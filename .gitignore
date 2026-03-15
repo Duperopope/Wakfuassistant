@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/wakfu_tracker.db
+data/user_config.json
+logs/
+.venv/
