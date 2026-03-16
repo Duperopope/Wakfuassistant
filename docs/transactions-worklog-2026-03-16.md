@@ -62,3 +62,13 @@ This update reworks the Transactions tab and the kama history pipeline for relia
   - renamed from `Solde estime` to `Solde`
   - added real per-step kama delta (`Difference: +/-N`) computed from previous point
 - Vertical scaling was adjusted to keep step heights visually relative to absolute kama magnitude and reduce exaggerated micro-variation jumps.
+
+## Final UI Pass (same session)
+- Metrics panel was reorganized into:
+  - one combined card for Gains + Losses
+  - one combined card for Net + Current Kamas
+  - two intentionally empty placeholder cards for future features
+- Kama symbol display was standardized across Transactions:
+  - chart tooltip (`Solde`, `Difference`)
+  - history amounts and history column title
+  - correction deletion confirmation text
