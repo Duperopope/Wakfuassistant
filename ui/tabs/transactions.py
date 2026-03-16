@@ -732,7 +732,7 @@ class TransactionsTab(BaseTab):
             (taxes_chip,  "taxes"),
             (kamas_chip,  "kamas"),
         ):
-            _chip.clicked.connect(lambda _, k=_key: self._toggle_chip(k))
+            _chip.clicked.connect(lambda k=_key: self._toggle_chip(k))
             chips_row.addWidget(_chip, 1)
 
         # ── Ligne 2 : cartes détail (données futures) ────────────────
