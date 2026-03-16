@@ -25,7 +25,7 @@ class WakfuTracker(QObject):
     restored         = pyqtSignal()
     focus_changed    = pyqtSignal(bool)                  # True si Wakfu est au premier plan
 
-    _POLL_MS = 400
+    _POLL_MS = 3
 
     def __init__(self, parent=None):
         super().__init__(parent)

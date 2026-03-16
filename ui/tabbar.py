@@ -1,30 +1,70 @@
 # ui/tabbar.py — Barre d'onglets style Wakfu
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
-from PyQt5.QtCore    import pyqtSignal
-from PyQt5.QtGui     import QPainter, QColor, QPen
+from PyQt5.QtCore    import pyqtSignal, Qt
+from PyQt5.QtGui     import QPainter, QColor, QPen, QFont, QFontMetrics
 
 from ui.theme import BG_PANEL, BG, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM, BORDER
 
 HEIGHT  = 30
-TABS    = ["Personnage", "Inventaire", "HDV", "Marché", "Combat", "Banque", "Options"]
+TABS    = ["Personnage", "Inventaire", "HDV", "Marché", "Combat", "Metier", "Options"]
 
 
 class _TabBtn(QPushButton):
 
-    def __init__(self, label: str):
+    def __init__(self, label: str, palette: dict[str, str] | None = None):
         super().__init__(label)
+        self._full_label = label
+        self.setToolTip(label)
         self.setCheckable(True)
+        self._base_font_size = 10
+        self._min_font_size = 6
+        self._palette = palette or {
+            "TEAL": TEAL,
+            "TEAL_BRIGHT": TEAL_BRIGHT,
+            "TEXT": TEXT,
+            "TEXT_DIM": TEXT_DIM,
+            "BORDER": BORDER,
+        }
         self._refresh(False)
+        self._fit_text_to_width()
+
+    def set_palette(self, palette: dict[str, str]):
+        self._palette = palette
+        self._refresh(self.isChecked())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._fit_text_to_width()
+
+    def _fit_text_to_width(self):
+        # Texte complet obligatoire: on ajuste la taille de police au lieu de tronquer.
+        super().setText(self._full_label)
+        available = max(10, self.width() - 10)
+
+        size = self._base_font_size
+        while size >= self._min_font_size:
+            f = QFont(self.font())
+            f.setPointSize(size)
+            self.setFont(f)
+            fm = QFontMetrics(f)
+            if fm.horizontalAdvance(self._full_label) <= available:
+                break
+            size -= 1
 
     def _refresh(self, active: bool):
+        teal = self._palette.get("TEAL", TEAL)
+        teal_bright = self._palette.get("TEAL_BRIGHT", TEAL_BRIGHT)
+        text = self._palette.get("TEXT", TEXT)
+        text_dim = self._palette.get("TEXT_DIM", TEXT_DIM)
+        border = self._palette.get("BORDER", BORDER)
         if active:
             self.setStyleSheet(f"""
                 QPushButton {{
                     background: transparent;
                     border: none;
-                    border-bottom: 2px solid {TEAL};
-                    color: {TEAL_BRIGHT};
+                    border-bottom: 2px solid {teal};
+                    color: {teal_bright};
                     font-size: 10px;
                     font-weight: 800;
                     padding: 0 6px;
@@ -37,21 +77,22 @@ class _TabBtn(QPushButton):
                     background: transparent;
                     border: none;
                     border-bottom: 2px solid transparent;
-                    color: {TEXT_DIM};
+                    color: {text_dim};
                     font-size: 10px;
                     font-weight: 700;
                     padding: 0 6px;
                     letter-spacing: 0.5px;
                 }}
                 QPushButton:hover {{
-                    color: {TEXT};
-                    border-bottom-color: {BORDER};
+                    color: {text};
+                    border-bottom-color: {border};
                 }}
             """)
 
     def setChecked(self, checked: bool):
         super().setChecked(checked)
         self._refresh(checked)
+        self._fit_text_to_width()
 
 
 class TabBar(QWidget):
@@ -66,6 +107,14 @@ class TabBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedHeight(HEIGHT)
+        self._palette = {
+            "BG_PANEL": BG_PANEL,
+            "BORDER": BORDER,
+            "TEAL": TEAL,
+            "TEAL_BRIGHT": TEAL_BRIGHT,
+            "TEXT": TEXT,
+            "TEXT_DIM": TEXT_DIM,
+        }
 
         lay = QHBoxLayout(self)
         lay.setContentsMargins(4, 0, 4, 0)
@@ -73,7 +122,7 @@ class TabBar(QWidget):
 
         self._btns: list[_TabBtn] = []
         for i, name in enumerate(TABS):
-            btn = _TabBtn(name)
+            btn = _TabBtn(name, self._palette)
             btn.clicked.connect(lambda _, idx=i: self._select(idx))
             lay.addWidget(btn)
             self._btns.append(btn)
@@ -87,8 +136,17 @@ class TabBar(QWidget):
 
     def paintEvent(self, _event):
         p = QPainter(self)
-        p.fillRect(self.rect(), QColor(BG_PANEL))
+        p.fillRect(self.rect(), QColor(self._palette.get("BG_PANEL", BG_PANEL)))
         # Séparateur bas
-        p.setPen(QPen(QColor(BORDER), 1))
+        p.setPen(QPen(QColor(self._palette.get("BORDER", BORDER)), 1))
         y = self.height() - 1
         p.drawLine(0, y, self.width(), y)
+
+    def set_palette(self, palette: dict[str, str]):
+        self._palette = {
+            **self._palette,
+            **palette,
+        }
+        for btn in self._btns:
+            btn.set_palette(self._palette)
+        self.update()
