@@ -40,3 +40,25 @@ This update reworks the Transactions tab and the kama history pipeline for relia
 ## Notes
 - Runtime/local data files (logs, DB, caches) are intentionally excluded from this commit.
 - If needed, next step can add a dedicated audit mode in Transactions to show source metadata per row.
+
+## Follow-up Refinements (same session)
+- Time window controls were made data-aware:
+  - only proposes ranges that are truly available from current history depth and recency
+  - keeps smart wrap behavior between short ranges and `all`
+- Period filtering now uses real-time window logic (`now - range`) and includes visual boundary anchors:
+  - left anchor at cutoff
+  - right anchor at now
+  - avoids fake transaction rows while keeping the visible window aligned with real time
+- Chart rendering was changed from linear interpolation to staircase mode to better represent discrete transaction events.
+- Wheel zoom behavior was expanded:
+  - deeper zoom-in enabled (lower minimum visible points)
+  - zone-aware zoom interactions:
+    - right side anchors to present
+    - center stays cursor-centered
+    - left side keeps past-oriented context
+  - dynamic range expansion on zoom-out beyond selected period with progressive minute step growth
+- Range label now reflects the actual visible span in viewport instead of only the selected mode label.
+- Tooltip improvements:
+  - renamed from `Solde estime` to `Solde`
+  - added real per-step kama delta (`Difference: +/-N`) computed from previous point
+- Vertical scaling was adjusted to keep step heights visually relative to absolute kama magnitude and reduce exaggerated micro-variation jumps.
