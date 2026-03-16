@@ -92,6 +92,21 @@ git remote add origin https://github.com/<owner>/<repo>.git
 git push -u origin main
 ```
 
+## Miroir strict local <-> repo (temps reel)
+
+Pour forcer ton dossier local a etre un miroir exact du remote (aucun fichier en plus, aucun en moins):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\live_mirror.ps1 -RepoPath . -Remote origin -Branch master -IntervalSeconds 2
+```
+
+Ce mode applique en boucle:
+- `git fetch --prune`
+- `git reset --hard origin/<branch>`
+- `git clean -fdx`
+
+Attention: tous les changements locaux non pushes et les fichiers non trackes seront supprimes.
+
 ## Notes de conception
 - Les logs restent la base de vérité automatique.
 - Les corrections UI sont persistées et considérées comme des surcharges utilisateur.
