@@ -5,8 +5,8 @@ import os
 import re
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QApplication, QPushButton, QFrame, QLabel, QGridLayout
-from PyQt5.QtCore    import Qt, QPoint, QRect, QTimer, QDateTime, QSettings, QRectF
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QApplication, QPushButton, QFrame, QLabel, QGridLayout, QMenu
+from PyQt5.QtCore    import Qt, QPoint, QRect, QTimer, QDateTime, QSettings, QRectF, QEvent
 from PyQt5.QtGui     import QPainter, QColor, QPen, QPainterPath, QRegion
 import win32gui
 import win32con
@@ -25,11 +25,12 @@ from ui.tabs.options import OptionsTab
 from ui.tabs.transactions import TransactionsTab
 from core.wakfu_tracker import WakfuTracker
 
-DEFAULT_W = 440
-DEFAULT_H = 600
+DEFAULT_W = 895
+DEFAULT_H = 590
 MIN_W     = 220
 MIN_H     = 120
-EDGE      = 12         # zone plus large pour faciliter le resize
+EDGE      = 16         # zone de resize (bords)
+CORNER    = 20         # zone de resize (angles, plus large pour faciliter le grab)
 ATTACH_GAP = 6         # espace entre Wakfu et l'overlay
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _CONFIG_PATH = _PROJECT_ROOT / "data" / "config.json"
@@ -182,11 +183,16 @@ _CURSORS = {
 
 def _edge_at(pos: QPoint, w: int, h: int) -> int:
     x, y = pos.x(), pos.y()
+    # Zone d'angle plus large que le bord simple.
+    in_l = x < CORNER if (y < CORNER or y > h - CORNER) else x < EDGE
+    in_r = x > w - CORNER if (y < CORNER or y > h - CORNER) else x > w - EDGE
+    in_t = y < CORNER if (x < CORNER or x > w - CORNER) else y < EDGE
+    in_b = y > h - CORNER if (x < CORNER or x > w - CORNER) else y > h - EDGE
     flags = 0
-    if x < EDGE:     flags |= _L
-    if x > w - EDGE: flags |= _R
-    if y < EDGE:     flags |= _T
-    if y > h - EDGE: flags |= _B
+    if in_l: flags |= _L
+    if in_r: flags |= _R
+    if in_t: flags |= _T
+    if in_b: flags |= _B
     return flags
 
 
@@ -207,6 +213,7 @@ class OverlayWindow(QWidget):
         self._resize_dir:      int           = 0
         self._resize_start_g:  QRect         = QRect()
         self._resize_start_p:  QPoint        = QPoint()
+        self._cursor_overridden: bool        = False
         self._folded:          bool          = False
         self._saved_h:         int           = DEFAULT_H
         self._wakfu_rect:      tuple[int, int, int, int] | None = None
@@ -264,6 +271,7 @@ class OverlayWindow(QWidget):
         self._position()
         self._start_timer()
         self._check_onboarding()
+        QApplication.instance().installEventFilter(self)
 
     # ── Initialisation ────────────────────────────────────────────
 
@@ -285,7 +293,7 @@ class OverlayWindow(QWidget):
         default_h = self._settings.value("default_window_height", DEFAULT_H, type=int)
         saved_w = self._settings.value("window_width", default_w, type=int)
         saved_h = self._settings.value("window_height", default_h, type=int)
-        saved_w = max(MIN_W, DEFAULT_W, int(saved_w))
+        saved_w = max(MIN_W, int(saved_w))
         saved_h = max(MIN_H, int(saved_h))
         self._saved_h = saved_h
         self.resize(saved_w, saved_h)
@@ -351,6 +359,7 @@ class OverlayWindow(QWidget):
                 w.shape_changed.connect(self.set_window_corner_radius)
                 w.reset_requested.connect(self._on_reset_requested)
                 w.kamas_corrected.connect(self._on_kamas_corrected)
+                w.transactions_refresh_requested.connect(self._refresh_transactions_tab)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -690,6 +699,50 @@ class OverlayWindow(QWidget):
         if self._options_tab is not None:
             self._options_tab.set_kamas(self._current_kamas)
         self._refresh_stats_panel()
+
+    def _refresh_transactions_tab(self):
+        for widget in self._tab_widgets:
+            if isinstance(widget, TransactionsTab):
+                widget.refresh()
+                break
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.setStyleSheet(
+            f"QMenu {{ background: {self._palette.get('BG_PANEL', BG)}; border: 1px solid {self._palette.get('BORDER', BORDER)}; }}"
+            "QMenu::item { padding: 6px 16px; }"
+            "QMenu::item:selected { background: rgba(30,180,176,0.18); }"
+        )
+
+        refresh_action = menu.addAction("Actualiser maintenant")
+        tx_refresh_action = menu.addAction("Rafraichir transactions")
+        menu.addSeparator()
+        tx_tab_action = menu.addAction("Aller a Transactions")
+        options_tab_action = menu.addAction("Aller a Options")
+
+        chosen = menu.exec_(event.globalPos())
+        if chosen is None:
+            event.accept()
+            return
+
+        if chosen == refresh_action:
+            self._tick()
+        elif chosen == tx_refresh_action:
+            self._refresh_transactions_tab()
+        elif chosen == tx_tab_action:
+            try:
+                idx = TABS.index("Transactions")
+                self._tabbar.set_current_index(idx)
+            except ValueError:
+                pass
+        elif chosen == options_tab_action:
+            try:
+                idx = TABS.index("Options")
+                self._tabbar.set_current_index(idx)
+            except ValueError:
+                pass
+
+        event.accept()
 
     @staticmethod
     def _parse_int_token(value: str | None) -> int | None:
@@ -1548,6 +1601,7 @@ class OverlayWindow(QWidget):
 
     def set_window_corner_radius(self, radius: int):
         self._corner_radius = max(4, min(32, int(radius)))
+        self._mask_cache_size = None
         self._apply_rounded_mask()
         self.update()
         self._settings.setValue("window_corner_radius", self._corner_radius)
@@ -1616,58 +1670,107 @@ class OverlayWindow(QWidget):
         app.setStyleSheet(build_qss(self._palette_name, font_stack))
 
     def _apply_rounded_mask(self):
-        # Forme réelle de la fenêtre: pas seulement peinte, mais aussi masquée.
-        path = QPainterPath()
-        path.addRoundedRect(QRectF(self.rect()), self._corner_radius, self._corner_radius)
-        region = QRegion(path.toFillPolygon().toPolygon())
+        w, h = self.width(), self.height()
+        cached = getattr(self, '_mask_cache_size', None)
+        if cached == (w, h, self._corner_radius):
+            return
+        self._mask_cache_size = (w, h, self._corner_radius)
+        r = min(self._corner_radius, w // 2, h // 2)
+        d = r * 2
+        # Construction directe par addition de régions simples — sans polygone.
+        region = QRegion(r, 0, w - d, h)        # bande centrale verticale
+        region += QRegion(0, r, w, h - d)        # bande centrale horizontale
+        region += QRegion(0,     0,     d, d, QRegion.Ellipse)  # coin haut-gauche
+        region += QRegion(w - d, 0,     d, d, QRegion.Ellipse)  # coin haut-droit
+        region += QRegion(0,     h - d, d, d, QRegion.Ellipse)  # coin bas-gauche
+        region += QRegion(w - d, h - d, d, d, QRegion.Ellipse)  # coin bas-droit
         self.setMask(region)
 
     # ── Resize + Drag — événements souris ─────────────────────────
 
+    def nativeEvent(self, event_type, message):
+        if event_type == b'windows_generic_MSG':
+            import ctypes, ctypes.wintypes
+            msg = ctypes.wintypes.MSG.from_address(int(message))
+            if msg.message == 0x0014:  # WM_ERASEBKGND — évite le flash blanc avant WM_PAINT
+                return True, 1
+        return super().nativeEvent(event_type, message)
+
+    def eventFilter(self, obj, event):
+        """Intercepte les events souris globaux pour gérer le resize depuis n'importe quel widget."""
+        t = event.type()
+
+        if t == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
+            lpos = self.mapFromGlobal(event.globalPos())
+            if not self._folded and self.rect().contains(lpos):
+                edge = _edge_at(lpos, self.width(), self.height())
+                if edge:
+                    self._resize_dir     = edge
+                    self._resize_start_p = event.globalPos()
+                    self._resize_start_g = self.geometry()
+                    self._drag_pos       = None
+                    return True
+
+        elif t == QEvent.MouseMove:
+            gpos = event.globalPos()
+            lpos = self.mapFromGlobal(gpos)
+            if event.buttons() == Qt.LeftButton and self._resize_dir:
+                self._do_resize(gpos)
+                return True
+            # Mise à jour du curseur via override global (évite que les enfants l'écrasent).
+            if not self._folded and self.rect().contains(lpos) and not (event.buttons() & Qt.LeftButton):
+                edge = _edge_at(lpos, self.width(), self.height())
+                cursor = _CURSORS.get(edge)
+                if cursor is not None:
+                    if not self._cursor_overridden:
+                        QApplication.setOverrideCursor(cursor)
+                        self._cursor_overridden = True
+                    elif QApplication.overrideCursor().shape() != cursor:
+                        QApplication.changeOverrideCursor(cursor)
+                else:
+                    if self._cursor_overridden:
+                        QApplication.restoreOverrideCursor()
+                        self._cursor_overridden = False
+            elif self._cursor_overridden:
+                QApplication.restoreOverrideCursor()
+                self._cursor_overridden = False
+
+        elif t == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+            if self._resize_dir:
+                if not self._titlebar.is_pinned and self._wakfu_rect and not self._in_programmatic_move:
+                    wx, wy, ww, wh = self._wakfu_rect
+                    if ww > 0 and wh > 0:
+                        self._relative_offset_ratio = ((self.x() - wx) / ww, (self.y() - wy) / wh)
+                        if not self._folded:
+                            self._relative_size_ratio = (self.width() / ww, self.height() / wh)
+                        self._save_relative_layout()
+                self._drag_pos   = None
+                self._resize_dir = 0
+                return True
+
+        return super().eventFilter(obj, event)
+
     def mousePressEvent(self, event):
         if event.button() != Qt.LeftButton:
             return
-
-        edge = _edge_at(event.pos(), self.width(), self.height())
-
-        if edge and not self._folded:
-            # Démarrer un resize
-            self._resize_dir     = edge
-            self._resize_start_p = event.globalPos()
-            self._resize_start_g = self.geometry()
-            self._drag_pos       = None
-        elif (not self._titlebar.is_pinned
-              and event.y() <= self._titlebar.height()):
-            # Démarrer un drag
+        if (not self._titlebar.is_pinned
+                and event.y() <= self._titlebar.height()
+                and not _edge_at(event.pos(), self.width(), self.height())):
+            # Démarrer un drag (resize géré dans eventFilter)
             self._drag_pos   = event.globalPos() - self.frameGeometry().topLeft()
             self._resize_dir = 0
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton:
-            if self._drag_pos:
-                self.move(event.globalPos() - self._drag_pos)
-                return
-            if self._resize_dir:
-                self._do_resize(event.globalPos())
-                return
-
-        # Pas de clic : mettre à jour le curseur
-        self._update_cursor(event.pos())
+        if event.buttons() == Qt.LeftButton and self._drag_pos:
+            self.move(event.globalPos() - self._drag_pos)
 
     def mouseReleaseEvent(self, _event):
-        if not self._titlebar.is_pinned and self._wakfu_rect and not self._in_programmatic_move:
-            wx, wy, ww, wh = self._wakfu_rect
-            if ww > 0 and wh > 0:
-                self._relative_offset_ratio = ((self.x() - wx) / ww, (self.y() - wy) / wh)
-                if not self._folded:
-                    self._relative_size_ratio = (self.width() / ww, self.height() / wh)
-                self._save_relative_layout()
-
-        self._drag_pos   = None
-        self._resize_dir = 0
+        self._drag_pos = None
 
     def leaveEvent(self, _event):
-        self.setCursor(Qt.ArrowCursor)
+        if self._cursor_overridden:
+            QApplication.restoreOverrideCursor()
+            self._cursor_overridden = False
 
     # ── Resize ────────────────────────────────────────────────────
 

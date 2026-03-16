@@ -72,3 +72,157 @@ This update reworks the Transactions tab and the kama history pipeline for relia
   - chart tooltip (`Solde`, `Difference`)
   - history amounts and history column title
   - correction deletion confirmation text
+
+---
+
+## Session 2 — 2026-03-16 : Performance, Resize & Métriques
+
+### 1. Correction du débordement des colonnes (`ui/tabs/transactions.py`)
+
+**Problème root cause :** l'event filter était installé sur `self._table` (le scroll area), qui reçoit `QEvent.Resize` *avant* que `QAbstractScrollArea.resizeEvent()` mette à jour la taille du viewport. Au moment où `_enforce_columns_fit()` appelait `viewport().width()`, la valeur était toujours à 0.
+
+**Fix :** déplacement de l'event filter sur `self._table.viewport()`. Le viewport reçoit son propre `Resize` *après* avoir été redimensionné — `viewport().width()` retourne alors la bonne valeur.
+
+```python
+# avant
+self._table.installEventFilter(self)
+if obj is self._table and event.type() == QEvent.Resize: ...
+
+# après
+self._table.viewport().installEventFilter(self)
+if obj is self._table.viewport() and event.type() == QEvent.Resize: ...
+```
+
+---
+
+### 2. Persistance des largeurs de colonnes (`ui/tabs/transactions.py`)
+
+- Ajout d'un appel à `_persist_column_widths()` (via debounce) après chaque `_enforce_columns_fit()` déclenché par un resize viewport, afin que les largeurs affichées et les largeurs sauvegardées restent toujours synchrones.
+- Débounce de 400 ms (`_persist_debounce`) pour éviter d'écrire dans le registre Windows à chaque pixel de déplacement.
+
+---
+
+### 3. Taille de fenêtre et colonnes par défaut (`ui/window.py`, `ui/tabs/transactions.py`)
+
+- `DEFAULT_W = 895`, `DEFAULT_H = 590` mis à jour d'après la configuration active de l'utilisateur.
+- Colonnes par défaut (`_apply_default_column_widths`) mises à jour : Date=176, Heure=165, Type=91, Libelle=120, Montant=185.
+- Suppression de `DEFAULT_W` dans le `max()` de contrainte minimale (ligne 288, `window.py`) : `saved_w = max(MIN_W, int(saved_w))`. Empêche d'imposer 895 px comme minimum sur d'autres machines.
+
+---
+
+### 4. Optimisation WakfuTracker — fast path polling (`core/wakfu_tracker.py`)
+
+**Problème :** `_find_wakfu()` appelait `EnumWindows` + `OpenProcess` + `GetModuleFileNameEx` + `CloseHandle` à chaque tick de 3 ms, même quand Wakfu était déjà trouvé.
+
+**Fix :** quand `self._hwnd` est connu, on appelle uniquement `win32gui.IsWindow(hwnd)` (appel noyau pur, <1 µs, aucune communication cross-process) pour vérifier que le handle est encore valide. `EnumWindows` n'est plus appelé que lors de la détection initiale ou après perte de Wakfu.
+
+```python
+def _hwnd_still_valid(hwnd: int) -> bool:
+    try:
+        return bool(win32gui.IsWindow(hwnd))
+    except Exception:
+        return False
+```
+
+**Pourquoi pas `GetWindowText` :** `GetWindowText` envoie un message `WM_GETTEXT` à la fenêtre cible (communication cross-process), ce qui peut bloquer plusieurs ms si Wakfu est busy, désynchronisant le timer de 3 ms.
+
+---
+
+### 5. Zones de resize de la fenêtre (`ui/window.py`)
+
+**Problème 1 — zones trop fines + angles non fonctionnels :**
+- `EDGE` était à 12 px → augmenté à 16 px pour les bords, `CORNER = 20 px` pour les angles.
+- `_edge_at()` revu : quand le curseur est dans la zone d'un angle (x ou y proche d'un coin), la zone active passe à `CORNER` dans les deux directions.
+
+**Problème 2 — widgets enfants consommant les events souris :**
+Les handlers `mousePressEvent` / `mouseMoveEvent` de la fenêtre parent ne recevaient jamais les clics sur les zones de bord couvertes par du contenu (table, boutons...).
+
+**Approche 1 (abandonnée) — `WM_NCHITTEST` via `nativeEvent` :**
+Retournait les codes `HTLEFT`, `HTBOTTOMRIGHT`, etc. directement à Windows (niveau OS, avant Qt). Fonctionnel pour les angles mais causait du **flickering dans le chart et les métriques** lors du resize : Windows pilote sa propre boucle de resize (plus rapide que Qt), les widgets enfants non-natifs (QWidget custom) n'avaient pas le temps d'être repeints entre chaque update de taille.
+
+**Approche 2 (retenue) — `QApplication.installEventFilter(self)` :**
+Filtre global installé sur l'instance QApplication. Intercepte les `MouseButtonPress`, `MouseMove`, `MouseButtonRelease` avant que les widgets enfants les traitent. Si l'event est dans une zone de bord, démarre le resize Qt classique (`setGeometry`) et consomme l'event.
+
+```python
+QApplication.instance().installEventFilter(self)
+```
+
+- Le resize reste géré par Qt → `resizeEvent` + `_apply_rounded_mask` se font de façon cohérente → pas de flicker.
+- Curseur géré via `QApplication.setOverrideCursor()` / `restoreOverrideCursor()` pour ne pas être écrasé par les curseurs des widgets enfants.
+
+---
+
+### 6. Anti-flicker resize — `WM_ERASEBKGND` (`ui/window.py`)
+
+Ajout dans `nativeEvent` : interception de `WM_ERASEBKGND` (0x0014) avec retour `(True, 1)`. Indique à Windows que le fond a déjà été effacé, empêchant le remplissage système blanc/gris de la zone nouvellement exposée avant que Qt peigne son `paintEvent`.
+
+---
+
+### 7. Optimisation `_apply_rounded_mask` (`ui/window.py`)
+
+**Problème :** `QPainterPath.toFillPolygon().toPolygon()` générait ~60 points pour approximer les coins arrondis → `QRegion(polygon)` coûteux → `setMask` lourd à chaque resize.
+
+**Fix :** construction directe de la région avec 6 primitives Qt (2 rectangles + 4 ellipses) :
+
+```python
+region = QRegion(r, 0, w - d, h)        # bande centrale verticale
+region += QRegion(0, r, w, h - d)        # bande centrale horizontale
+region += QRegion(0,     0,     d, d, QRegion.Ellipse)  # coin haut-gauche
+region += QRegion(w - d, 0,     d, d, QRegion.Ellipse)  # coin haut-droit
+region += QRegion(0,     h - d, d, d, QRegion.Ellipse)  # coin bas-gauche
+region += QRegion(w - d, h - d, d, d, QRegion.Ellipse)  # coin bas-droit
+```
+
+**Cache de taille :** `setMask` n'est appelé que si `(w, h, corner_radius)` a changé depuis le dernier appel — utile quand la fenêtre se déplace sans changer de taille.
+
+---
+
+### 8. Throttle + batching de `_enforce_columns_fit` (`ui/tabs/transactions.py`)
+
+**Problème :** `_enforce_columns_fit` était appelé à chaque pixel de resize de la fenêtre (via le viewport resize), chaque `setColumnWidth` déclenchant un repaint individuel du header.
+
+**Fix 1 — throttle 16 ms :** un timer single-shot `_fit_throttle` absorbe les events intermédiaires — la fonction ne tourne qu'une fois par frame (~60 fps max) au lieu de chaque pixel.
+
+```python
+if not self._fit_throttle.isActive():
+    self._fit_throttle.start()  # 16 ms
+```
+
+**Fix 2 — batching des repaints :** enveloppe de tout le bloc `_enforce_columns_fit` dans `setUpdatesEnabled(False/True)`. Tous les `setColumnWidth` s'accumulent sans repaint, un seul repaint à la fin du `finally`.
+
+---
+
+### 9. Refonte UI métriques (`ui/tabs/transactions.py`)
+
+**Avant :** grille 2×2 de cartes `_build_metric_dual_box` génériques, deux placeholders vides, pas de hiérarchie visuelle.
+
+**Après :** deux lignes dans un `QVBoxLayout` :
+
+**Ligne 1 — 5 chips `_build_metric_chip` :**
+| Chip | Couleur accent | Couleur valeur | Dynamique |
+|---|---|---|---|
+| GAINS | `GREEN` | `GREEN` | `+N ₭` |
+| PERTES | `RED` | `RED` | `-N ₭` |
+| NET | `TEAL` | `GREEN`/`RED`/`TEAL` | selon signe |
+| TAXES | `RED` | `RED` | `--` (futur) |
+| KAMAS ACTUELS | `TEAL` | `TEXT` | balance brute |
+
+Chaque chip : barre d'accent 3 px `border-top` dans sa couleur, label 9 px dim uppercase, valeur 16 px bold.
+
+**Ligne 2 — 2 cartes détail `_build_metric_dual_box` redesignées :**
+- `H. DES VENTES` : PRÉVISIONNEL (teal) / À RÉCUPÉRER (green)
+- `SOURCES` : COMMERCE (teal) / AUTRES (dim)
+
+Chaque carte : titre + séparateur horizontal + deux colonnes séparées par un diviseur vertical.
+
+**Styles QSS ajoutés :** `txChipLabel` (9 px, dim, letter-spacing 0.9 px), `txDualTitle` (9 px, dim, letter-spacing 1.0 px).
+
+---
+
+### Fichiers modifiés (session 2)
+
+| Fichier | Nature |
+|---|---|
+| `ui/tabs/transactions.py` | viewport fix, persist debounce, throttle+batching enforce, métriques UI |
+| `ui/window.py` | DEFAULT_W/H, edge zones, global event filter, WM_ERASEBKGND, mask optimisation |
+| `core/wakfu_tracker.py` | fast path polling IsWindow |

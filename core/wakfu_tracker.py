@@ -100,8 +100,27 @@ class WakfuTracker(QObject):
 
     # ── Boucle de polling ────────────────────────────────────────
 
+    @staticmethod
+    def _hwnd_still_valid(hwnd: int) -> bool:
+        """Vérifie que le hwnd est encore valide. Appel kernel pur, aucune comm cross-process."""
+        try:
+            return bool(win32gui.IsWindow(hwnd))
+        except Exception:
+            return False
+
     def _poll(self):
-        hwnd = self._find_wakfu()
+        # Chemin rapide : le hwnd est déjà connu, on évite EnumWindows.
+        if self._hwnd is not None:
+            if not self._hwnd_still_valid(self._hwnd):
+                self._hwnd = None
+                if self._was_focused:
+                    self._was_focused = False
+                    self.focus_changed.emit(False)
+                self.lost.emit()
+                return
+            hwnd = self._hwnd
+        else:
+            hwnd = self._find_wakfu()
 
         # Wakfu introuvable
         if hwnd is None:

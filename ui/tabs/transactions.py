@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QMenu,
     QMessageBox,
+    QInputDialog,
     QPushButton,
     QWidgetAction,
     QTableWidget,
@@ -34,6 +35,7 @@ from ui.theme import BG_PANEL, BORDER, GREEN, RED, TEAL, TEXT, TEXT_DIM
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _KAMAS_JOURNAL = _PROJECT_ROOT / "data" / "kamas_journal.jsonl"
+_TX_LABELS_DB = _PROJECT_ROOT / "data" / "transaction_labels.json"
 _APPDATA_WAKFU_DIR = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
 _KAMA_SYMBOL = "₭"
 
@@ -512,6 +514,7 @@ class KamasLineChart(QWidget):
 
 
 class TransactionsTab(BaseTab):
+    _COLUMN_LAYOUT_SETTINGS_VERSION = 3
     _TIME_WINDOWS: list[tuple[str, str, timedelta | None]] = [
         ("5m", "5 minutes", timedelta(minutes=5)),
         ("15m", "15 minutes", timedelta(minutes=15)),
@@ -533,6 +536,7 @@ class TransactionsTab(BaseTab):
         super().__init__(parent)
         self.setObjectName("transactionsTab")
         self._settings = QSettings("WakfuAssistant", "Overlay")
+        self._label_suggestions_db = self._load_label_suggestions_db()
         self.setStyleSheet(
             f"""
             QWidget#transactionsTab {{
@@ -563,6 +567,18 @@ class TransactionsTab(BaseTab):
                 color: {TEXT};
                 font-size: 14px;
                 font-weight: 800;
+            }}
+            QLabel#txChipLabel {{
+                color: {TEXT_DIM};
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.9px;
+            }}
+            QLabel#txDualTitle {{
+                color: {TEXT_DIM};
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 1.0px;
             }}
             QTableWidget#txTable {{
                 background: transparent;
@@ -629,63 +645,61 @@ class TransactionsTab(BaseTab):
         self._organization_mode = False
         self._resizing_guard = False
         self._layout_ready = False
+        self._column_layout_schema_migrated = False
+        self._persist_debounce = QTimer(self)
+        self._persist_debounce.setSingleShot(True)
+        self._persist_debounce.setInterval(400)
+        self._persist_debounce.timeout.connect(self._persist_column_widths)
+        self._fit_throttle = QTimer(self)
+        self._fit_throttle.setSingleShot(True)
+        self._fit_throttle.setInterval(16)   # ~60fps max
+        self._fit_throttle.timeout.connect(self._on_fit_throttle)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(10, 10, 10, 10)
         root.setSpacing(10)
 
-        header_card = QFrame(self)
-        header_card.setObjectName("txCard")
-        header_layout = QHBoxLayout(header_card)
-        header_layout.setContentsMargins(12, 10, 12, 10)
-        header_layout.setSpacing(8)
-
-        title_col = QVBoxLayout()
-        title_col.setSpacing(2)
-        title = QLabel("Transactions")
-        title.setObjectName("txSectionTitle")
-        subtitle = QLabel("Historique des gains/pertes et points de recalage")
-        subtitle.setObjectName("txSectionSubtitle")
-        title_col.addWidget(title)
-        title_col.addWidget(subtitle)
-        header_layout.addLayout(title_col, 1)
-
-        refresh_btn = QPushButton("Rafraichir")
-        refresh_btn.setFixedHeight(28)
-        refresh_btn.setMinimumWidth(104)
-        refresh_btn.clicked.connect(self.refresh)
-        header_layout.addWidget(refresh_btn)
-
-        root.addWidget(header_card)
-
         metrics_card = QFrame(self)
         metrics_card.setObjectName("txCard")
-        metrics_layout = QGridLayout(metrics_card)
-        metrics_layout.setContentsMargins(10, 10, 10, 10)
-        metrics_layout.setHorizontalSpacing(8)
-        metrics_layout.setVerticalSpacing(8)
+        metrics_outer = QVBoxLayout(metrics_card)
+        metrics_outer.setContentsMargins(10, 10, 10, 10)
+        metrics_outer.setSpacing(8)
 
-        flow_box, self._gains_value_label, self._losses_value_label = self._build_metric_dual_box(
-            "FLUX",
-            "GAINS",
-            GREEN,
-            "PERTES",
-            RED,
-        )
-        balance_box, self._net_value_label, self._current_kamas_value_label = self._build_metric_dual_box(
-            "SOLDE",
-            "NET",
-            TEAL,
-            "KAMAS ACTUELS",
-            TEAL,
-        )
-        placeholder_1 = self._build_placeholder_metric_box()
-        placeholder_2 = self._build_placeholder_metric_box()
+        # ── Ligne 1 : chips individuels ──────────────────────────────
+        chips_row = QHBoxLayout()
+        chips_row.setSpacing(8)
+        chips_row.setContentsMargins(0, 0, 0, 0)
 
-        metrics_layout.addWidget(flow_box, 0, 0)
-        metrics_layout.addWidget(balance_box, 0, 1)
-        metrics_layout.addWidget(placeholder_1, 1, 0)
-        metrics_layout.addWidget(placeholder_2, 1, 1)
+        gains_chip,  self._gains_value_label         = self._build_metric_chip("GAINS",         GREEN,  GREEN)
+        pertes_chip, self._losses_value_label         = self._build_metric_chip("PERTES",        RED,    RED)
+        net_chip,    self._net_value_label            = self._build_metric_chip("NET",           TEAL,   TEAL)
+        taxes_chip,  self._taxes_label                = self._build_metric_chip("TAXES",         RED,    RED)
+        kamas_chip,  self._current_kamas_value_label  = self._build_metric_chip("KAMAS ACTUELS", TEXT,   TEAL)
+
+        for _chip in (gains_chip, pertes_chip, net_chip, taxes_chip, kamas_chip):
+            chips_row.addWidget(_chip, 1)
+
+        # ── Ligne 2 : cartes détail (données futures) ────────────────
+        detail_row = QHBoxLayout()
+        detail_row.setSpacing(8)
+        detail_row.setContentsMargins(0, 0, 0, 0)
+
+        hdv_box, self._hdv_previsionnel_label, self._hdv_recuperer_label = self._build_metric_dual_box(
+            "H. DES VENTES",
+            "PRÉVISIONNEL", TEAL,
+            "À RÉCUPÉRER",  GREEN,
+        )
+        sources_box, self._sources_commerce_label, self._sources_autres_label = self._build_metric_dual_box(
+            "SOURCES",
+            "COMMERCE",  TEAL,
+            "AUTRES",    TEXT_DIM,
+        )
+
+        detail_row.addWidget(hdv_box,     1)
+        detail_row.addWidget(sources_box, 1)
+
+        metrics_outer.addLayout(chips_row)
+        metrics_outer.addLayout(detail_row)
 
         root.addWidget(metrics_card)
 
@@ -707,7 +721,7 @@ class TransactionsTab(BaseTab):
         chart_head.addWidget(chart_title)
         chart_head.addStretch(1)
 
-        self._range_label = QLabel(f"Fenetre: {self._selected_window_label()}")
+        self._range_label = QLabel(self._format_range_label(self._selected_window_label()))
         self._range_label.setObjectName("txSectionSubtitle")
         chart_head.addWidget(self._range_label)
         self._range_label_fx = QGraphicsOpacityEffect(self._range_label)
@@ -765,7 +779,7 @@ class TransactionsTab(BaseTab):
         self._table.customContextMenuRequested.connect(self._on_table_context_menu)
         header = self._table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Interactive)
-        header.setMinimumSectionSize(60)
+        header.setMinimumSectionSize(56)
         header.setStretchLastSection(False)
         header.setCascadingSectionResizes(False)
         header.setSectionsClickable(True)
@@ -773,14 +787,20 @@ class TransactionsTab(BaseTab):
         header.sectionClicked.connect(self._on_header_clicked)
         header.sectionResized.connect(self._on_column_resized)
         header.sectionMoved.connect(self._on_columns_reordered)
-        self._table.installEventFilter(self)
+        self._table.viewport().installEventFilter(self)
         table_layout.addWidget(self._table, 1)
         root.addWidget(table_card, 1)
 
+        self._ensure_column_layout_settings_schema()
         self._apply_default_column_widths()
-        self._restore_column_widths()
-        self._restore_column_order()
-        self._table.horizontalHeader().setStretchLastSection(True)
+        self._apply_default_column_order()
+        if not self._column_layout_schema_migrated:
+            self._restore_column_widths()
+            self._restore_column_order()
+        else:
+            self._persist_column_widths()
+            self._settings.setValue(self._column_order_key(), self._table.horizontalHeader().saveState())
+        self._table.horizontalHeader().setStretchLastSection(False)
         self._enforce_columns_fit()
         self._apply_organization_mode_visuals()
         self._layout_ready = True
@@ -813,6 +833,35 @@ class TransactionsTab(BaseTab):
 
         return card, value_lbl
 
+    def _build_metric_chip(self, label: str, value_color: str, accent: str) -> tuple[QFrame, QLabel]:
+        """Chip compact : accent colorée en haut, label dim, valeur large."""
+        chip = QFrame(self)
+        chip.setObjectName("txMetricChip")
+        chip.setStyleSheet(
+            f"QFrame#txMetricChip {{"
+            f"  background: {BG_PANEL};"
+            f"  border-left:   1px solid {BORDER};"
+            f"  border-right:  1px solid {BORDER};"
+            f"  border-bottom: 1px solid {BORDER};"
+            f"  border-top:    3px solid {accent};"
+            f"  border-radius: 8px;"
+            f"}}"
+        )
+        lay = QVBoxLayout(chip)
+        lay.setContentsMargins(12, 8, 12, 8)
+        lay.setSpacing(3)
+
+        lbl = QLabel(label)
+        lbl.setObjectName("txChipLabel")
+
+        val = QLabel("--")
+        val.setObjectName("txMetricValue")
+        val.setStyleSheet(f"color: {value_color}; font-size: 16px; font-weight: 800;")
+
+        lay.addWidget(lbl)
+        lay.addWidget(val)
+        return chip, val
+
     def _build_metric_dual_box(
         self,
         title: str,
@@ -821,61 +870,71 @@ class TransactionsTab(BaseTab):
         right_name: str,
         right_color: str,
     ) -> tuple[QFrame, QLabel, QLabel]:
+        """Carte détail : titre + séparateur + deux colonnes avec diviseur central."""
         card = QFrame(self)
         card.setObjectName("txCard")
         card.setStyleSheet(
-            f"QFrame#txCard {{ background: {BG_PANEL}; border: 1px solid {BORDER}; border-radius: 8px; }}"
+            f"QFrame#txCard {{"
+            f"  background: {BG_PANEL};"
+            f"  border: 1px solid {BORDER};"
+            f"  border-radius: 8px;"
+            f"}}"
         )
 
         lay = QVBoxLayout(card)
-        lay.setContentsMargins(8, 8, 8, 8)
+        lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(6)
 
-        section_lbl = QLabel(title)
-        section_lbl.setObjectName("txMetricName")
-        lay.addWidget(section_lbl)
+        # En-tête
+        title_lbl = QLabel(title)
+        title_lbl.setObjectName("txDualTitle")
+        lay.addWidget(title_lbl)
 
-        row = QHBoxLayout()
-        row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(10)
+        # Séparateur horizontal
+        h_sep = QFrame()
+        h_sep.setFrameShape(QFrame.HLine)
+        h_sep.setStyleSheet(f"background: {BORDER}; max-height: 1px; border: none;")
+        lay.addWidget(h_sep)
 
+        # Deux colonnes
+        cols = QHBoxLayout()
+        cols.setSpacing(0)
+        cols.setContentsMargins(0, 0, 0, 0)
+
+        left_lbl = QLabel(left_name)
+        left_lbl.setObjectName("txChipLabel")
+        left_val = QLabel("--")
+        left_val.setObjectName("txMetricValue")
+        left_val.setStyleSheet(f"color: {left_color}; font-size: 14px; font-weight: 800;")
         left_col = QVBoxLayout()
-        left_col.setSpacing(2)
-        left_name_lbl = QLabel(left_name)
-        left_name_lbl.setObjectName("txSectionSubtitle")
-        left_value_lbl = QLabel("--")
-        left_value_lbl.setObjectName("txMetricValue")
-        left_value_lbl.setStyleSheet(f"color: {left_color}; font-size: 14px; font-weight: 800;")
-        left_col.addWidget(left_name_lbl)
-        left_col.addWidget(left_value_lbl)
+        left_col.setSpacing(3)
+        left_col.setContentsMargins(0, 2, 0, 2)
+        left_col.addWidget(left_lbl)
+        left_col.addWidget(left_val)
 
+        # Diviseur vertical
+        v_sep = QFrame()
+        v_sep.setFrameShape(QFrame.VLine)
+        v_sep.setStyleSheet(f"background: {BORDER}; max-width: 1px; border: none;")
+        v_sep.setFixedWidth(1)
+
+        right_lbl = QLabel(right_name)
+        right_lbl.setObjectName("txChipLabel")
+        right_val = QLabel("--")
+        right_val.setObjectName("txMetricValue")
+        right_val.setStyleSheet(f"color: {right_color}; font-size: 14px; font-weight: 800;")
         right_col = QVBoxLayout()
-        right_col.setSpacing(2)
-        right_name_lbl = QLabel(right_name)
-        right_name_lbl.setObjectName("txSectionSubtitle")
-        right_value_lbl = QLabel("--")
-        right_value_lbl.setObjectName("txMetricValue")
-        right_value_lbl.setStyleSheet(f"color: {right_color}; font-size: 14px; font-weight: 800;")
-        right_col.addWidget(right_name_lbl)
-        right_col.addWidget(right_value_lbl)
+        right_col.setSpacing(3)
+        right_col.setContentsMargins(12, 2, 0, 2)
+        right_col.addWidget(right_lbl)
+        right_col.addWidget(right_val)
 
-        row.addLayout(left_col, 1)
-        row.addLayout(right_col, 1)
-        lay.addLayout(row)
+        cols.addLayout(left_col, 1)
+        cols.addWidget(v_sep)
+        cols.addLayout(right_col, 1)
+        lay.addLayout(cols)
 
-        return card, left_value_lbl, right_value_lbl
-
-    def _build_placeholder_metric_box(self) -> QFrame:
-        card = QFrame(self)
-        card.setObjectName("txCard")
-        card.setStyleSheet(
-            f"QFrame#txCard {{ background: {BG_PANEL}; border: 1px solid {BORDER}; border-radius: 8px; }}"
-        )
-        lay = QVBoxLayout(card)
-        lay.setContentsMargins(8, 8, 8, 8)
-        lay.setSpacing(0)
-        lay.addStretch(1)
-        return card
+        return card, left_val, right_val
 
     def _set_flow_metrics(self, gains: int, losses: int):
         self._gains_value_label.setText(f"+{_fmt_kamas_with_symbol(gains)}")
@@ -883,6 +942,8 @@ class TransactionsTab(BaseTab):
 
     def _set_balance_metrics(self, net: int, current_kamas: int | None):
         self._net_value_label.setText(f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}")
+        net_color = GREEN if net > 0 else (RED if net < 0 else TEAL)
+        self._net_value_label.setStyleSheet(f"color: {net_color}; font-size: 16px; font-weight: 800;")
         if current_kamas is None:
             self._current_kamas_value_label.setText("--")
         else:
@@ -926,7 +987,7 @@ class TransactionsTab(BaseTab):
         series = self._rendered_series
         total = len(series)
         if total < 2:
-            self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+            self._set_range_label(self._selected_window_label())
             return
 
         start = max(0, min(total - 1, int(self._view_start)))
@@ -937,21 +998,50 @@ class TransactionsTab(BaseTab):
             first_dt, last_dt = last_dt, first_dt
 
         span_label = self._format_visible_span_label(int((last_dt - first_dt).total_seconds()))
-        self._range_label.setText(f"Fenetre: {span_label}")
+        self._set_range_label(span_label)
+
+    @staticmethod
+    def _normalize_duration_label_text(label: str) -> str:
+        txt = str(label or "").strip()
+        txt = re.sub(r"\s+", " ", txt)
+        txt = re.sub(r"(?<=\d)j(?=\d)", " j ", txt)
+        txt = re.sub(r"(?<=\d)j", " j", txt)
+        txt = re.sub(r"(?<=\d)h", " h", txt)
+        txt = re.sub(r"(?<=\d)m(?![a-z])", " min", txt)
+        txt = re.sub(r"\s+", " ", txt).strip()
+        return txt
+
+    def _format_range_label(self, label: str) -> str:
+        return f"Fenetre: {self._normalize_duration_label_text(label)}"
+
+    def _set_range_label(self, label: str):
+        self._range_label.setText(self._format_range_label(label))
 
     def _selected_window_label(self) -> str:
         if self._time_window_key != "all" and self._custom_window_minutes is not None:
-            minutes = max(1, int(self._custom_window_minutes))
-            if minutes < 60:
-                return f"{minutes} minutes"
-            hours, rem = divmod(minutes, 60)
-            if rem == 0:
-                return f"{hours} heure" if hours == 1 else f"{hours} heures"
-            return f"{hours}h{rem:02d}"
+            return self._format_duration_label_from_minutes(int(self._custom_window_minutes))
         for key, label, _delta in self._TIME_WINDOWS:
             if key == self._time_window_key:
                 return label
         return "Toute la duree"
+
+    @staticmethod
+    def _format_duration_label_from_minutes(minutes_total: int) -> str:
+        minutes = max(1, int(minutes_total))
+        days, rem_minutes = divmod(minutes, 24 * 60)
+        hours, rem = divmod(rem_minutes, 60)
+
+        if days > 0:
+            if hours > 0:
+                return f"{days} j {hours} h"
+            return f"{days} j"
+
+        if hours > 0:
+            if rem > 0:
+                return f"{hours} h {rem} min"
+            return f"{hours} h"
+
+        return f"{minutes} min"
 
     def _selected_window_delta(self) -> timedelta | None:
         if self._time_window_key == "all":
@@ -1001,7 +1091,7 @@ class TransactionsTab(BaseTab):
 
         self._custom_window_minutes = minutes
         self._reset_chart_view_on_next_render = True
-        self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+        self._set_range_label(self._selected_window_label())
         self._animate_range_label()
         self._render()
         self._animate_chart_refresh()
@@ -1239,7 +1329,7 @@ class TransactionsTab(BaseTab):
             if self._custom_window_minutes is not None:
                 self._custom_window_minutes = None
                 self._reset_chart_view_on_next_render = True
-                self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+                self._set_range_label(self._selected_window_label())
                 self._render()
             self._refresh_range_menu_controls()
             return
@@ -1251,7 +1341,7 @@ class TransactionsTab(BaseTab):
         self._time_window_key = key
         self._settings.setValue("transactions_time_window_key", self._time_window_key)
         self._reset_chart_view_on_next_render = True
-        self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+        self._set_range_label(self._selected_window_label())
         self._animate_range_label()
         self._render()
         self._animate_chart_refresh()
@@ -1500,6 +1590,120 @@ class TransactionsTab(BaseTab):
 
         return True
 
+    def _load_label_suggestions_db(self) -> dict[str, dict[str, int]]:
+        if not _TX_LABELS_DB.exists():
+            return {}
+        try:
+            payload = json.loads(_TX_LABELS_DB.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            return {}
+
+        if not isinstance(payload, dict):
+            return {}
+        kinds_raw = payload.get("kinds")
+        if not isinstance(kinds_raw, dict):
+            return {}
+
+        out: dict[str, dict[str, int]] = {}
+        for kind, labels in kinds_raw.items():
+            if not isinstance(kind, str) or not isinstance(labels, dict):
+                continue
+            clean_labels: dict[str, int] = {}
+            for label, count in labels.items():
+                text = str(label or "").strip()
+                if not text:
+                    continue
+                try:
+                    n = int(count)
+                except (ValueError, TypeError):
+                    n = 1
+                clean_labels[text] = max(1, n)
+            if clean_labels:
+                out[kind] = clean_labels
+        return out
+
+    def _save_label_suggestions_db(self):
+        payload = {"kinds": self._label_suggestions_db}
+        try:
+            _TX_LABELS_DB.parent.mkdir(parents=True, exist_ok=True)
+            _TX_LABELS_DB.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError:
+            return
+
+    def _register_label_suggestion(self, kind: str, label: str):
+        text = str(label or "").strip()
+        if not text:
+            return
+        k = str(kind or "").strip().lower() or "other"
+        bucket = self._label_suggestions_db.setdefault(k, {})
+        bucket[text] = int(bucket.get(text, 0)) + 1
+        self._save_label_suggestions_db()
+
+    def _label_suggestions_for_kind(self, kind: str) -> list[str]:
+        builtins_by_kind: dict[str, list[str]] = {
+            "gain": ["Gain de kamas", "Vente HDV", "Récompense", "Remboursement"],
+            "loss": ["Perte de kamas", "Achat HDV", "Taxe", "Frais"],
+            "correction": ["Correction manuelle", "Recalage manuel"],
+        }
+
+        ordered: list[str] = []
+        seen: set[str] = set()
+        k = str(kind or "").strip().lower()
+        bucket = self._label_suggestions_db.get(k, {})
+        if isinstance(bucket, dict):
+            for label, _count in sorted(bucket.items(), key=lambda item: int(item[1]), reverse=True):
+                text = str(label or "").strip()
+                if text and text not in seen:
+                    seen.add(text)
+                    ordered.append(text)
+
+        for labels in builtins_by_kind.values():
+            for text in labels:
+                t = str(text).strip()
+                if t and t not in seen:
+                    seen.add(t)
+                    ordered.append(t)
+        return ordered
+
+    @staticmethod
+    def _event_label_storage_key(evt: TransactionEvent) -> str:
+        stamp = evt.dt.strftime("%Y-%m-%d %H:%M:%S.%f")
+        corr = str(evt.correction_ts or "")
+        return f"transactions_custom_label::{stamp}|{evt.kind}|{int(evt.amount)}|{corr}"
+
+    def _effective_libelle(self, evt: TransactionEvent) -> str:
+        custom = self._settings.value(self._event_label_storage_key(evt), "", type=str)
+        custom = str(custom or "").strip()
+        return custom if custom else evt.libelle
+
+    def _set_custom_libelle(self, evt: TransactionEvent, libelle: str | None):
+        key = self._event_label_storage_key(evt)
+        text = str(libelle or "").strip()
+        if text:
+            self._settings.setValue(key, text)
+            self._register_label_suggestion(evt.kind, text)
+        else:
+            self._settings.remove(key)
+
+    def _edit_event_libelle(self, evt: TransactionEvent):
+        current = self._effective_libelle(evt)
+        suggestions = self._label_suggestions_for_kind(evt.kind)
+        if current and current not in suggestions:
+            suggestions.insert(0, current)
+
+        text, ok = QInputDialog.getItem(
+            self,
+            "Modifier le libelle",
+            "Libelle (saisie libre ou suggestion) :",
+            suggestions,
+            0,
+            True,
+        )
+        if not ok:
+            return
+        self._set_custom_libelle(evt, text)
+        self._render()
+
     def _on_table_context_menu(self, pos):
         item = self._table.itemAt(pos)
         if item is None:
@@ -1509,13 +1713,17 @@ class TransactionsTab(BaseTab):
             return
 
         evt = self._display_events[row]
-        if evt.kind != "correction":
-            return
 
         menu = QMenu(self)
-        delete_action = menu.addAction("Supprimer cette correction")
+        edit_action = menu.addAction("Editer le libelle")
+        delete_action = None
+        if evt.kind == "correction":
+            delete_action = menu.addAction("Supprimer cette correction")
         chosen = menu.exec_(self._table.viewport().mapToGlobal(pos))
-        if chosen != delete_action:
+        if chosen == edit_action:
+            self._edit_event_libelle(evt)
+            return
+        if delete_action is None or chosen != delete_action:
             return
 
         date_txt, time_txt = _format_dt_parts(evt.dt)
@@ -1570,7 +1778,7 @@ class TransactionsTab(BaseTab):
 
         if self._sort_column == 3:
             events.sort(
-                key=lambda evt: (evt.libelle.lower(), evt.dt),
+                key=lambda evt: (self._effective_libelle(evt).lower(), evt.dt),
                 reverse=self._sort_desc,
             )
             return events
@@ -1597,49 +1805,143 @@ class TransactionsTab(BaseTab):
     def _column_key(self, section: int) -> str:
         return f"transactions_col_width_{section}"
 
+    def _ensure_column_layout_settings_schema(self):
+        version_key = "transactions_column_layout_schema_version"
+        current = self._settings.value(version_key, 0, type=int)
+        if int(current) >= self._COLUMN_LAYOUT_SETTINGS_VERSION:
+            return
+
+        # Migration one-shot: purge les anciennes structures de persistance
+        # pour repartir sur une base saine apres les changements de logique.
+        for section in range(5):
+            self._settings.remove(self._column_key(section))
+            self._settings.remove(f"transactions_default_col_width_{section}")
+        self._settings.remove(self._column_order_key())
+        self._settings.remove("transactions_default_col_order_state")
+        self._settings.setValue(version_key, self._COLUMN_LAYOUT_SETTINGS_VERSION)
+        self._column_layout_schema_migrated = True
+
     def _apply_default_column_widths(self):
-        self._table.setColumnWidth(0, 120)
-        self._table.setColumnWidth(1, 96)
-        self._table.setColumnWidth(2, 100)
-        self._table.setColumnWidth(3, 220)
-        self._table.setColumnWidth(4, 110)
+        self._table.setColumnWidth(0, 176)  # Date
+        self._table.setColumnWidth(1, 165)  # Heure
+        self._table.setColumnWidth(2, 91)   # Type
+        self._table.setColumnWidth(3, 120)  # Libelle
+        self._table.setColumnWidth(4, 185)  # Montant
+
+    def _apply_default_column_order(self):
+        # Configuration par défaut de l'application.
+        # Visuel: Type, Libelle, Montant, Heure, Date.
+        header = self._table.horizontalHeader()
+        desired_visual_order = [2, 3, 4, 1, 0]
+        for target_visual, logical_idx in enumerate(desired_visual_order):
+            current_visual = int(header.visualIndex(logical_idx))
+            if current_visual != target_visual:
+                header.moveSection(current_visual, target_visual)
+
+    @staticmethod
+    def _column_semantic_min_width(section: int) -> int:
+        # Minima ergonomiques pour eviter la troncature des infos critiques.
+        if section == 0:  # Date
+            return 104
+        if section == 1:  # Heure
+            return 86
+        if section == 2:  # Type
+            return 70
+        if section == 3:  # Libelle
+            return 120
+        if section == 4:  # Montant
+            return 116
+        return 60
+
+    @staticmethod
+    def _column_hard_floor_width(section: int) -> int:
+        # Fallback ultime si la fenetre devient tres etroite.
+        if section == 0:  # Date
+            return 78
+        if section == 1:  # Heure
+            return 68
+        if section == 2:  # Type
+            return 56
+        if section == 3:  # Libelle
+            return 72
+        if section == 4:  # Montant
+            return 88
+        return 40
 
     def _restore_column_widths(self):
         for section in range(self._table.columnCount()):
             width = self._settings.value(self._column_key(section), 0, type=int)
-            if not width:
-                width = self._settings.value(self._column_default_key(section), 0, type=int)
             if width and width >= 60:
                 self._table.setColumnWidth(section, int(width))
 
-    def _on_column_resized(self, section: int, _old_size: int, new_size: int):
+    def _on_column_resized(self, section: int, old_size: int, _new_size: int):
         if not self._layout_ready:
             return
         if self._resizing_guard:
             return
-        # Sauvegarde immediate pendant le drag pour conserver les largeurs.
+
+        delta = int(self._table.columnWidth(section)) - int(old_size)
+        if delta != 0:
+            self._redistribute_resize_delta(section, delta)
+
+        self._enforce_columns_fit(preferred_section=section)
+        self._persist_column_widths()
+
+    def _redistribute_resize_delta(self, section: int, delta: int):
+        header = self._table.horizontalHeader()
+        count = self._table.columnCount()
+        if count <= 1 or delta == 0:
+            return
+
+        visual = int(header.visualIndex(section))
+        if visual < 0:
+            return
+
         self._resizing_guard = True
         try:
-            self._enforce_columns_fit(preferred_section=section)
+            if delta > 0:
+                # Priorite aux colonnes a droite du separateur, puis a gauche
+                # si necessaire, pour conserver une sensation de drag naturelle.
+                donors_visual = list(range(visual + 1, count)) + list(range(visual - 1, -1, -1))
+                remaining = int(delta)
+                for donor_visual in donors_visual:
+                    if remaining <= 0:
+                        break
+                    donor = int(header.logicalIndex(donor_visual))
+                    if donor == section:
+                        continue
+                    current = int(self._table.columnWidth(donor))
+                    floor = self._column_semantic_min_width(donor)
+                    reducible = max(0, current - floor)
+                    if reducible <= 0:
+                        continue
+                    take = min(reducible, remaining)
+                    self._table.setColumnWidth(donor, current - take)
+                    remaining -= take
+
+                if remaining > 0:
+                    # Si aucun espace ne peut etre repris ailleurs,
+                    # on limite la croissance de la colonne active.
+                    current = int(self._table.columnWidth(section))
+                    floor = self._column_semantic_min_width(section)
+                    self._table.setColumnWidth(section, max(floor, current - remaining))
+
+            else:
+                freed = abs(int(delta))
+                recipient_visual = visual + 1 if (visual + 1) < count else visual - 1
+                if recipient_visual >= 0:
+                    recipient = int(header.logicalIndex(recipient_visual))
+                    if recipient != section:
+                        self._table.setColumnWidth(recipient, int(self._table.columnWidth(recipient)) + freed)
         finally:
             self._resizing_guard = False
-        self._settings.setValue(self._column_key(section), int(new_size))
-        self._persist_column_widths()
-        self._persist_default_column_layout()
 
     def _persist_column_widths(self):
         for section in range(self._table.columnCount()):
             self._settings.setValue(self._column_key(section), int(self._table.columnWidth(section)))
-            self._settings.setValue(self._column_default_key(section), int(self._table.columnWidth(section)))
 
     def _column_order_key(self) -> str:
         return "transactions_col_order_state"
-
-    def _column_default_key(self, section: int) -> str:
-        return f"transactions_default_col_width_{section}"
-
-    def _column_order_default_key(self) -> str:
-        return "transactions_default_col_order_state"
 
     def _on_columns_reordered(self, _logical_index: int, _old_visual_index: int, _new_visual_index: int):
         if not self._layout_ready:
@@ -1648,24 +1950,15 @@ class TransactionsTab(BaseTab):
         header = self._table.horizontalHeader()
         state = header.saveState()
         self._settings.setValue(self._column_order_key(), state)
-        self._settings.setValue(self._column_order_default_key(), state)
-        self._persist_default_column_layout()
+        self._persist_column_widths()
 
     def _restore_column_order(self):
         state = self._settings.value(self._column_order_key())
-        if state is None:
-            state = self._settings.value(self._column_order_default_key())
         if state is None:
             return
         header = self._table.horizontalHeader()
         header.restoreState(state)
         self._enforce_columns_fit()
-
-    def _persist_default_column_layout(self):
-        self._persist_column_widths()
-        header = self._table.horizontalHeader()
-        state = header.saveState()
-        self._settings.setValue(self._column_order_default_key(), state)
 
     def _on_toggle_organization_mode(self, enabled: bool):
         self._organization_mode = bool(enabled)
@@ -1697,50 +1990,149 @@ class TransactionsTab(BaseTab):
         if viewport_width <= 0:
             return
 
-        min_w = self._table.horizontalHeader().minimumSectionSize()
-        if viewport_width < (count * min_w):
-            # Layout Qt pas encore stabilise (souvent au demarrage): ne rien ecraser.
-            return
-        widths = [int(self._table.columnWidth(i)) for i in range(count)]
-        overflow = sum(widths) - viewport_width
-        if overflow <= 0:
+        fit_width = max(0, viewport_width - 2)
+        if fit_width <= 0:
             return
 
-        order: list[int] = []
+        logical_sections = list(range(count))
+        semantic_mins = [self._column_semantic_min_width(i) for i in logical_sections]
+        hard_floors = [self._column_hard_floor_width(i) for i in logical_sections]
+
+        self._table.setUpdatesEnabled(False)
+        try:
+            # Assainit d'abord toute largeur invalide/persistante trop faible.
+            self._resizing_guard = True
+            try:
+                for idx in logical_sections:
+                    current = int(self._table.columnWidth(idx))
+                    floor = hard_floors[idx]
+                    if current < floor:
+                        self._table.setColumnWidth(idx, floor)
+            finally:
+                self._resizing_guard = False
+
+            widths = [int(self._table.columnWidth(i)) for i in logical_sections]
+            total_w = sum(widths)
+            overflow = total_w - fit_width
+
+            if overflow < 0:
+                deficit = -overflow
+                # Etire pour occuper toute la largeur, priorite au Libelle puis Date/Heure.
+                grow_order = [3, 0, 1, 4, 2]
+                order = [idx for idx in grow_order if 0 <= idx < count]
+                if not order:
+                    order = list(range(count))
+
+                self._resizing_guard = True
+                try:
+                    per_col = deficit // len(order)
+                    rem = deficit % len(order)
+                    for i, idx in enumerate(order):
+                        bonus = per_col + (1 if i < rem else 0)
+                        self._table.setColumnWidth(idx, int(self._table.columnWidth(idx)) + bonus)
+                finally:
+                    self._resizing_guard = False
+
+            elif overflow > 0:
+                # Ramene d'abord toute colonne au-dessus de son minimum ergonomique.
+                shrink_order: list[int] = [3, 2, 4, 1, 0]
+                if preferred_section is not None and preferred_section in shrink_order:
+                    shrink_order = [i for i in shrink_order if i != preferred_section] + [preferred_section]
+
+                self._resizing_guard = True
+                try:
+                    for idx in shrink_order:
+                        target = max(semantic_mins[idx], hard_floors[idx])
+                        if widths[idx] < target:
+                            widths[idx] = target
+                            self._table.setColumnWidth(idx, target)
+                    widths = [int(self._table.columnWidth(i)) for i in range(count)]
+                    overflow = sum(widths) - fit_width
+                    if overflow <= 0:
+                        overflow = 0
+
+                    # Reduction ergonomique: Libelle d'abord, puis Type, puis le reste.
+                    for idx in shrink_order:
+                        if overflow <= 0:
+                            break
+                        current = int(self._table.columnWidth(idx))
+                        floor = semantic_mins[idx]
+                        reducible = max(0, current - floor)
+                        if reducible <= 0:
+                            continue
+                        delta = min(reducible, overflow)
+                        new_w = current - delta
+                        self._table.setColumnWidth(idx, new_w)
+                        overflow -= delta
+
+                    # Dernier recours seulement: descendre sous min ergonomique vers hard floor.
+                    if overflow > 0:
+                        for idx in shrink_order:
+                            if overflow <= 0:
+                                break
+                            current = int(self._table.columnWidth(idx))
+                            floor = hard_floors[idx]
+                            reducible = max(0, current - floor)
+                            if reducible <= 0:
+                                continue
+                            delta = min(reducible, overflow)
+                            new_w = current - delta
+                            self._table.setColumnWidth(idx, new_w)
+                            overflow -= delta
+                finally:
+                    self._resizing_guard = False
+
+            self._force_exact_table_fit(fit_width, hard_floors)
+        finally:
+            self._table.setUpdatesEnabled(True)
+
+    def _force_exact_table_fit(self, fit_width: int, hard_floors: list[int]):
+        count = self._table.columnCount()
+        if count <= 0 or fit_width <= 0:
+            return
+
         header = self._table.horizontalHeader()
-        last_visual = header.logicalIndex(header.count() - 1)
-        if last_visual not in order:
-            order.append(last_visual)
+        total_w = sum(int(self._table.columnWidth(i)) for i in range(count))
+        overflow = total_w - fit_width
 
-        for idx in sorted(range(count), key=lambda i: widths[i], reverse=True):
-            if idx == preferred_section:
-                continue
-            if idx not in order:
-                order.append(idx)
-
-        # On ne touche la colonne en cours de drag qu'en dernier recours.
-        if preferred_section is not None and 0 <= preferred_section < count and preferred_section not in order:
-            order.append(preferred_section)
+        if overflow == 0:
+            return
 
         self._resizing_guard = True
         try:
-            for idx in order:
-                if overflow <= 0:
-                    break
-                current = int(self._table.columnWidth(idx))
-                reducible = max(0, current - min_w)
-                if reducible <= 0:
-                    continue
-                delta = min(reducible, overflow)
-                self._table.setColumnWidth(idx, current - delta)
-                overflow -= delta
+            if overflow > 0:
+                # Correction stricte anti-debordement en priorisant la droite.
+                for visual in range(count - 1, -1, -1):
+                    if overflow <= 0:
+                        break
+                    idx = int(header.logicalIndex(visual))
+                    current = int(self._table.columnWidth(idx))
+                    floor = hard_floors[idx] if 0 <= idx < len(hard_floors) else 40
+                    reducible = max(0, current - floor)
+                    if reducible <= 0:
+                        continue
+                    delta = min(reducible, overflow)
+                    self._table.setColumnWidth(idx, current - delta)
+                    overflow -= delta
+            else:
+                deficit = -overflow
+                last_visual = count - 1
+                idx = int(header.logicalIndex(last_visual)) if last_visual >= 0 else -1
+                if 0 <= idx < count:
+                    self._table.setColumnWidth(idx, int(self._table.columnWidth(idx)) + deficit)
         finally:
             self._resizing_guard = False
 
     def eventFilter(self, obj, event):
-        if obj is self._table and event.type() == QEvent.Resize:
-            self._enforce_columns_fit()
+        if obj is self._table.viewport() and event.type() == QEvent.Resize:
+            if not self._fit_throttle.isActive():
+                self._fit_throttle.start()
         return super().eventFilter(obj, event)
+
+    def _on_fit_throttle(self):
+        self._enforce_columns_fit()
+        if self._layout_ready:
+            self._persist_debounce.start()
 
     def _update_header_labels(self):
         labels = ["Date", "Heure", "Type", "Libelle", f"Montant ({_KAMA_SYMBOL})"]
@@ -1941,7 +2333,7 @@ class TransactionsTab(BaseTab):
             self._custom_window_minutes = None
             self._time_window_key = "all"
             self._settings.setValue("transactions_time_window_key", self._time_window_key)
-            self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+            self._set_range_label(self._selected_window_label())
             self._reset_chart_view_on_next_render = True
 
         # Fenetre temporelle choisie via clic droit sur le graphe.
@@ -2012,7 +2404,7 @@ class TransactionsTab(BaseTab):
                 color = QColor(RED)
 
             type_item = QTableWidgetItem(tx_type)
-            libelle_item = QTableWidgetItem(evt.libelle)
+            libelle_item = QTableWidgetItem(self._effective_libelle(evt))
             amount_item = QTableWidgetItem(amount_text)
             type_item.setForeground(color)
             amount_item.setForeground(color)
