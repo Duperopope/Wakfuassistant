@@ -14,7 +14,7 @@ import win32con
 from ui.theme    import BG, BORDER, TEAL, TEAL_BRIGHT, QSS, build_qss, get_palette, DEFAULT_PALETTE
 from ui.titlebar import TitleBar
 from ui.onboarding import KamasOnboardingDialog
-from core.kamas_history import replay_kamas_delta, now_iso
+from core.kamas_history import replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
@@ -79,11 +79,11 @@ _LEVEL_RE = re.compile(
     re.IGNORECASE,
 )
 _KAMAS_GAIN_RE = re.compile(
-    r"\[Information \(jeu\)\]\s+Vous avez gagné\s+([0-9\s\u00a0\u202f.,]+)\s+kamas",
+    r"\[Information \(jeu\)\]\s+Vous avez gagné\s+([0-9\s\u00a0\u202f.,]+)\s+kamas?\b",
     re.IGNORECASE,
 )
 _KAMAS_LOSS_RE = re.compile(
-    r"\[Information \(jeu\)\]\s+Vous avez perdu\s+([0-9\s\u00a0\u202f.,]+)\s+kamas",
+    r"\[Information \(jeu\)\]\s+Vous avez perdu\s+([0-9\s\u00a0\u202f.,]+)\s+kamas?\b",
     re.IGNORECASE,
 )
 _KAMA_CANDIDATE_VALUE_RE = re.compile(r"^([^=]+)=(-?\d+)\s+\(score=(-?\d+)\)")
@@ -235,6 +235,7 @@ class OverlayWindow(QWidget):
         self._runtime_kamas_delta: int = 0
         self._interface_feed_mtime: int = 0
         self._interface_feed_path: Path | None = None
+        self._options_tab: "OptionsTab | None" = None
         self._stats_labels: dict[str, QLabel] = {}
         self._runtime_kama_candidates_prev: dict[str, int] = {}
         self._runtime_kama_candidate_scores: dict[str, int] = {}
@@ -325,6 +326,9 @@ class OverlayWindow(QWidget):
             opt.palette_changed.connect(self.set_overlay_palette)
             opt.shape_changed.connect(self.set_window_corner_radius)
             opt.reset_requested.connect(self._on_reset_requested)
+            opt.kamas_corrected.connect(self._on_kamas_corrected)
+            opt.set_kamas(self._current_kamas)
+            self._options_tab = opt
             self.set_tab(idx, opt)
 
     def _build_stats_card(self) -> QFrame:
@@ -634,6 +638,8 @@ class OverlayWindow(QWidget):
         self._titlebar.set_info(
             f"{e//3600:02d}:{(e%3600)//60:02d}:{e%60:02d} | {status}{character_part}{class_part}{level_part}{crit_part}{xp_part}{kamas_part}"
         )
+        if self._options_tab is not None:
+            self._options_tab.set_kamas(self._current_kamas)
         self._refresh_stats_panel()
 
     @staticmethod
@@ -826,6 +832,20 @@ class OverlayWindow(QWidget):
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
         self._current_kamas = 0
+        self._refresh_title_info()
+
+    def _on_kamas_corrected(self, value: int):
+        """Correction manuelle du montant de kamas depuis l'onglet Options."""
+        ts = write_kamas_correction(value)   # journal horodaté à la ms
+        self._base_kamas = value
+        self._manual_kamas_delta = 0
+        self._runtime_kamas_delta = 0
+        self._current_kamas = value
+        self._write_config_patch({
+            "base_kamas": value,
+            "manual_kamas_delta": 0,
+            "last_session_end": ts,
+        })
         self._refresh_title_info()
 
     def _write_config_patch(self, patch: dict):
