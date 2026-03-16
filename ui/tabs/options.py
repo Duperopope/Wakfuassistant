@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from datetime import datetime
+
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -8,8 +12,10 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QPushButton,
     QSizePolicy,
+    QLineEdit,
 )
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIntValidator
 
 from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, TEXT, TEXT_DIM, TEAL
@@ -83,7 +89,6 @@ class CollapsibleCard(QFrame):
         self._body_layout.setContentsMargins(10, 8, 10, 10)
         self._body_layout.setSpacing(8)
 
-        # Appliquer l'état initial
         self._apply_state(animate=False)
 
     # ── API publique ──────────────────────────────────────────────────────
@@ -116,17 +121,50 @@ class CollapsibleCard(QFrame):
 
 
 # ---------------------------------------------------------------------------
+# Helpers internes
+# ---------------------------------------------------------------------------
+
+def _section_label(text: str) -> QLabel:
+    lbl = QLabel(text)
+    lbl.setStyleSheet(
+        f"color: {TEAL}; font-size: 9px; font-weight: 700;"
+        f" letter-spacing: 1.2px; padding-top: 4px; padding-bottom: 2px;"
+    )
+    return lbl
+
+
+def _sep_line() -> QFrame:
+    sep = QFrame()
+    sep.setFrameShape(QFrame.HLine)
+    sep.setStyleSheet(
+        f"color: {BORDER}; background: {BORDER}; max-height: 1px; margin: 2px 0 6px 0;"
+    )
+    return sep
+
+
+def _format_ts(ts: str) -> str:
+    """Convertit un timestamp ISO ms en chaîne lisible arrondie à la seconde."""
+    try:
+        fmt = "%Y-%m-%d %H:%M:%S.%f" if "." in ts else "%Y-%m-%d %H:%M:%S"
+        dt = datetime.strptime(ts, fmt)
+        return dt.strftime("%d/%m/%Y à %H:%M:%S")
+    except Exception:
+        return ts
+
+
+# ---------------------------------------------------------------------------
 # Onglet Options
 # ---------------------------------------------------------------------------
 
 class OptionsTab(BaseTab):
     """Options UI/overlay avec layout propre et controls clairs."""
 
-    opacity_changed = pyqtSignal(float)
-    font_changed = pyqtSignal(str)
-    palette_changed = pyqtSignal(str)
-    shape_changed = pyqtSignal(int)
-    reset_requested = pyqtSignal()
+    opacity_changed  = pyqtSignal(float)
+    font_changed     = pyqtSignal(str)
+    palette_changed  = pyqtSignal(str)
+    shape_changed    = pyqtSignal(int)
+    reset_requested  = pyqtSignal()
+    kamas_corrected  = pyqtSignal(int)   # valeur corrigée manuellement
 
     FONT_CHOICES = [
         "Segoe UI Variable",
@@ -336,16 +374,97 @@ class OptionsTab(BaseTab):
     # ── Contenu : carte Données ───────────────────────────────────────────
 
     def _populate_data_card(self, lay: QVBoxLayout):
-        desc = QLabel(
-            "Efface l'historique des logs et repart à zéro.\n"
-            "Le montant de kamas sera redemandé au prochain lancement."
-        )
-        desc.setWordWrap(True)
-        desc.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
-        lay.addWidget(desc)
+        _input_qss = f"""
+            QLineEdit {{
+                background: #0f1116;
+                border: 1px solid {BORDER};
+                border-radius: 6px;
+                padding: 4px 8px;
+                color: {TEXT};
+                font-size: 11px;
+            }}
+            QLineEdit:focus {{ border-color: {TEAL}; }}
+        """
+        _confirm_qss = f"""
+            QPushButton {{
+                background: {TEAL};
+                color: #0a1a1f;
+                border: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 4px;
+                min-width: 28px;
+            }}
+            QPushButton:hover {{ background: #1ec8c4; }}
+        """
 
-        btn = QPushButton("Réinitialiser les données")
-        btn.setStyleSheet(f"""
+        # ── Section : PERSONNAGE ─────────────────────────────────────────
+        lay.addWidget(_section_label("PERSONNAGE"))
+        lay.addWidget(_sep_line())
+
+        # ── Champ Kamas ──────────────────────────────────────────────────
+        # Ligne valeur : label + valeur live (avec tooltip)
+        kamas_top = QHBoxLayout()
+        kamas_top.setSpacing(6)
+
+        kamas_field_lbl = QLabel("Kamas")
+        kamas_field_lbl.setStyleSheet(f"color: {TEXT}; font-size: 11px; font-weight: 600;")
+        kamas_top.addWidget(kamas_field_lbl)
+
+        kamas_top.addStretch(1)
+
+        self._kamas_display = QLabel("—")
+        self._kamas_display.setStyleSheet(
+            f"color: {TEAL}; font-size: 12px; font-weight: 700;"
+        )
+        self._kamas_display.setToolTip("")
+        kamas_top.addWidget(self._kamas_display)
+
+        lay.addLayout(kamas_top)
+
+        # Ligne saisie : input + bouton confirmer
+        kamas_edit_row = QHBoxLayout()
+        kamas_edit_row.setSpacing(6)
+
+        self._kamas_input = QLineEdit()
+        self._kamas_input.setPlaceholderText("Nouveau montant…")
+        self._kamas_input.setValidator(QIntValidator(0, 999_999_999))
+        self._kamas_input.setStyleSheet(_input_qss)
+        self._kamas_input.returnPressed.connect(self._on_kamas_confirm)
+        kamas_edit_row.addWidget(self._kamas_input, 1)
+
+        confirm_btn = QPushButton("✓")
+        confirm_btn.setStyleSheet(_confirm_qss)
+        confirm_btn.clicked.connect(self._on_kamas_confirm)
+        kamas_edit_row.addWidget(confirm_btn)
+
+        lay.addLayout(kamas_edit_row)
+
+        # Dernière saisie
+        self._kamas_last_entry_lbl = QLabel("")
+        self._kamas_last_entry_lbl.setStyleSheet(
+            f"color: {TEXT_DIM}; font-size: 9px; padding-top: 1px;"
+        )
+        lay.addWidget(self._kamas_last_entry_lbl)
+
+        # ── Séparateur avant Reset ────────────────────────────────────────
+        lay.addWidget(_sep_line())
+
+        # ── Section : RÉINITIALISATION ────────────────────────────────────
+        lay.addWidget(_section_label("RÉINITIALISATION"))
+        lay.addWidget(_sep_line())
+
+        reset_desc = QLabel(
+            "Efface l'historique des logs et relance\n"
+            "la configuration initiale."
+        )
+        reset_desc.setWordWrap(True)
+        reset_desc.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+        lay.addWidget(reset_desc)
+
+        reset_btn = QPushButton("Réinitialiser les données")
+        reset_btn.setStyleSheet(f"""
             QPushButton {{
                 background: transparent;
                 color: #e05555;
@@ -360,8 +479,47 @@ class OptionsTab(BaseTab):
                 border-color: #e05555;
             }}
         """)
-        btn.clicked.connect(self.reset_requested)
-        lay.addWidget(btn)
+        reset_btn.clicked.connect(self.reset_requested)
+        lay.addWidget(reset_btn)
+
+    # ── API publique ──────────────────────────────────────────────────────
+
+    def set_kamas(self, value: int | None):
+        """Met à jour l'affichage live des kamas dans la carte Données."""
+        if not hasattr(self, "_kamas_display"):
+            return
+        if value is None:
+            self._kamas_display.setText("—")
+        else:
+            self._kamas_display.setText(f"{value:,}".replace(",", "\u00a0") + " k")
+
+    def set_kamas_last_entry(self, ts: str | None):
+        """
+        Met à jour le label et le tooltip horodatage de la dernière correction.
+        `ts` est un timestamp ISO avec ou sans millisecondes.
+        """
+        if not hasattr(self, "_kamas_last_entry_lbl"):
+            return
+        if not ts:
+            self._kamas_last_entry_lbl.setText("")
+            if hasattr(self, "_kamas_display"):
+                self._kamas_display.setToolTip("")
+            return
+        label = _format_ts(ts)
+        self._kamas_last_entry_lbl.setText(f"✎ {label}")
+        if hasattr(self, "_kamas_display"):
+            self._kamas_display.setToolTip(f"Dernière saisie manuelle : {label}")
+
+    def _on_kamas_confirm(self):
+        text = self._kamas_input.text().strip()
+        if not text:
+            return
+        try:
+            value = int(text)
+        except ValueError:
+            return
+        self._kamas_input.clear()
+        self.kamas_corrected.emit(value)
 
     # ── Slots ─────────────────────────────────────────────────────────────
 

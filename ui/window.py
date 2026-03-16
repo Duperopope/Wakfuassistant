@@ -5,7 +5,7 @@ import os
 import re
 from pathlib import Path
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QApplication, QPushButton, QFrame, QLabel, QGridLayout, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QApplication, QPushButton, QFrame, QLabel, QGridLayout
 from PyQt5.QtCore    import Qt, QPoint, QRect, QTimer, QDateTime, QSettings, QRectF
 from PyQt5.QtGui     import QPainter, QColor, QPen, QPainterPath, QRegion
 import win32gui
@@ -13,8 +13,8 @@ import win32con
 
 from ui.theme    import BG, BORDER, TEAL, TEAL_BRIGHT, QSS, build_qss, get_palette, DEFAULT_PALETTE
 from ui.titlebar import TitleBar
-from ui.onboarding import KamasOnboardingDialog
-from core.kamas_history import replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction
+from ui.onboarding import OnboardingPage
+from core.kamas_history import replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction, get_last_correction_ts
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
@@ -244,6 +244,8 @@ class OverlayWindow(QWidget):
         self._runtime_kama_reliable: bool = False
         self._runtime_kama_last_delta_applied: int = 0
         self._runtime_kama_truth_hint: int | None = self._parse_int_token(os.environ.get("WAKFU_KAMA_TRUTH_HINT"))
+        self._onboarding_done: bool = True
+        self._onboarding_page: "OnboardingPage | None" = None
 
         self._load_kamas_config_values()
 
@@ -264,6 +266,7 @@ class OverlayWindow(QWidget):
         self._setup_wakfu_tracking()
         self._position()
         self._start_timer()
+        self._check_onboarding()
 
     # ── Initialisation ────────────────────────────────────────────
 
@@ -328,8 +331,14 @@ class OverlayWindow(QWidget):
             opt.reset_requested.connect(self._on_reset_requested)
             opt.kamas_corrected.connect(self._on_kamas_corrected)
             opt.set_kamas(self._current_kamas)
+            opt.set_kamas_last_entry(get_last_correction_ts())
             self._options_tab = opt
             self.set_tab(idx, opt)
+
+        # ── Page onboarding (hors TABS, index = len(TABS)) ──────────────
+        self._onboarding_page = OnboardingPage(self)
+        self._onboarding_page.confirmed.connect(self._on_onboarding_confirmed)
+        self._stack.addWidget(self._onboarding_page)
 
     def _build_stats_card(self) -> QFrame:
         card = QFrame(self)
@@ -775,19 +784,11 @@ class OverlayWindow(QWidget):
 
     def _load_kamas_config_values(self):
         data = self._read_config_json()
-        onboarding_done = bool(data.get("onboarding_done", False))
+        self._onboarding_done = bool(data.get("onboarding_done", False))
 
-        if not onboarding_done:
-            dlg = KamasOnboardingDialog(self)
-            if dlg.exec_() and dlg.kamas_value > 0:
-                base = dlg.kamas_value
-            else:
-                base = int(data.get("base_kamas", 0) or 0)
-            self._write_config_patch({"base_kamas": base, "onboarding_done": True,
-                                      "last_session_end": now_iso()})
-            self._base_kamas = base
-        else:
-            self._base_kamas = int(data.get("base_kamas", 0) or 0)
+        self._base_kamas = int(data.get("base_kamas", 0) or 0)
+
+        if self._onboarding_done:
             # Replay kamas gains/losses from permanent log since last session
             last_end = data.get("last_session_end") or None
             replay_delta = replay_kamas_delta(last_end)
@@ -797,20 +798,45 @@ class OverlayWindow(QWidget):
         self._manual_kamas_delta = int(data.get("manual_kamas_delta", 0) or 0)
         self._current_kamas = self._base_kamas + self._manual_kamas_delta + self._runtime_kamas_delta
 
-    def _on_reset_requested(self):
-        """Réinitialise toutes les données : logs permanents + config kamas."""
-        reply = QMessageBox.question(
-            self,
-            "Réinitialiser",
-            "Effacer tous les logs permanents et repartir à zéro ?\n\n"
-            "Les données kamas seront réinitialisées et le montant\n"
-            "sera redemandé au prochain lancement.",
-            QMessageBox.Yes | QMessageBox.Cancel,
-            QMessageBox.Cancel,
-        )
-        if reply != QMessageBox.Yes:
-            return
+    # ── Onboarding ────────────────────────────────────────────────────────
 
+    def _check_onboarding(self):
+        """Affiche la page d'onboarding si la configuration initiale n'est pas faite."""
+        if not self._onboarding_done:
+            self._show_onboarding()
+
+    def _show_onboarding(self):
+        """Bascule sur la page d'onboarding (cache les onglets)."""
+        if self._onboarding_page is None:
+            return
+        self._onboarding_page.reset_input()
+        self._tabbar.hide()
+        self._stack.setCurrentWidget(self._onboarding_page)
+
+    def _on_onboarding_confirmed(self, value: int):
+        """Appelé quand l'utilisateur valide l'onboarding."""
+        ts = now_iso()
+        self._base_kamas = value
+        self._manual_kamas_delta = 0
+        self._runtime_kamas_delta = 0
+        self._current_kamas = value
+        self._write_config_patch({
+            "base_kamas": value,
+            "manual_kamas_delta": 0,
+            "onboarding_done": True,
+            "last_session_end": ts,
+        })
+        self._onboarding_done = True
+        if self._options_tab:
+            self._options_tab.set_kamas(self._current_kamas)
+        self._refresh_title_info()
+
+        # Revenir à l'onglet Personnage
+        self._tabbar.show()
+        self._stack.setCurrentIndex(0)
+
+    def _on_reset_requested(self):
+        """Réinitialise toutes les données et relance l'onboarding."""
         # Vider le log permanent
         perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
         try:
@@ -828,11 +854,18 @@ class OverlayWindow(QWidget):
         })
 
         # Réinitialiser l'état en mémoire
+        self._onboarding_done = False
         self._base_kamas = 0
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
         self._current_kamas = 0
+        if self._options_tab:
+            self._options_tab.set_kamas(0)
+            self._options_tab.set_kamas_last_entry(None)
         self._refresh_title_info()
+
+        # Afficher l'onboarding dans la même fenêtre
+        self._show_onboarding()
 
     def _on_kamas_corrected(self, value: int):
         """Correction manuelle du montant de kamas depuis l'onglet Options."""
@@ -846,6 +879,8 @@ class OverlayWindow(QWidget):
             "manual_kamas_delta": 0,
             "last_session_end": ts,
         })
+        if self._options_tab:
+            self._options_tab.set_kamas_last_entry(ts)
         self._refresh_title_info()
 
     def _write_config_patch(self, patch: dict):

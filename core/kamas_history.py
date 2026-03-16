@@ -47,6 +47,24 @@ def now_ms_iso() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
 
+def get_last_correction_ts() -> str | None:
+    """Retourne le timestamp ISO de la dernière correction manuelle, ou None."""
+    if not _JOURNAL.exists():
+        return None
+    try:
+        with _JOURNAL.open("r", encoding="utf-8") as fh:
+            last_line = None
+            for line in fh:
+                stripped = line.strip()
+                if stripped:
+                    last_line = stripped
+        if last_line:
+            return json.loads(last_line).get("ts")
+    except (OSError, json.JSONDecodeError, AttributeError):
+        pass
+    return None
+
+
 def write_kamas_correction(value: int) -> str:
     """
     Enregistre une correction manuelle dans le journal (append).
