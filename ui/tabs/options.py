@@ -455,10 +455,14 @@ class OptionsTab(BaseTab):
         lay.addWidget(_section_label("RÉINITIALISATION"))
         lay.addWidget(_sep_line())
 
-        reset_desc = QLabel(
-            "Efface l'historique des logs et relance\n"
-            "la configuration initiale."
+        # Date de début du log permanent
+        self._log_start_lbl = QLabel("")
+        self._log_start_lbl.setStyleSheet(
+            f"color: {TEAL}; font-size: 10px; font-weight: 600;"
         )
+        lay.addWidget(self._log_start_lbl)
+
+        reset_desc = QLabel("Efface l'historique et relance la configuration initiale.")
         reset_desc.setWordWrap(True)
         reset_desc.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
         lay.addWidget(reset_desc)
@@ -492,6 +496,19 @@ class OptionsTab(BaseTab):
             self._kamas_display.setText("—")
         else:
             self._kamas_display.setText(f"{value:,}".replace(",", "\u00a0") + " k")
+
+    def set_log_start_date(self, ts: str | None):
+        """
+        Met à jour l'étiquette indiquant la date la plus ancienne du log permanent.
+        `ts` est un timestamp ISO "YYYY-MM-DD HH:MM:SS".
+        """
+        if not hasattr(self, "_log_start_lbl"):
+            return
+        if not ts:
+            self._log_start_lbl.setText("")
+        else:
+            label = _format_ts(ts)
+            self._log_start_lbl.setText(f"Données depuis le {label}")
 
     def set_kamas_last_entry(self, ts: str | None):
         """

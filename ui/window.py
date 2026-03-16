@@ -14,7 +14,10 @@ import win32con
 from ui.theme    import BG, BORDER, TEAL, TEAL_BRIGHT, QSS, build_qss, get_palette, DEFAULT_PALETTE
 from ui.titlebar import TitleBar
 from ui.onboarding import OnboardingPage
-from core.kamas_history import replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction, get_last_correction_ts
+from core.kamas_history import (
+    replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction,
+    get_last_correction_ts, get_permanent_log_start_ts,
+)
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
@@ -332,6 +335,7 @@ class OverlayWindow(QWidget):
             opt.kamas_corrected.connect(self._on_kamas_corrected)
             opt.set_kamas(self._current_kamas)
             opt.set_kamas_last_entry(get_last_correction_ts())
+            opt.set_log_start_date(get_permanent_log_start_ts())
             self._options_tab = opt
             self.set_tab(idx, opt)
 
@@ -789,9 +793,12 @@ class OverlayWindow(QWidget):
         self._base_kamas = int(data.get("base_kamas", 0) or 0)
 
         if self._onboarding_done:
-            # Replay kamas gains/losses from permanent log since last session
+            # Replay kamas gains/losses from permanent log since last session.
+            # perm_log_offset allows seeking directly to the right position
+            # instead of scanning the entire file from byte 0.
             last_end = data.get("last_session_end") or None
-            replay_delta = replay_kamas_delta(last_end)
+            perm_log_offset = int(data.get("perm_log_offset", 0) or 0)
+            replay_delta = replay_kamas_delta(last_end, perm_log_offset)
             if replay_delta:
                 self._runtime_kamas_delta += replay_delta
 
@@ -816,6 +823,11 @@ class OverlayWindow(QWidget):
     def _on_onboarding_confirmed(self, value: int):
         """Appelé quand l'utilisateur valide l'onboarding."""
         ts = now_iso()
+        perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
+        try:
+            perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
+        except OSError:
+            perm_log_offset = 0
         self._base_kamas = value
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
@@ -825,10 +837,12 @@ class OverlayWindow(QWidget):
             "manual_kamas_delta": 0,
             "onboarding_done": True,
             "last_session_end": ts,
+            "perm_log_offset": perm_log_offset,
         })
         self._onboarding_done = True
         if self._options_tab:
             self._options_tab.set_kamas(self._current_kamas)
+            self._options_tab.set_log_start_date(get_permanent_log_start_ts())
         self._refresh_title_info()
 
         # Revenir à l'onglet Personnage
@@ -851,6 +865,7 @@ class OverlayWindow(QWidget):
             "manual_kamas_delta": 0,
             "onboarding_done": False,
             "last_session_end": None,
+            "perm_log_offset": 0,
         })
 
         # Réinitialiser l'état en mémoire
@@ -862,6 +877,7 @@ class OverlayWindow(QWidget):
         if self._options_tab:
             self._options_tab.set_kamas(0)
             self._options_tab.set_kamas_last_entry(None)
+            self._options_tab.set_log_start_date(None)
         self._refresh_title_info()
 
         # Afficher l'onboarding dans la même fenêtre
@@ -870,6 +886,11 @@ class OverlayWindow(QWidget):
     def _on_kamas_corrected(self, value: int):
         """Correction manuelle du montant de kamas depuis l'onglet Options."""
         ts = write_kamas_correction(value)   # journal horodaté à la ms
+        perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
+        try:
+            perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
+        except OSError:
+            perm_log_offset = 0
         self._base_kamas = value
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
@@ -878,6 +899,7 @@ class OverlayWindow(QWidget):
             "base_kamas": value,
             "manual_kamas_delta": 0,
             "last_session_end": ts,
+            "perm_log_offset": perm_log_offset,
         })
         if self._options_tab:
             self._options_tab.set_kamas_last_entry(ts)
@@ -1645,12 +1667,18 @@ class OverlayWindow(QWidget):
         self._settings.setValue("window_height", max(MIN_H, int(expanded_h)))
         self._save_relative_layout()
         self._settings.sync()
-        # Persister le kamas actuel comme base pour la prochaine session
-        if self._current_kamas is not None and self._current_kamas > 0:
+        # Persister le kamas actuel + offset du log pour démarrage rapide
+        if self._current_kamas is not None and self._onboarding_done:
+            perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
+            try:
+                perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
+            except OSError:
+                perm_log_offset = 0
             self._write_config_patch({
                 "base_kamas": self._current_kamas,
                 "manual_kamas_delta": 0,
                 "last_session_end": now_iso(),
+                "perm_log_offset": perm_log_offset,
             })
         super().closeEvent(event)
 

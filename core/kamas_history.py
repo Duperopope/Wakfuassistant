@@ -11,6 +11,7 @@ Journal des corrections manuelles : data/kamas_journal.jsonl
 
 from __future__ import annotations
 
+import io
 import json
 import re
 from datetime import datetime
@@ -47,6 +48,21 @@ def now_ms_iso() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
 
+def get_permanent_log_start_ts() -> str | None:
+    """Retourne le timestamp de la première entrée du log permanent, ou None."""
+    if not _PERM_LOG.exists():
+        return None
+    try:
+        with _PERM_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                m = _TS_RE.match(line)
+                if m:
+                    return m.group(1)
+    except OSError:
+        pass
+    return None
+
+
 def get_last_correction_ts() -> str | None:
     """Retourne le timestamp ISO de la dernière correction manuelle, ou None."""
     if not _JOURNAL.exists():
@@ -80,30 +96,36 @@ def write_kamas_correction(value: int) -> str:
     return ts
 
 
-def replay_kamas_delta(since_iso: str | None) -> int:
+def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
     """
     Lit all_events.log et retourne le delta kamas (gains - pertes)
     pour toutes les lignes postérieures à `since_iso`.
 
     `since_iso` est une chaîne ISO "YYYY-MM-DD HH:MM:SS[.mmm]" (ou None).
+    `file_offset` : offset octet pour sauter directement au bon endroit du fichier
+                    (évite de relire tout le fichier depuis le début).
+                    Si > 0, la comparaison de timestamp est ignorée (l'offset fait foi).
     """
     if not _PERM_LOG.exists():
         return 0
 
     since_dt: datetime | None = None
-    if since_iso:
+    if since_iso and file_offset == 0:
         try:
-            # Accepte avec ou sans millisecondes
             fmt = "%Y-%m-%d %H:%M:%S.%f" if "." in since_iso else "%Y-%m-%d %H:%M:%S"
             since_dt = datetime.strptime(since_iso, fmt)
         except ValueError:
             since_dt = None
 
     delta = 0
-    past_cutoff = since_dt is None
+    past_cutoff = (since_dt is None) or (file_offset > 0)
 
     try:
-        with _PERM_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+        file_size = _PERM_LOG.stat().st_size
+        with _PERM_LOG.open("rb") as fh_bin:
+            if file_offset > 0 and file_offset < file_size:
+                fh_bin.seek(file_offset)
+            fh = io.TextIOWrapper(fh_bin, encoding="utf-8", errors="ignore")
             for line in fh:
                 if not past_cutoff:
                     m = _TS_RE.match(line)
