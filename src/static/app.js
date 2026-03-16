@@ -773,7 +773,7 @@ function renderInventory() {
 
     var html = "<div class=\"filters\">";
     html += "<input class=\"filter-input\" type=\"text\" placeholder=\"Rechercher...\" value=\"" + filterText + "\" oninput=\"filterText=this.value;render()\" style=\"width:250px\">";
-    html += "<select class=\"filter-input\" onchange=\"inventoryCategoryFilter=this.value;render()\"><option value=\"all\"" + (inventoryCategoryFilter===\"all\"?\" selected\":\"\") + \">Toutes categories</option>";
+    html += "<select class=\"filter-input\" onchange=\"inventoryCategoryFilter=this.value;render()\"><option value=\"all\"" + (inventoryCategoryFilter==="all" ? " selected" : "") + ">Toutes categories</option>";
     for (var ck = 0; ck < categoryKeys.length; ck++) {
         var cat = categoryKeys[ck];
         var sel = inventoryCategoryFilter === cat ? " selected" : "";
@@ -924,7 +924,7 @@ function renderHDV() {
     html += "<div class=\"filters\">";
     html += "<input class=\"filter-input\" type=\"text\" value=\"" + esc(hdvFilterText) + "\" placeholder=\"Filtrer un objet...\" oninput=\"hdvFilterText=this.value;render()\" style=\"width:260px\">";
     html += "<select class=\"filter-input\" onchange=\"hdvCategoryFilter=this.value;render()\">";
-    html += "<option value=\"all\"" + (hdvCategoryFilter===\"all\"?\" selected\":\"\") + \">Toutes categories</option>";
+    html += "<option value=\"all\"" + (hdvCategoryFilter==="all" ? " selected" : "") + ">Toutes categories</option>";
     var catMap = {};
     var tmpAll = Object.keys(offersByItem).concat(Object.keys(inv.prices || {}));
     for (var cx = 0; cx < tmpAll.length; cx++) catMap[categoryOf(tmpAll[cx])] = true;
@@ -935,10 +935,10 @@ function renderHDV() {
     }
     html += "</select>";
     html += "<select class=\"filter-input\" onchange=\"hdvSortCol=this.value;render()\">";
-    html += "<option value=\"name\"" + (hdvSortCol===\"name\"?" selected":"") + ">Tri: Objet</option>";
-    html += "<option value=\"bestSell\"" + (hdvSortCol===\"bestSell\"?" selected":"") + ">Tri: Meilleure vente</option>";
-    html += "<option value=\"bestBuy\"" + (hdvSortCol===\"bestBuy\"?" selected":"") + ">Tri: Meilleure offre achat</option>";
-    html += "<option value=\"offers\"" + (hdvSortCol===\"offers\"?" selected":"") + ">Tri: Nb offres</option>";
+    html += "<option value=\"name\"" + (hdvSortCol==="name" ? " selected" : "") + ">Tri: Objet</option>";
+    html += "<option value=\"bestSell\"" + (hdvSortCol==="bestSell" ? " selected" : "") + ">Tri: Meilleure vente</option>";
+    html += "<option value=\"bestBuy\"" + (hdvSortCol==="bestBuy" ? " selected" : "") + ">Tri: Meilleure offre achat</option>";
+    html += "<option value=\"offers\"" + (hdvSortCol==="offers" ? " selected" : "") + ">Tri: Nb offres</option>";
     html += "</select>";
     html += "<button class=\"filter-btn\" onclick=\"hdvSortDir*=-1;render()\">" + (hdvSortDir>0?"Asc":"Desc") + "</button>";
     html += "</div>";

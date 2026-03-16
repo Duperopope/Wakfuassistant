@@ -49,14 +49,30 @@ Le projet reste volontairement conforme à une contrainte simple:
 - SQLite
 - Données Ankama CDN locales (`data/ankama_cdn/*.json`)
 
-## Arborescence utile
-- `src/main.py`: application principale (backend + frontend inline)
-- `data/wakfu_tracker.db`: base SQLite
-- `data/ankama_cdn/`: exports Ankama (items, itemTypes, jobsItems, resources...)
-- `docs/HANDOVER.md`: synthese des points a reprendre par un autre agent
-- `docs/examples/wakfu_chat_example.log`: extrait de logs Wakfu (exemple de chat)
+## Arborescence
+```
+src/
+  main.py          — point d'entrée (~90 lignes)
+  config.py        — chemins, variables d'env, UserConfig
+  database.py      — classe Database + schéma SQLite
+  item_db.py       — ItemDatabase (chargement CDN/local)
+  models.py        — XPCurve, SmartInventory, Session
+  parsers.py       — regex log Wakfu + LogWatcher
+  api.py           — Flask app, routes, _build_data()
+  static/
+    style.css      — feuille de styles
+    app.js         — interface JavaScript
+  templates/
+    index.html     — squelette HTML
+data/
+  ankama_cdn/      — données Ankama exportées (items, types...)
+  wakfu_tracker.db — base SQLite (créée automatiquement)
+```
 
-Note: `src/trackers/farm_tracker.py` a ete retire (code mort non utilise).
+## Installation
+```bash
+pip install -r requirements.txt
+```
 
 ## Lancement
 ```bash
@@ -65,9 +81,24 @@ python src/main.py
 
 Ouvrir ensuite: `http://localhost:5000`
 
-## Variables et chemins
-- log Wakfu: `C:\Users\...\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log`
-- base locale: `data/wakfu_tracker.db`
+## Configuration (optionnelle)
+Copie `.env.example` en `.env` et ajuste les valeurs, ou passe les variables directement :
+
+```bash
+# Chemin vers le log Wakfu (détection automatique Windows par défaut)
+WAKFU_LOG_PATH="C:\Users\TonNom\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log" python src/main.py
+
+# Autre port
+WEB_PORT=8080 python src/main.py
+```
+
+Variables disponibles :
+| Variable | Défaut | Description |
+|---|---|---|
+| `WAKFU_LOG_PATH` | `~/AppData/Roaming/.../wakfu.log` | Chemin vers le log Wakfu |
+| `WEB_PORT` | `5000` | Port du serveur web |
+| `PARSE_EXISTING_LOG` | `1` | Lire le log existant au démarrage (0 pour désactiver) |
+| `REFRESH_INTERVAL` | `2` | Intervalle SSE en secondes |
 
 ## Publication GitHub
 
