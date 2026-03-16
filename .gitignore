@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-data/wakfu_tracker.db
-data/wakfu_tracker.db-shm
-data/wakfu_tracker.db-wal
-data/config.json
-data/user_config.json
-logs/
-.venv/

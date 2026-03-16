@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wakfu Companion</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="header overlay-drag pywebview-drag-region" id="header">
+    <div class="header-brand">
+        <h1>&#9876; Wakfu</h1>
+        <span class="header-char" id="header-char"></span>
+    </div>
+    <div class="header-stats" id="header-stats"></div>
+</div>
+<div class="tabs overlay-drag">
+    <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Résumé</div>
+    <div class="tab" data-tab="inventory" onclick="switchTab('inventory')">Objets</div>
+    <div class="tab" data-tab="combats" onclick="switchTab('combats')">Combats</div>
+    <div class="tab" data-tab="activity" onclick="switchTab('activity')">Journal</div>
+</div>
+<div id="ctx-menu" class="ctx-menu" onclick="event.stopPropagation()">
+    <div id="ctx-title" class="ctx-title">Actions</div>
+    <div id="ctx-menu-body"></div>
+</div>
+<div class="content" id="content"></div>
+<div class="overlay-controls">
+    <button id="btn-click-through" class="overlay-btn" onclick="toggleClickThrough()">Passant</button>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
