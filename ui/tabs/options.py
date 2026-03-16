@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QLineEdit,
+    QCheckBox,
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIntValidator
@@ -160,12 +161,14 @@ def _format_ts(ts: str) -> str:
 class OptionsTab(BaseTab):
     """Options UI/overlay avec layout propre et controls clairs."""
 
-    opacity_changed  = pyqtSignal(float)
-    font_changed     = pyqtSignal(str)
-    palette_changed  = pyqtSignal(str)
-    shape_changed    = pyqtSignal(int)
-    reset_requested  = pyqtSignal()
-    kamas_corrected  = pyqtSignal(int)   # valeur corrigée manuellement
+    opacity_changed        = pyqtSignal(float)
+    font_changed           = pyqtSignal(str)
+    palette_changed        = pyqtSignal(str)
+    shape_changed          = pyqtSignal(int)
+    reset_requested        = pyqtSignal()
+    kamas_corrected        = pyqtSignal(int)   # valeur corrigée manuellement
+    transactions_refresh_requested = pyqtSignal()
+    short_numbers_changed  = pyqtSignal(bool)  # format court des kamas
 
     FONT_CHOICES = [
         "Segoe UI Variable",
@@ -202,6 +205,7 @@ class OptionsTab(BaseTab):
         initial_font: str = "Noto Sans",
         initial_palette: str = "wakfu",
         initial_corner_radius: int = 24,
+        initial_short_kamas: bool = False,
         parent: QWidget | None = None,
     ):
         super().__init__(parent)
@@ -224,6 +228,7 @@ class OptionsTab(BaseTab):
         self._populate_display_card(
             self._display_card.body_layout(),
             initial_opacity, initial_font, initial_palette, initial_corner_radius,
+            initial_short_kamas,
         )
         root.addWidget(self._display_card)
 
@@ -257,6 +262,7 @@ class OptionsTab(BaseTab):
         initial_font: str,
         initial_palette: str,
         initial_corner_radius: int,
+        initial_short_kamas: bool = False,
     ):
         _combo_qss = f"""
             QComboBox {{
@@ -368,11 +374,43 @@ class OptionsTab(BaseTab):
         shape_row.addWidget(self._shape_combo, 1)
         lay.addLayout(shape_row)
 
+        # Nombres courts
+        self._short_kamas_cb = QCheckBox("Nombres courts")
+        self._short_kamas_cb.setChecked(initial_short_kamas)
+        self._short_kamas_cb.setStyleSheet(f"""
+            QCheckBox {{
+                color: {TEXT_DIM};
+                font-size: 11px;
+                spacing: 6px;
+            }}
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border: 1px solid {BORDER};
+                border-radius: 3px;
+                background: #0f1116;
+            }}
+            QCheckBox::indicator:checked {{
+                background: {TEAL};
+                border-color: {TEAL};
+            }}
+            QCheckBox::indicator:hover {{
+                border-color: {TEAL};
+            }}
+        """)
+        self._short_kamas_cb.setToolTip(
+            "Affiche les montants en format court :\n"
+            "100 000 – 999 999 → ex. 150 ₭₭  |  1 000 000+ → ex. 1.5 M₭\n"
+            "Survolez une valeur pour voir le montant exact."
+        )
+        lay.addWidget(self._short_kamas_cb)
+
         # Connecter les signaux
         self._opacity_slider.valueChanged.connect(self._on_slider_change)
         self._font_combo.currentTextChanged.connect(self._on_font_change)
         self._palette_combo.currentIndexChanged.connect(self._on_palette_change)
         self._shape_combo.currentIndexChanged.connect(self._on_shape_change)
+        self._short_kamas_cb.stateChanged.connect(self._on_short_kamas_change)
         self._on_slider_change(self._opacity_slider.value())
 
     # ── Contenu : carte Données ───────────────────────────────────────────
@@ -451,6 +489,36 @@ class OptionsTab(BaseTab):
             f"color: {TEXT_DIM}; font-size: 9px; padding-top: 1px;"
         )
         lay.addWidget(self._kamas_last_entry_lbl)
+
+        # ── Actions Transactions ────────────────────────────────────────
+        tx_row = QHBoxLayout()
+        tx_row.setSpacing(6)
+
+        tx_lbl = QLabel("Transactions")
+        tx_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+        tx_row.addWidget(tx_lbl)
+        tx_row.addStretch(1)
+
+        tx_refresh_btn = QPushButton("Rafraichir")
+        tx_refresh_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: rgba(45,120,165,0.25);
+                color: #dfeef9;
+                border: 1px solid {BORDER};
+                border-radius: 6px;
+                padding: 4px 10px;
+                font-size: 10px;
+                font-weight: 700;
+            }}
+            QPushButton:hover {{
+                border-color: {TEAL};
+                color: {TEAL};
+            }}
+        """)
+        tx_refresh_btn.clicked.connect(self.transactions_refresh_requested)
+        tx_row.addWidget(tx_refresh_btn)
+
+        lay.addLayout(tx_row)
 
         # ── Séparateur avant Reset ────────────────────────────────────────
         lay.addWidget(_sep_line())
@@ -573,3 +641,8 @@ class OptionsTab(BaseTab):
             return
         radius = int(self._shape_combo.itemData(index))
         self.shape_changed.emit(radius)
+
+    def _on_short_kamas_change(self, state: int):
+        if self._building:
+            return
+        self.short_numbers_changed.emit(bool(state))

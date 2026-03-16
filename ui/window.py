@@ -222,6 +222,7 @@ class OverlayWindow(QWidget):
         self._in_programmatic_move: bool = False
         self._corner_radius = self._settings.value("window_corner_radius", 24, type=int)
         self._palette_name = self._settings.value("ui_palette", DEFAULT_PALETTE, type=str)
+        self._short_kamas: bool = bool(self._settings.value("short_kamas", False, type=bool))
         self._palette = get_palette(self._palette_name)
         self._click_through = self._settings.value("click_through", False, type=bool)
         self._click_unlock_btn: QPushButton | None = None
@@ -345,12 +346,14 @@ class OverlayWindow(QWidget):
         for name in TABS:
             if name == "Transactions":
                 w = TransactionsTab(self)
+                w.set_short_kamas(self._short_kamas)
             elif name == "Options":
                 w = OptionsTab(
                     self._opacity,
                     self._font_family,
                     self._palette_name,
                     self._corner_radius,
+                    self._short_kamas,
                     self,
                 )
                 w.opacity_changed.connect(self.set_overlay_opacity)
@@ -360,6 +363,7 @@ class OverlayWindow(QWidget):
                 w.reset_requested.connect(self._on_reset_requested)
                 w.kamas_corrected.connect(self._on_kamas_corrected)
                 w.transactions_refresh_requested.connect(self._refresh_transactions_tab)
+                w.short_numbers_changed.connect(self._on_short_kamas_changed)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -1605,6 +1609,14 @@ class OverlayWindow(QWidget):
         self._apply_rounded_mask()
         self.update()
         self._settings.setValue("window_corner_radius", self._corner_radius)
+
+    def _on_short_kamas_changed(self, enabled: bool):
+        self._short_kamas = enabled
+        self._settings.setValue("short_kamas", enabled)
+        for widget in self._tab_widgets:
+            if isinstance(widget, TransactionsTab):
+                widget.set_short_kamas(enabled)
+                break
 
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)

@@ -74,6 +74,20 @@ def _fmt_kamas_with_symbol(value: int) -> str:
     return f"{_fmt_kamas(value)} {_KAMA_SYMBOL}"
 
 
+def _fmt_kamas_short(value: int) -> str:
+    """Compact notation: ₭₭ for 100K–999K, M₭ for 1M+. Below 100K: normal."""
+    abs_v = abs(value)
+    sign = "-" if value < 0 else ""
+    if abs_v >= 1_000_000:
+        m = abs_v / 1_000_000
+        s = f"{m:.1f}".rstrip("0").rstrip(".")
+        return f"{sign}{s} M{_KAMA_SYMBOL}"
+    if abs_v >= 100_000:
+        k = round(abs_v / 1_000)
+        return f"{sign}{k} {_KAMA_SYMBOL}{_KAMA_SYMBOL}"
+    return _fmt_kamas_with_symbol(value)
+
+
 def _format_dt_parts(dt: datetime) -> tuple[str, str]:
     rounded = dt + timedelta(milliseconds=500)
     rounded = rounded.replace(microsecond=0)
@@ -645,6 +659,7 @@ class TransactionsTab(BaseTab):
         self._organization_mode = False
         self._resizing_guard = False
         self._layout_ready = False
+        self._short_kamas: bool = False
         self._column_layout_schema_migrated = False
         self._persist_debounce = QTimer(self)
         self._persist_debounce.setSingleShot(True)
@@ -936,18 +951,36 @@ class TransactionsTab(BaseTab):
 
         return card, left_val, right_val
 
+    # ── Nombres courts ───────────────────────────────────────────────────
+
+    def set_short_kamas(self, enabled: bool):
+        """Active/désactive le format court (₭₭ / M₭) pour les montants affichés."""
+        self._short_kamas = enabled
+        if self._layout_ready:
+            self._render()
+
+    def _disp(self, value: int) -> str:
+        """Retourne le format d'affichage selon le mode (court ou complet)."""
+        return _fmt_kamas_short(value) if self._short_kamas else _fmt_kamas_with_symbol(value)
+
+    # ── Métriques ────────────────────────────────────────────────────────
+
     def _set_flow_metrics(self, gains: int, losses: int):
-        self._gains_value_label.setText(f"+{_fmt_kamas_with_symbol(gains)}")
-        self._losses_value_label.setText(f"-{_fmt_kamas_with_symbol(losses)}")
+        self._gains_value_label.setText(f"+{self._disp(gains)}")
+        self._losses_value_label.setText(f"-{self._disp(losses)}")
 
     def _set_balance_metrics(self, net: int, current_kamas: int | None):
-        self._net_value_label.setText(f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}")
+        if self._short_kamas:
+            net_txt = ("+" if net >= 0 else "") + _fmt_kamas_short(net)
+        else:
+            net_txt = f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}"
         net_color = GREEN if net > 0 else (RED if net < 0 else TEAL)
+        self._net_value_label.setText(net_txt)
         self._net_value_label.setStyleSheet(f"color: {net_color}; font-size: 16px; font-weight: 800;")
         if current_kamas is None:
             self._current_kamas_value_label.setText("--")
         else:
-            self._current_kamas_value_label.setText(_fmt_kamas_with_symbol(max(0, int(current_kamas))))
+            self._current_kamas_value_label.setText(self._disp(max(0, int(current_kamas))))
 
     def _on_chart_view_stats(self, pct: float, _first: int, _last: int, gains: int, losses: int):
         # Methode conservee pour compatibilite; la carte affiche desormais
@@ -2388,24 +2421,26 @@ class TransactionsTab(BaseTab):
             time_item = QTableWidgetItem(time_txt)
             if evt.kind == "correction":
                 tx_type = "Correction"
-                amount_text = _fmt_kamas_with_symbol(evt.amount)
+                amount_text = self._disp(evt.amount)
                 color = QColor(TEAL)
             elif evt.kind == "hdv_sale":
                 tx_type = "Vente HDV"
-                amount_text = _fmt_kamas_with_symbol(evt.amount)
+                amount_text = self._disp(evt.amount)
                 color = QColor(TEXT_DIM)
             elif evt.kind == "gain":
                 tx_type = "Gain"
-                amount_text = f"+ {_fmt_kamas_with_symbol(evt.amount)}"
+                amount_text = f"+ {self._disp(evt.amount)}"
                 color = QColor(GREEN)
             else:
                 tx_type = "Perte"
-                amount_text = f"- {_fmt_kamas_with_symbol(evt.amount)}"
+                amount_text = f"- {self._disp(evt.amount)}"
                 color = QColor(RED)
 
             type_item = QTableWidgetItem(tx_type)
             libelle_item = QTableWidgetItem(self._effective_libelle(evt))
             amount_item = QTableWidgetItem(amount_text)
+            if self._short_kamas:
+                amount_item.setToolTip(_fmt_kamas_with_symbol(evt.amount))
             type_item.setForeground(color)
             amount_item.setForeground(color)
 
