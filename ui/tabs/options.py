@@ -375,7 +375,7 @@ class OptionsTab(BaseTab):
         lay.addLayout(shape_row)
 
         # Nombres courts
-        self._short_kamas_cb = QCheckBox("Nombres courts")
+        self._short_kamas_cb = QCheckBox("Nombres courts (historique)")
         self._short_kamas_cb.setChecked(initial_short_kamas)
         self._short_kamas_cb.setStyleSheet(f"""
             QCheckBox {{
