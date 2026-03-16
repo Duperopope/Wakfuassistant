@@ -1,39 +1,94 @@
-# Wakfu Assistant - Proof of Concept
+# Wakfu Assistant
 
-Outil companion pour Wakfu qui parse le log du jeu en temps réel.
+Companion Wakfu orienté logs: suivi session, inventaire, métiers, HDV et combats.
 
-## Features (PoC Terminal)
-- **XP Tracker** : XP/h par metier, progression, level ups
-- **Kamas Tracker** : gains/h, kamas de base editables
-- **Drop Tracker** : items ramasses avec quantites
-- **Craft Tracker** : recettes reussies
-- **Inventaire** : gestion inventaire/coffre/hdv manuelle
-- **Prix HDV** : saisie manuelle des prix, historique
-- **Mouvements** : suivi des deplacements d items entre inventaire/coffre/hdv/craft
-- **Base items Ankama** : 8324 items du CDN officiel avec recherche et icones
-- **SQLite** : toutes les donnees persistees
+Le projet reste volontairement conforme à une contrainte simple:
+- source légale principale de données = logs du jeu
+- corrections manuelles possibles dans l'UI quand les logs ne suffisent pas
 
-## Log Source
-`C:\Users\...\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log`
+## Fonctionnalités
 
-## Format des lignes parsees
-`[Information (jeu)] Herboriste : +261 points d'XP.  Prochain niveau dans : 14 454.`
-`[Information (jeu)] Vous avez gagne 243 kamas.`
-`[Information (jeu)] Vous avez ramasse 5x Eter .`
-`[Information (jeu)] Vous avez reussi votre recette de Essence Exquise.`
+### Dashboard session
+- durée de session
+- kamas connus = kamas de base + gains logs + ventes HDV + ajustement manuel
+- cartes de synthèse (drops, HDV, inventaire)
+- activité récente
+
+### Métiers
+- édition manuelle niveau/xp/cible via clic droit
+- l'édition manuelle est la source de vérité pour le niveau affiché
+- courbe XP globale apprise par niveau (`xp_current + xp_remaining`)
+- réutilisation de cette courbe pour tous les personnages
+
+### Inventaire
+- tableau triable
+- filtre texte + filtre de catégorie
+- catégories d'objets via tags Ankama (`itemTypes`)
+- icônes + infobulles au survol
+- corrections persistées: quantité, prix, label, notes, image
+
+### HDV
+- offres manuelles vente/achat par objet
+- support des attributs impactant le prix: slots de gemmes, sublimations, notes
+- vue organisée par catégories d'objets
+- tri/filtres dédiés + sections dépliables
+
+### Combats
+- onglet dédié
+- structure dépliante: combat -> tours -> compétences
+- dégâts par tour et par compétence (selon ce que les logs permettent de détecter)
+
+### Sélecteur d'images Ankama
+- menu visuel (modal) au lieu d'une saisie URL brute
+- recherche dans la librairie d'icônes
+- suggestions auto + sélection au clic
 
 ## Stack
 - Python 3
+- Flask (UI web locale + SSE)
 - SQLite
-- Donnees Ankama CDN (items.json, recipes.json, etc.)
-- Icons : https://vertylo.github.io/wakassets/items/{id}.png
+- Données Ankama CDN locales (`data/ankama_cdn/*.json`)
 
-## Usage
-`python src/main.py`
+## Arborescence utile
+- `src/main.py`: application principale (backend + frontend inline)
+- `data/wakfu_tracker.db`: base SQLite
+- `data/ankama_cdn/`: exports Ankama (items, itemTypes, jobsItems, resources...)
 
-## Roadmap
-- [ ] Overlay transparent par-dessus Wakfu
-- [ ] Icones des items
-- [ ] Graphiques XP/kamas dans le temps
-- [ ] Calcul de rentabilite farm auto
-- [ ] Alertes prix HDV
+## Lancement
+```bash
+python src/main.py
+```
+
+Ouvrir ensuite: `http://localhost:5000`
+
+## Variables et chemins
+- log Wakfu: `C:\Users\...\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log`
+- base locale: `data/wakfu_tracker.db`
+
+## Publication GitHub
+
+### 1) Commit local
+```bash
+git add src/main.py README.md
+git commit -m "Refonte UI: categories, HDV, combats, courbe XP et corrections manuelles"
+```
+
+### 2) Vérifier le remote
+```bash
+git remote -v
+```
+
+### 3) Si aucun remote n'existe
+```bash
+git remote add origin https://github.com/<owner>/<repo>.git
+```
+
+### 4) Push
+```bash
+git push -u origin main
+```
+
+## Notes de conception
+- Les logs restent la base de vérité automatique.
+- Les corrections UI sont persistées et considérées comme des surcharges utilisateur.
+- Certaines métriques combat dépendent du format exact des lignes de log disponibles.
