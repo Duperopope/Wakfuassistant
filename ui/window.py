@@ -609,6 +609,7 @@ class OverlayWindow(QWidget):
         self._tracker.lost.connect(self._on_wakfu_lost)
         self._tracker.geometry_changed.connect(self._on_wakfu_geometry)
         self._tracker.minimized.connect(self._on_wakfu_minimized)
+        self._tracker.character_changed.connect(self._on_character_changed)
         self._tracker.restored.connect(self._on_wakfu_restored)
         self._tracker.focus_changed.connect(self._on_wakfu_focus_changed)
 
@@ -1486,6 +1487,16 @@ class OverlayWindow(QWidget):
         self._wakfu_rect = None
         self.hide()
         self._update_click_unlock_button_visibility()
+
+    def _on_character_changed(self, name: str):
+        """Déclenché dès que le titre de la fenêtre Wakfu change.
+        name = "" → écran de sélection / déconnecté.
+        name = "L'immortel" → personnage actif."""
+        if name == self._current_character_name:
+            return
+        self._current_character_name = name or None
+        self._session_connected = bool(name)
+        self._refresh_title_info()
 
     def _on_wakfu_geometry(self, x: int, y: int, w: int, h: int):
         self._wakfu_rect = (x, y, w, h)

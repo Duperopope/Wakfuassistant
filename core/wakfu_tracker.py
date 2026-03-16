@@ -2,11 +2,16 @@
 # Surveille la fenêtre Wakfu : position, taille, état (minimisé/restauré).
 
 import os
+import re as _re
 import win32gui
 import win32con
 import win32process
 import win32api
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal
+
+# "L'immortel - Wakfu"  →  group(1) = "L'immortel"
+# "Wakfu"               →  pas de match → aucun personnage connecté
+_RE_TITLE = _re.compile(r'^(.+?)\s*-\s*[Ww]akfu\s*$')
 
 
 class WakfuTracker(QObject):
@@ -17,14 +22,17 @@ class WakfuTracker(QObject):
         geometry_changed(x,y,w,h) — fenêtre déplacée ou redimensionnée
         minimized()               — Wakfu réduit
         restored()                — Wakfu restauré
+        focus_changed(bool)       — True si Wakfu est au premier plan
+        character_changed(str)    — nom du personnage actif ("" = aucun)
     """
 
-    found            = pyqtSignal(int)
-    lost             = pyqtSignal()
-    geometry_changed = pyqtSignal(int, int, int, int)   # x y w h
-    minimized        = pyqtSignal()
-    restored         = pyqtSignal()
-    focus_changed    = pyqtSignal(bool)                  # True si Wakfu est au premier plan
+    found             = pyqtSignal(int)
+    lost              = pyqtSignal()
+    geometry_changed  = pyqtSignal(int, int, int, int)   # x y w h
+    minimized         = pyqtSignal()
+    restored          = pyqtSignal()
+    focus_changed     = pyqtSignal(bool)                  # True si Wakfu est au premier plan
+    character_changed = pyqtSignal(str)                   # "" = déconnecté / écran de sélection
 
     _POLL_MS = 3
 
@@ -35,6 +43,7 @@ class WakfuTracker(QObject):
         self._was_minimized: bool                   = False
         self._was_focused:   bool                   = False
         self._last_rect:     tuple[int,int,int,int] = (0, 0, 0, 0)
+        self._last_character: str                   = ""   # dernier nom émis
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._poll)
@@ -76,7 +85,8 @@ class WakfuTracker(QObject):
                 return
 
             score = 10
-            if title_up.strip().startswith("WAKFU"):
+            # "Wakfu" seul (écran de sélection) ET "Perso - Wakfu" (connecté) : même valeur
+            if "WAKFU" in title_up:
                 score += 20
             if not win32gui.IsIconic(hwnd):
                 score += 30
@@ -116,6 +126,9 @@ class WakfuTracker(QObject):
                 if self._was_focused:
                     self._was_focused = False
                     self.focus_changed.emit(False)
+                if self._last_character:
+                    self._last_character = ""
+                    self.character_changed.emit("")
                 self.lost.emit()
                 return
             hwnd = self._hwnd
@@ -165,6 +178,17 @@ class WakfuTracker(QObject):
 
         if is_min:
             return
+
+        # Personnage actif — détecté depuis le titre de la fenêtre
+        try:
+            title = win32gui.GetWindowText(hwnd)
+            m = _RE_TITLE.match(title)
+            char_name = m.group(1).strip() if m else ""
+        except Exception:
+            char_name = ""
+        if char_name != self._last_character:
+            self._last_character = char_name
+            self.character_changed.emit(char_name)
 
         # Géométrie
         rect = self._get_rect(hwnd)
