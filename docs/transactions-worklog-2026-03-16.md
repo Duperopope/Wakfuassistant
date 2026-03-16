@@ -226,3 +226,140 @@ Chaque carte : titre + séparateur horizontal + deux colonnes séparées par un 
 | `ui/tabs/transactions.py` | viewport fix, persist debounce, throttle+batching enforce, métriques UI |
 | `ui/window.py` | DEFAULT_W/H, edge zones, global event filter, WM_ERASEBKGND, mask optimisation |
 | `core/wakfu_tracker.py` | fast path polling IsWindow |
+
+---
+
+## Session 3 — 2026-03-16 : Chips indépendants, icône ₭, bouton colonnes, tooltips, fix header
+
+### 1. Chips métriques — états indépendants par chip
+
+**Avant :** un seul flag `_short_kamas_chips: bool` → cliquer n'importe quel chip bascule tous les chips simultanément.
+
+**Après :** dict `_chip_short: dict[str, bool]` (clés : `"gains"`, `"losses"`, `"net"`, `"taxes"`, `"kamas"`). Chaque chip a son propre état. Cliquer GAINS ne touche ni PERTES ni NET, etc.
+
+**Dispatch dans `_toggle_chip(key)`** :
+- `"gains"` / `"losses"` → `_set_flow_metrics`
+- `"net"` / `"kamas"` → `_set_balance_metrics`
+- `"taxes"` → no-op (valeur future)
+
+---
+
+### 2. Icône ₭ dorée dans les chips
+
+Chaque chip contient désormais une ligne valeur en `QHBoxLayout` :
+- `val` QLabel → le nombre (ou le texte court KK/MK)
+- `kama_icon` QLabel → `"₭"` stylée en `#c8a020`, font-size 13px, alignée en bas
+
+En mode **complet** : `val` affiche le nombre seul, `kama_icon.setVisible(True)`.
+En mode **court** (valeur ≥ 100 000) : `val` affiche `"150 KK"` ou `"1.5 MK"`, `kama_icon.setVisible(False)`.
+En mode **court** (valeur < 100 000) : pas d'abréviation disponible → icône reste visible.
+
+La référence `chip._kama_icon` est stockée comme attribut dynamique Python sur le `_ClickableFrame`.
+
+---
+
+### 3. Format court mis à jour : KK / MK
+
+`_fmt_kamas_short` mis à jour :
+- `₭₭` → `KK` (notation communauté Wakfu : kilo-kamas)
+- `M₭` → `MK` (méga-kamas)
+- < 100 000 : nombre seul (l'icône ₭ reste visible à côté)
+
+---
+
+### 4. Tooltip chip = format alternatif réel
+
+Selon l'état du chip :
+- Mode **complet** → tooltip montre le format court (`+1.9 MK`) si disponible
+- Mode **court** → tooltip montre le format complet (`+1 900 000 ₭`)
+- Aucun tooltip si valeur < 100 000 (pas d'abréviation)
+
+---
+
+### 5. Bouton "Edition colonnes" → icône SVG
+
+Remplacé le bouton texte `QPushButton("Edition colonnes")` (hauteur 24 px, texte variable "Edition active") par :
+- `QPushButton` 26×26 px, icône `ui/assets/columns.svg` (trois rectangles verticaux)
+- Tooltip descriptif, mis à jour selon l'état actif/inactif
+- Style cohérent avec le thème : fond teal faible, bordure teal quand actif
+- Curseur pointer
+
+`_apply_organization_mode_visuals` : suppression de `setText()`, remplacement par `setToolTip()` contextuel.
+
+---
+
+### 6. QToolTip global thémé
+
+Ajout dans `build_qss` (`ui/theme.py`) :
+
+```css
+QToolTip {
+    background: BG_PANEL2;
+    border: 1px solid BORDER2;
+    border-radius: 8px;
+    color: TEXT;
+    padding: 6px 10px;
+    font-size: 11px;
+    opacity: 240;
+}
+```
+
+Unifie le style des tooltips dans toute l'application (chips, boutons, options, tabbar…).
+
+---
+
+### 7. Fix : symbole kama incorrect dans le header
+
+**Problème :** `kamas_part` dans `_refresh_title_info` utilisait `\u00a7` (`§`, signe paragraphe) au lieu du symbole kama.
+
+**Fix :** remplacé par `f"{self._current_kamas:,} ₭".replace(",", "\u202f")` (séparateur espace fine).
+
+---
+
+### 8. Problème : clic chip fermait l'overlay (drag parasite)
+
+**Root cause :** `_ClickableFrame.mousePressEvent` appelait `super().mousePressEvent(event)` après `clicked.emit()`. L'event non accepté remontait jusqu'à `OverlayWindow.mousePressEvent` qui initiait un drag (`self._drag_pos = event.globalPos()`). Tout mouvement de souris après le clic déplaçait la fenêtre.
+
+**Fix :** `event.accept()` + `return` anticipé pour les clics gauche — la propagation vers le parent est stoppée.
+
+```python
+def mousePressEvent(self, event):
+    if event.button() == Qt.LeftButton:
+        event.accept()
+        self.clicked.emit()
+        return
+    super().mousePressEvent(event)
+```
+
+---
+
+### 9. Problème : chips PERTES/NET/TAXES/KAMAS fermaient l'application (TypeError PyQt5)
+
+**Root cause :** `pyqtSignal()` (zéro arguments) appelle le slot avec **0 args**. Les chips étaient connectés via :
+
+```python
+_chip.clicked.connect(lambda _, k=_key: self._toggle_chip(k))
+```
+
+La lambda attendait **1 argument positionnel** (`_`). Lors de l'emit, PyQt5 tentait d'appeler `lambda()` sans argument → `TypeError`. En PyQt5, une exception non gérée dans un slot provoque `sys.exit(1)` → fermeture brutale de l'application.
+
+**Pourquoi GAINS semblait "fonctionner" :** le fix `event.accept()` empêchait le drag visible, mais GAINS échouait aussi silencieusement (le toggle visuel ne s'exécutait pas). L'utilisateur interprétait "overlay reste ouvert" comme "ça marche".
+
+**Fix :** suppression de l'argument positionnel superflu :
+
+```python
+_chip.clicked.connect(lambda k=_key: self._toggle_chip(k))
+```
+
+`k` avec valeur par défaut capturée par la closure → aucun argument positionnel → compatible avec le signal zéro-arg.
+
+---
+
+### Fichiers modifiés (session 3)
+
+| Fichier | Nature |
+|---|---|
+| `ui/tabs/transactions.py` | chips indépendants, icône ₭, format KK/MK, tooltip alternatif, bouton colonnes SVG, fix lambda, fix event.accept |
+| `ui/theme.py` | QToolTip global thémé |
+| `ui/assets/columns.svg` | nouveau — icône bouton edition colonnes |
+| `ui/window.py` | fix symbole kama header (§ → ₭) |

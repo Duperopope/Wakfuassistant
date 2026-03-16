@@ -169,6 +169,7 @@ class OptionsTab(BaseTab):
     kamas_corrected        = pyqtSignal(int)   # valeur corrigée manuellement
     transactions_refresh_requested = pyqtSignal()
     short_numbers_changed  = pyqtSignal(bool)  # format court des kamas
+    fold_anchor_changed    = pyqtSignal(bool)  # ancrage bas quand replié
 
     FONT_CHOICES = [
         "Segoe UI Variable",
@@ -206,6 +207,7 @@ class OptionsTab(BaseTab):
         initial_palette: str = "wakfu",
         initial_corner_radius: int = 24,
         initial_short_kamas: bool = False,
+        initial_fold_anchor_bottom: bool = False,
         parent: QWidget | None = None,
     ):
         super().__init__(parent)
@@ -228,7 +230,7 @@ class OptionsTab(BaseTab):
         self._populate_display_card(
             self._display_card.body_layout(),
             initial_opacity, initial_font, initial_palette, initial_corner_radius,
-            initial_short_kamas,
+            initial_short_kamas, initial_fold_anchor_bottom,
         )
         root.addWidget(self._display_card)
 
@@ -263,6 +265,7 @@ class OptionsTab(BaseTab):
         initial_palette: str,
         initial_corner_radius: int,
         initial_short_kamas: bool = False,
+        initial_fold_anchor_bottom: bool = False,
     ):
         _combo_qss = f"""
             QComboBox {{
@@ -405,12 +408,44 @@ class OptionsTab(BaseTab):
         )
         lay.addWidget(self._short_kamas_cb)
 
+        # Ancrer en bas (replié)
+        _cb_qss = f"""
+            QCheckBox {{
+                color: {TEXT_DIM};
+                font-size: 11px;
+                spacing: 6px;
+            }}
+            QCheckBox::indicator {{
+                width: 14px;
+                height: 14px;
+                border: 1px solid {BORDER};
+                border-radius: 3px;
+                background: #0f1116;
+            }}
+            QCheckBox::indicator:checked {{
+                background: {TEAL};
+                border-color: {TEAL};
+            }}
+            QCheckBox::indicator:hover {{
+                border-color: {TEAL};
+            }}
+        """
+        self._fold_anchor_cb = QCheckBox("Ancrer en bas (replié)")
+        self._fold_anchor_cb.setChecked(initial_fold_anchor_bottom)
+        self._fold_anchor_cb.setStyleSheet(_cb_qss)
+        self._fold_anchor_cb.setToolTip(
+            "Quand la fenêtre est repliée, elle reste ancrée en bas :\n"
+            "le bas de la fenêtre garde sa position au lieu du haut."
+        )
+        lay.addWidget(self._fold_anchor_cb)
+
         # Connecter les signaux
         self._opacity_slider.valueChanged.connect(self._on_slider_change)
         self._font_combo.currentTextChanged.connect(self._on_font_change)
         self._palette_combo.currentIndexChanged.connect(self._on_palette_change)
         self._shape_combo.currentIndexChanged.connect(self._on_shape_change)
         self._short_kamas_cb.stateChanged.connect(self._on_short_kamas_change)
+        self._fold_anchor_cb.stateChanged.connect(self._on_fold_anchor_change)
         self._on_slider_change(self._opacity_slider.value())
 
     # ── Contenu : carte Données ───────────────────────────────────────────
@@ -646,3 +681,8 @@ class OptionsTab(BaseTab):
         if self._building:
             return
         self.short_numbers_changed.emit(bool(state))
+
+    def _on_fold_anchor_change(self, state: int):
+        if self._building:
+            return
+        self.fold_anchor_changed.emit(bool(state))

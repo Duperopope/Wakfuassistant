@@ -223,6 +223,7 @@ class OverlayWindow(QWidget):
         self._corner_radius = self._settings.value("window_corner_radius", 24, type=int)
         self._palette_name = self._settings.value("ui_palette", DEFAULT_PALETTE, type=str)
         self._short_kamas: bool = bool(self._settings.value("short_kamas", False, type=bool))
+        self._fold_anchor_bottom: bool = bool(self._settings.value("fold_anchor_bottom", False, type=bool))
         self._palette = get_palette(self._palette_name)
         self._click_through = self._settings.value("click_through", False, type=bool)
         self._click_unlock_btn: QPushButton | None = None
@@ -354,6 +355,7 @@ class OverlayWindow(QWidget):
                     self._palette_name,
                     self._corner_radius,
                     self._short_kamas,
+                    self._fold_anchor_bottom,
                     self,
                 )
                 w.opacity_changed.connect(self.set_overlay_opacity)
@@ -364,6 +366,7 @@ class OverlayWindow(QWidget):
                 w.kamas_corrected.connect(self._on_kamas_corrected)
                 w.transactions_refresh_requested.connect(self._refresh_transactions_tab)
                 w.short_numbers_changed.connect(self._on_short_kamas_changed)
+                w.fold_anchor_changed.connect(self._on_fold_anchor_changed)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -640,15 +643,22 @@ class OverlayWindow(QWidget):
         self._folded = folded
         if folded:
             self._saved_h = self.height()
+            bottom_y = self.y() + self.height()
             self._tabbar.hide()
             self._stack.hide()
-            self.setFixedHeight(self._titlebar.height() + 2)
+            new_h = self._titlebar.height() + 2
+            self.setFixedHeight(new_h)
+            if self._fold_anchor_bottom:
+                self.move(self.x(), bottom_y - new_h)
         else:
+            bottom_y = self.y() + self.height()
             self.setMinimumHeight(MIN_H)
             self.setMaximumHeight(16_777_215)
             self._tabbar.show()
             self._stack.show()
             self.resize(self.width(), self._saved_h)
+            if self._fold_anchor_bottom:
+                self.move(self.x(), bottom_y - self._saved_h)
 
     def _on_pin(self, pinned: bool):
         # Pin = position verrouillée (ne peut plus être draggée)
@@ -1617,6 +1627,10 @@ class OverlayWindow(QWidget):
             if isinstance(widget, TransactionsTab):
                 widget.set_short_kamas(enabled)
                 break
+
+    def _on_fold_anchor_changed(self, enabled: bool):
+        self._fold_anchor_bottom = enabled
+        self._settings.setValue("fold_anchor_bottom", enabled)
 
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)

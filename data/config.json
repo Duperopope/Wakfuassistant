@@ -3,10 +3,10 @@
   "character_class": "sram",
   "server": "Ogrest",
   "account": "Kairozadyk",
-  "base_kamas": 576869,
+  "base_kamas": 577306,
   "manual_kamas_delta": 0,
   "onboarding_done": true,
-  "last_session_end": "2026-03-16 13:24:09",
+  "last_session_end": "2026-03-16 15:20:02.854",
   "character_level": 0,
   "character_xp_current": 0,
   "character_xp_total": 0,
@@ -16,5 +16,8 @@
   "click_through": false,
   "known_character_classes": {
     "L'Immortel": "sram"
-  }
+  },
+  "perm_log_offset": 3704353,
+  "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
+  "journal_read_pos": 57617
 }
