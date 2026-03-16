@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wakfu Companion</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="header" id="header">
+  <h1>Wakfu Companion</h1>
+  <div class="stats" id="header-stats"></div>
+</div>
+<div class="tabs">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</div>
+  <div class="tab" data-tab="inventory" onclick="switchTab('inventory')">Inventaire</div>
+  <div class="tab" data-tab="metiers" onclick="switchTab('metiers')">Metiers</div>
+  <div class="tab" data-tab="hdv" onclick="switchTab('hdv')">HDV</div>
+  <div class="tab" data-tab="combats" onclick="switchTab('combats')">Combats</div>
+  <div class="tab" data-tab="activity" onclick="switchTab('activity')">Activite</div>
+</div>
+<div id="ctx-menu" class="ctx-menu" onclick="event.stopPropagation()">
+  <div id="ctx-title" class="ctx-title">Actions</div>
+  <div id="ctx-menu-body"></div>
+</div>
+<div id="icon-picker-overlay" class="icon-picker-overlay" onclick="closeIconPicker()">
+  <div class="icon-picker" onclick="event.stopPropagation()">
+    <div class="icon-picker-head">
+      <div id="icon-picker-title" class="icon-picker-title">Choix image</div>
+      <input id="icon-picker-input" class="editable text" type="text" placeholder="Rechercher un objet..." oninput="onIconPickerInput(this.value)">
+      <button id="icon-picker-apply" class="ctx-item" style="width:auto;padding:6px 10px" onclick="applySelectedIcon()">Valider l'image</button>
+      <button class="ctx-item" style="width:auto;padding:6px 10px" onclick="closeIconPicker()">Fermer</button>
+    </div>
+    <div id="icon-picker-suggestions" class="icon-suggestions"></div>
+    <div id="icon-picker-body" class="icon-picker-body"></div>
+  </div>
+</div>
+<div id="onboarding-overlay" class="onboarding-overlay" onclick="closeOnboarding()">
+  <div class="onboarding-card" onclick="event.stopPropagation()">
+    <div class="section-title">Initialisation profil</div>
+    <div class="tiny-note">Renseigne ta base de verite au depart. Tu pourras modifier ensuite via clic droit sur le dashboard.</div>
+    <div class="onboarding-grid">
+      <label>Niveau perso actuel<input id="ob-level" class="editable text" type="number" value="0"></label>
+      <label>XP actuelle perso<input id="ob-xp-current" class="editable text" type="number" value="0"></label>
+      <label>XP totale du niveau<input id="ob-xp-total" class="editable text" type="number" value="0"></label>
+      <label>Kamas actuels<input id="ob-kamas" class="editable text" type="number" value="0"></label>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="ctx-item" style="width:auto" onclick="closeOnboarding()">Plus tard</button>
+      <button class="ctx-item" style="width:auto" onclick="saveOnboarding()">Valider</button>
+    </div>
+  </div>
+</div>
+<div class="content" id="content"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
