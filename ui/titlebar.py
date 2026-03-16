@@ -4,8 +4,8 @@ from pathlib import Path
 import re as _re
 import zipfile
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore    import Qt, pyqtSignal, QSize, QByteArray
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QToolTip
+from PyQt5.QtCore    import Qt, pyqtSignal, QSize, QByteArray, QEvent
 from PyQt5.QtGui     import QPainter, QColor, QPen, QIcon, QLinearGradient, QPixmap
 
 from ui.theme import (
@@ -267,6 +267,8 @@ class TitleBar(QWidget):
         for _ in range(5):
             lbl = QLabel()
             lbl.setVisible(False)
+            lbl.setMouseTracking(True)
+            lbl.installEventFilter(self)
             self._metrics_layout.addWidget(lbl)
             self._metric_labels.append(lbl)
 
@@ -377,6 +379,20 @@ class TitleBar(QWidget):
         self._click_through = not self._click_through
         self._btn_click.set_active(self._click_through)
         self.click_through_toggled.emit(self._click_through)
+
+    # ── Event filter ───────────────────────────────────────────────
+
+    def eventFilter(self, obj, event):
+        """Affiche les tooltips des chips même sans focus applicatif."""
+        if obj in self._metric_labels:
+            t = event.type()
+            if t == QEvent.Enter:
+                tt = obj.toolTip()
+                if tt:
+                    QToolTip.showText(obj.mapToGlobal(obj.rect().center()), tt, obj)
+            elif t == QEvent.Leave:
+                QToolTip.hideText()
+        return super().eventFilter(obj, event)
 
     # ── Rendu ──────────────────────────────────────────────────────
 

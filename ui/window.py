@@ -1440,16 +1440,29 @@ class OverlayWindow(QWidget):
         try:
             # Fenêtre directement au-dessus de Wakfu dans la pile Z
             above = win32gui.GetWindow(wakfu_hwnd, win32con.GW_HWNDPREV)
-            if above and above != overlay_hwnd:
-                win32gui.SetWindowPos(
-                    overlay_hwnd, above, 0, 0, 0, 0,
-                    win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_NOACTIVATE,
-                )
-            elif not above:
-                win32gui.SetWindowPos(
-                    overlay_hwnd, win32con.HWND_TOP, 0, 0, 0, 0,
-                    win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_NOACTIVATE,
-                )
+            if above == overlay_hwnd:
+                return  # déjà en position
+            if above:
+                # hWndInsertAfter doit être une fenêtre non-topmost ;
+                # si la fenêtre au-dessus de Wakfu est topmost (ex. barre des tâches,
+                # notifications système), on tombe en arrière sur HWND_TOP.
+                try:
+                    ex = win32gui.GetWindowLong(above, win32con.GWL_EXSTYLE)
+                    is_topmost = bool(ex & win32con.WS_EX_TOPMOST)
+                except Exception:
+                    is_topmost = True
+                if not is_topmost:
+                    win32gui.SetWindowPos(
+                        overlay_hwnd, above, 0, 0, 0, 0,
+                        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_NOACTIVATE,
+                    )
+                    return
+            # Pas de fenêtre non-topmost au-dessus de Wakfu → placer au sommet
+            # de la couche non-topmost (= au-dessus de Wakfu)
+            win32gui.SetWindowPos(
+                overlay_hwnd, win32con.HWND_TOP, 0, 0, 0, 0,
+                win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_NOACTIVATE,
+            )
         except Exception:
             pass
 
@@ -1484,7 +1497,7 @@ class OverlayWindow(QWidget):
         self._update_click_unlock_button_visibility()
 
     def _on_wakfu_restored(self):
-        if self._wakfu_rect and not self._titlebar.is_pinned:
+        if self._wakfu_rect and not self._titlebar.is_pinned and not self._folded:
             self._apply_relative_to_wakfu(*self._wakfu_rect)
         self.show()
         self._reorder_above_wakfu()
@@ -1492,7 +1505,7 @@ class OverlayWindow(QWidget):
 
     def _on_wakfu_focus_changed(self, focused: bool):
         # Toujours visible — on resynchronise position et Z-order
-        if self._tracker.rect and not self._titlebar.is_pinned:
+        if self._tracker.rect and not self._titlebar.is_pinned and not self._folded:
             self._apply_relative_to_wakfu(*self._tracker.rect)
         self._reorder_above_wakfu()
         self._update_click_unlock_button_visibility()
