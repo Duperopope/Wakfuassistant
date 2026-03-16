@@ -703,11 +703,10 @@ class OverlayWindow(QWidget):
             if self._last_detected_class:
                 self._personnage_tab.set_class_icon(self._last_detected_class)
 
-        # ── Métriques compactes → TitleBar (mode replié) ──────────────────
+        # ── Métriques épinglées → TitleBar (mode replié) ─────────────────
         for widget in self._tab_widgets:
             if isinstance(widget, TransactionsTab):
-                gains, losses, net, kamas = widget.get_metrics()
-                self._titlebar.set_folded_metrics(gains, losses, net, kamas)
+                self._titlebar.set_folded_metrics(widget.get_pinned_metrics())
                 break
 
         self._refresh_stats_panel()

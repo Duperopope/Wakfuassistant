@@ -98,16 +98,21 @@ def _format_dt_parts(dt: datetime) -> tuple[str, str]:
 
 
 class _ClickableFrame(QFrame):
-    """QFrame qui émet clicked() lors d'un clic gauche.
-    L'event est accepté pour éviter toute propagation vers la fenêtre parente."""
-    clicked = pyqtSignal()
+    """QFrame qui émet clicked() (clic gauche) ou right_clicked(QPoint) (clic droit).
+    Les deux events sont acceptés pour éviter toute propagation."""
+    clicked       = pyqtSignal()
+    right_clicked = pyqtSignal(QPoint)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             event.accept()
             self.clicked.emit()
             return
-        super().mousePressEvent(event)
+        if event.button() == Qt.RightButton:
+            event.accept()
+            self.right_clicked.emit(event.globalPos())
+            return
+        event.accept()  # bloquer tout autre bouton également
 
 
 class KamasLineChart(QWidget):
@@ -680,6 +685,15 @@ class TransactionsTab(BaseTab):
         self._chip_short: dict[str, bool] = {
             "gains": False, "losses": False, "net": False, "taxes": False, "kamas": False,
         }
+        # Chips épinglés dans la barre de titre (mode replié)
+        def _load_pin(k: str) -> bool:
+            return bool(self._settings.value(f"chip_pinned_{k}", False, type=bool))
+        self._chip_pinned: dict[str, bool] = {
+            "gains": _load_pin("gains"),
+            "losses": _load_pin("losses"),
+            "net": _load_pin("net"),
+            "kamas": _load_pin("kamas"),
+        }
         # Références chips + cache valeurs pour le toggle léger
         self._gains_chip:  "_ClickableFrame | None" = None
         self._losses_chip: "_ClickableFrame | None" = None
@@ -733,6 +747,8 @@ class TransactionsTab(BaseTab):
             (kamas_chip,  "kamas"),
         ):
             _chip.clicked.connect(lambda k=_key: self._toggle_chip(k))
+            if _key in self._chip_pinned:  # taxes non épingable (pas de valeur)
+                _chip.right_clicked.connect(lambda pos, k=_key: self._show_chip_pin_menu(pos, k))
             chips_row.addWidget(_chip, 1)
 
         # ── Ligne 2 : cartes détail (données futures) ────────────────
@@ -1048,6 +1064,48 @@ class TransactionsTab(BaseTab):
             self._cached_net,
             self._cached_kamas if self._cached_kamas is not None else 0,
         )
+
+    def get_pinned_metrics(self) -> list[tuple[str, str]]:
+        """Retourne [(texte, couleur_hex)] pour les chips épinglés, dans l'ordre."""
+        def _fmt(v: int) -> str:
+            av = abs(v)
+            if av >= 1_000_000:
+                return f"{v / 1_000_000:.1f}M ₭"
+            if av >= 1_000:
+                return f"{v / 1_000:.0f}K ₭"
+            return f"{v:,} ₭".replace(",", "\u202f")
+
+        result: list[tuple[str, str]] = []
+        for key in ("gains", "losses", "net", "kamas"):
+            if not self._chip_pinned.get(key, False):
+                continue
+            if key == "gains":
+                result.append((f"↑ {_fmt(self._cached_gains)}", GREEN))
+            elif key == "losses":
+                result.append((f"↓ {_fmt(self._cached_losses)}", RED))
+            elif key == "net":
+                sign = "+" if self._cached_net >= 0 else ""
+                color = GREEN if self._cached_net > 0 else (RED if self._cached_net < 0 else TEAL)
+                result.append((f"~ {sign}{_fmt(self._cached_net)}", color))
+            elif key == "kamas":
+                kamas = self._cached_kamas or 0
+                result.append((f"⬟ {_fmt(kamas)}", TEXT_DIM))
+        return result
+
+    def _show_chip_pin_menu(self, pos: QPoint, key: str):
+        """Affiche le menu contextuel pour épingler/désépingler un chip."""
+        from PyQt5.QtWidgets import QMenu
+        pinned = self._chip_pinned.get(key, False)
+        menu = QMenu(self)
+        label = "Désépingler de la barre repliée" if pinned else "Épingler dans la barre repliée"
+        action = menu.addAction(label)
+        action.triggered.connect(lambda: self._toggle_pin_chip(key))
+        menu.exec_(pos)
+
+    def _toggle_pin_chip(self, key: str):
+        """Bascule l'état épinglé d'un chip et persiste le choix."""
+        self._chip_pinned[key] = not self._chip_pinned.get(key, False)
+        self._settings.setValue(f"chip_pinned_{key}", self._chip_pinned[key])
 
     def _toggle_chip(self, key: str):
         """Bascule le mode court/complet d'un chip individuel (clic direct)."""
