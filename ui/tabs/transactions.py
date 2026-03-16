@@ -8,9 +8,10 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QPoint, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QPoint, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QColor, QPainter, QPen
 from PyQt5.QtWidgets import (
+    QApplication,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -18,11 +19,13 @@ from PyQt5.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
+    QWidgetAction,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
     QHeaderView,
+    QGraphicsOpacityEffect,
 )
 
 from core.permanent_journal import read_permanent_kamas_events, sync_permanent_kamas_journal
@@ -72,8 +75,11 @@ def _format_dt_parts(dt: datetime) -> tuple[str, str]:
 
 class KamasLineChart(QWidget):
     pointClicked = pyqtSignal(int)
+    viewBoundsChanged = pyqtSignal(int, int)
+    rangeMenuRequested = pyqtSignal(QPoint)
+    zoomOutLimitReached = pyqtSignal(int)
 
-    _MIN_ZOOM_POINTS = 10
+    _MIN_ZOOM_POINTS = 2
     _DETAIL_GRID_MAX_SPAN = 80
     _DETAIL_GRID_LINES = 6
 
@@ -88,19 +94,100 @@ class KamasLineChart(QWidget):
         self._pan_start_x: int = 0
         self._pan_start_y: int = 0
         self._pan_start_center: float = 0.0
+        self._last_emitted_bounds: tuple[int, int] | None = None
+        self._view_anim_timer = QTimer(self)
+        self._view_anim_timer.setInterval(16)
+        self._view_anim_timer.timeout.connect(self._on_view_anim_tick)
+        self._anim_step: int = 0
+        self._anim_steps: int = 10
+        self._anim_from_span: float = 0.0
+        self._anim_to_span: float = 0.0
+        self._anim_from_center: float = 0.0
+        self._anim_to_center: float = 0.0
         self.setMouseTracking(True)
         self.setMinimumHeight(150)
 
-    def set_series(self, series: list[tuple[datetime, int]]):
+    def _stop_view_animation(self):
+        if self._view_anim_timer.isActive():
+            self._view_anim_timer.stop()
+
+    def _start_view_animation(self, target_span: int, target_center: float):
+        total = len(self._series)
+        if total <= 0:
+            return
+        self._stop_view_animation()
+        self._anim_step = 0
+        self._anim_from_span = float(self._zoom_span or total)
+        self._anim_to_span = float(max(1, min(total, int(target_span))))
+        self._anim_from_center = float(self._zoom_center)
+        self._anim_to_center = float(max(0.0, min(float(total - 1), float(target_center))))
+        self._view_anim_timer.start()
+
+    def _on_view_anim_tick(self):
+        total = len(self._series)
+        if total <= 0:
+            self._stop_view_animation()
+            return
+
+        self._anim_step += 1
+        t = self._anim_step / max(1, self._anim_steps)
+        # Ease-out cubic for smoother camera feel.
+        eased = 1.0 - pow(1.0 - max(0.0, min(1.0, t)), 3)
+
+        span = self._anim_from_span + (self._anim_to_span - self._anim_from_span) * eased
+        center = self._anim_from_center + (self._anim_to_center - self._anim_from_center) * eased
+        self._zoom_span = int(round(span))
+        self._zoom_center = float(center)
+        self._emit_bounds_if_changed()
+        self.update()
+
+        if self._anim_step >= self._anim_steps:
+            self._zoom_span = int(round(self._anim_to_span))
+            self._zoom_center = float(self._anim_to_center)
+            self._emit_bounds_if_changed()
+            self.update()
+            self._stop_view_animation()
+
+    def _emit_bounds_if_changed(self):
+        start, end = self._visible_bounds()
+        current = (int(start), int(end))
+        if self._last_emitted_bounds == current:
+            return
+        self._last_emitted_bounds = current
+        self.viewBoundsChanged.emit(current[0], current[1])
+
+    def set_series(self, series: list[tuple[datetime, int]], reset_view: bool = False):
         old_total = len(self._series)
+        old_span = int(self._zoom_span)
+        old_center = float(self._zoom_center)
+        was_following_latest = False
+        if old_total > 0:
+            old_min_span = min(old_total, self._MIN_ZOOM_POINTS)
+            old_effective_span = max(old_min_span, min(old_total, old_span or old_total))
+            old_effective_center = max(0.0, min(float(old_total - 1), old_center))
+            old_start = int(round(old_effective_center - old_effective_span / 2.0))
+            old_end = old_start + old_effective_span
+            if old_start < 0:
+                old_start = 0
+                old_end = old_effective_span
+            if old_end > old_total:
+                old_end = old_total
+                old_start = max(0, old_end - old_effective_span)
+            # Considere "live" si la fenetre colle deja la fin de serie.
+            was_following_latest = old_end >= old_total - 1
         self._series = series
         total = len(self._series)
+        self._stop_view_animation()
         if total <= 0:
             self._zoom_span = 0
             self._zoom_center = 0.0
         else:
             min_span = min(total, self._MIN_ZOOM_POINTS)
-            if self._zoom_span <= 0:
+            if reset_view:
+                # Changement de periode: recadrage anime vers la plage choisie.
+                self._zoom_span = old_span if old_span > 0 else total
+                self._zoom_center = old_center if old_total > 0 else (total - 1) / 2.0
+            elif self._zoom_span <= 0:
                 self._zoom_span = total
             self._zoom_span = max(min_span, min(total, self._zoom_span))
             if self._zoom_center <= 0.0:
@@ -110,7 +197,16 @@ class KamasLineChart(QWidget):
                 # points arrivent, pour eviter les sauts de fenetre de zoom.
                 rel = self._zoom_center / max(1.0, float(old_total - 1))
                 self._zoom_center = rel * max(1.0, float(total - 1))
+
+            if old_total > 0 and total > old_total and was_following_latest:
+                # En mode live, on garde le dernier point visible a droite.
+                self._zoom_center = float(total - 1)
+
             self._zoom_center = max(0.0, min(float(total - 1), self._zoom_center))
+            if reset_view and total > 1:
+                self._start_view_animation(total, (total - 1) / 2.0)
+        self._last_emitted_bounds = None
+        self._emit_bounds_if_changed()
         self.update()
 
     def _visible_bounds(self) -> tuple[int, int]:
@@ -146,6 +242,7 @@ class KamasLineChart(QWidget):
         return max(start, min(end - 1, idx))
 
     def wheelEvent(self, event):
+        self._stop_view_animation()
         total = len(self._series)
         if total < 3:
             return
@@ -166,6 +263,8 @@ class KamasLineChart(QWidget):
         new_span = int(round(current_span * factor))
         new_span = max(min_span, min(total, new_span))
         if new_span == current_span:
+            if delta < 0:
+                self.zoomOutLimitReached.emit(max(1, int(round(abs(steps)))))
             event.accept()
             return
 
@@ -179,18 +278,31 @@ class KamasLineChart(QWidget):
 
         new_start = int(round(cursor_idx - ratio * max(1, new_span - 1)))
         max_start = max(0, total - new_span)
+
+        # Zoom par zones:
+        # - droite: colle la vue au present (dernier point a droite)
+        # - centre: conserve le point sous le curseur
+        # - gauche: garde un ancrage vers le passe
+        if ratio >= 0.67:
+            new_start = max_start
+        elif ratio <= 0.33:
+            new_start = start
+
         new_start = max(0, min(max_start, new_start))
         new_center = new_start + (new_span - 1) / 2.0
 
         self._zoom_span = new_span
         self._zoom_center = float(new_center)
+        self._emit_bounds_if_changed()
         self.update()
         event.accept()
 
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.LeftButton and self._series:
+            self._stop_view_animation()
             self._zoom_span = len(self._series)
             self._zoom_center = (len(self._series) - 1) / 2.0
+            self._emit_bounds_if_changed()
             self.update()
             event.accept()
             return
@@ -198,6 +310,7 @@ class KamasLineChart(QWidget):
 
     def mouseMoveEvent(self, event):
         if self._is_panning:
+            self._stop_view_animation()
             total = len(self._series)
             if total > 1:
                 dx = int(event.pos().x() - self._pan_start_x)
@@ -211,6 +324,7 @@ class KamasLineChart(QWidget):
                 shift = dx * idx_per_px
                 max_center = float(total - 1)
                 self._zoom_center = max(0.0, min(max_center, self._pan_start_center - shift))
+                self._emit_bounds_if_changed()
                 self.update()
             event.accept()
             return
@@ -258,6 +372,10 @@ class KamasLineChart(QWidget):
         self.update()
         super().leaveEvent(event)
 
+    def contextMenuEvent(self, event):
+        self.rangeMenuRequested.emit(event.globalPos())
+        event.accept()
+
     def paintEvent(self, _event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
@@ -286,8 +404,28 @@ class KamasLineChart(QWidget):
         plot_h = max(1, bottom - top)
 
         visible_values = [value for _dt, value in visible]
-        v_min = min(visible_values)
-        v_max = max(visible_values)
+        raw_min = min(visible_values)
+        raw_max = max(visible_values)
+        raw_span = max(1, raw_max - raw_min)
+
+        # Echelle relative a la valeur absolue pour eviter des crans
+        # visuellement exagérés quand les variations sont tres faibles.
+        magnitude = max(1, abs(raw_min), abs(raw_max))
+        min_relative_span = max(1, int(round(magnitude * 0.02)))
+        if raw_span < min_relative_span:
+            center = (raw_min + raw_max) / 2.0
+            half = min_relative_span / 2.0
+            v_min = int(math.floor(center - half))
+            v_max = int(math.ceil(center + half))
+            # Le solde ne doit pas descendre sous zero visuellement.
+            if v_min < 0:
+                shift = -v_min
+                v_min += shift
+                v_max += shift
+        else:
+            v_min = raw_min
+            v_max = raw_max
+
         span = max(1, v_max - v_min)
 
         # Ligne zero pour lire rapidement la tendance.
@@ -325,13 +463,25 @@ class KamasLineChart(QWidget):
         p.setPen(QPen(line_color, 2))
 
         for i in range(1, len(coords)):
-            p.drawLine(coords[i - 1][0], coords[i - 1][1], coords[i][0], coords[i][1])
+            x0, y0 = coords[i - 1]
+            x1, y1 = coords[i]
+            # Courbe en escalier: valeur constante entre transactions,
+            # puis saut net au moment du changement.
+            p.drawLine(x0, y0, x1, y0)
+            if y1 != y0:
+                p.drawLine(x1, y0, x1, y1)
 
         if self._hover_index is not None and start <= self._hover_index < end:
             local_idx = self._hover_index - start
             hx, hy = coords[local_idx]
             hdt, hval = self._series[self._hover_index]
-            balance_txt = f"Solde estime: {_fmt_kamas(hval)}"
+            prev_val = hval
+            if self._hover_index > 0:
+                prev_val = int(self._series[self._hover_index - 1][1])
+            diff_val = int(hval) - int(prev_val)
+
+            balance_txt = f"Solde: {_fmt_kamas(hval)}"
+            diff_txt = f"Difference: {diff_val:+,}".replace(",", " ")
             when_txt = hdt.strftime("%d/%m/%Y %H:%M:%S")
 
             p.setPen(QPen(QColor(TEAL), 1, Qt.DashLine))
@@ -340,21 +490,40 @@ class KamasLineChart(QWidget):
             p.setBrush(QColor(TEAL))
             p.drawEllipse(QPoint(hx, hy), 3, 3)
 
-            tooltip_lines = [balance_txt, when_txt]
+            tooltip_lines = [balance_txt, diff_txt, when_txt]
             tooltip_x = max(left + 8, min(hx + 10, right - 220))
             tooltip_y = max(top + 8, hy - 38)
             tip_w = 208
-            tip_h = 34
+            tip_h = 48
             p.setPen(QPen(QColor(BORDER), 1))
             p.setBrush(QColor(14, 18, 26, 235))
             p.drawRoundedRect(tooltip_x, tooltip_y, tip_w, tip_h, 6, 6)
             p.setPen(QColor(TEXT))
             p.drawText(tooltip_x + 8, tooltip_y + 14, tooltip_lines[0])
-            p.setPen(QColor(TEXT_DIM))
+            p.setPen(QColor(TEAL))
             p.drawText(tooltip_x + 8, tooltip_y + 28, tooltip_lines[1])
+            p.setPen(QColor(TEXT_DIM))
+            p.drawText(tooltip_x + 8, tooltip_y + 42, tooltip_lines[2])
 
 
 class TransactionsTab(BaseTab):
+    _TIME_WINDOWS: list[tuple[str, str, timedelta | None]] = [
+        ("5m", "5 minutes", timedelta(minutes=5)),
+        ("15m", "15 minutes", timedelta(minutes=15)),
+        ("30m", "30 minutes", timedelta(minutes=30)),
+        ("1h", "1 heure", timedelta(hours=1)),
+        ("6h", "6 heures", timedelta(hours=6)),
+        ("24h", "24 heures", timedelta(hours=24)),
+        ("72h", "72 heures", timedelta(hours=72)),
+        ("1w", "1 semaine", timedelta(days=7)),
+        ("2w", "2 semaines", timedelta(days=14)),
+        ("1mo", "1 mois", timedelta(days=30)),
+        ("3mo", "3 mois", timedelta(days=90)),
+        ("6mo", "6 mois", timedelta(days=180)),
+        ("1y", "1 an", timedelta(days=365)),
+        ("all", "Toute la duree", None),
+    ]
+
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setObjectName("transactionsTab")
@@ -418,6 +587,27 @@ class TransactionsTab(BaseTab):
 
         self._events: list[TransactionEvent] = []
         self._display_events: list[TransactionEvent] = []
+        self._chart_event_indexes: list[int] = []
+        self._rendered_series: list[tuple[datetime, int]] = []
+        self._view_start: int = 0
+        self._view_end: int = 0
+        saved_window = str(self._settings.value("transactions_time_window_key", "all", type=str) or "all")
+        valid_window_keys = {key for key, _label, _delta in self._TIME_WINDOWS}
+        self._time_window_key: str = saved_window if saved_window in valid_window_keys else "all"
+        self._range_menu: QMenu | None = None
+        self._range_current_btn: QPushButton | None = None
+        self._range_shortest_btn: QPushButton | None = None
+        self._range_shorter_btn: QPushButton | None = None
+        self._range_longer_btn: QPushButton | None = None
+        self._range_all_btn: QPushButton | None = None
+        self._available_time_window_keys: list[str] = [key for key, _label, _delta in self._TIME_WINDOWS]
+        self._custom_window_minutes: int | None = None
+        self._last_non_all_window_key: str = "30m"
+        self._reset_chart_view_on_next_render = False
+        self._range_label_fx: QGraphicsOpacityEffect | None = None
+        self._range_label_anim: QPropertyAnimation | None = None
+        self._chart_fx: QGraphicsOpacityEffect | None = None
+        self._chart_anim: QPropertyAnimation | None = None
         # 0 = historique complet (pas de truncation).
         self._max_events = 0
         self._pulse_timer = QTimer(self)
@@ -491,12 +681,32 @@ class TransactionsTab(BaseTab):
         chart_layout.setContentsMargins(10, 10, 10, 8)
         chart_layout.setSpacing(6)
 
+        chart_head = QHBoxLayout()
+        chart_head.setContentsMargins(0, 0, 0, 0)
+        chart_head.setSpacing(8)
+
         chart_title = QLabel("Evolution des transactions")
         chart_title.setObjectName("txSectionTitle")
-        chart_layout.addWidget(chart_title)
+        chart_head.addWidget(chart_title)
+        chart_head.addStretch(1)
+
+        self._range_label = QLabel(f"Fenetre: {self._selected_window_label()}")
+        self._range_label.setObjectName("txSectionSubtitle")
+        chart_head.addWidget(self._range_label)
+        self._range_label_fx = QGraphicsOpacityEffect(self._range_label)
+        self._range_label_fx.setOpacity(1.0)
+        self._range_label.setGraphicsEffect(self._range_label_fx)
+
+        chart_layout.addLayout(chart_head)
 
         self._chart = KamasLineChart(chart_frame)
         self._chart.pointClicked.connect(self._focus_event_in_history)
+        self._chart.viewBoundsChanged.connect(self._on_chart_view_changed)
+        self._chart.rangeMenuRequested.connect(self._show_chart_range_menu)
+        self._chart.zoomOutLimitReached.connect(self._on_chart_zoom_out_limit)
+        self._chart_fx = QGraphicsOpacityEffect(self._chart)
+        self._chart_fx.setOpacity(1.0)
+        self._chart.setGraphicsEffect(self._chart_fx)
         chart_layout.addWidget(self._chart)
         root.addWidget(chart_frame)
 
@@ -563,7 +773,7 @@ class TransactionsTab(BaseTab):
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.refresh)
-        self._timer.start(4000)
+        self._timer.start(1000)
 
     def _build_metric_box(self, title: str, color: str) -> tuple[QFrame, QLabel]:
         card = QFrame(self)
@@ -592,6 +802,395 @@ class TransactionsTab(BaseTab):
         _ = (pct, gains, losses)
         if _last:
             self._current_label.setText(_fmt_kamas(max(0, _last)))
+
+    def _on_chart_view_changed(self, start: int, end: int):
+        self._view_start = max(0, int(start))
+        self._view_end = max(self._view_start, int(end))
+        self._refresh_range_label_from_view()
+        self._update_metrics_from_visible_range()
+
+    @staticmethod
+    def _format_visible_span_label(total_seconds: int) -> str:
+        seconds = max(0, int(total_seconds))
+        if seconds < 60:
+            return "moins d'1 min"
+
+        minutes = seconds // 60
+        if minutes < 60:
+            return f"{minutes} min"
+
+        hours, rem_minutes = divmod(minutes, 60)
+        if hours < 24:
+            if rem_minutes == 0:
+                return f"{hours} h"
+            return f"{hours} h {rem_minutes} min"
+
+        days, rem_hours = divmod(hours, 24)
+        if rem_hours == 0:
+            return f"{days} j"
+        return f"{days} j {rem_hours} h"
+
+    def _refresh_range_label_from_view(self):
+        series = self._rendered_series
+        total = len(series)
+        if total < 2:
+            self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+            return
+
+        start = max(0, min(total - 1, int(self._view_start)))
+        end = max(start + 1, min(total, int(self._view_end)))
+        first_dt = series[start][0]
+        last_dt = series[end - 1][0]
+        if last_dt < first_dt:
+            first_dt, last_dt = last_dt, first_dt
+
+        span_label = self._format_visible_span_label(int((last_dt - first_dt).total_seconds()))
+        self._range_label.setText(f"Fenetre: {span_label}")
+
+    def _selected_window_label(self) -> str:
+        if self._time_window_key != "all" and self._custom_window_minutes is not None:
+            minutes = max(1, int(self._custom_window_minutes))
+            if minutes < 60:
+                return f"{minutes} minutes"
+            hours, rem = divmod(minutes, 60)
+            if rem == 0:
+                return f"{hours} heure" if hours == 1 else f"{hours} heures"
+            return f"{hours}h{rem:02d}"
+        for key, label, _delta in self._TIME_WINDOWS:
+            if key == self._time_window_key:
+                return label
+        return "Toute la duree"
+
+    def _selected_window_delta(self) -> timedelta | None:
+        if self._time_window_key == "all":
+            return None
+        if self._custom_window_minutes is not None:
+            return timedelta(minutes=max(1, int(self._custom_window_minutes)))
+        for key, _label, delta in self._TIME_WINDOWS:
+            if key == self._time_window_key:
+                return delta
+        return None
+
+    @staticmethod
+    def _zoom_out_minute_step(current_minutes: int) -> int:
+        # Progression demandee: <10 => +1, >=10 => +2, >=15 => +3, >=20 => +4, etc.
+        return max(1, int(current_minutes) // 5)
+
+    def _current_window_short_label(self) -> str:
+        if self._time_window_key != "all" and self._custom_window_minutes is not None:
+            minutes = max(1, int(self._custom_window_minutes))
+            if minutes < 60:
+                return f"{minutes}m"
+            hours, rem = divmod(minutes, 60)
+            if rem == 0:
+                return f"{hours}h"
+            return f"{hours}h{rem:02d}"
+        return self._window_short_label(self._time_window_key)
+
+    def _on_chart_zoom_out_limit(self, steps: int):
+        if self._time_window_key == "all":
+            return
+
+        delta = self._selected_window_delta()
+        if delta is None:
+            return
+
+        minutes = max(1, int(delta.total_seconds() // 60))
+        for _ in range(max(1, int(steps))):
+            minutes += self._zoom_out_minute_step(minutes)
+
+        # Si on depasse l'historique utile, on repasse en "Toute la duree".
+        if self._events:
+            history_minutes = max(1, int((datetime.now() - self._events[0].dt).total_seconds() // 60))
+            if minutes >= history_minutes:
+                self._custom_window_minutes = None
+                self._set_time_window("all")
+                return
+
+        self._custom_window_minutes = minutes
+        self._reset_chart_view_on_next_render = True
+        self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+        self._animate_range_label()
+        self._render()
+        self._animate_chart_refresh()
+        self._refresh_range_menu_controls()
+
+    @staticmethod
+    def _window_short_label(key: str) -> str:
+        short = {
+            "5m": "5m",
+            "15m": "15m",
+            "30m": "30m",
+            "1h": "1h",
+            "6h": "6h",
+            "24h": "24h",
+            "72h": "72h",
+            "1w": "1w",
+            "2w": "2w",
+            "1mo": "1mo",
+            "3mo": "3mo",
+            "6mo": "6mo",
+            "1y": "1a",
+            "all": "Tout",
+        }
+        return short.get(key, key)
+
+    def _time_window_index(self, key: str) -> int:
+        for idx, (k, _label, _delta) in enumerate(self._TIME_WINDOWS):
+            if k == key:
+                return idx
+        return len(self._TIME_WINDOWS) - 1
+
+    def _ordered_available_window_keys(self) -> list[str]:
+        allowed = set(self._available_time_window_keys)
+        ordered = [key for key, _label, _delta in self._TIME_WINDOWS if key in allowed]
+        if not ordered:
+            return ["all"]
+        if "all" not in ordered:
+            ordered.append("all")
+        return ordered
+
+    def _preferred_non_all_window_key(self) -> str:
+        available = self._ordered_available_window_keys()
+        non_all = [key for key in available if key != "all"]
+        if not non_all:
+            return "all"
+        if self._last_non_all_window_key in non_all:
+            return self._last_non_all_window_key
+        return non_all[-1]
+
+    @staticmethod
+    def _compute_available_window_keys(series: list[tuple[datetime, int]], windows: list[tuple[str, str, timedelta | None]]) -> list[str]:
+        if not series:
+            return ["all"]
+
+        now = datetime.now()
+        oldest_dt = series[0][0]
+        newest_dt = series[-1][0]
+        available: list[str] = []
+
+        for key, _label, delta in windows:
+            if delta is None:
+                continue
+            cutoff = now - delta
+            # Fenetre disponible seulement si on couvre reellement la duree
+            # et qu'il y a encore de l'activite recente dans cette plage.
+            has_full_depth = oldest_dt <= cutoff
+            has_recent_activity = newest_dt >= cutoff
+            if has_full_depth and has_recent_activity:
+                available.append(key)
+
+        available.append("all")
+        return available
+
+    def _suggested_window_keys(self) -> list[str]:
+        idx = self._time_window_index(self._time_window_key)
+        suggestions: list[str] = []
+
+        for delta in (-1, 0, 1):
+            j = idx + delta
+            if 0 <= j < len(self._TIME_WINDOWS):
+                key = self._TIME_WINDOWS[j][0]
+                if key not in suggestions:
+                    suggestions.append(key)
+
+        # Jalons utiles pour naviguer vite sans inonder de boutons.
+        for key in ("1h", "24h", "1w", "all"):
+            if key not in suggestions:
+                suggestions.append(key)
+
+        return suggestions[:5]
+
+    def _set_time_window_by_index(self, index: int, menu: QMenu | None = None):
+        if index < 0:
+            index = 0
+        if index >= len(self._TIME_WINDOWS):
+            index = len(self._TIME_WINDOWS) - 1
+        self._set_time_window(self._TIME_WINDOWS[index][0], menu)
+
+    def _step_time_window(self, delta: int):
+        step = int(delta)
+        if step == 0:
+            return
+
+        ordered = self._ordered_available_window_keys()
+        if len(ordered) <= 1:
+            return
+
+        current = self._time_window_key if self._time_window_key in ordered else ordered[-1]
+        idx = ordered.index(current)
+        target = (idx + step) % len(ordered)
+        self._set_time_window(ordered[target])
+
+    def _range_button_style(self) -> str:
+        return (
+            f"QPushButton {{ border: 1px solid {BORDER}; border-radius: 10px; padding: 0 8px; "
+            "background: rgba(18,22,29,180); color: #d7e6f2; }}"
+            f"QPushButton:hover {{ border-color: {TEAL}; background: rgba(56,180,170,55); color: {TEAL}; }}"
+            "QPushButton:pressed { background: rgba(56,180,170,90); }"
+            "QPushButton:disabled { color: #6f7c8d; border-color: #2a3240; background: rgba(18,22,29,120); }"
+        )
+
+    def _animate_range_label(self):
+        if self._range_label_fx is None:
+            return
+        anim = QPropertyAnimation(self._range_label_fx, b"opacity", self)
+        anim.setDuration(180)
+        anim.setStartValue(0.45)
+        anim.setEndValue(1.0)
+        anim.setEasingCurve(QEasingCurve.OutCubic)
+        anim.start()
+        self._range_label_anim = anim
+
+    def _animate_chart_refresh(self):
+        if self._chart_fx is None:
+            return
+        anim = QPropertyAnimation(self._chart_fx, b"opacity", self)
+        anim.setDuration(160)
+        anim.setStartValue(0.70)
+        anim.setEndValue(1.0)
+        anim.setEasingCurve(QEasingCurve.OutCubic)
+        anim.start()
+        self._chart_anim = anim
+
+    def _refresh_range_menu_controls(self):
+        available = self._ordered_available_window_keys()
+        if self._range_current_btn is not None:
+            self._range_current_btn.setText(self._current_window_short_label())
+        can_navigate = len(available) > 1
+        if self._range_shorter_btn is not None:
+            self._range_shorter_btn.setEnabled(can_navigate)
+        if self._range_longer_btn is not None:
+            self._range_longer_btn.setEnabled(can_navigate)
+
+    def _range_step_delta(self) -> int:
+        # Shift = navigation rapide entre plages.
+        return 3 if (QApplication.keyboardModifiers() & Qt.ShiftModifier) else 1
+
+    def _on_range_prev_clicked(self):
+        self._step_time_window(-self._range_step_delta())
+
+    def _on_range_next_clicked(self):
+        self._step_time_window(self._range_step_delta())
+
+    def _on_range_current_clicked(self):
+        # Bascule instantanee: plage active <-> toute duree.
+        if self._time_window_key == "all":
+            self._set_time_window(self._preferred_non_all_window_key())
+        else:
+            self._last_non_all_window_key = self._time_window_key
+            self._set_time_window("all")
+
+    def _show_chart_range_menu(self, global_pos: QPoint):
+        menu = QMenu(self)
+        menu.setStyleSheet(
+            f"QMenu {{ background: {BG_PANEL}; border: 1px solid {BORDER}; }}"
+            "QMenu::item { background: transparent; }"
+        )
+        container = QWidget(menu)
+        root = QHBoxLayout(container)
+        root.setContentsMargins(6, 6, 6, 6)
+        root.setSpacing(4)
+
+        available = self._ordered_available_window_keys()
+        can_navigate = len(available) > 1
+
+        def _mk_btn(text: str, min_w: int = 24) -> QPushButton:
+            btn = QPushButton(text)
+            btn.setMinimumHeight(22)
+            btn.setMinimumWidth(min_w)
+            btn.setStyleSheet(self._range_button_style())
+            btn.setCursor(Qt.PointingHandCursor)
+            return btn
+
+        shorter_btn = _mk_btn("<", 24)
+        shorter_btn.setEnabled(can_navigate)
+        shorter_btn.setToolTip("Intervalle plus court (Shift: saut rapide)")
+        shorter_btn.clicked.connect(lambda _checked=False: self._on_range_prev_clicked())
+        root.addWidget(shorter_btn)
+        self._range_shorter_btn = shorter_btn
+
+        current_btn = _mk_btn(self._current_window_short_label(), 52)
+        current_btn.setStyleSheet(
+            f"QPushButton {{ border: 1px solid {TEAL}; color: {TEAL}; border-radius: 10px; padding: 0 10px; font-weight: 700; "
+            "background: rgba(56,180,170,35); }}"
+        )
+        current_btn.setEnabled(True)
+        current_btn.setCursor(Qt.PointingHandCursor)
+        current_btn.setToolTip("Basculer avec Toute la duree")
+        current_btn.clicked.connect(lambda _checked=False: self._on_range_current_clicked())
+        root.addWidget(current_btn)
+        self._range_current_btn = current_btn
+
+        longer_btn = _mk_btn(">", 24)
+        longer_btn.setEnabled(can_navigate)
+        longer_btn.setToolTip("Intervalle plus long (Shift: saut rapide)")
+        longer_btn.clicked.connect(lambda _checked=False: self._on_range_next_clicked())
+        root.addWidget(longer_btn)
+        self._range_longer_btn = longer_btn
+
+        action = QWidgetAction(menu)
+        action.setDefaultWidget(container)
+        menu.addAction(action)
+        self._range_menu = menu
+        menu.exec_(global_pos)
+        self._range_menu = None
+        self._range_current_btn = None
+        self._range_shorter_btn = None
+        self._range_longer_btn = None
+        self._range_shortest_btn = None
+        self._range_all_btn = None
+
+    def _set_time_window(self, key: str, menu: QMenu | None = None):
+        key = str(key)
+        if key == self._time_window_key:
+            if self._custom_window_minutes is not None:
+                self._custom_window_minutes = None
+                self._reset_chart_view_on_next_render = True
+                self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+                self._render()
+            self._refresh_range_menu_controls()
+            return
+        if key != "all" and key not in set(self._available_time_window_keys):
+            return
+        self._custom_window_minutes = None
+        if key != "all":
+            self._last_non_all_window_key = key
+        self._time_window_key = key
+        self._settings.setValue("transactions_time_window_key", self._time_window_key)
+        self._reset_chart_view_on_next_render = True
+        self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+        self._animate_range_label()
+        self._render()
+        self._animate_chart_refresh()
+        self._refresh_range_menu_controls()
+        if menu is not None:
+            pass
+
+    def _update_metrics_from_visible_range(self):
+        total = len(self._chart_event_indexes)
+        if total <= 0:
+            self._gain_label.setText("+0")
+            self._loss_label.setText("-0")
+            self._net_label.setText("+0")
+            return
+
+        start = max(0, min(total, int(self._view_start)))
+        end = max(start, min(total, int(self._view_end)))
+        if end <= start:
+            start, end = 0, total
+
+        visible_events: list[TransactionEvent] = []
+        for idx in self._chart_event_indexes[start:end]:
+            if 0 <= idx < len(self._events):
+                visible_events.append(self._events[idx])
+        gains = sum(evt.amount for evt in visible_events if evt.kind == "gain")
+        losses = sum(evt.amount for evt in visible_events if evt.kind == "loss")
+        net = gains - losses
+
+        self._gain_label.setText(f"+{_fmt_kamas(gains)}")
+        self._loss_label.setText(f"-{_fmt_kamas(losses)}")
+        self._net_label.setText(f"{net:+,}".replace(",", " "))
 
     @staticmethod
     def _parse_kamas_token(raw: str) -> int | None:
@@ -1057,10 +1656,13 @@ class TransactionsTab(BaseTab):
         self._table.setHorizontalHeaderLabels(labels)
 
     def _focus_event_in_history(self, event_index: int):
-        if event_index < 0 or event_index >= len(self._events):
+        if event_index < 0 or event_index >= len(self._chart_event_indexes):
             return
 
-        target = self._events[event_index]
+        source_idx = self._chart_event_indexes[event_index]
+        if source_idx < 0 or source_idx >= len(self._events):
+            return
+        target = self._events[source_idx]
         row_index = -1
         for row, evt in enumerate(self._display_events):
             if evt is target:
@@ -1165,13 +1767,6 @@ class TransactionsTab(BaseTab):
 
     def _render(self):
         self._update_header_labels()
-        gains = sum(evt.amount for evt in self._events if evt.kind == "gain")
-        losses = sum(evt.amount for evt in self._events if evt.kind == "loss")
-        net = gains - losses
-
-        self._gain_label.setText(f"+{_fmt_kamas(gains)}")
-        self._loss_label.setText(f"-{_fmt_kamas(losses)}")
-        self._net_label.setText(f"{net:+,}".replace(",", " "))
 
         current_kamas = self._read_current_kamas()
 
@@ -1240,8 +1835,63 @@ class TransactionsTab(BaseTab):
                 self._current_label.setText(_fmt_kamas(max(0, int(current_kamas))))
         self._current_label.setStyleSheet(f"color: {TEAL}; font-size: 14px; font-weight: 800;")
 
-        series = list(zip([evt.dt for evt in self._events], points))
-        self._chart.set_series(series)
+        full_series: list[tuple[datetime, int]] = []
+        self._chart_event_indexes = []
+        for idx, evt in enumerate(self._events):
+            if idx < len(points):
+                full_series.append((evt.dt, points[idx]))
+                self._chart_event_indexes.append(idx)
+
+        self._available_time_window_keys = self._compute_available_window_keys(full_series, self._TIME_WINDOWS)
+        if self._time_window_key != "all" and self._time_window_key not in set(self._available_time_window_keys):
+            self._custom_window_minutes = None
+            self._time_window_key = "all"
+            self._settings.setValue("transactions_time_window_key", self._time_window_key)
+            self._range_label.setText(f"Fenetre: {self._selected_window_label()}")
+            self._reset_chart_view_on_next_render = True
+
+        # Fenetre temporelle choisie via clic droit sur le graphe.
+        selected_delta = self._selected_window_delta()
+        if selected_delta is not None and full_series:
+            # Vrai mode temps reel: fenetre relative a maintenant.
+            now_dt = datetime.now()
+            cutoff = now_dt - selected_delta
+            filtered_series: list[tuple[datetime, int]] = []
+            filtered_indexes: list[int] = []
+            last_before_cutoff: tuple[datetime, int] | None = None
+            for idx, point in enumerate(full_series):
+                if point[0] < cutoff:
+                    last_before_cutoff = point
+                if point[0] >= cutoff:
+                    filtered_series.append(point)
+                    filtered_indexes.append(self._chart_event_indexes[idx])
+
+            # Ancrage gauche: demarre la fenetre a "cutoff" avec la
+            # derniere valeur connue avant la fenetre (ou le 1er point dedans).
+            if last_before_cutoff is not None:
+                cutoff_value = int(last_before_cutoff[1])
+                filtered_series.insert(0, (cutoff, cutoff_value))
+                filtered_indexes.insert(0, -1)
+            elif filtered_series and filtered_series[0][0] > cutoff:
+                filtered_series.insert(0, (cutoff, int(filtered_series[0][1])))
+                filtered_indexes.insert(0, -1)
+
+            # Ancrage droit: la fenetre se termine toujours a "maintenant".
+            if filtered_series:
+                last_dt, last_value = filtered_series[-1]
+                if last_dt < now_dt:
+                    filtered_series.append((now_dt, int(last_value)))
+                    filtered_indexes.append(-1)
+
+            full_series = filtered_series
+            self._chart_event_indexes = filtered_indexes
+
+        series = full_series
+        self._rendered_series = list(series)
+        self._chart.set_series(series, reset_view=self._reset_chart_view_on_next_render)
+        self._reset_chart_view_on_next_render = False
+        self._refresh_range_label_from_view()
+        self._update_metrics_from_visible_range()
 
         display_events = self._sorted_events_for_table()
         self._display_events = display_events
