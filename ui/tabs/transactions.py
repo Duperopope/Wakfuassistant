@@ -35,6 +35,7 @@ from ui.theme import BG_PANEL, BORDER, GREEN, RED, TEAL, TEXT, TEXT_DIM
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _KAMAS_JOURNAL = _PROJECT_ROOT / "data" / "kamas_journal.jsonl"
 _APPDATA_WAKFU_DIR = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
+_KAMA_SYMBOL = "₭"
 
 _TS_RE = re.compile(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{3})?)\]")
 _INNER_TIME_RE = re.compile(r"\b(\d{2}:\d{2}:\d{2}),(\d{3})\b")
@@ -65,6 +66,10 @@ def _parse_ts(raw: str) -> datetime:
 
 def _fmt_kamas(value: int) -> str:
     return f"{value:,}".replace(",", " ")
+
+
+def _fmt_kamas_with_symbol(value: int) -> str:
+    return f"{_fmt_kamas(value)} {_KAMA_SYMBOL}"
 
 
 def _format_dt_parts(dt: datetime) -> tuple[str, str]:
@@ -480,8 +485,8 @@ class KamasLineChart(QWidget):
                 prev_val = int(self._series[self._hover_index - 1][1])
             diff_val = int(hval) - int(prev_val)
 
-            balance_txt = f"Solde: {_fmt_kamas(hval)}"
-            diff_txt = f"Difference: {diff_val:+,}".replace(",", " ")
+            balance_txt = f"Solde: {_fmt_kamas_with_symbol(hval)}"
+            diff_txt = f"Difference: {diff_val:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}"
             when_txt = hdt.strftime("%d/%m/%Y %H:%M:%S")
 
             p.setPen(QPen(QColor(TEAL), 1, Qt.DashLine))
@@ -660,15 +665,27 @@ class TransactionsTab(BaseTab):
         metrics_layout.setHorizontalSpacing(8)
         metrics_layout.setVerticalSpacing(8)
 
-        gain_box, self._gain_label = self._build_metric_box("GAINS", GREEN)
-        loss_box, self._loss_label = self._build_metric_box("PERTES", RED)
-        net_box, self._net_label = self._build_metric_box("NET", TEAL)
-        current_box, self._current_label = self._build_metric_box("KAMAS ACTUELS", TEAL)
+        flow_box, self._gains_value_label, self._losses_value_label = self._build_metric_dual_box(
+            "FLUX",
+            "GAINS",
+            GREEN,
+            "PERTES",
+            RED,
+        )
+        balance_box, self._net_value_label, self._current_kamas_value_label = self._build_metric_dual_box(
+            "SOLDE",
+            "NET",
+            TEAL,
+            "KAMAS ACTUELS",
+            TEAL,
+        )
+        placeholder_1 = self._build_placeholder_metric_box()
+        placeholder_2 = self._build_placeholder_metric_box()
 
-        metrics_layout.addWidget(gain_box, 0, 0)
-        metrics_layout.addWidget(loss_box, 0, 1)
-        metrics_layout.addWidget(net_box, 1, 0)
-        metrics_layout.addWidget(current_box, 1, 1)
+        metrics_layout.addWidget(flow_box, 0, 0)
+        metrics_layout.addWidget(balance_box, 0, 1)
+        metrics_layout.addWidget(placeholder_1, 1, 0)
+        metrics_layout.addWidget(placeholder_2, 1, 1)
 
         root.addWidget(metrics_card)
 
@@ -733,7 +750,7 @@ class TransactionsTab(BaseTab):
 
         self._table = QTableWidget(0, 5, table_card)
         self._table.setObjectName("txTable")
-        self._table.setHorizontalHeaderLabels(["Date", "Heure", "Type", "Libelle", "Montant"])
+        self._table.setHorizontalHeaderLabels(["Date", "Heure", "Type", "Libelle", f"Montant ({_KAMA_SYMBOL})"])
         self._table.verticalHeader().setVisible(False)
         self._table.setEditTriggers(QTableWidget.NoEditTriggers)
         self._table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -796,12 +813,87 @@ class TransactionsTab(BaseTab):
 
         return card, value_lbl
 
+    def _build_metric_dual_box(
+        self,
+        title: str,
+        left_name: str,
+        left_color: str,
+        right_name: str,
+        right_color: str,
+    ) -> tuple[QFrame, QLabel, QLabel]:
+        card = QFrame(self)
+        card.setObjectName("txCard")
+        card.setStyleSheet(
+            f"QFrame#txCard {{ background: {BG_PANEL}; border: 1px solid {BORDER}; border-radius: 8px; }}"
+        )
+
+        lay = QVBoxLayout(card)
+        lay.setContentsMargins(8, 8, 8, 8)
+        lay.setSpacing(6)
+
+        section_lbl = QLabel(title)
+        section_lbl.setObjectName("txMetricName")
+        lay.addWidget(section_lbl)
+
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(10)
+
+        left_col = QVBoxLayout()
+        left_col.setSpacing(2)
+        left_name_lbl = QLabel(left_name)
+        left_name_lbl.setObjectName("txSectionSubtitle")
+        left_value_lbl = QLabel("--")
+        left_value_lbl.setObjectName("txMetricValue")
+        left_value_lbl.setStyleSheet(f"color: {left_color}; font-size: 14px; font-weight: 800;")
+        left_col.addWidget(left_name_lbl)
+        left_col.addWidget(left_value_lbl)
+
+        right_col = QVBoxLayout()
+        right_col.setSpacing(2)
+        right_name_lbl = QLabel(right_name)
+        right_name_lbl.setObjectName("txSectionSubtitle")
+        right_value_lbl = QLabel("--")
+        right_value_lbl.setObjectName("txMetricValue")
+        right_value_lbl.setStyleSheet(f"color: {right_color}; font-size: 14px; font-weight: 800;")
+        right_col.addWidget(right_name_lbl)
+        right_col.addWidget(right_value_lbl)
+
+        row.addLayout(left_col, 1)
+        row.addLayout(right_col, 1)
+        lay.addLayout(row)
+
+        return card, left_value_lbl, right_value_lbl
+
+    def _build_placeholder_metric_box(self) -> QFrame:
+        card = QFrame(self)
+        card.setObjectName("txCard")
+        card.setStyleSheet(
+            f"QFrame#txCard {{ background: {BG_PANEL}; border: 1px solid {BORDER}; border-radius: 8px; }}"
+        )
+        lay = QVBoxLayout(card)
+        lay.setContentsMargins(8, 8, 8, 8)
+        lay.setSpacing(0)
+        lay.addStretch(1)
+        return card
+
+    def _set_flow_metrics(self, gains: int, losses: int):
+        self._gains_value_label.setText(f"+{_fmt_kamas_with_symbol(gains)}")
+        self._losses_value_label.setText(f"-{_fmt_kamas_with_symbol(losses)}")
+
+    def _set_balance_metrics(self, net: int, current_kamas: int | None):
+        self._net_value_label.setText(f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}")
+        if current_kamas is None:
+            self._current_kamas_value_label.setText("--")
+        else:
+            self._current_kamas_value_label.setText(_fmt_kamas_with_symbol(max(0, int(current_kamas))))
+
     def _on_chart_view_stats(self, pct: float, _first: int, _last: int, gains: int, losses: int):
         # Methode conservee pour compatibilite; la carte affiche desormais
         # uniquement les kamas actuels (valeur absolue).
         _ = (pct, gains, losses)
         if _last:
-            self._current_label.setText(_fmt_kamas(max(0, _last)))
+            self._set_balance_metrics(0, max(0, _last))
 
     def _on_chart_view_changed(self, start: int, end: int):
         self._view_start = max(0, int(start))
@@ -1170,9 +1262,8 @@ class TransactionsTab(BaseTab):
     def _update_metrics_from_visible_range(self):
         total = len(self._chart_event_indexes)
         if total <= 0:
-            self._gain_label.setText("+0")
-            self._loss_label.setText("-0")
-            self._net_label.setText("+0")
+            self._set_flow_metrics(0, 0)
+            self._set_balance_metrics(0, None)
             return
 
         start = max(0, min(total, int(self._view_start)))
@@ -1188,9 +1279,12 @@ class TransactionsTab(BaseTab):
         losses = sum(evt.amount for evt in visible_events if evt.kind == "loss")
         net = gains - losses
 
-        self._gain_label.setText(f"+{_fmt_kamas(gains)}")
-        self._loss_label.setText(f"-{_fmt_kamas(losses)}")
-        self._net_label.setText(f"{net:+,}".replace(",", " "))
+        current_val: int | None = None
+        if self._rendered_series:
+            current_val = int(self._rendered_series[-1][1])
+
+        self._set_flow_metrics(gains, losses)
+        self._set_balance_metrics(net, current_val)
 
     @staticmethod
     def _parse_kamas_token(raw: str) -> int | None:
@@ -1428,7 +1522,7 @@ class TransactionsTab(BaseTab):
         confirm = QMessageBox.question(
             self,
             "Suppression correction",
-            f"Supprimer la correction du {date_txt} {time_txt} ({_fmt_kamas(evt.amount)} kamas) ?",
+            f"Supprimer la correction du {date_txt} {time_txt} ({_fmt_kamas_with_symbol(evt.amount)}) ?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
@@ -1649,7 +1743,7 @@ class TransactionsTab(BaseTab):
         return super().eventFilter(obj, event)
 
     def _update_header_labels(self):
-        labels = ["Date", "Heure", "Type", "Libelle", "Montant"]
+        labels = ["Date", "Heure", "Type", "Libelle", f"Montant ({_KAMA_SYMBOL})"]
         arrow = "▼" if self._sort_desc else "▲"
         if 0 <= self._sort_column < len(labels):
             labels[self._sort_column] = f"{labels[self._sort_column]} {arrow}"
@@ -1827,13 +1921,13 @@ class TransactionsTab(BaseTab):
         # Source unique: la carte "KAMAS ACTUELS" suit la derniere valeur
         # de la serie du graphique pour eviter toute divergence d'affichage.
         if points:
-            self._current_label.setText(_fmt_kamas(max(0, int(points[-1]))))
+            current_display = max(0, int(points[-1]))
         else:
             if current_kamas is None:
-                self._current_label.setText("--")
+                current_display = None
             else:
-                self._current_label.setText(_fmt_kamas(max(0, int(current_kamas))))
-        self._current_label.setStyleSheet(f"color: {TEAL}; font-size: 14px; font-weight: 800;")
+                current_display = max(0, int(current_kamas))
+        self._set_balance_metrics(0, current_display)
 
         full_series: list[tuple[datetime, int]] = []
         self._chart_event_indexes = []
@@ -1902,19 +1996,19 @@ class TransactionsTab(BaseTab):
             time_item = QTableWidgetItem(time_txt)
             if evt.kind == "correction":
                 tx_type = "Correction"
-                amount_text = _fmt_kamas(evt.amount)
+                amount_text = _fmt_kamas_with_symbol(evt.amount)
                 color = QColor(TEAL)
             elif evt.kind == "hdv_sale":
                 tx_type = "Vente HDV"
-                amount_text = _fmt_kamas(evt.amount)
+                amount_text = _fmt_kamas_with_symbol(evt.amount)
                 color = QColor(TEXT_DIM)
             elif evt.kind == "gain":
                 tx_type = "Gain"
-                amount_text = f"+ {_fmt_kamas(evt.amount)}"
+                amount_text = f"+ {_fmt_kamas_with_symbol(evt.amount)}"
                 color = QColor(GREEN)
             else:
                 tx_type = "Perte"
-                amount_text = f"- {_fmt_kamas(evt.amount)}"
+                amount_text = f"- {_fmt_kamas_with_symbol(evt.amount)}"
                 color = QColor(RED)
 
             type_item = QTableWidgetItem(tx_type)
