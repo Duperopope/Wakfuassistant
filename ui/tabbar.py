@@ -7,7 +7,7 @@ from PyQt5.QtGui     import QPainter, QColor, QPen, QFont, QFontMetrics
 from ui.theme import BG_PANEL, BG, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM, BORDER
 
 HEIGHT  = 30
-TABS    = ["Personnage", "Inventaire", "HDV", "Marché", "Combat", "Metier", "Options"]
+TABS    = ["Personnage", "Inventaire", "HDV", "Transactions", "Combat", "Metier", "Options"]
 
 
 class _TabBtn(QPushButton):
@@ -107,6 +107,7 @@ class TabBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedHeight(HEIGHT)
+        self._current_idx = 0
         self._palette = {
             "BG_PANEL": BG_PANEL,
             "BORDER": BORDER,
@@ -130,9 +131,22 @@ class TabBar(QWidget):
         self._select(0)
 
     def _select(self, idx: int):
+        self._current_idx = idx
         for i, btn in enumerate(self._btns):
             btn.setChecked(i == idx)
         self.tab_changed.emit(idx)
+
+    def set_current_index(self, idx: int, emit_signal: bool = False):
+        if idx < 0 or idx >= len(self._btns):
+            return
+        self._current_idx = idx
+        for i, btn in enumerate(self._btns):
+            btn.setChecked(i == idx)
+        if emit_signal:
+            self.tab_changed.emit(idx)
+
+    def current_index(self) -> int:
+        return int(self._current_idx)
 
     def paintEvent(self, _event):
         p = QPainter(self)

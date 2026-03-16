@@ -16,11 +16,13 @@ from ui.titlebar import TitleBar
 from ui.onboarding import OnboardingPage
 from core.kamas_history import (
     replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction,
-    get_last_correction_ts, get_permanent_log_start_ts,
+    get_last_correction_ts, get_permanent_log_start_ts, get_active_permanent_log_size,
 )
+from core.permanent_journal import sync_permanent_kamas_journal
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
+from ui.tabs.transactions import TransactionsTab
 from core.wakfu_tracker import WakfuTracker
 
 DEFAULT_W = 440
@@ -220,6 +222,7 @@ class OverlayWindow(QWidget):
         self._session_connected: bool | None = None
         self._log_read_pos: int = 0
         self._journal_read_pos: int = 0
+        self._journal_log_path: Path | None = None
         self._last_detected_class: str | None = None
         self._current_character_name: str | None = None
         self._last_level: int | None = None
@@ -251,16 +254,7 @@ class OverlayWindow(QWidget):
         self._onboarding_page: "OnboardingPage | None" = None
 
         self._load_kamas_config_values()
-
-        if self._settings.value("relative_offset_set", False, type=bool):
-            ox = self._settings.value("relative_offset_rx", 0.0, type=float)
-            oy = self._settings.value("relative_offset_ry", 0.0, type=float)
-            self._relative_offset_ratio = (float(ox), float(oy))
-
-        if self._settings.value("relative_size_set", False, type=bool):
-            rw = self._settings.value("relative_size_rw", 0.0, type=float)
-            rh = self._settings.value("relative_size_rh", 0.0, type=float)
-            self._relative_size_ratio = (float(rw), float(rh))
+        self._load_relative_layout_preferences()
 
         self._setup_window()
         self._setup_click_unlock_button()
@@ -287,13 +281,40 @@ class OverlayWindow(QWidget):
         self.setWindowOpacity(self._opacity)
         self._font_family = self._settings.value("ui_font_family", "Noto Sans", type=str)
         self._apply_app_font_style()
-        saved_w = self._settings.value("window_width", DEFAULT_W, type=int)
-        saved_h = self._settings.value("window_height", DEFAULT_H, type=int)
+        default_w = self._settings.value("default_window_width", DEFAULT_W, type=int)
+        default_h = self._settings.value("default_window_height", DEFAULT_H, type=int)
+        saved_w = self._settings.value("window_width", default_w, type=int)
+        saved_h = self._settings.value("window_height", default_h, type=int)
         saved_w = max(MIN_W, DEFAULT_W, int(saved_w))
         saved_h = max(MIN_H, int(saved_h))
         self._saved_h = saved_h
         self.resize(saved_w, saved_h)
         self._apply_rounded_mask()
+
+    def _load_relative_layout_preferences(self):
+        offset_set = self._settings.value("relative_offset_set", False, type=bool)
+        if not offset_set:
+            offset_set = self._settings.value("default_relative_offset_set", False, type=bool)
+            offset_prefix = "default_relative_offset"
+        else:
+            offset_prefix = "relative_offset"
+
+        if offset_set:
+            ox = self._settings.value(f"{offset_prefix}_rx", 0.0, type=float)
+            oy = self._settings.value(f"{offset_prefix}_ry", 0.0, type=float)
+            self._relative_offset_ratio = (float(ox), float(oy))
+
+        size_set = self._settings.value("relative_size_set", False, type=bool)
+        if not size_set:
+            size_set = self._settings.value("default_relative_size_set", False, type=bool)
+            size_prefix = "default_relative_size"
+        else:
+            size_prefix = "relative_size"
+
+        if size_set:
+            rw = self._settings.value(f"{size_prefix}_rw", 0.0, type=float)
+            rh = self._settings.value(f"{size_prefix}_rh", 0.0, type=float)
+            self._relative_size_ratio = (float(rw), float(rh))
 
     def _build_ui(self):
         root = QVBoxLayout(self)
@@ -314,30 +335,30 @@ class OverlayWindow(QWidget):
 
         self._tab_widgets: list[QWidget] = []
         for name in TABS:
-            w = PlaceholderTab(name)
+            if name == "Transactions":
+                w = TransactionsTab(self)
+            elif name == "Options":
+                w = OptionsTab(
+                    self._opacity,
+                    self._font_family,
+                    self._palette_name,
+                    self._corner_radius,
+                    self,
+                )
+                w.opacity_changed.connect(self.set_overlay_opacity)
+                w.font_changed.connect(self.set_overlay_font_family)
+                w.palette_changed.connect(self.set_overlay_palette)
+                w.shape_changed.connect(self.set_window_corner_radius)
+                w.reset_requested.connect(self._on_reset_requested)
+                w.kamas_corrected.connect(self._on_kamas_corrected)
+                w.set_kamas(self._current_kamas)
+                w.set_kamas_last_entry(get_last_correction_ts())
+                w.set_log_start_date(get_permanent_log_start_ts())
+                self._options_tab = w
+            else:
+                w = PlaceholderTab(name)
             self._stack.addWidget(w)
             self._tab_widgets.append(w)
-
-        if "Options" in TABS:
-            idx = TABS.index("Options")
-            opt = OptionsTab(
-                self._opacity,
-                self._font_family,
-                self._palette_name,
-                self._corner_radius,
-                self,
-            )
-            opt.opacity_changed.connect(self.set_overlay_opacity)
-            opt.font_changed.connect(self.set_overlay_font_family)
-            opt.palette_changed.connect(self.set_overlay_palette)
-            opt.shape_changed.connect(self.set_window_corner_radius)
-            opt.reset_requested.connect(self._on_reset_requested)
-            opt.kamas_corrected.connect(self._on_kamas_corrected)
-            opt.set_kamas(self._current_kamas)
-            opt.set_kamas_last_entry(get_last_correction_ts())
-            opt.set_log_start_date(get_permanent_log_start_ts())
-            self._options_tab = opt
-            self.set_tab(idx, opt)
 
         # ── Page onboarding (hors TABS, index = len(TABS)) ──────────────
         self._onboarding_page = OnboardingPage(self)
@@ -544,7 +565,21 @@ class OverlayWindow(QWidget):
         self._titlebar.pin_toggled.connect(self._on_pin)
         self._titlebar.click_through_toggled.connect(self._on_click_through)
         self._titlebar.close_requested.connect(self.close)
-        self._tabbar.tab_changed.connect(self._stack.setCurrentIndex)
+        self._tabbar.tab_changed.connect(self._on_tab_changed)
+        self._restore_last_opened_tab()
+
+    def _on_tab_changed(self, idx: int):
+        if idx < 0 or idx >= len(TABS):
+            return
+        self._stack.setCurrentIndex(idx)
+        self._settings.setValue("last_opened_tab", int(idx))
+
+    def _restore_last_opened_tab(self):
+        idx = self._settings.value("last_opened_tab", 0, type=int)
+        if idx < 0 or idx >= len(TABS):
+            idx = 0
+        self._tabbar.set_current_index(idx, emit_signal=False)
+        self._stack.setCurrentIndex(idx)
 
     def _setup_wakfu_tracking(self):
         self._tracker = WakfuTracker(self)
@@ -557,7 +592,7 @@ class OverlayWindow(QWidget):
 
     def _position(self):
         screen = QApplication.primaryScreen().availableGeometry()
-        self.move(screen.right() - DEFAULT_W - 10, screen.top() + 40)
+        self.move(screen.right() - self.width() - 10, screen.top() + 40)
 
     def _start_timer(self):
         self._t0 = QDateTime.currentDateTime()
@@ -612,6 +647,7 @@ class OverlayWindow(QWidget):
 
     def _tick(self):
         self._elapsed_seconds = self._t0.secsTo(QDateTime.currentDateTime())
+        sync_permanent_kamas_journal()
         self._sync_character_info_from_interface_feed()
         self._sync_character_info_from_journal()
         self._refresh_title_info()
@@ -689,6 +725,18 @@ class OverlayWindow(QWidget):
         if path is None:
             return None
 
+        # Changement de source journal: on reapplique un curseur persistant
+        # uniquement si le chemin est identique, sinon on repart en tail (EOF).
+        if self._journal_log_path != path:
+            self._journal_log_path = path
+            data = self._read_config_json()
+            stored_path = str(data.get("journal_log_path") or "").strip()
+            stored_pos = int(data.get("journal_read_pos", 0) or 0)
+            if stored_path == str(path) and stored_pos >= 0:
+                self._journal_read_pos = stored_pos
+            else:
+                self._journal_read_pos = 0
+
         try:
             size = path.stat().st_size
             if size <= 0:
@@ -696,18 +744,18 @@ class OverlayWindow(QWidget):
 
             with path.open("rb") as fh:
                 if self._journal_read_pos <= 0:
-                    start = max(0, size - _LOG_BOOTSTRAP_CHUNK)
-                    fh.seek(start)
-                    data = fh.read()
+                    # Ne jamais rejouer l'historique au demarrage: on lit
+                    # seulement les nouvelles lignes futures.
                     self._journal_read_pos = size
-                    return data.decode("utf-8", errors="ignore")
+                    self._persist_journal_cursor(path)
+                    return None
 
                 if size < self._journal_read_pos:
-                    self._journal_read_pos = 0
-                    fh.seek(0)
-                    data = fh.read()
+                    # Rotation/troncature: on saute l'historique present dans
+                    # le nouveau fichier pour eviter un double comptage.
                     self._journal_read_pos = size
-                    return data.decode("utf-8", errors="ignore")
+                    self._persist_journal_cursor(path)
+                    return None
 
                 if size == self._journal_read_pos:
                     return None
@@ -715,23 +763,34 @@ class OverlayWindow(QWidget):
                 fh.seek(self._journal_read_pos)
                 data = fh.read()
                 self._journal_read_pos = size
+                self._persist_journal_cursor(path)
                 return data.decode("utf-8", errors="ignore")
         except OSError:
             return None
+
+    def _persist_journal_cursor(self, path: Path | None = None):
+        if path is None:
+            path = self._journal_log_path
+        if path is None:
+            return
+        self._write_config_patch({
+            "journal_log_path": str(path),
+            "journal_read_pos": int(max(0, self._journal_read_pos)),
+        })
 
     def _sync_character_info_from_journal(self):
         blob = self._read_journal_log_update()
         if not blob:
             return
 
+        # Kamas ne nécessitent pas le nom du personnage ("Vous avez gagné/perdu" = toujours le joueur).
+        # XP/crit/level en ont besoin pour filtrer les événements du bon personnage.
         character_name = self._current_character_name or self._read_character_name()
-        if not character_name:
-            return
-
-        target_name = _normalize_character_name(character_name).lower()
+        target_name = _normalize_character_name(character_name).lower() if character_name else None
         changed = False
 
         for raw_line in blob.splitlines():
+            # ── Kamas (indépendant du nom) ───────────────────────────────
             kamas_gain_match = _KAMAS_GAIN_RE.search(raw_line)
             if kamas_gain_match:
                 gain = self._parse_int_token(kamas_gain_match.group(1))
@@ -745,6 +804,10 @@ class OverlayWindow(QWidget):
                 if loss is not None:
                     self._runtime_kamas_delta -= loss
                     changed = True
+
+            # ── Événements filtrés par nom de personnage ─────────────────
+            if target_name is None:
+                continue
 
             xp_match = _COMBAT_XP_RE.search(raw_line)
             if xp_match:
@@ -787,6 +850,7 @@ class OverlayWindow(QWidget):
             self._refresh_title_info()
 
     def _load_kamas_config_values(self):
+        sync_permanent_kamas_journal()
         data = self._read_config_json()
         self._onboarding_done = bool(data.get("onboarding_done", False))
 
@@ -823,21 +887,21 @@ class OverlayWindow(QWidget):
     def _on_onboarding_confirmed(self, value: int):
         """Appelé quand l'utilisateur valide l'onboarding."""
         ts = now_iso()
-        perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
-        try:
-            perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
-        except OSError:
-            perm_log_offset = 0
+        perm_log_offset = get_active_permanent_log_size()
         self._base_kamas = value
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
         self._current_kamas = value
+        self._journal_read_pos = 0
+        self._journal_log_path = None
         self._write_config_patch({
             "base_kamas": value,
             "manual_kamas_delta": 0,
             "onboarding_done": True,
             "last_session_end": ts,
             "perm_log_offset": perm_log_offset,
+            "journal_read_pos": 0,
+            "journal_log_path": "",
         })
         self._onboarding_done = True
         if self._options_tab:
@@ -874,6 +938,8 @@ class OverlayWindow(QWidget):
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
         self._current_kamas = 0
+        self._journal_read_pos = 0
+        self._journal_log_path = None
         if self._options_tab:
             self._options_tab.set_kamas(0)
             self._options_tab.set_kamas_last_entry(None)
@@ -886,20 +952,20 @@ class OverlayWindow(QWidget):
     def _on_kamas_corrected(self, value: int):
         """Correction manuelle du montant de kamas depuis l'onglet Options."""
         ts = write_kamas_correction(value)   # journal horodaté à la ms
-        perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
-        try:
-            perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
-        except OSError:
-            perm_log_offset = 0
+        perm_log_offset = get_active_permanent_log_size()
         self._base_kamas = value
         self._manual_kamas_delta = 0
         self._runtime_kamas_delta = 0
         self._current_kamas = value
+        self._journal_read_pos = 0
+        self._journal_log_path = None
         self._write_config_patch({
             "base_kamas": value,
             "manual_kamas_delta": 0,
             "last_session_end": ts,
             "perm_log_offset": perm_log_offset,
+            "journal_read_pos": 0,
+            "journal_log_path": "",
         })
         if self._options_tab:
             self._options_tab.set_kamas_last_entry(ts)
@@ -1439,6 +1505,9 @@ class OverlayWindow(QWidget):
             self._settings.setValue("relative_offset_set", True)
             self._settings.setValue("relative_offset_rx", float(ox))
             self._settings.setValue("relative_offset_ry", float(oy))
+            self._settings.setValue("default_relative_offset_set", True)
+            self._settings.setValue("default_relative_offset_rx", float(ox))
+            self._settings.setValue("default_relative_offset_ry", float(oy))
 
         if self._relative_size_ratio is None:
             self._settings.setValue("relative_size_set", False)
@@ -1449,6 +1518,9 @@ class OverlayWindow(QWidget):
             self._settings.setValue("relative_size_set", True)
             self._settings.setValue("relative_size_rw", float(rw))
             self._settings.setValue("relative_size_rh", float(rh))
+            self._settings.setValue("default_relative_size_set", True)
+            self._settings.setValue("default_relative_size_rw", float(rw))
+            self._settings.setValue("default_relative_size_rh", float(rh))
 
     def set_overlay_opacity(self, opacity: float):
         self._opacity = max(0.35, min(1.0, float(opacity)))
@@ -1665,15 +1737,14 @@ class OverlayWindow(QWidget):
         self._settings.setValue("window_width", self.width())
         expanded_h = self._saved_h if self._folded else self.height()
         self._settings.setValue("window_height", max(MIN_H, int(expanded_h)))
+        self._settings.setValue("default_window_width", self.width())
+        self._settings.setValue("default_window_height", max(MIN_H, int(expanded_h)))
         self._save_relative_layout()
         self._settings.sync()
+        self._persist_journal_cursor()
         # Persister le kamas actuel + offset du log pour démarrage rapide
         if self._current_kamas is not None and self._onboarding_done:
-            perm_log = _PROJECT_ROOT / "logs" / "permanent" / "all_events.log"
-            try:
-                perm_log_offset = perm_log.stat().st_size if perm_log.exists() else 0
-            except OSError:
-                perm_log_offset = 0
+            perm_log_offset = get_active_permanent_log_size()
             self._write_config_patch({
                 "base_kamas": self._current_kamas,
                 "manual_kamas_delta": 0,
