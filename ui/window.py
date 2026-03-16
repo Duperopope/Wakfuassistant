@@ -1788,6 +1788,14 @@ class OverlayWindow(QWidget):
             self.move(event.globalPos() - self._drag_pos)
 
     def mouseReleaseEvent(self, _event):
+        if self._drag_pos is not None:
+            # Après un drag manuel, persister la nouvelle position relative
+            # pour que _on_wakfu_focus_changed ne snappe pas en arrière.
+            if not self._titlebar.is_pinned and self._wakfu_rect and not self._in_programmatic_move:
+                wx, wy, ww, wh = self._wakfu_rect
+                if ww > 0 and wh > 0:
+                    self._relative_offset_ratio = ((self.x() - wx) / ww, (self.y() - wy) / wh)
+                    self._save_relative_layout()
         self._drag_pos = None
 
     def leaveEvent(self, _event):
