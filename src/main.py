@@ -115,6 +115,7 @@ class Database:
                     unit_price REAL DEFAULT 0,
                     quantity INTEGER DEFAULT 0,
                     seller_name TEXT DEFAULT '',
+                    is_own_offer INTEGER DEFAULT 0,
                     gem_slots INTEGER DEFAULT 0,
                     sublimations TEXT DEFAULT '',
                     notes TEXT DEFAULT '',
@@ -122,6 +123,32 @@ class Database:
                     is_active INTEGER DEFAULT 1,
                     created_at TEXT,
                     updated_at TEXT
+                );
+                CREATE TABLE IF NOT EXISTS item_loss_tags (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    item_name TEXT NOT NULL,
+                    quantity INTEGER DEFAULT 0,
+                    reason TEXT NOT NULL,
+                    notes TEXT DEFAULT '',
+                    created_at TEXT
+                );
+                CREATE TABLE IF NOT EXISTS craft_components (
+                    output_item TEXT NOT NULL,
+                    component_item TEXT NOT NULL,
+                    quantity INTEGER DEFAULT 1,
+                    created_at TEXT,
+                    PRIMARY KEY (output_item, component_item)
+                );
+                CREATE TABLE IF NOT EXISTS bug_reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT,
+                    tab TEXT,
+                    context_kind TEXT,
+                    context_name TEXT,
+                    context_field TEXT,
+                    message TEXT,
+                    ui_state TEXT,
+                    status TEXT DEFAULT 'open'
                 );
                 CREATE TABLE IF NOT EXISTS xp_curve_levels (
                     level INTEGER PRIMARY KEY,
@@ -135,10 +162,13 @@ class Database:
                     current_level INTEGER DEFAULT 0,
                     current_xp INTEGER DEFAULT 0,
                     target_level INTEGER DEFAULT 0,
+                    manual_truth INTEGER DEFAULT 1,
                     last_updated TEXT
                 );
             """)
             self._ensure_user_items_columns()
+            self._ensure_metier_levels_columns()
+            self._ensure_hdv_offers_columns()
             self.conn.commit()
 
     def _ensure_user_items_columns(self):
@@ -154,6 +184,24 @@ class Database:
         for name, col_type in required.items():
             if name not in cols:
                 self.conn.execute(f"ALTER TABLE user_items ADD COLUMN {name} {col_type}")
+
+    def _ensure_metier_levels_columns(self):
+        cols = {row[1] for row in self.conn.execute("PRAGMA table_info(metier_levels)").fetchall()}
+        required = {
+            "manual_truth": "INTEGER DEFAULT 1",
+        }
+        for name, col_type in required.items():
+            if name not in cols:
+                self.conn.execute(f"ALTER TABLE metier_levels ADD COLUMN {name} {col_type}")
+
+    def _ensure_hdv_offers_columns(self):
+        cols = {row[1] for row in self.conn.execute("PRAGMA table_info(hdv_offers)").fetchall()}
+        required = {
+            "is_own_offer": "INTEGER DEFAULT 0",
+        }
+        for name, col_type in required.items():
+            if name not in cols:
+                self.conn.execute(f"ALTER TABLE hdv_offers ADD COLUMN {name} {col_type}")
 
     def execute(self, sql, params=None):
         with self._lock:
@@ -182,7 +230,9 @@ class Database:
 
 class UserConfig:
     DEFAULTS = {"character": "L'Immortel", "server": "Ogrest",
-                "account": "Kairozadyk", "base_kamas": 0, "manual_kamas_delta": 0}
+                "account": "Kairozadyk", "base_kamas": 0, "manual_kamas_delta": 0,
+                "onboarding_done": False, "character_level": 0,
+                "character_xp_current": 0, "character_xp_total": 0}
 
     def __init__(self, path):
         self.path = Path(path)
@@ -907,19 +957,59 @@ class Session:
             xp_total = sum(self.xp_by_metier.values())
             metiers = {}
             curve_values, curve_samples = self._curve_map()
-            lvl_rows = self.db.query("SELECT metier, current_level, current_xp, target_level FROM metier_levels")
-            lvl_by_metier = {r[0]: (r[1], r[2], r[3]) for r in lvl_rows}
-            all_metiers = set(self.xp_by_metier.keys()) | set(lvl_by_metier.keys())
+            lvl_rows = self.db.query("SELECT metier, current_level, current_xp, target_level, manual_truth FROM metier_levels")
 
-            for m in sorted(all_metiers):
-                xp = self.xp_by_metier.get(m, 0)
+            db_by_norm = {}
+            for row in lvl_rows:
+                m_name = str(row[0] or "").strip()
+                nk = normalize_name(m_name)
+                if not nk:
+                    continue
+                db_by_norm[nk] = {
+                    "name": m_name,
+                    "level": int(row[1] or 0),
+                    "xp": int(row[2] or 0),
+                    "target": int(row[3] or 0),
+                    "manual_truth": bool(int(row[4] or 0)),
+                }
+
+            xp_by_norm = defaultdict(int)
+            xp_next_by_norm = {}
+            display_name_by_norm = {}
+            for raw_name, v in self.xp_by_metier.items():
+                nk = normalize_name(raw_name)
+                if not nk:
+                    continue
+                xp_by_norm[nk] += int(v or 0)
+                if nk not in display_name_by_norm:
+                    display_name_by_norm[nk] = raw_name
+            for raw_name, v in self.xp_to_next.items():
+                nk = normalize_name(raw_name)
+                if not nk:
+                    continue
+                xp_next_by_norm[nk] = int(v or 0)
+
+            level_ups_by_norm = defaultdict(int)
+            for lu in self.level_ups:
+                nk = normalize_name(lu.get("metier", ""))
+                if nk:
+                    level_ups_by_norm[nk] += 1
+
+            all_norms = set(xp_by_norm.keys()) | set(db_by_norm.keys())
+
+            for nk in sorted(all_norms):
+                dbm = db_by_norm.get(nk)
+                m = dbm["name"] if dbm else display_name_by_norm.get(nk, nk)
+                xp = xp_by_norm.get(nk, 0)
                 xp_h = int(xp / h)
-                xp_next = self.xp_to_next.get(m, 0)
+                xp_next = xp_next_by_norm.get(nk, 0)
                 eta_s = (xp_next / xp_h * 3600) if xp_h > 0 and xp_next > 0 else 0
                 pct = min(99, max(0, (1 - xp_next / (xp_next + xp)) * 100)) if xp_next > 0 else 0
-                base_level, base_xp_input, target_lvl = lvl_by_metier.get(m, (0, 0, 0))
-                manual_truth = m in lvl_by_metier
-                lvl_ups_count = len([lu for lu in self.level_ups if lu["metier"] == m])
+                base_level = dbm["level"] if dbm else 0
+                base_xp_input = dbm["xp"] if dbm else 0
+                target_lvl = dbm["target"] if dbm else 0
+                manual_truth = bool(dbm["manual_truth"]) if dbm else False
+                lvl_ups_count = int(level_ups_by_norm.get(nk, 0))
                 real_level = base_level if manual_truth else base_level + lvl_ups_count
 
                 xp_for_this_lvl = XPCurve.xp_for_level(real_level, curve_values)
@@ -1283,9 +1373,29 @@ tr:hover td { background: var(--bg2); }
     cursor: pointer;
 }
 .icon-card:hover { border-color: var(--cyan); }
+.icon-card.selected { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
 .icon-card .name { font-size: 12px; min-height: 32px; margin-bottom: 6px; }
 .icon-card .line { display: flex; align-items: center; gap: 6px; }
 .icon-card img { width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--bg3); }
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10060;
+    background: rgba(0, 0, 0, 0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+}
+.onboarding-card {
+    width: min(560px, 100%);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+}
+.onboarding-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.onboarding-grid label { color: var(--text2); font-size: 12px; }
 .progress-bar { width: 100px; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; }
 .progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.5s; }
 .feed { max-height: 300px; overflow-y: auto; }
@@ -1336,7 +1446,7 @@ var hdvCategoryFilter = "all";
 var hdvSortCol = "name";
 var hdvSortDir = 1;
 var ctxTarget = {kind: "", name: "", field: ""};
-var iconPicker = {open: false, item: "", query: "", list: [], suggestions: [], loading: false, error: ""};
+var iconPicker = {open: false, item: "", query: "", list: [], suggestions: [], selectedUrl: "", loading: false, error: ""};
 var iconPickerTimer = null;
 
 function switchTab(tab) {
@@ -1429,6 +1539,7 @@ function buildMenuTitle() {
     if (ctxTarget.kind === "item") return ctxTarget.name;
     if (ctxTarget.kind === "hdv_offer") return "Offre HDV #" + ctxTarget.field;
     if (ctxTarget.kind === "hdv_new") return "Nouvelle offre HDV";
+    if (ctxTarget.kind === "zone") return "Zone: " + (ctxTarget.name || "(inconnue)");
     if (ctxTarget.kind === "metier") return "Metier: " + ctxTarget.name;
     if (ctxTarget.kind === "metier_new") return "Metiers";
     if (ctxTarget.kind === "config") return "Dashboard";
@@ -1446,40 +1557,107 @@ function buildMenuBody() {
             + menuButton("Modifier prix manuel", "promptEditPrice()")
             + menuButton("Ajouter offre de vente HDV", "promptAddHdvOfferForItem(\"sell\")")
             + menuButton("Ajouter offre d'achat HDV", "promptAddHdvOfferForItem(\"buy\")")
+            + menuButton("Taguer une perte (detruit/craft/banque)", "promptTagLoss()")
+            + menuButton("Ajouter composant de craft", "promptAddCraftComponent()")
+            + menuButton("Vider recette craft", "clearCraftRecipe()")
             + menuButton("Modifier nom corrige (icone)", "promptEditLabel()")
             + menuButton("Modifier notes", "promptEditNotes()")
             + menuButton("Choisir image (librairie Ankama)", "openIconPickerForCurrentItem()")
             + menuButton("Retirer image manuelle", "clearIconOverride()")
+            + menuButton("Signaler un bug ici", "promptReportBug()")
             + menuButton("Reinitialiser les corrections manuelles", "resetManualEdits()");
     }
     if (ctxTarget.kind === "hdv_offer") {
         return ""
             + menuButton("Modifier cette offre", "promptEditHdvOfferById()")
+            + menuButton("Signaler un bug ici", "promptReportBug()")
             + menuButton("Supprimer cette offre", "deleteHdvOfferById()");
     }
     if (ctxTarget.kind === "hdv_new") {
         return ""
             + menuButton("Ajouter offre de vente", "promptAddHdvOffer(\"sell\")")
+            + menuButton("Signaler un bug ici", "promptReportBug()")
             + menuButton("Ajouter offre d'achat", "promptAddHdvOffer(\"buy\")");
     }
     if (ctxTarget.kind === "metier") {
         return ""
             + menuButton("Modifier niveau actuel", "promptEditMetierLevel()")
             + menuButton("Modifier XP actuelle", "promptEditMetierXp()")
+            + menuButton("Signaler un bug ici", "promptReportBug()")
             + menuButton("Modifier niveau cible", "promptEditMetierTarget()");
     }
     if (ctxTarget.kind === "metier_new") {
-        return menuButton("Ajouter un metier", "promptAddMetier()");
+        return ""
+            + menuButton("Ajouter un metier", "promptAddMetier()")
+            + menuButton("Signaler un bug ici", "promptReportBug()");
     }
     if (ctxTarget.kind === "config") {
         return ""
             + menuButton("Modifier personnage", "promptEditConfigCharacter()")
             + menuButton("Modifier serveur", "promptEditConfigServer()")
             + menuButton("Modifier compte", "promptEditConfigAccount()")
+            + menuButton("Onboarding initial (perso/xp/kamas)", "openOnboarding()")
             + menuButton("Modifier kamas de base", "promptEditConfigBaseKamas()")
+            + menuButton("Reset base locale", "promptResetData()")
+            + menuButton("Signaler un bug ici", "promptReportBug()")
             + menuButton("Ajustement manuel kamas (+/-)", "promptEditManualKamasDelta()");
     }
-    return "";
+    if (ctxTarget.kind === "zone") {
+        return menuButton("Signaler un bug ici", "promptReportBug()");
+    }
+    return menuButton("Signaler un bug ici", "promptReportBug()");
+}
+
+function buildZoneNameFromEvent(ev) {
+    var t = ev.target;
+    if (!t) return "zone inconnue";
+    var titleEl = t.closest(".section-title,.subsection-title,.metier-name,th,.tab");
+    if (titleEl && titleEl.textContent) return String(titleEl.textContent || "").trim().slice(0, 120);
+    var cls = String(t.className || "").trim();
+    var tag = String(t.tagName || "DIV").toLowerCase();
+    if (cls) return tag + "." + cls.split(/\s+/).slice(0, 2).join(".");
+    return tag;
+}
+
+function promptReportBug() {
+    var defaultMsg = "";
+    if (ctxTarget.kind === "item" && ctxTarget.name) defaultMsg = "Bug sur l'objet: " + ctxTarget.name;
+    else if (ctxTarget.kind === "metier" && ctxTarget.name) defaultMsg = "Bug sur le metier: " + ctxTarget.name;
+    else if (ctxTarget.kind === "zone" && ctxTarget.name) defaultMsg = "Bug sur la zone: " + ctxTarget.name;
+    var msg = prompt("Decris le bug observe", defaultMsg);
+    if (msg === null) return;
+    msg = String(msg || "").trim();
+    if (!msg) return;
+
+    var uiState = {
+        tab: currentTab,
+        sortCol: sortCol,
+        sortDir: sortDir,
+        filterText: filterText,
+        filterMode: filterMode,
+        inventoryCategoryFilter: inventoryCategoryFilter,
+        hdvFilterText: hdvFilterText,
+        hdvCategoryFilter: hdvCategoryFilter,
+        hdvSortCol: hdvSortCol,
+        hdvSortDir: hdvSortDir,
+    };
+
+    fetch("/api/bug_report", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            message: msg,
+            tab: currentTab,
+            context_kind: ctxTarget.kind || "",
+            context_name: ctxTarget.name || "",
+            context_field: ctxTarget.field || "",
+            ui_state: uiState
+        })
+    }).then(function() {
+        alert("Bug enregistre. Merci.");
+    }).catch(function() {
+        alert("Impossible d'enregistrer le bug.");
+    });
 }
 
 function promptEditQuantity() {
@@ -1520,6 +1698,42 @@ function resetManualEdits() {
     setPrice(ctxTarget.name, 0);
 }
 
+function promptTagLoss() {
+    if (!ctxTarget.name) return;
+    var qty = parseInt(prompt("Quantite a taguer en perte", "1") || "0", 10) || 0;
+    if (qty <= 0) return;
+    var reason = String(prompt("Raison (detruit/craft/banque/autre)", "detruit") || "detruit").trim().toLowerCase();
+    if (reason !== "detruit" && reason !== "craft" && reason !== "banque" && reason !== "autre") reason = "autre";
+    var notes = prompt("Notes (optionnel)", "") || "";
+    fetch("/api/loss_tag", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({item: ctxTarget.name, quantity: qty, reason: reason, notes: notes})
+    });
+}
+
+function promptAddCraftComponent() {
+    if (!ctxTarget.name) return;
+    var comp = prompt("Nom de l'objet composant", "");
+    if (!comp) return;
+    var qty = parseInt(prompt("Quantite de ce composant", "1") || "1", 10) || 1;
+    fetch("/api/craft_component", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({output_item: ctxTarget.name, component_item: comp, quantity: qty, action: "upsert"})
+    });
+}
+
+function clearCraftRecipe() {
+    if (!ctxTarget.name) return;
+    if (!confirm("Vider toute la recette craft pour cet objet ?")) return;
+    fetch("/api/craft_component", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({output_item: ctxTarget.name, action: "clear"})
+    });
+}
+
 function clearIconOverride() {
     if (!ctxTarget.name) return;
     setItemMeta(ctxTarget.name, {manual_icon_url: ""});
@@ -1532,6 +1746,7 @@ function openIconPickerForCurrentItem() {
     iconPicker.query = ctxTarget.name;
     iconPicker.list = [];
     iconPicker.suggestions = [];
+    iconPicker.selectedUrl = "";
     iconPicker.loading = true;
     iconPicker.error = "";
     renderIconPicker();
@@ -1542,6 +1757,7 @@ function closeIconPicker() {
     iconPicker.open = false;
     iconPicker.loading = false;
     iconPicker.error = "";
+    iconPicker.selectedUrl = "";
     renderIconPicker();
 }
 
@@ -1578,7 +1794,16 @@ function loadIconLibrary(query) {
 
 function chooseIconForCurrentItem(url) {
     if (!iconPicker.item || !url) return;
-    setItemMeta(iconPicker.item, {manual_icon_url: String(url)});
+    iconPicker.selectedUrl = String(url);
+    renderIconPicker();
+}
+
+function applySelectedIcon() {
+    if (!iconPicker.item || !iconPicker.selectedUrl) {
+        alert("Choisis une image avant de valider.");
+        return;
+    }
+    setItemMeta(iconPicker.item, {manual_icon_url: String(iconPicker.selectedUrl)});
     closeIconPicker();
 }
 
@@ -1586,15 +1811,18 @@ function renderIconPicker() {
     var overlay = document.getElementById("icon-picker-overlay");
     var title = document.getElementById("icon-picker-title");
     var input = document.getElementById("icon-picker-input");
+    var applyBtn = document.getElementById("icon-picker-apply");
     var sug = document.getElementById("icon-picker-suggestions");
     var body = document.getElementById("icon-picker-body");
-    if (!overlay || !title || !input || !sug || !body) return;
+    if (!overlay || !title || !input || !sug || !body || !applyBtn) return;
 
     overlay.style.display = iconPicker.open ? "flex" : "none";
     if (!iconPicker.open) return;
 
     title.textContent = "Choix image: " + iconPicker.item;
     input.value = iconPicker.query || "";
+    applyBtn.disabled = !iconPicker.selectedUrl;
+    applyBtn.textContent = iconPicker.selectedUrl ? "Valider l'image" : "Choisir une image";
 
     var sugHtml = "";
     if (iconPicker.suggestions && iconPicker.suggestions.length) {
@@ -1602,7 +1830,8 @@ function renderIconPicker() {
         for (var i = 0; i < iconPicker.suggestions.length; i++) {
             var s = iconPicker.suggestions[i];
             var safeS = s.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"");
-            sugHtml += "<button class=\"icon-chip\" onclick=\"chooseIconForCurrentItem(\\\"" + safeS + "\\\")\"><img src=\"" + s + "\" onerror=\"this.style.display='none'\"></button>";
+            var selectedChip = iconPicker.selectedUrl === s ? " style=\"border-color:var(--green)\"" : "";
+            sugHtml += "<button class=\"icon-chip\"" + selectedChip + " onclick=\"chooseIconForCurrentItem(\\\"" + safeS + "\\\")\"><img src=\"" + s + "\" onerror=\"this.style.display='none'\"></button>";
         }
         sugHtml += "</div>";
     }
@@ -1628,7 +1857,8 @@ function renderIconPicker() {
         var iconUrl = (row.icons && row.icons.length) ? row.icons[0] : "";
         if (!iconUrl) continue;
         var safe = iconUrl.replace(/\\/g, "\\\\").replace(/\"/g, "\\\"");
-        out += "<button class=\"icon-card\" onclick=\"chooseIconForCurrentItem(\\\"" + safe + "\\\")\">";
+        var selectedClass = iconPicker.selectedUrl === iconUrl ? " selected" : "";
+        out += "<button class=\"icon-card" + selectedClass + "\" onclick=\"chooseIconForCurrentItem(\\\"" + safe + "\\\")\">";
         out += "<div class=\"name\">" + esc(row.name || "Objet") + "</div>";
         out += "<div class=\"line\"><img src=\"" + iconUrl + "\" onerror=\"this.style.display='none'\"><span class=\"tiny-note\">gfx " + (row.gfx_id || "?") + "</span></div>";
         out += "</button>";
@@ -1656,7 +1886,14 @@ function promptOfferPayload(existing, forcedType, forcedItem) {
     var quantity = parseInt(prompt("Quantite de l'offre", qtyDefault) || "0", 10) || 0;
 
     var sellerDefault = existing ? (existing.seller_name || "") : "";
-    var seller = prompt("Vendeur / Acheteur (optionnel)", sellerDefault);
+    var ownDefault = existing ? (existing.is_own_offer ? "oui" : "non") : "non";
+    var ownRaw = prompt("Est-ce notre offre ? (oui/non)", ownDefault);
+    if (ownRaw === null) return null;
+    var isOwnOffer = String(ownRaw || "non").trim().toLowerCase();
+    isOwnOffer = (isOwnOffer === "oui" || isOwnOffer === "yes" || isOwnOffer === "y" || isOwnOffer === "1");
+
+    var sellerLabel = isOwnOffer ? "Nom du joueur (toi)" : "Nom du joueur (autre)";
+    var seller = prompt(sellerLabel, sellerDefault || (isOwnOffer ? (data && data.config ? data.config.character : "") : ""));
     if (seller === null) return null;
 
     var gemDefault = existing ? String(existing.gem_slots || 0) : "0";
@@ -1676,6 +1913,7 @@ function promptOfferPayload(existing, forcedType, forcedItem) {
         unit_price: unitPrice,
         quantity: quantity,
         seller_name: String(seller || "").trim(),
+        is_own_offer: isOwnOffer,
         gem_slots: gemSlots,
         sublimations: String(sublimations || "").trim(),
         notes: String(notes || "").trim()
@@ -1802,12 +2040,59 @@ function promptEditManualKamasDelta() {
     setConfigField("manual_kamas_delta", parseInt(v, 10) || 0);
 }
 
+function openOnboarding() {
+    var m = document.getElementById("onboarding-overlay");
+    if (!m) return;
+    document.getElementById("ob-level").value = String((data && data.config ? (data.config.character_level || 0) : 0));
+    document.getElementById("ob-xp-current").value = String((data && data.config ? (data.config.character_xp_current || 0) : 0));
+    document.getElementById("ob-xp-total").value = String((data && data.config ? (data.config.character_xp_total || 0) : 0));
+    document.getElementById("ob-kamas").value = String((data && data.config ? (data.config.base_kamas || 0) : 0));
+    m.style.display = "flex";
+}
+
+function closeOnboarding() {
+    var m = document.getElementById("onboarding-overlay");
+    if (m) m.style.display = "none";
+}
+
+function saveOnboarding() {
+    var payload = {
+        character_level: parseInt(document.getElementById("ob-level").value || "0", 10) || 0,
+        character_xp_current: parseInt(document.getElementById("ob-xp-current").value || "0", 10) || 0,
+        character_xp_total: parseInt(document.getElementById("ob-xp-total").value || "0", 10) || 0,
+        base_kamas: parseInt(document.getElementById("ob-kamas").value || "0", 10) || 0,
+        onboarding_done: true
+    };
+    fetch("/api/config", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    }).then(function() {
+        closeOnboarding();
+    });
+}
+
+function promptResetData() {
+    var clearDb = confirm("Reset local: effacer les donnees trackees (sessions, HDV, combats, tags) ?");
+    if (!clearDb) return;
+    var clearWakfu = confirm("Vider aussi le fichier log Wakfu ?");
+    fetch("/api/reset", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({clear_db: true, clear_wakfu_log: clearWakfu, clear_config: false})
+    }).then(function() {
+        alert("Reset termine.");
+    });
+}
+
 function renderHeader() {
     if (!data) return;
     var s = data.session;
     var h = document.getElementById("header-stats");
     h.innerHTML =
         "<span class=\"stat\" oncontextmenu=\"openContextMenu(event,&quot;config&quot;,&quot;&quot;,&quot;character&quot;)\"><span class=\"label\">Perso </span><span class=\"value cyan\">" + esc(data.config.character) + "</span></span>" +
+        "<span class=\"stat\"><span class=\"label\">Niveau perso </span><span class=\"value\">" + fmt(data.config.character_level || 0) + "</span></span>" +
+        "<span class=\"stat\"><span class=\"label\">XP perso </span><span class=\"value\">" + fmt(data.config.character_xp_current || 0) + " / " + fmt(data.config.character_xp_total || 0) + "</span></span>" +
         "<span class=\"stat\"><span class=\"label\">Duree session </span><span class=\"value\">" + s.elapsed_str + "</span></span>" +
         "<span class=\"stat\"><span class=\"label\">Combats </span><span class=\"value red\">" + s.fights + "</span></span>" +
         "<span class=\"stat\"><span class=\"label\">Crafts </span><span class=\"value yellow\">" + s.crafts + "</span></span>" +
@@ -1953,6 +2238,9 @@ function renderInventory() {
             case "uses": va = inv.uses[a[0]]||0; vb = inv.uses[b[0]]||0; break;
             case "sales": va = inv.sales[a[0]]||0; vb = inv.sales[b[0]]||0; break;
             case "crafts": va = inv.crafts[a[0]]||0; vb = inv.crafts[b[0]]||0; break;
+            case "detruit": va = (((data.loss_tags||{})[a[0]]||{}).detruit)||0; vb = (((data.loss_tags||{})[b[0]]||{}).detruit)||0; break;
+            case "banque": va = (((data.loss_tags||{})[a[0]]||{}).banque)||0; vb = (((data.loss_tags||{})[b[0]]||{}).banque)||0; break;
+            case "loss_craft": va = (((data.loss_tags||{})[a[0]]||{}).craft)||0; vb = (((data.loss_tags||{})[b[0]]||{}).craft)||0; break;
             case "solde": va = a[1]; vb = b[1]; break;
             case "manual": va = inv.manual_qty[a[0]]||0; vb = inv.manual_qty[b[0]]||0; break;
             case "meta":
@@ -1970,7 +2258,7 @@ function renderInventory() {
     });
 
     html += "<table><tr>";
-    var cols = [["name","Objet"],["category","Categorie"],["drops","Drops"],["losses","Perdu"],["uses","Utilise"],["sales","Vendu"],["crafts","Crafte"],["solde","SOLDE"],["manual","Ajust."],["price","Prix/u"],["value","Valeur"],["meta","Correction manuelle"]];
+    var cols = [["name","Objet"],["category","Categorie"],["drops","Drops"],["losses","Perdu"],["uses","Utilise"],["sales","Vendu"],["crafts","Crafte"],["detruit","Detruit"],["banque","Banque"],["loss_craft","Pertes craft"],["solde","SOLDE"],["manual","Ajust."],["price","Prix/u"],["value","Valeur"],["meta","Correction manuelle"]];
     for (var c = 0; c < cols.length; c++) {
         var key = cols[c][0];
         var label = cols[c][1];
@@ -1992,6 +2280,9 @@ function renderInventory() {
         var autoNet = inv.auto_items[name]||0;
         var p = inv.prices[name]||0;
         var v = (net > 0 && p > 0) ? Math.round(net * p) : 0;
+        var lt = (data.loss_tags && data.loss_tags[name]) ? data.loss_tags[name] : {detruit:0, banque:0, craft:0, autre:0};
+        var cdata = (data.craft_costs && data.craft_costs[name]) ? data.craft_costs[name] : null;
+        var recipe = (data.craft_recipes && data.craft_recipes[name]) ? data.craft_recipes[name] : [];
         var img = iconTag(name);
         var catName = categoryOf(name);
         var sCls = net > 0 ? "pos bold" : (net < 0 ? "neg" : "dim");
@@ -2006,6 +2297,9 @@ function renderInventory() {
         html += "<td class=\"num\">" + (u>0?"-"+u:"-") + "</td>";
         html += "<td class=\"num\">" + (sl>0?"-"+sl:"-") + "</td>";
         html += "<td class=\"num\">" + (cr>0?"+"+cr:"-") + "</td>";
+        html += "<td class=\"num\">" + ((lt.detruit||0)>0?"-"+(lt.detruit||0):"-") + "</td>";
+        html += "<td class=\"num\">" + ((lt.banque||0)>0?"-"+(lt.banque||0):"-") + "</td>";
+        html += "<td class=\"num\">" + ((lt.craft||0)>0?"-"+(lt.craft||0):"-") + "</td>";
         html += "<td class=\"num " + sCls + "\">" + (net>0?"+":"") + net + "</td>";
         html += "<td class=\"num\"><input class=\"editable\" type=\"number\" value=\"" + mq + "\" onchange=\"setItemMeta(&quot;" + safeName + "&quot;, {manual_qty:this.value})\"></td>";
         html += "<td class=\"num\"><input class=\"editable\" type=\"number\" value=\"" + (p>0?Math.round(p):"") + "\" placeholder=\"?\" onchange=\"setPrice(&quot;" + safeName + "&quot;,this.value)\"></td>";
@@ -2013,6 +2307,14 @@ function renderInventory() {
         html += "<td>";
         html += "<input class=\"editable text\" type=\"text\" value=\"" + esc(rawLabel) + "\" placeholder=\"Nom exact (corrige)\" onchange=\"setItemMeta(&quot;" + safeName + "&quot;, {manual_label:this.value})\">";
         html += "<div style=\"margin-top:4px\"><input class=\"editable text\" type=\"text\" value=\"" + esc(rawNotes) + "\" placeholder=\"Notes\" onchange=\"setItemMeta(&quot;" + safeName + "&quot;, {notes:this.value})\"></div>";
+        if (recipe.length) {
+            var comps = [];
+            for (var ri = 0; ri < recipe.length; ri++) comps.push(recipe[ri].qty + "x " + recipe[ri].item);
+            var cc = cdata ? fmt(cdata.cost || 0) : "0";
+            var ce = cdata && cdata.complete ? "" : " (prix incomplets)";
+            html += "<div class=\"tiny-note\" style=\"margin-top:4px\">Recette: " + esc(comps.join(", ")) + "</div>";
+            html += "<div class=\"tiny-note\" style=\"margin-top:2px\">Cout composants: " + cc + ce + "</div>";
+        }
         if (inv.corrected[name]) html += "<div class=\"tiny-note pos\" style=\"margin-top:4px\">Correction enregistree</div>";
         html += "</td>";
         html += "</tr>";
@@ -2152,15 +2454,17 @@ function renderHDV() {
                 continue;
             }
             html += "<table style=\"margin-top:4px\">";
-            html += "<tr><th>Type</th><th class=\"num\">Prix/u</th><th class=\"num\">Qte</th><th>Vendeur/Acheteur</th><th class=\"num\">Gemmes</th><th>Sublimations</th><th>Notes</th><th>Maj</th></tr>";
+            html += "<tr><th>Type</th><th>Offre</th><th class=\"num\">Prix/u</th><th class=\"num\">Qte</th><th>Joueur</th><th class=\"num\">Gemmes</th><th>Sublimations</th><th>Notes</th><th>Maj</th></tr>";
             for (var r = 0; r < offers.length; r++) {
                 var row = offers[r];
                 var rid = String(row.id || "");
                 var oType = row.offer_type === "buy" ? "Achat" : "Vente";
                 var oCls = row.offer_type === "buy" ? "cyan" : "yellow";
                 var upd = row.updated_at ? String(row.updated_at).slice(0, 16).replace("T", " ") : "-";
+                var ownerTxt = row.is_own_offer ? "Moi" : "Autre";
                 html += "<tr oncontextmenu=\"openContextMenu(event,&quot;hdv_offer&quot;,&quot;" + safeName + "&quot;,&quot;" + rid + "&quot;)\">";
                 html += "<td class=\"" + oCls + "\">" + oType + "</td>";
+                html += "<td>" + ownerTxt + "</td>";
                 html += "<td class=\"num\">" + fmt(Math.round(row.unit_price || 0)) + "</td>";
                 html += "<td class=\"num\">" + (row.quantity || 0) + "</td>";
                 html += "<td>" + esc(row.seller_name || "-") + "</td>";
@@ -2298,7 +2602,7 @@ function setItemMeta(item, payload) {
     });
 }
 
-fetch("/api/data").then(function(r){return r.json();}).then(function(d){data=d;render();}).catch(function(){});
+fetch("/api/data").then(function(r){return r.json();}).then(function(d){data=d;render(); if (data && data.config && !data.config.onboarding_done) openOnboarding();}).catch(function(){});
 
 var evtSource = new EventSource("/api/stream");
 evtSource.onmessage = function(e) { data = JSON.parse(e.data); render(); };
@@ -2311,7 +2615,9 @@ setInterval(function() {
 
 document.addEventListener("click", function() { closeItemMenu(); });
 document.addEventListener("contextmenu", function(ev) {
-    if (!ev.target.closest("[oncontextmenu]")) closeItemMenu();
+    if (!ev.target.closest("[oncontextmenu]")) {
+        openContextMenu(ev, "zone", buildZoneNameFromEvent(ev), "");
+    }
 });
 document.addEventListener("keydown", function(ev) {
     if (ev.key === "Escape") {
@@ -2354,10 +2660,27 @@ document.addEventListener("keydown", function(ev) {
     html_parts.append("<div class=\"icon-picker-head\">")
     html_parts.append("<div id=\"icon-picker-title\" class=\"icon-picker-title\">Choix image</div>")
     html_parts.append("<input id=\"icon-picker-input\" class=\"editable text\" type=\"text\" placeholder=\"Rechercher un objet...\" oninput=\"onIconPickerInput(this.value)\">")
+    html_parts.append("<button id=\"icon-picker-apply\" class=\"ctx-item\" style=\"width:auto;padding:6px 10px\" onclick=\"applySelectedIcon()\">Valider l'image</button>")
     html_parts.append("<button class=\"ctx-item\" style=\"width:auto;padding:6px 10px\" onclick=\"closeIconPicker()\">Fermer</button>")
     html_parts.append("</div>")
     html_parts.append("<div id=\"icon-picker-suggestions\" class=\"icon-suggestions\"></div>")
     html_parts.append("<div id=\"icon-picker-body\" class=\"icon-picker-body\"></div>")
+    html_parts.append("</div>")
+    html_parts.append("</div>")
+    html_parts.append("<div id=\"onboarding-overlay\" class=\"onboarding-overlay\" onclick=\"closeOnboarding()\">")
+    html_parts.append("<div class=\"onboarding-card\" onclick=\"event.stopPropagation()\">")
+    html_parts.append("<div class=\"section-title\">Initialisation profil</div>")
+    html_parts.append("<div class=\"tiny-note\">Renseigne ta base de verite au depart. Tu pourras modifier ensuite via clic droit sur le dashboard.</div>")
+    html_parts.append("<div class=\"onboarding-grid\">")
+    html_parts.append("<label>Niveau perso actuel<input id=\"ob-level\" class=\"editable text\" type=\"number\" value=\"0\"></label>")
+    html_parts.append("<label>XP actuelle perso<input id=\"ob-xp-current\" class=\"editable text\" type=\"number\" value=\"0\"></label>")
+    html_parts.append("<label>XP totale du niveau<input id=\"ob-xp-total\" class=\"editable text\" type=\"number\" value=\"0\"></label>")
+    html_parts.append("<label>Kamas actuels<input id=\"ob-kamas\" class=\"editable text\" type=\"number\" value=\"0\"></label>")
+    html_parts.append("</div>")
+    html_parts.append("<div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:12px\">")
+    html_parts.append("<button class=\"ctx-item\" style=\"width:auto\" onclick=\"closeOnboarding()\">Plus tard</button>")
+    html_parts.append("<button class=\"ctx-item\" style=\"width:auto\" onclick=\"saveOnboarding()\">Valider</button>")
+    html_parts.append("</div>")
     html_parts.append("</div>")
     html_parts.append("</div>")
     html_parts.append("<div class=\"content\" id=\"content\"></div>")
@@ -2461,29 +2784,30 @@ def api_metier():
     xp_remaining = body.get("xp_remaining")
     level_for_curve = body.get("level_for_curve", level)
     if metier:
+        metier_name = str(metier).strip()
         i_level = int(level or 0)
         i_xp = int(xp or 0)
         i_target = int(target or 0)
         db.execute(
-            "INSERT OR REPLACE INTO metier_levels (metier, current_level, current_xp, target_level, last_updated) VALUES (?,?,?,?,?)",
-            (metier, i_level, i_xp, i_target, datetime.now().isoformat()))
+            "INSERT OR REPLACE INTO metier_levels (metier, current_level, current_xp, target_level, manual_truth, last_updated) VALUES (?,?,?,?,?,?)",
+            (metier_name, i_level, i_xp, i_target, 1, datetime.now().isoformat()))
 
         if learn_curve and xp_remaining is not None:
             i_rem = int(xp_remaining or 0)
             curve_level = int(level_for_curve or i_level)
             xp_required = i_xp + i_rem
             if xp_required > 0:
-                session.learn_curve_level(curve_level, xp_required, source=f"manual:{metier}")
+                session.learn_curve_level(curve_level, xp_required, source=f"manual:{metier_name}")
                 logger.info(
                     "Courbe XP apprise: metier=%s level=%s xp_current=%s xp_remaining=%s xp_required=%s",
-                    metier,
+                    metier_name,
                     curve_level,
                     i_xp,
                     i_rem,
                     xp_required,
                 )
 
-        logger.info(f"Metier {metier} : niveau={i_level}, xp={i_xp}, cible={i_target}")
+        logger.info(f"Metier {metier_name} : niveau={i_level}, xp={i_xp}, cible={i_target}, manual_truth=1")
     return jsonify({"ok": True})
 
 
@@ -2509,6 +2833,7 @@ def api_hdv_offer():
     unit_price = float(body.get("unit_price", 0) or 0)
     quantity = int(body.get("quantity", 0) or 0)
     seller_name = str(body.get("seller_name", "") or "").strip()
+    is_own_offer = 1 if bool(body.get("is_own_offer", False)) else 0
     gem_slots = int(body.get("gem_slots", 0) or 0)
     sublimations = str(body.get("sublimations", "") or "").strip()
     notes = str(body.get("notes", "") or "").strip()
@@ -2518,19 +2843,147 @@ def api_hdv_offer():
         db.execute(
             """
             UPDATE hdv_offers
-            SET item_name=?, offer_type=?, unit_price=?, quantity=?, seller_name=?, gem_slots=?, sublimations=?, notes=?, is_active=1, updated_at=?
+            SET item_name=?, offer_type=?, unit_price=?, quantity=?, seller_name=?, is_own_offer=?, gem_slots=?, sublimations=?, notes=?, is_active=1, updated_at=?
             WHERE id=?
             """,
-            (item, offer_type, unit_price, quantity, seller_name, gem_slots, sublimations, notes, now, int(offer_id)),
+            (item, offer_type, unit_price, quantity, seller_name, is_own_offer, gem_slots, sublimations, notes, now, int(offer_id)),
         )
     else:
         db.execute(
             """
-            INSERT INTO hdv_offers (item_name, offer_type, unit_price, quantity, seller_name, gem_slots, sublimations, notes, source, is_active, created_at, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+            INSERT INTO hdv_offers (item_name, offer_type, unit_price, quantity, seller_name, is_own_offer, gem_slots, sublimations, notes, source, is_active, created_at, updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
-            (item, offer_type, unit_price, quantity, seller_name, gem_slots, sublimations, notes, "manual", 1, now, now),
+            (item, offer_type, unit_price, quantity, seller_name, is_own_offer, gem_slots, sublimations, notes, "manual", 1, now, now),
         )
+    return jsonify({"ok": True})
+
+
+@flask_app.route("/api/loss_tag", methods=["POST"])
+def api_loss_tag():
+    body = request.get_json(force=True)
+    item = str(body.get("item", "") or "").strip()
+    quantity = int(body.get("quantity", 0) or 0)
+    reason = str(body.get("reason", "") or "").strip().lower()
+    notes = str(body.get("notes", "") or "").strip()
+    if not item:
+        return jsonify({"ok": False, "error": "item requis"}), 400
+    if quantity <= 0:
+        return jsonify({"ok": False, "error": "quantite invalide"}), 400
+    if reason not in ("detruit", "craft", "banque", "autre"):
+        reason = "autre"
+    db.execute(
+        "INSERT INTO item_loss_tags (item_name, quantity, reason, notes, created_at) VALUES (?,?,?,?,?)",
+        (item, quantity, reason, notes, datetime.now().isoformat()),
+    )
+    return jsonify({"ok": True})
+
+
+@flask_app.route("/api/craft_component", methods=["POST"])
+def api_craft_component():
+    body = request.get_json(force=True)
+    action = str(body.get("action", "upsert") or "upsert").strip().lower()
+    output_item = str(body.get("output_item", "") or "").strip()
+    component_item = str(body.get("component_item", "") or "").strip()
+
+    if not output_item:
+        return jsonify({"ok": False, "error": "output_item requis"}), 400
+
+    if action == "clear":
+        db.execute("DELETE FROM craft_components WHERE output_item=?", (output_item,))
+        return jsonify({"ok": True})
+
+    if not component_item:
+        return jsonify({"ok": False, "error": "component_item requis"}), 400
+
+    if action == "delete":
+        db.execute("DELETE FROM craft_components WHERE output_item=? AND component_item=?", (output_item, component_item))
+        return jsonify({"ok": True})
+
+    quantity = int(body.get("quantity", 1) or 1)
+    if quantity <= 0:
+        quantity = 1
+    db.execute(
+        """
+        INSERT INTO craft_components (output_item, component_item, quantity, created_at)
+        VALUES (?,?,?,?)
+        ON CONFLICT(output_item, component_item) DO UPDATE SET
+            quantity=excluded.quantity,
+            created_at=excluded.created_at
+        """,
+        (output_item, component_item, quantity, datetime.now().isoformat()),
+    )
+    return jsonify({"ok": True})
+
+
+@flask_app.route("/api/reset", methods=["POST"])
+def api_reset():
+    global inventory, session, watcher
+    body = request.get_json(force=True)
+    clear_db = bool(body.get("clear_db", True))
+    clear_wakfu_log = bool(body.get("clear_wakfu_log", False))
+    clear_config = bool(body.get("clear_config", False))
+
+    try:
+        watcher.stop()
+    except Exception:
+        pass
+
+    if clear_db:
+        for table in [
+            "sessions", "xp_events", "kamas_events", "drop_events", "loss_events", "use_events",
+            "sale_events", "craft_events", "fight_events", "market_prices", "hdv_offers",
+            "item_loss_tags", "craft_components", "bug_reports", "metier_levels", "user_items", "xp_curve_levels",
+        ]:
+            db.execute(f"DELETE FROM {table}")
+
+    if clear_wakfu_log:
+        try:
+            if WAKFU_LOG.exists():
+                WAKFU_LOG.write_text("", encoding="utf-8")
+        except Exception as e:
+            logger.warning(f"Impossible de vider le log Wakfu: {e}")
+
+    if clear_config:
+        for k, v in UserConfig.DEFAULTS.items():
+            config.set(k, v)
+
+    inventory = SmartInventory(db)
+    session = Session(db, inventory)
+    watcher = LogWatcher(WAKFU_LOG, session, parse_existing=False)
+    watcher.start()
+    return jsonify({"ok": True})
+
+
+@flask_app.route("/api/bug_report", methods=["POST"])
+def api_bug_report():
+    body = request.get_json(force=True)
+    message = str(body.get("message", "") or "").strip()
+    if not message:
+        return jsonify({"ok": False, "error": "message requis"}), 400
+
+    tab = str(body.get("tab", "") or "")
+    context_kind = str(body.get("context_kind", "") or "")
+    context_name = str(body.get("context_name", "") or "")
+    context_field = str(body.get("context_field", "") or "")
+    ui_state = body.get("ui_state", {})
+    now = datetime.now().isoformat()
+
+    db.execute(
+        """
+        INSERT INTO bug_reports (created_at, tab, context_kind, context_name, context_field, message, ui_state, status)
+        VALUES (?,?,?,?,?,?,?,?)
+        """,
+        (now, tab, context_kind, context_name, context_field, message, json.dumps(ui_state, ensure_ascii=False), "open"),
+    )
+    logger.info(
+        "Bug report: tab=%s kind=%s name=%s field=%s msg=%s",
+        tab,
+        context_kind,
+        context_name,
+        context_field,
+        message[:160],
+    )
     return jsonify({"ok": True})
 
 @flask_app.route("/api/config", methods=["POST"])
@@ -2546,7 +2999,7 @@ def _build_data():
     inv = inventory.get_snapshot()
     hdv_rows = db.query(
         """
-        SELECT id, item_name, offer_type, unit_price, quantity, seller_name, gem_slots, sublimations, notes, source, updated_at
+        SELECT id, item_name, offer_type, unit_price, quantity, seller_name, is_own_offer, gem_slots, sublimations, notes, source, updated_at
         FROM hdv_offers
         WHERE is_active=1
         ORDER BY item_name COLLATE NOCASE ASC, offer_type ASC, unit_price DESC
@@ -2562,14 +3015,43 @@ def _build_data():
             "unit_price": float(row[3] or 0),
             "quantity": int(row[4] or 0),
             "seller_name": row[5] or "",
-            "gem_slots": int(row[6] or 0),
-            "sublimations": row[7] or "",
-            "notes": row[8] or "",
-            "source": row[9] or "manual",
-            "updated_at": row[10] or "",
+            "is_own_offer": bool(int(row[6] or 0)),
+            "gem_slots": int(row[7] or 0),
+            "sublimations": row[8] or "",
+            "notes": row[9] or "",
+            "source": row[10] or "manual",
+            "updated_at": row[11] or "",
         }
         hdv_offers[offer["item"]].append(offer)
         hdv_offer_index[str(offer["id"])] = offer
+
+    loss_rows = db.query(
+        "SELECT item_name, reason, SUM(quantity) FROM item_loss_tags GROUP BY item_name, reason"
+    )
+    loss_tags = defaultdict(lambda: {"detruit": 0, "craft": 0, "banque": 0, "autre": 0})
+    for item_name, reason, qty in loss_rows:
+        rr = str(reason or "autre")
+        if rr not in ("detruit", "craft", "banque", "autre"):
+            rr = "autre"
+        loss_tags[item_name][rr] = int(qty or 0)
+
+    craft_rows = db.query(
+        "SELECT output_item, component_item, quantity FROM craft_components ORDER BY output_item, component_item"
+    )
+    craft_recipes = defaultdict(list)
+    craft_costs = {}
+    for out_item, comp_item, qty in craft_rows:
+        q = int(qty or 0)
+        craft_recipes[out_item].append({"item": comp_item, "qty": q})
+    for out_item, components in craft_recipes.items():
+        total = 0
+        complete = True
+        for comp in components:
+            unit = float(inv.get("prices", {}).get(comp["item"], 0) or 0)
+            if unit <= 0:
+                complete = False
+            total += int(round(unit * int(comp["qty"] or 0)))
+        craft_costs[out_item] = {"cost": int(total), "complete": complete}
 
     icon_candidates = {}
     icons = {}
@@ -2600,6 +3082,9 @@ def _build_data():
         "inventory": inv,
         "hdv_offers": dict(hdv_offers),
         "hdv_offer_index": hdv_offer_index,
+        "loss_tags": dict(loss_tags),
+        "craft_recipes": dict(craft_recipes),
+        "craft_costs": craft_costs,
         "item_categories": item_categories,
         "known_kamas_total": known_kamas_total,
         "inv_value": inventory.get_estimated_value(),

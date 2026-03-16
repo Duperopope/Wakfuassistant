@@ -53,6 +53,10 @@ Le projet reste volontairement conforme à une contrainte simple:
 - `src/main.py`: application principale (backend + frontend inline)
 - `data/wakfu_tracker.db`: base SQLite
 - `data/ankama_cdn/`: exports Ankama (items, itemTypes, jobsItems, resources...)
+- `docs/HANDOVER.md`: synthese des points a reprendre par un autre agent
+- `docs/examples/wakfu_chat_example.log`: extrait de logs Wakfu (exemple de chat)
+
+Note: `src/trackers/farm_tracker.py` a ete retire (code mort non utilise).
 
 ## Lancement
 ```bash
