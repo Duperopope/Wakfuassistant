@@ -560,27 +560,24 @@ class OverlayWindow(QWidget):
         self._write_config_json(data)
 
     def _setup_click_unlock_button(self):
-        btn = QPushButton("🖱 Deverrouiller", None)
+        from ui.titlebar import _tinted_icon, _ICON_DIR
+        from PyQt5.QtCore import QSize as _QSize
+        btn = QPushButton("", None)
         btn.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        btn.setAttribute(Qt.WA_TranslucentBackground, False)
+        btn.setAttribute(Qt.WA_TranslucentBackground, True)
         btn.setFocusPolicy(Qt.NoFocus)
-        btn.setFixedHeight(28)
-        btn.setStyleSheet(
-            f"""
-            QPushButton {{
-                background: {BG};
-                color: {TEAL_BRIGHT};
-                border: 1px solid {BORDER};
-                border-radius: 8px;
-                padding: 4px 10px;
-                font-weight: 700;
-            }}
-            QPushButton:hover {{
-                border-color: {TEAL};
-                background: #111722;
-            }}
-            """
-        )
+        btn.setFixedSize(28, 28)
+        btn.setIconSize(_QSize(16, 16))
+        btn.setIcon(_tinted_icon(str(_ICON_DIR / "clickthrough.svg"), TEAL_BRIGHT))
+        btn.setToolTip("Désactiver le clic à travers")
+        btn.setStyleSheet("""
+            QPushButton {
+                background: transparent; border: none; border-radius: 10px;
+            }
+            QPushButton:hover {
+                background: rgba(30,180,176,0.14);
+            }
+        """)
         btn.clicked.connect(lambda: self.set_click_through(False))
         btn.hide()
         self._click_unlock_btn = btn
@@ -1611,8 +1608,18 @@ class OverlayWindow(QWidget):
         self._titlebar.set_palette(self._palette)
         self._tabbar.set_palette(self._palette)
         self._apply_app_font_style()
+        self._refresh_click_unlock_icon()
         self.update()
         self._settings.setValue("ui_palette", self._palette_name)
+
+    def _refresh_click_unlock_icon(self):
+        if self._click_unlock_btn is None:
+            return
+        from ui.titlebar import _tinted_icon, _ICON_DIR
+        teal_bright = self._palette.get("TEAL_BRIGHT", TEAL_BRIGHT)
+        self._click_unlock_btn.setIcon(
+            _tinted_icon(str(_ICON_DIR / "clickthrough.svg"), teal_bright)
+        )
 
     def set_window_corner_radius(self, radius: int):
         self._corner_radius = max(4, min(32, int(radius)))
@@ -1674,10 +1681,8 @@ class OverlayWindow(QWidget):
     def _position_click_unlock_button(self):
         if self._click_unlock_btn is None:
             return
-        self._click_unlock_btn.adjustSize()
-        fg = self.frameGeometry()
-        x = fg.x() + max(8, fg.width() - self._click_unlock_btn.width() - 8)
-        y = fg.y() + 8
+        # Superposé exactement sur le bouton click-through du titlebar
+        x, y, _w, _h = self._titlebar.click_through_btn_geometry()
         self._click_unlock_btn.move(x, y)
 
     def _update_click_unlock_button_visibility(self):

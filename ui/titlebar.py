@@ -330,6 +330,11 @@ class TitleBar(QWidget):
         self._click_through = bool(enabled)
         self._btn_click.set_active(self._click_through)
 
+    def click_through_btn_geometry(self) -> "tuple[int,int,int,int]":
+        """Retourne (x, y, w, h) global du bouton click-through (pour y superposer le bouton unlock)."""
+        pos = self._btn_click.mapToGlobal(self._btn_click.rect().topLeft())
+        return pos.x(), pos.y(), self._btn_click.width(), self._btn_click.height()
+
     @property
     def is_click_through(self) -> bool:
         return self._click_through
