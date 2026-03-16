@@ -695,7 +695,7 @@ class OverlayWindow(QWidget):
 
         kamas_part = ""
         if self._current_kamas is not None:
-            kamas_part = f" | kamas: {self._current_kamas}\u00a7"
+            kamas_part = f" | kamas: {self._current_kamas:,} ₭".replace(",", "\u202f")
 
         self._titlebar.set_info(
             f"{e//3600:02d}:{(e%3600)//60:02d}:{e%60:02d} | {status}{character_part}{class_part}{level_part}{crit_part}{xp_part}{kamas_part}"

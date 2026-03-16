@@ -98,12 +98,15 @@ def _format_dt_parts(dt: datetime) -> tuple[str, str]:
 
 
 class _ClickableFrame(QFrame):
-    """QFrame qui émet clicked() lors d'un clic gauche."""
+    """QFrame qui émet clicked() lors d'un clic gauche.
+    L'event est accepté pour éviter toute propagation vers la fenêtre parente."""
     clicked = pyqtSignal()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            event.accept()
             self.clicked.emit()
+            return
         super().mousePressEvent(event)
 
 
