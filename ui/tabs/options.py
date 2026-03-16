@@ -19,6 +19,7 @@ from PyQt5.QtGui import QIntValidator
 
 from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, TEXT, TEXT_DIM, TEAL
+from core.kamas_history import get_last_correction_ts
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +236,9 @@ class OptionsTab(BaseTab):
         self._all_cards: list[CollapsibleCard] = [self._display_card, self._data_card]
         for card in self._all_cards:
             card.expanded.connect(lambda c=card: self._on_card_expanded(c))
+
+        # Refresh horodatage depuis le journal à chaque ouverture de Données
+        self._data_card.expanded.connect(self._refresh_data_timestamps)
 
         root.addStretch(1)
         self._building = False
@@ -496,6 +500,12 @@ class OptionsTab(BaseTab):
             self._kamas_display.setText("—")
         else:
             self._kamas_display.setText(f"{value:,}".replace(",", "\u00a0") + " k")
+
+    def _refresh_data_timestamps(self):
+        """Relit le journal à chaque ouverture de la carte pour garantir l'affichage."""
+        ts = get_last_correction_ts()
+        if ts:
+            self.set_kamas_last_entry(ts)
 
     def set_log_start_date(self, ts: str | None):
         """

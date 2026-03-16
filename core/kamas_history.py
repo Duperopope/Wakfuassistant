@@ -109,8 +109,20 @@ def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
     if not _PERM_LOG.exists():
         return 0
 
+    try:
+        file_size = _PERM_LOG.stat().st_size
+    except OSError:
+        return 0
+
+    # Si l'offset pointe à la fin ou au-delà → rien de nouveau à lire
+    if file_offset > 0 and file_offset >= file_size:
+        return 0
+
+    # On utilise l'offset seulement s'il pointe DANS le fichier
+    use_offset = file_offset > 0 and file_offset < file_size
+
     since_dt: datetime | None = None
-    if since_iso and file_offset == 0:
+    if since_iso and not use_offset:
         try:
             fmt = "%Y-%m-%d %H:%M:%S.%f" if "." in since_iso else "%Y-%m-%d %H:%M:%S"
             since_dt = datetime.strptime(since_iso, fmt)
@@ -118,12 +130,11 @@ def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
             since_dt = None
 
     delta = 0
-    past_cutoff = (since_dt is None) or (file_offset > 0)
+    past_cutoff = (since_dt is None) or use_offset
 
     try:
-        file_size = _PERM_LOG.stat().st_size
         with _PERM_LOG.open("rb") as fh_bin:
-            if file_offset > 0 and file_offset < file_size:
+            if use_offset:
                 fh_bin.seek(file_offset)
             fh = io.TextIOWrapper(fh_bin, encoding="utf-8", errors="ignore")
             for line in fh:
@@ -131,8 +142,7 @@ def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
                     m = _TS_RE.match(line)
                     if m:
                         try:
-                            raw_ts = m.group(1)
-                            line_dt = datetime.strptime(raw_ts, "%Y-%m-%d %H:%M:%S")
+                            line_dt = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S")
                             if line_dt > since_dt:
                                 past_cutoff = True
                         except ValueError:
@@ -152,7 +162,6 @@ def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
                     v = _parse_kamas_token(loss_m.group(1))
                     if v is not None:
                         delta -= v
-
     except OSError:
         return 0
 
