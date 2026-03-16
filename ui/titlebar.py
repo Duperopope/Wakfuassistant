@@ -1,10 +1,11 @@
 # ui/titlebar.py — Barre de titre custom (drag, pin, fold, close)
 
 from pathlib import Path
+import re as _re
 import zipfile
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore    import Qt, pyqtSignal, QSize
+from PyQt5.QtCore    import Qt, pyqtSignal, QSize, QByteArray
 from PyQt5.QtGui     import QPainter, QColor, QPen, QIcon, QLinearGradient, QPixmap
 
 from ui.theme import (
@@ -18,6 +19,20 @@ _CLASS_ICON_CACHE_DIR = _PROJECT_ROOT / "data" / "ankama_cdn" / "class_icons"
 _ZAAP_WAKFU_ICON = Path.home() / "AppData" / "Roaming" / "zaap" / "repositories" / "production" / "wakfu" / "main" / "data" / "icon.png"
 _WAKFU_INSTALL_ROOT = Path("H:/Games/Wakfu")
 _WAKFU_GUI_JAR = _WAKFU_INSTALL_ROOT / "contents" / "gui_jar" / "gui.jar"
+
+
+def _tinted_icon(svg_path: str, color: str, size: int = 16) -> QIcon:
+    """Charge un SVG, remplace toutes les couleurs hex par `color`, retourne un QIcon."""
+    try:
+        data = Path(svg_path).read_text(encoding="utf-8")
+        data = _re.sub(r"#[0-9A-Fa-f]{6}", color, data)
+        pix = QPixmap()
+        if pix.loadFromData(QByteArray(data.encode()), b"SVG"):
+            return QIcon(pix.scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+    except Exception:
+        pass
+    return QIcon(svg_path)
+
 
 _CLASS_TO_ID = {
     "feca": 1,
@@ -126,66 +141,65 @@ class _TitleBtn(QPushButton):
     def __init__(self, icon_name: str, tooltip: str = "", danger: bool = False):
         super().__init__("")
         self.setFixedSize(28, 28)
-        self.setIcon(QIcon(str(_ICON_DIR / icon_name)))
         self.setIconSize(QSize(16, 16))
         self.setToolTip(tooltip)
-        self._danger  = danger
-        self._active  = False
-        self._palette = {
-            "TEAL": TEAL,
+        self._danger   = danger
+        self._active   = False
+        self._svg_path = str(_ICON_DIR / icon_name)
+        self._palette  = {
+            "TEAL":        TEAL,
             "TEAL_BRIGHT": TEAL_BRIGHT,
-            "TEXT": TEXT,
-            "TEXT_DIM": TEXT_DIM,
-            "RED": RED,
+            "TEXT":        TEXT,
+            "TEXT_DIM":    TEXT_DIM,
+            "RED":         RED,
         }
         self._refresh_style()
 
     def set_palette(self, palette: dict[str, str]):
-        self._palette = {
-            **self._palette,
-            **palette,
-        }
+        self._palette = {**self._palette, **palette}
         self._refresh_style()
 
     def set_active(self, active: bool):
         self._active = active
         self._refresh_style()
 
+    def update_icon(self, icon_name: str):
+        """Remplace l'icône SVG et rafraîchit la couleur."""
+        self._svg_path = str(_ICON_DIR / icon_name)
+        self._refresh_style()
+
     def _refresh_style(self):
-        teal = self._palette.get("TEAL", TEAL)
         teal_bright = self._palette.get("TEAL_BRIGHT", TEAL_BRIGHT)
-        text = self._palette.get("TEXT", TEXT)
-        text_dim = self._palette.get("TEXT_DIM", TEXT_DIM)
-        red = self._palette.get("RED", RED)
+        text_dim    = self._palette.get("TEXT_DIM",    TEXT_DIM)
+        red         = self._palette.get("RED",         RED)
+
+        # Icône colorée selon l'état (pas de boîte / bordure)
+        if self._danger:
+            icon_color = red if self._active else text_dim
+        elif self._active:
+            icon_color = teal_bright
+        else:
+            icon_color = text_dim
+
+        self.setIcon(_tinted_icon(self._svg_path, icon_color))
+
+        # Fond au survol uniquement
         if self._danger:
             self.setStyleSheet(f"""
                 QPushButton {{
-                    background: transparent; border: none;
-                    color: {text_dim}; border-radius: 10px;
+                    background: transparent; border: none; border-radius: 10px;
                 }}
                 QPushButton:hover {{
-                    background: rgba(224,80,80,0.18); color: {red};
-                }}
-            """)
-        elif self._active:
-            self.setStyleSheet(f"""
-                QPushButton {{
-                    background: rgba(30,180,176,0.18);
-                    border: 1px solid {teal};
-                    color: {teal}; border-radius: 10px;
-                }}
-                QPushButton:hover {{
-                    background: rgba(30,180,176,0.28); color: {teal_bright};
+                    background: rgba(224,80,80,0.14);
                 }}
             """)
         else:
             self.setStyleSheet(f"""
                 QPushButton {{
-                    background: transparent; border: none;
-                    color: {text_dim}; border-radius: 10px;
+                    background: transparent; border: none; border-radius: 10px;
                 }}
                 QPushButton:hover {{
-                    background: rgba(255,255,255,0.07); color: {text};
+                    background: rgba(255,255,255,0.07);
                 }}
             """)
 
@@ -293,14 +307,17 @@ class TitleBar(QWidget):
     def set_class_icon_by_breed_id(self, breed_id: int):
         """No-op : l'icône de classe est désormais dans PersonnageTab."""
 
-    def set_folded_metrics(self, items: "list[tuple[str, str]]"):
+    def set_folded_metrics(self, items: "list[tuple]"):
         """Met à jour les métriques compactes.
-        items = [(texte, couleur_hex), …] — seulement les chips épinglés."""
+        items = [(texte, couleur_hex), …] ou [(texte, couleur_hex, tooltip), …]"""
         for i, lbl in enumerate(self._metric_labels):
             if i < len(items):
-                text, color = items[i]
+                entry = items[i]
+                text, color = entry[0], entry[1]
+                tooltip = entry[2] if len(entry) > 2 else ""
                 lbl.setText(text)
                 lbl.setStyleSheet(f"color: {color}; font-size: 11px; font-weight: 700;")
+                lbl.setToolTip(tooltip)
                 lbl.setVisible(True)
             else:
                 lbl.setVisible(False)
@@ -344,9 +361,7 @@ class TitleBar(QWidget):
 
     def _toggle_fold(self):
         self._folded = not self._folded
-        self._btn_fold.setIcon(
-            QIcon(str(_ICON_DIR / ("chevron_up.svg" if self._folded else "chevron_down.svg")))
-        )
+        self._btn_fold.update_icon("chevron_up.svg" if self._folded else "chevron_down.svg")
         # Basculer entre identité app et métriques
         self._enutrium_icon.setVisible(not self._folded)
         self._lbl.setVisible(not self._folded)

@@ -162,6 +162,7 @@ class OptionsTab(BaseTab):
     """Options UI/overlay avec layout propre et controls clairs."""
 
     opacity_changed        = pyqtSignal(float)
+    ct_opacity_changed     = pyqtSignal(float)  # opacité en mode clic à travers
     font_changed           = pyqtSignal(str)
     palette_changed        = pyqtSignal(str)
     shape_changed          = pyqtSignal(int)
@@ -203,6 +204,7 @@ class OptionsTab(BaseTab):
     def __init__(
         self,
         initial_opacity: float = 0.96,
+        initial_ct_opacity: float = 0.60,
         initial_font: str = "Noto Sans",
         initial_palette: str = "wakfu",
         initial_corner_radius: int = 24,
@@ -229,7 +231,8 @@ class OptionsTab(BaseTab):
         self._display_card = CollapsibleCard("Affichage", collapsed=True, parent=self)
         self._populate_display_card(
             self._display_card.body_layout(),
-            initial_opacity, initial_font, initial_palette, initial_corner_radius,
+            initial_opacity, initial_ct_opacity,
+            initial_font, initial_palette, initial_corner_radius,
             initial_short_kamas, initial_fold_anchor_bottom,
         )
         root.addWidget(self._display_card)
@@ -261,9 +264,10 @@ class OptionsTab(BaseTab):
         self,
         lay: QVBoxLayout,
         initial_opacity: float,
-        initial_font: str,
-        initial_palette: str,
-        initial_corner_radius: int,
+        initial_ct_opacity: float = 0.60,
+        initial_font: str = "Noto Sans",
+        initial_palette: str = "wakfu",
+        initial_corner_radius: int = 24,
         initial_short_kamas: bool = False,
         initial_fold_anchor_bottom: bool = False,
     ):
@@ -325,6 +329,30 @@ class OptionsTab(BaseTab):
         op_row.addWidget(self._opacity_slider, 1)
         op_row.addWidget(self._opacity_value)
         lay.addLayout(op_row)
+
+        # Opacité clic à travers
+        ct_row = QHBoxLayout()
+        ct_row.setSpacing(8)
+        ct_lbl = QLabel("Clic à travers")
+        ct_lbl.setMinimumWidth(70)
+        ct_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+
+        self._ct_opacity_slider = QSlider(Qt.Horizontal)
+        self._ct_opacity_slider.setRange(5, 85)
+        self._ct_opacity_slider.setSingleStep(1)
+        self._ct_opacity_slider.setPageStep(5)
+        self._ct_opacity_slider.setValue(int(max(5, min(85, round(initial_ct_opacity * 100)))))
+        self._ct_opacity_slider.setStyleSheet(self._opacity_slider.styleSheet())
+
+        self._ct_opacity_value = QLabel("")
+        self._ct_opacity_value.setMinimumWidth(40)
+        self._ct_opacity_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self._ct_opacity_value.setStyleSheet(f"color: {TEXT}; font-size: 11px; font-weight: 600;")
+
+        ct_row.addWidget(ct_lbl)
+        ct_row.addWidget(self._ct_opacity_slider, 1)
+        ct_row.addWidget(self._ct_opacity_value)
+        lay.addLayout(ct_row)
 
         # Police
         font_row = QHBoxLayout()
@@ -441,12 +469,14 @@ class OptionsTab(BaseTab):
 
         # Connecter les signaux
         self._opacity_slider.valueChanged.connect(self._on_slider_change)
+        self._ct_opacity_slider.valueChanged.connect(self._on_ct_slider_change)
         self._font_combo.currentTextChanged.connect(self._on_font_change)
         self._palette_combo.currentIndexChanged.connect(self._on_palette_change)
         self._shape_combo.currentIndexChanged.connect(self._on_shape_change)
         self._short_kamas_cb.stateChanged.connect(self._on_short_kamas_change)
         self._fold_anchor_cb.stateChanged.connect(self._on_fold_anchor_change)
         self._on_slider_change(self._opacity_slider.value())
+        self._on_ct_slider_change(self._ct_opacity_slider.value())
 
     # ── Contenu : carte Données ───────────────────────────────────────────
 
@@ -688,6 +718,12 @@ class OptionsTab(BaseTab):
         if self._building:
             return
         self.opacity_changed.emit(value / 100.0)
+
+    def _on_ct_slider_change(self, value: int):
+        self._ct_opacity_value.setText(f"{value}%")
+        if self._building:
+            return
+        self.ct_opacity_changed.emit(value / 100.0)
 
     def _on_font_change(self, family: str):
         if self._building:

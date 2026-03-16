@@ -1065,8 +1065,8 @@ class TransactionsTab(BaseTab):
             self._cached_kamas if self._cached_kamas is not None else 0,
         )
 
-    def get_pinned_metrics(self) -> list[tuple[str, str]]:
-        """Retourne [(texte, couleur_hex)] pour les chips épinglés, dans l'ordre."""
+    def get_pinned_metrics(self) -> list[tuple[str, str, str]]:
+        """Retourne [(texte_court, couleur_hex, tooltip_complet)] pour les chips épinglés."""
         def _fmt(v: int) -> str:
             av = abs(v)
             if av >= 1_000_000:
@@ -1075,21 +1075,28 @@ class TransactionsTab(BaseTab):
                 return f"{v / 1_000:.0f}K ₭"
             return f"{v:,} ₭".replace(",", "\u202f")
 
-        result: list[tuple[str, str]] = []
+        def _full(v: int) -> str:
+            return f"{v:,} ₭".replace(",", "\u202f")
+
+        result: list[tuple[str, str, str]] = []
         for key in ("gains", "losses", "net", "kamas"):
             if not self._chip_pinned.get(key, False):
                 continue
             if key == "gains":
-                result.append((f"↑ {_fmt(self._cached_gains)}", GREEN))
+                result.append((f"↑ {_fmt(self._cached_gains)}", GREEN,
+                                f"Gains : +{_full(self._cached_gains)}"))
             elif key == "losses":
-                result.append((f"↓ {_fmt(self._cached_losses)}", RED))
+                result.append((f"↓ {_fmt(self._cached_losses)}", RED,
+                                f"Pertes : -{_full(self._cached_losses)}"))
             elif key == "net":
                 sign = "+" if self._cached_net >= 0 else ""
                 color = GREEN if self._cached_net > 0 else (RED if self._cached_net < 0 else TEAL)
-                result.append((f"~ {sign}{_fmt(self._cached_net)}", color))
+                result.append((f"~ {sign}{_fmt(self._cached_net)}", color,
+                                f"Net : {sign}{_full(self._cached_net)}"))
             elif key == "kamas":
                 kamas = self._cached_kamas or 0
-                result.append((f"⬟ {_fmt(kamas)}", TEXT_DIM))
+                result.append((f"⬟ {_fmt(kamas)}", TEXT_DIM,
+                                f"Kamas actuels : {_full(kamas)}"))
         return result
 
     def _show_chip_pin_menu(self, pos: QPoint, key: str):

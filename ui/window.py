@@ -225,6 +225,8 @@ class OverlayWindow(QWidget):
         self._palette_name = self._settings.value("ui_palette", DEFAULT_PALETTE, type=str)
         self._short_kamas: bool = bool(self._settings.value("short_kamas", False, type=bool))
         self._fold_anchor_bottom: bool = bool(self._settings.value("fold_anchor_bottom", False, type=bool))
+        saved_ct = self._settings.value("ct_opacity", 0.60, type=float)
+        self._ct_opacity: float = max(0.05, min(0.85, float(saved_ct)))
         self._palette = get_palette(self._palette_name)
         self._click_through = self._settings.value("click_through", False, type=bool)
         self._click_unlock_btn: QPushButton | None = None
@@ -353,6 +355,7 @@ class OverlayWindow(QWidget):
             elif name == "Options":
                 w = OptionsTab(
                     self._opacity,
+                    self._ct_opacity,
                     self._font_family,
                     self._palette_name,
                     self._corner_radius,
@@ -369,6 +372,7 @@ class OverlayWindow(QWidget):
                 w.transactions_refresh_requested.connect(self._refresh_transactions_tab)
                 w.short_numbers_changed.connect(self._on_short_kamas_changed)
                 w.fold_anchor_changed.connect(self._on_fold_anchor_changed)
+                w.ct_opacity_changed.connect(self._on_ct_opacity_changed)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -1629,12 +1633,17 @@ class OverlayWindow(QWidget):
         self._fold_anchor_bottom = enabled
         self._settings.setValue("fold_anchor_bottom", enabled)
 
+    def _on_ct_opacity_changed(self, opacity: float):
+        self._ct_opacity = max(0.05, min(0.85, float(opacity)))
+        self._settings.setValue("ct_opacity", self._ct_opacity)
+        if self._click_through:
+            self.setWindowOpacity(self._ct_opacity)
+
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)
         self._titlebar.set_click_through(self._click_through)
         self._settings.setValue("click_through", self._click_through)
-        # Mode pass-through plus discret: opacité fixe à 60%.
-        self.setWindowOpacity(0.60 if self._click_through else self._opacity)
+        self.setWindowOpacity(self._ct_opacity if self._click_through else self._opacity)
         self._apply_click_through_style()
         self._update_click_unlock_button_visibility()
 
