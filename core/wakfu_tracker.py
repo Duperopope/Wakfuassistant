@@ -5,6 +5,7 @@ import os
 import win32gui
 import win32con
 import win32process
+import win32api
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal
 
 
@@ -64,6 +65,12 @@ class WakfuTracker(QObject):
             try:
                 _, pid = win32process.GetWindowThreadProcessId(hwnd)
                 if pid == self._pid:
+                    return
+                # Wakfu est une app Java — ignorer les autres processus (navigateurs, etc.)
+                h = win32api.OpenProcess(0x0410, False, pid)
+                exe = win32process.GetModuleFileNameEx(h, 0)
+                win32api.CloseHandle(h)
+                if not exe.lower().endswith("java.exe"):
                     return
             except Exception:
                 return

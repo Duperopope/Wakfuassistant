@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSizePolicy,
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, pyqtSignal
 
 from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, TEXT, TEXT_DIM, TEAL
@@ -22,7 +22,10 @@ from ui.theme import BG_PANEL, BORDER, TEXT, TEXT_DIM, TEAL
 class CollapsibleCard(QFrame):
     """
     Carte avec header cliquable (▶/▼ + titre) et body masqué par défaut.
+    Émet expanded() quand elle s'ouvre (pour logique accordéon).
     """
+
+    expanded = pyqtSignal()
 
     def __init__(self, title: str, collapsed: bool = True, parent: QWidget | None = None):
         super().__init__(parent)
@@ -88,9 +91,16 @@ class CollapsibleCard(QFrame):
     def body_layout(self) -> QVBoxLayout:
         return self._body_layout
 
+    def collapse(self):
+        if not self._collapsed:
+            self._collapsed = True
+            self._apply_state()
+
     def toggle(self):
         self._collapsed = not self._collapsed
-        self._apply_state(animate=True)
+        self._apply_state()
+        if not self._collapsed:
+            self.expanded.emit()
 
     # ── Privé ─────────────────────────────────────────────────────────────
 
@@ -183,8 +193,18 @@ class OptionsTab(BaseTab):
         self._populate_data_card(self._data_card.body_layout())
         root.addWidget(self._data_card)
 
+        # Accordéon : ouverture d'une carte replie les autres
+        self._all_cards: list[CollapsibleCard] = [self._display_card, self._data_card]
+        for card in self._all_cards:
+            card.expanded.connect(lambda c=card: self._on_card_expanded(c))
+
         root.addStretch(1)
         self._building = False
+
+    def _on_card_expanded(self, opened: CollapsibleCard):
+        for card in self._all_cards:
+            if card is not opened:
+                card.collapse()
 
     # ── Contenu : carte Affichage ─────────────────────────────────────────
 

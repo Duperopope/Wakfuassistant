@@ -916,16 +916,8 @@ class OverlayWindow(QWidget):
         candidates_now, candidate_scores = self._extract_runtime_kama_candidates(payload)
         self._update_runtime_kama_lock(candidates_now, candidate_scores)
 
-        if self._runtime_kama_locked_key and self._runtime_kama_locked_key in candidates_now:
-            locked_kamas = candidates_now[self._runtime_kama_locked_key]
-            if locked_kamas != self._current_kamas:
-                self._current_kamas = locked_kamas
-                changed = True
-        else:
-            kamas_value = self._parse_int_token(str(payload.get("kamas_total", "")))
-            if runtime_kamas_usable and kamas_value is not None and kamas_value != self._current_kamas:
-                self._current_kamas = kamas_value
-                changed = True
+        # Kamas géré exclusivement via log-based tracking (base + delta journal).
+        # kamas_total / kama_candidates de l'interface feed ignorés.
 
         ap_value = self._parse_int_token(str(payload.get("ap", "")))
         if ap_value is not None and ap_value != self._last_ap:
