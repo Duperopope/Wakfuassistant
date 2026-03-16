@@ -117,3 +117,8 @@ def build_icons_map(names: list[str]) -> dict[str, list[str]]:
     """Return {name: [url, ...]} for all *names* that have icons."""
     _load_once()
     return {n: _icons[n] for n in names if n in _icons}
+
+
+def preload() -> None:
+    """Eagerly load the item database (useful to warm up in a background thread)."""
+    _load_once()

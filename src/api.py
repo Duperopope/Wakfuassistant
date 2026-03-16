@@ -279,7 +279,7 @@ def _bootstrap() -> None:
     t.start()
 
     # Pre-warm item DB in the background
-    threading.Thread(target=item_db._load_once, daemon=True, name="item-db-load").start()
+    threading.Thread(target=item_db.preload, daemon=True, name="item-db-load").start()
 
 
 def create_app() -> Flask:

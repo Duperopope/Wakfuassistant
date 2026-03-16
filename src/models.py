@@ -167,10 +167,14 @@ class SessionState:
         # Approximate XP required for next level (Wakfu formula approximation)
         # Level N requires roughly 1000 * N^1.4 XP
         if m.level > 0:
-            import math
             xp_for_next = int(1000 * (m.level ** 1.4))
-            m.xp_next = max(0, xp_for_next - (m.xp % xp_for_next if xp_for_next else 0))
-            m.pct = min(100.0, (m.xp % xp_for_next) / xp_for_next * 100 if xp_for_next else 0.0)
+            if xp_for_next > 0:
+                xp_in_level = m.xp % xp_for_next
+                m.xp_next = max(0, xp_for_next - xp_in_level)
+                m.pct = min(100.0, xp_in_level / xp_for_next * 100)
+            else:
+                m.xp_next = 0
+                m.pct = 0.0
             if m.xp_h > 0:
                 m.eta_s = m.xp_next / m.xp_h * 3600
                 if m.target_level > m.level:
