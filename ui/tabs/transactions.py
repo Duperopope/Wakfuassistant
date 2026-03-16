@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QPoint, pyqtSignal, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QColor, QPainter, QPen
+from PyQt5.QtGui import QColor, QIcon, QPainter, QPen
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (
     QApplication,
     QFrame,
@@ -34,6 +35,7 @@ from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, GREEN, RED, TEAL, TEXT, TEXT_DIM
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_ASSETS_DIR   = Path(__file__).resolve().parents[1] / "assets"
 _KAMAS_JOURNAL = _PROJECT_ROOT / "data" / "kamas_journal.jsonl"
 _TX_LABELS_DB = _PROJECT_ROOT / "data" / "transaction_labels.json"
 _APPDATA_WAKFU_DIR = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
@@ -75,17 +77,18 @@ def _fmt_kamas_with_symbol(value: int) -> str:
 
 
 def _fmt_kamas_short(value: int) -> str:
-    """Compact notation: ₭₭ for 100K–999K, M₭ for 1M+. Below 100K: normal."""
+    """Format court : KK pour 100K–999K, MK pour 1M+. En dessous : nombre seul (icône séparée)."""
     abs_v = abs(value)
     sign = "-" if value < 0 else ""
     if abs_v >= 1_000_000:
         m = abs_v / 1_000_000
         s = f"{m:.1f}".rstrip("0").rstrip(".")
-        return f"{sign}{s} M{_KAMA_SYMBOL}"
+        return f"{sign}{s} MK"
     if abs_v >= 100_000:
         k = round(abs_v / 1_000)
-        return f"{sign}{k} {_KAMA_SYMBOL}{_KAMA_SYMBOL}"
-    return _fmt_kamas_with_symbol(value)
+        return f"{sign}{k} KK"
+    # < 100K en mode court : nombre uniquement, l'icône ₭ reste visible à côté
+    return f"{sign}{_fmt_kamas(abs_v)}"
 
 
 def _format_dt_parts(dt: datetime) -> tuple[str, str]:
@@ -670,12 +673,15 @@ class TransactionsTab(BaseTab):
         self._resizing_guard = False
         self._layout_ready = False
         self._short_kamas: bool = False        # historique (Options)
-        self._short_kamas_chips: bool = False  # chips métriques (clic)
+        # État court indépendant par chip (clic direct sur le chip)
+        self._chip_short: dict[str, bool] = {
+            "gains": False, "losses": False, "net": False, "taxes": False, "kamas": False,
+        }
         # Références chips + cache valeurs pour le toggle léger
-        self._gains_chip: "_ClickableFrame | None" = None
+        self._gains_chip:  "_ClickableFrame | None" = None
         self._losses_chip: "_ClickableFrame | None" = None
-        self._net_chip: "_ClickableFrame | None" = None
-        self._kamas_chip: "_ClickableFrame | None" = None
+        self._net_chip:    "_ClickableFrame | None" = None
+        self._kamas_chip:  "_ClickableFrame | None" = None
         self._cached_gains: int = 0
         self._cached_losses: int = 0
         self._cached_net: int = 0
@@ -716,8 +722,14 @@ class TransactionsTab(BaseTab):
         self._net_chip    = net_chip
         self._kamas_chip  = kamas_chip
 
-        for _chip in (gains_chip, pertes_chip, net_chip, taxes_chip, kamas_chip):
-            _chip.clicked.connect(self._toggle_short_kamas_chips)
+        for _chip, _key in (
+            (gains_chip,  "gains"),
+            (pertes_chip, "losses"),
+            (net_chip,    "net"),
+            (taxes_chip,  "taxes"),
+            (kamas_chip,  "kamas"),
+        ):
+            _chip.clicked.connect(lambda _, k=_key: self._toggle_chip(k))
             chips_row.addWidget(_chip, 1)
 
         # ── Ligne 2 : cartes détail (données futures) ────────────────
@@ -795,10 +807,30 @@ class TransactionsTab(BaseTab):
         table_head.addWidget(table_title)
         table_head.addStretch(1)
 
-        self._organization_btn = QPushButton("Edition colonnes")
+        self._organization_btn = QPushButton()
         self._organization_btn.setCheckable(True)
         self._organization_btn.setChecked(bool(self._organization_mode))
-        self._organization_btn.setFixedHeight(24)
+        self._organization_btn.setFixedSize(26, 26)
+        self._organization_btn.setIcon(QIcon(str(_ASSETS_DIR / "columns.svg")))
+        self._organization_btn.setIconSize(QSize(14, 14))
+        self._organization_btn.setToolTip("Édition des colonnes — réorganiser et redimensionner")
+        self._organization_btn.setCursor(Qt.PointingHandCursor)
+        self._organization_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: rgba(30,180,176,0.06);
+                border: 1px solid {BORDER};
+                border-radius: 6px;
+                padding: 0;
+            }}
+            QPushButton:hover {{
+                background: rgba(30,180,176,0.18);
+                border-color: {TEAL};
+            }}
+            QPushButton:checked {{
+                background: rgba(30,180,176,0.28);
+                border-color: {TEAL};
+            }}
+        """)
         self._organization_btn.clicked.connect(self._on_toggle_organization_mode)
         table_head.addWidget(self._organization_btn)
         table_layout.addLayout(table_head)
@@ -875,7 +907,7 @@ class TransactionsTab(BaseTab):
         return card, value_lbl
 
     def _build_metric_chip(self, label: str, value_color: str, accent: str) -> "tuple[_ClickableFrame, QLabel]":
-        """Chip compact cliquable : accent colorée en haut, label dim, valeur large."""
+        """Chip compact cliquable : accent colorée en haut, label dim, valeur + icône kama."""
         chip = _ClickableFrame(self)
         chip.setObjectName("txMetricChip")
         chip.setCursor(Qt.PointingHandCursor)
@@ -897,13 +929,30 @@ class TransactionsTab(BaseTab):
         lbl.setObjectName("txChipLabel")
         lbl.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
+        # Ligne valeur : nombre + icône ₭ dorée (masquée en mode court si KK/MK)
+        val_row = QHBoxLayout()
+        val_row.setContentsMargins(0, 0, 0, 0)
+        val_row.setSpacing(4)
+
         val = QLabel("--")
         val.setObjectName("txMetricValue")
         val.setStyleSheet(f"color: {value_color}; font-size: 16px; font-weight: 800;")
         val.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
+        kama_icon = QLabel(_KAMA_SYMBOL)
+        kama_icon.setObjectName("txKamaIcon")
+        kama_icon.setStyleSheet("color: #c8a020; font-size: 13px; font-weight: 900;")
+        kama_icon.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        kama_icon.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
+
+        val_row.addWidget(val)
+        val_row.addWidget(kama_icon)
+        val_row.addStretch()
+
         lay.addWidget(lbl)
-        lay.addWidget(val)
+        lay.addLayout(val_row)
+
+        chip._kama_icon = kama_icon  # référence dynamique pour show/hide
         return chip, val
 
     def _build_metric_dual_box(
@@ -988,64 +1037,82 @@ class TransactionsTab(BaseTab):
         if self._layout_ready:
             self._render()
 
-    def _toggle_short_kamas_chips(self):
-        """Bascule le mode court/complet des chips métriques (clic direct)."""
-        self._short_kamas_chips = not self._short_kamas_chips
-        self._set_flow_metrics(self._cached_gains, self._cached_losses)
-        self._set_balance_metrics(self._cached_net, self._cached_kamas)
+    def _toggle_chip(self, key: str):
+        """Bascule le mode court/complet d'un chip individuel (clic direct)."""
+        self._chip_short[key] = not self._chip_short.get(key, False)
+        if key in ("gains", "losses"):
+            self._set_flow_metrics(self._cached_gains, self._cached_losses)
+        elif key in ("net", "kamas"):
+            self._set_balance_metrics(self._cached_net, self._cached_kamas)
 
     def _disp(self, value: int) -> str:
         """Format historique selon le réglage Options."""
         return _fmt_kamas_short(value) if self._short_kamas else _fmt_kamas_with_symbol(value)
 
-    def _disp_chip(self, value: int) -> str:
-        """Format chips métriques selon l'état du toggle clic."""
-        return _fmt_kamas_short(value) if self._short_kamas_chips else _fmt_kamas_with_symbol(value)
+    @staticmethod
+    def _chip_display(value: int, short: bool) -> tuple[str, bool]:
+        """Retourne (texte_valeur, show_kama_icon) pour un chip selon son état."""
+        if short and abs(value) >= 100_000:
+            return _fmt_kamas_short(value), False   # "150 KK" ou "1.5 MK", icône masquée
+        return _fmt_kamas(value), True              # nombre seul, icône ₭ visible
 
     # ── Métriques ────────────────────────────────────────────────────────
 
     def _set_flow_metrics(self, gains: int, losses: int):
         self._cached_gains = gains
         self._cached_losses = losses
-        self._gains_value_label.setText(f"+{self._disp_chip(gains)}")
-        self._losses_value_label.setText(f"-{self._disp_chip(losses)}")
-        if self._short_kamas_chips:
-            if self._gains_chip:
-                self._gains_chip.setToolTip(f"Gains : {_fmt_kamas_with_symbol(gains)}")
-            if self._losses_chip:
-                self._losses_chip.setToolTip(f"Pertes : {_fmt_kamas_with_symbol(losses)}")
-        else:
-            if self._gains_chip:
-                self._gains_chip.setToolTip("")
-            if self._losses_chip:
-                self._losses_chip.setToolTip("")
+
+        # GAINS
+        g_short = self._chip_short.get("gains", False)
+        g_txt, g_icon = self._chip_display(gains, g_short)
+        self._gains_value_label.setText(f"+{g_txt}")
+        if self._gains_chip:
+            self._gains_chip._kama_icon.setVisible(g_icon)
+            # Tooltip = format alternatif
+            alt = _fmt_kamas_short(gains) if not g_short else f"{_fmt_kamas(gains)} {_KAMA_SYMBOL}"
+            self._gains_chip.setToolTip(f"+{alt}" if abs(gains) >= 100_000 or g_short else "")
+
+        # LOSSES
+        l_short = self._chip_short.get("losses", False)
+        l_txt, l_icon = self._chip_display(losses, l_short)
+        self._losses_value_label.setText(f"-{l_txt}")
+        if self._losses_chip:
+            self._losses_chip._kama_icon.setVisible(l_icon)
+            alt = _fmt_kamas_short(losses) if not l_short else f"{_fmt_kamas(losses)} {_KAMA_SYMBOL}"
+            self._losses_chip.setToolTip(f"-{alt}" if abs(losses) >= 100_000 or l_short else "")
 
     def _set_balance_metrics(self, net: int, current_kamas: int | None):
         self._cached_net = net
         self._cached_kamas = current_kamas
-        if self._short_kamas_chips:
-            net_txt = ("+" if net >= 0 else "") + _fmt_kamas_short(net)
-            if self._net_chip:
-                full_net = f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}"
-                self._net_chip.setToolTip(f"Net : {full_net}")
-        else:
-            net_txt = f"{net:+,}".replace(",", " ") + f" {_KAMA_SYMBOL}"
-            if self._net_chip:
-                self._net_chip.setToolTip("")
+
+        # NET
+        n_short = self._chip_short.get("net", False)
+        n_txt, n_icon = self._chip_display(abs(net), n_short)
+        sign = "+" if net >= 0 else "-"
         net_color = GREEN if net > 0 else (RED if net < 0 else TEAL)
-        self._net_value_label.setText(net_txt)
+        self._net_value_label.setText(f"{sign}{n_txt}")
         self._net_value_label.setStyleSheet(f"color: {net_color}; font-size: 16px; font-weight: 800;")
+        if self._net_chip:
+            self._net_chip._kama_icon.setVisible(n_icon)
+            abs_net = abs(net)
+            alt = _fmt_kamas_short(abs_net) if not n_short else f"{_fmt_kamas(abs_net)} {_KAMA_SYMBOL}"
+            self._net_chip.setToolTip(f"{sign}{alt}" if abs_net >= 100_000 or n_short else "")
+
+        # KAMAS ACTUELS
         if current_kamas is None:
             self._current_kamas_value_label.setText("--")
             if self._kamas_chip:
+                self._kamas_chip._kama_icon.setVisible(True)
                 self._kamas_chip.setToolTip("")
         else:
             ck = max(0, int(current_kamas))
-            self._current_kamas_value_label.setText(self._disp_chip(ck))
-            if self._short_kamas_chips and self._kamas_chip:
-                self._kamas_chip.setToolTip(f"Kamas actuels : {_fmt_kamas_with_symbol(ck)}")
-            elif self._kamas_chip:
-                self._kamas_chip.setToolTip("")
+            k_short = self._chip_short.get("kamas", False)
+            k_txt, k_icon = self._chip_display(ck, k_short)
+            self._current_kamas_value_label.setText(k_txt)
+            if self._kamas_chip:
+                self._kamas_chip._kama_icon.setVisible(k_icon)
+                alt = _fmt_kamas_short(ck) if not k_short else f"{_fmt_kamas(ck)} {_KAMA_SYMBOL}"
+                self._kamas_chip.setToolTip(alt if ck >= 100_000 or k_short else "")
 
     def _on_chart_view_stats(self, pct: float, _first: int, _last: int, gains: int, losses: int):
         # Methode conservee pour compatibilite; la carte affiche desormais
@@ -2067,7 +2134,9 @@ class TransactionsTab(BaseTab):
         header = self._table.horizontalHeader()
         header.setSectionsMovable(self._organization_mode)
         header.setSectionResizeMode(QHeaderView.Interactive if self._organization_mode else QHeaderView.Fixed)
-        self._organization_btn.setText("Edition active" if self._organization_mode else "Edition colonnes")
+        tip = "Édition des colonnes active — cliquer pour terminer" if self._organization_mode \
+              else "Édition des colonnes — réorganiser et redimensionner"
+        self._organization_btn.setToolTip(tip)
         if self._organization_mode:
             self._table.setStyleSheet(
                 f"QTableWidget#txTable::item {{ border-right: 1px solid {BORDER}; }}"

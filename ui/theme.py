@@ -259,6 +259,18 @@ QPushButton:hover {{
 QPushButton:pressed {{
     background: rgba(30,180,176,0.15);
 }}
+
+/* Tooltips */
+QToolTip {{
+    background: {p['BG_PANEL2']};
+    border: 1px solid {p['BORDER2']};
+    border-radius: 8px;
+    color: {p['TEXT']};
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 240;
+}}
 """
 
 
