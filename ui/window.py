@@ -23,6 +23,7 @@ from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
 from ui.tabs.transactions import TransactionsTab
+from ui.tabs.personnage import PersonnageTab
 from core.wakfu_tracker import WakfuTracker
 
 DEFAULT_W = 895
@@ -251,6 +252,7 @@ class OverlayWindow(QWidget):
         self._interface_feed_mtime: int = 0
         self._interface_feed_path: Path | None = None
         self._options_tab: "OptionsTab | None" = None
+        self._personnage_tab: "PersonnageTab | None" = None
         self._stats_labels: dict[str, QLabel] = {}
         self._runtime_kama_candidates_prev: dict[str, int] = {}
         self._runtime_kama_candidate_scores: dict[str, int] = {}
@@ -371,6 +373,9 @@ class OverlayWindow(QWidget):
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
                 self._options_tab = w
+            elif name == "Personnage":
+                w = PersonnageTab(self)
+                self._personnage_tab = w
             else:
                 w = PlaceholderTab(name)
             self._stack.addWidget(w)
@@ -677,41 +682,34 @@ class OverlayWindow(QWidget):
 
     def _refresh_title_info(self):
         e = max(0, int(self._elapsed_seconds))
-        status = "connexion ?"
         if self._session_connected is True:
-            status = "connecte"
+            status = "connecté"
         elif self._session_connected is False:
-            status = "deconnecte"
+            status = "déconnecté"
+        else:
+            status = "connexion ?"
 
-        class_part = ""
-        if self._last_detected_class:
-            class_part = f" | classe: {self._last_detected_class}"
-
-        character_part = ""
-        if self._current_character_name:
-            character_part = f" | perso: {self._current_character_name}"
-
-        level_part = ""
-        if self._last_level is not None:
-            level_part = f" | lvl: {self._last_level}"
-
-        xp_part = ""
-        if self._last_xp_gain is not None and self._last_xp_to_next is not None:
-            xp_part = f" | xp+: {self._last_xp_gain} | next: {self._last_xp_to_next}"
-
-        crit_part = ""
-        if self._last_crit_percent is not None:
-            crit_part = f" | crit: {self._last_crit_percent}%"
-
-        kamas_part = ""
-        if self._current_kamas is not None:
-            kamas_part = f" | kamas: {self._current_kamas:,} ₭".replace(",", "\u202f")
-
-        self._titlebar.set_info(
-            f"{e//3600:02d}:{(e%3600)//60:02d}:{e%60:02d} | {status}{character_part}{class_part}{level_part}{crit_part}{xp_part}{kamas_part}"
-        )
+        # ── Timer + statut → OptionsTab (Données) ─────────────────────────
         if self._options_tab is not None:
+            self._options_tab.set_session_time(e, status)
             self._options_tab.set_kamas(self._current_kamas)
+
+        # ── Identité personnage → PersonnageTab ────────────────────────────
+        if self._personnage_tab is not None:
+            self._personnage_tab.set_character_name(self._current_character_name)
+            self._personnage_tab.set_class_name(self._last_detected_class)
+            self._personnage_tab.set_level(self._last_level)
+            self._personnage_tab.set_connection_status(self._session_connected)
+            if self._last_detected_class:
+                self._personnage_tab.set_class_icon(self._last_detected_class)
+
+        # ── Métriques compactes → TitleBar (mode replié) ──────────────────
+        for widget in self._tab_widgets:
+            if isinstance(widget, TransactionsTab):
+                gains, losses, net, kamas = widget.get_metrics()
+                self._titlebar.set_folded_metrics(gains, losses, net, kamas)
+                break
+
         self._refresh_stats_panel()
 
     def _refresh_transactions_tab(self):

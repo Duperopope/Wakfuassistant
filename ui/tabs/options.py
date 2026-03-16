@@ -476,6 +476,27 @@ class OptionsTab(BaseTab):
             QPushButton:hover {{ background: #1ec8c4; }}
         """
 
+        # ── Section : SESSION ────────────────────────────────────────────
+        lay.addWidget(_section_label("SESSION"))
+        lay.addWidget(_sep_line())
+
+        session_row = QHBoxLayout()
+        session_row.setSpacing(8)
+
+        self._session_timer_lbl = QLabel("00:00:00")
+        self._session_timer_lbl.setStyleSheet(
+            f"color: {TEAL}; font-size: 15px; font-weight: 700; letter-spacing: 1px;"
+        )
+        session_row.addWidget(self._session_timer_lbl)
+        session_row.addStretch(1)
+
+        self._session_status_lbl = QLabel("connexion ?")
+        self._session_status_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+        session_row.addWidget(self._session_status_lbl)
+
+        lay.addLayout(session_row)
+        lay.addWidget(_sep_line())
+
         # ── Section : PERSONNAGE ─────────────────────────────────────────
         lay.addWidget(_section_label("PERSONNAGE"))
         lay.addWidget(_sep_line())
@@ -594,6 +615,15 @@ class OptionsTab(BaseTab):
         lay.addWidget(reset_btn)
 
     # ── API publique ──────────────────────────────────────────────────────
+
+    def set_session_time(self, elapsed_seconds: int, status: str):
+        """Met à jour le timer de session et le statut de connexion."""
+        if not hasattr(self, "_session_timer_lbl"):
+            return
+        h, rem = divmod(max(0, elapsed_seconds), 3600)
+        m, s   = divmod(rem, 60)
+        self._session_timer_lbl.setText(f"{h:02d}:{m:02d}:{s:02d}")
+        self._session_status_lbl.setText(status)
 
     def set_kamas(self, value: int | None):
         """Met à jour l'affichage live des kamas dans la carte Données."""

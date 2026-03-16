@@ -1040,6 +1040,15 @@ class TransactionsTab(BaseTab):
         if self._layout_ready:
             self._render()
 
+    def get_metrics(self) -> tuple[int, int, int, int]:
+        """Retourne (gains, losses, net, kamas) pour la barre de titre repliée."""
+        return (
+            self._cached_gains,
+            self._cached_losses,
+            self._cached_net,
+            self._cached_kamas if self._cached_kamas is not None else 0,
+        )
+
     def _toggle_chip(self, key: str):
         """Bascule le mode court/complet d'un chip individuel (clic direct)."""
         self._chip_short[key] = not self._chip_short.get(key, False)
