@@ -3,18 +3,21 @@ param(
     [string]$Remote = "origin",
     [string]$Branch = "",
     [int]$IntervalSeconds = 2,
+    [int]$CleanRetries = 6,
+    [int]$RetryDelaySeconds = 2,
+    [switch]$ForceReleaseLocks,
     [switch]$Once
 )
 
 $ErrorActionPreference = "Stop"
+if ($PSVersionTable.PSVersion.Major -ge 7) {
+    $global:PSNativeCommandUseErrorActionPreference = $false
+}
 
 function Invoke-Git {
     param([string[]]$GitArgs)
-    $oldEap = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
     $output = & git -C $RepoPath @GitArgs 2>&1
     $exitCode = $LASTEXITCODE
-    $ErrorActionPreference = $oldEap
     if ($exitCode -ne 0) {
         throw "git $($GitArgs -join ' ') failed: $output"
     }
@@ -56,6 +59,55 @@ function Resolve-Branch {
     throw "Impossible de determiner la branche. Passe -Branch explicitement."
 }
 
+function Release-RepoLocks {
+    if (-not $ForceReleaseLocks) {
+        return
+    }
+
+    $fullRepo = (Resolve-Path $RepoPath).Path
+    $prefix = ($fullRepo.TrimEnd("\\") + "\\").ToLowerInvariant()
+
+    try {
+        $procs = Get-CimInstance Win32_Process -Filter "name='python.exe' OR name='pythonw.exe' OR name='py.exe'"
+    }
+    catch {
+        return
+    }
+
+    foreach ($p in $procs) {
+        $cmd = [string]$p.CommandLine
+        $exe = [string]$p.ExecutablePath
+        $matchByExe = $exe -and $exe.ToLowerInvariant().StartsWith($prefix)
+        $matchByCmd = $cmd -and $cmd.ToLowerInvariant().Contains($prefix)
+        if (-not ($matchByExe -or $matchByCmd)) {
+            continue
+        }
+        try {
+            Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+        }
+        catch {
+        }
+    }
+}
+
+function Clean-WithRetries {
+    $lastErr = ""
+    for ($i = 1; $i -le $CleanRetries; $i++) {
+        try {
+            Invoke-Git @("clean", "-fdx") | Out-Null
+            return
+        }
+        catch {
+            $lastErr = $_.Exception.Message
+            if ($i -lt $CleanRetries) {
+                Release-RepoLocks
+                Start-Sleep -Seconds $RetryDelaySeconds
+            }
+        }
+    }
+    throw "Echec clean apres $CleanRetries tentative(s). Ferme les process qui verrouillent des fichiers (python/app/db/logs), puis relance. Derniere erreur: $lastErr"
+}
+
 function Sync-StrictMirror {
     $targetBranch = Resolve-Branch
 
@@ -69,8 +121,10 @@ function Sync-StrictMirror {
         }
     }
 
+    Release-RepoLocks
+
     Invoke-Git @("reset", "--hard", "$Remote/$targetBranch") | Out-Null
-    Invoke-Git @("clean", "-fdx") | Out-Null
+    Clean-WithRetries
 
     $sha = (Invoke-Git @("rev-parse", "--short", "HEAD")).Trim()
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -87,6 +141,14 @@ if (-not (Test-Path (Join-Path $RepoPath ".git"))) {
 
 if ($IntervalSeconds -lt 1) {
     throw "IntervalSeconds doit etre >= 1"
+}
+
+if ($CleanRetries -lt 1) {
+    throw "CleanRetries doit etre >= 1"
+}
+
+if ($RetryDelaySeconds -lt 1) {
+    throw "RetryDelaySeconds doit etre >= 1"
 }
 
 if ($Once) {
