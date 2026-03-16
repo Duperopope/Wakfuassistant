@@ -156,6 +156,11 @@ class WakfuTracker(QObject):
         return self._get_rect(self._hwnd)
 
     @property
+    def hwnd(self) -> int | None:
+        """HWND de la fenêtre Wakfu, ou None."""
+        return self._hwnd
+
+    @property
     def is_active(self) -> bool:
         return self._hwnd is not None
 

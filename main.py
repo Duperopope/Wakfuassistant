@@ -6,9 +6,10 @@ Lance l'overlay PyQt5 sans terminal.
 
 import sys
 import os
+import tempfile
 from pathlib import Path
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QObject, QTimer, QProcess
+from PyQt5.QtCore import QObject, QTimer, QProcess, QLockFile
 from ui.theme  import QSS
 from ui.window import OverlayWindow
 
@@ -87,14 +88,32 @@ class LiveUiReloader(QObject):
         if not args or not args[0].lower().endswith(".py"):
             args = [str(self._project_root / "main.py")]
 
-        QProcess.startDetached(sys.executable, args, str(self._project_root))
+        if os.name == "nt":
+            quoted = " ".join(f'"{part}"' for part in [sys.executable, *args])
+            delayed = f'ping 127.0.0.1 -n 2 >nul && {quoted}'
+            QProcess.startDetached("cmd.exe", ["/c", delayed], str(self._project_root))
+        else:
+            QProcess.startDetached(sys.executable, args, str(self._project_root))
         self._app.quit()
+
+
+def _acquire_single_instance_lock() -> QLockFile | None:
+    lock_path = Path(tempfile.gettempdir()) / "wakfuassistant-overlay.lock"
+    lock = QLockFile(str(lock_path))
+    lock.setStaleLockTime(0)
+    if not lock.tryLock(0):
+        return None
+    return lock
 
 
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Wakfu Assistant")
     app.setStyleSheet(QSS)
+
+    app._instance_lock = _acquire_single_instance_lock()
+    if app._instance_lock is None:
+        return 0
 
     # WYSIWYG dev: recharge l'UI automatiquement apres modification de code.
     if os.environ.get("WAKFU_LIVE_UI", "1") == "1":
@@ -103,8 +122,8 @@ def main():
     win = OverlayWindow()
     win.show()
 
-    sys.exit(app.exec_())
+    return app.exec_()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

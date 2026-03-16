@@ -6,12 +6,108 @@ from PyQt5.QtWidgets import (
     QSlider,
     QFrame,
     QComboBox,
+    QPushButton,
+    QSizePolicy,
 )
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
 
 from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, TEXT, TEXT_DIM, TEAL
 
+
+# ---------------------------------------------------------------------------
+# Widget générique : carte repliable
+# ---------------------------------------------------------------------------
+
+class CollapsibleCard(QFrame):
+    """
+    Carte avec header cliquable (▶/▼ + titre) et body masqué par défaut.
+    """
+
+    def __init__(self, title: str, collapsed: bool = True, parent: QWidget | None = None):
+        super().__init__(parent)
+        self._collapsed = collapsed
+
+        self.setStyleSheet(f"""
+            CollapsibleCard {{
+                background: {BG_PANEL};
+                border: 1px solid {BORDER};
+                border-radius: 4px;
+            }}
+        """)
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+
+        # ── Header ──────────────────────────────────────────────────────────
+        self._header = QPushButton()
+        self._header.setCheckable(False)
+        self._header.setCursor(Qt.PointingHandCursor)
+        self._header.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self._header.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent;
+                border: none;
+                text-align: left;
+                padding: 8px 10px;
+                color: {TEXT};
+                font-size: 12px;
+                font-weight: 700;
+            }}
+            QPushButton:hover {{
+                background: rgba(255,255,255,0.04);
+                border-radius: 4px;
+            }}
+        """)
+        self._title = title
+        self._update_header()
+        self._header.clicked.connect(self.toggle)
+        outer.addWidget(self._header)
+
+        # ── Séparateur visible seulement quand déplié ────────────────────
+        self._sep = QFrame()
+        self._sep.setFrameShape(QFrame.HLine)
+        self._sep.setStyleSheet(f"color: {BORDER}; background: {BORDER}; max-height: 1px;")
+        outer.addWidget(self._sep)
+
+        # ── Body (container) ─────────────────────────────────────────────
+        self._body = QWidget()
+        self._body.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        outer.addWidget(self._body)
+
+        self._body_layout = QVBoxLayout(self._body)
+        self._body_layout.setContentsMargins(10, 8, 10, 10)
+        self._body_layout.setSpacing(8)
+
+        # Appliquer l'état initial
+        self._apply_state(animate=False)
+
+    # ── API publique ──────────────────────────────────────────────────────
+
+    def body_layout(self) -> QVBoxLayout:
+        return self._body_layout
+
+    def toggle(self):
+        self._collapsed = not self._collapsed
+        self._apply_state(animate=True)
+
+    # ── Privé ─────────────────────────────────────────────────────────────
+
+    def _update_header(self):
+        arrow = "▶" if self._collapsed else "▼"
+        self._header.setText(f"  {arrow}  {self._title}")
+
+    def _apply_state(self, animate: bool = True):
+        self._update_header()
+        visible = not self._collapsed
+        self._body.setVisible(visible)
+        self._sep.setVisible(visible)
+
+
+# ---------------------------------------------------------------------------
+# Onglet Options
+# ---------------------------------------------------------------------------
 
 class OptionsTab(BaseTab):
     """Options UI/overlay avec layout propre et controls clairs."""
@@ -20,6 +116,7 @@ class OptionsTab(BaseTab):
     font_changed = pyqtSignal(str)
     palette_changed = pyqtSignal(str)
     shape_changed = pyqtSignal(int)
+    reset_requested = pyqtSignal()
 
     FONT_CHOICES = [
         "Segoe UI Variable",
@@ -63,121 +160,43 @@ class OptionsTab(BaseTab):
 
         root = QVBoxLayout(self)
         root.setContentsMargins(10, 10, 10, 10)
-        root.setSpacing(10)
+        root.setSpacing(6)
 
         title = QLabel("Options")
         title.setStyleSheet(f"color: {TEXT}; font-size: 14px; font-weight: 700;")
         root.addWidget(title)
 
-        subtitle = QLabel("Reglages de l'overlay")
+        subtitle = QLabel("Réglages de l'overlay")
         subtitle.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
         root.addWidget(subtitle)
 
-        root.addWidget(
-            self._build_display_card(
-                initial_opacity,
-                initial_font,
-                initial_palette,
-                initial_corner_radius,
-            )
+        # ── Carte Affichage ──────────────────────────────────────────────
+        self._display_card = CollapsibleCard("Affichage", collapsed=True, parent=self)
+        self._populate_display_card(
+            self._display_card.body_layout(),
+            initial_opacity, initial_font, initial_palette, initial_corner_radius,
         )
-        root.addWidget(self._build_placeholder_card())
-        root.addStretch(1)
+        root.addWidget(self._display_card)
 
+        # ── Carte Données ────────────────────────────────────────────────
+        self._data_card = CollapsibleCard("Données", collapsed=True, parent=self)
+        self._populate_data_card(self._data_card.body_layout())
+        root.addWidget(self._data_card)
+
+        root.addStretch(1)
         self._building = False
 
-    def _build_display_card(
+    # ── Contenu : carte Affichage ─────────────────────────────────────────
+
+    def _populate_display_card(
         self,
+        lay: QVBoxLayout,
         initial_opacity: float,
         initial_font: str,
         initial_palette: str,
         initial_corner_radius: int,
-    ) -> QFrame:
-        card = QFrame(self)
-        card.setStyleSheet(
-            f"""
-            QFrame {{
-                background: {BG_PANEL};
-                border: 1px solid {BORDER};
-                border-radius: 4px;
-            }}
-            """
-        )
-
-        lay = QVBoxLayout(card)
-        lay.setContentsMargins(10, 10, 10, 10)
-        lay.setSpacing(8)
-
-        head = QLabel("Affichage")
-        head.setStyleSheet(f"color: {TEXT}; font-size: 12px; font-weight: 700;")
-        lay.addWidget(head)
-
-        row = QHBoxLayout()
-        row.setSpacing(8)
-
-        name = QLabel("Opacite")
-        name.setMinimumWidth(70)
-        name.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
-
-        self._opacity_slider = QSlider(Qt.Horizontal, card)
-        self._opacity_slider.setRange(35, 100)
-        self._opacity_slider.setSingleStep(1)
-        self._opacity_slider.setPageStep(5)
-        self._opacity_slider.setValue(int(max(35, min(100, round(initial_opacity * 100)))))
-
-        self._opacity_slider.setStyleSheet(
-            f"""
-            QSlider::groove:horizontal {{
-                border: 1px solid {BORDER};
-                height: 8px;
-                background: #0f1116;
-                border-radius: 4px;
-            }}
-            QSlider::sub-page:horizontal {{
-                background: {TEAL};
-                border-radius: 4px;
-            }}
-            QSlider::add-page:horizontal {{
-                background: #0f1116;
-                border-radius: 4px;
-            }}
-            QSlider::handle:horizontal {{
-                background: {TEXT};
-                border: 1px solid {BORDER};
-                width: 14px;
-                margin: -4px 0;
-                border-radius: 7px;
-            }}
-            """
-        )
-
-        self._opacity_value = QLabel("")
-        self._opacity_value.setMinimumWidth(48)
-        self._opacity_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self._opacity_value.setStyleSheet(f"color: {TEXT}; font-size: 11px; font-weight: 600;")
-
-        row.addWidget(name)
-        row.addWidget(self._opacity_slider, 1)
-        row.addWidget(self._opacity_value)
-        lay.addLayout(row)
-
-        hint = QLabel("Ajuste la transparence de la fenetre overlay.")
-        hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
-        lay.addWidget(hint)
-
-        font_row = QHBoxLayout()
-        font_row.setSpacing(8)
-
-        font_name = QLabel("Police")
-        font_name.setMinimumWidth(70)
-        font_name.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
-
-        self._font_combo = QComboBox(card)
-        self._font_combo.addItems(self.FONT_CHOICES)
-        if initial_font in self.FONT_CHOICES:
-            self._font_combo.setCurrentText(initial_font)
-        self._font_combo.setStyleSheet(
-            f"""
+    ):
+        _combo_qss = f"""
             QComboBox {{
                 background: #0f1116;
                 border: 1px solid {BORDER};
@@ -194,94 +213,137 @@ class OptionsTab(BaseTab):
                 color: {TEXT};
                 selection-background-color: rgba(30,180,176,0.18);
             }}
-            """
-        )
+        """
 
-        font_row.addWidget(font_name)
+        # Opacité
+        op_row = QHBoxLayout()
+        op_row.setSpacing(8)
+        op_lbl = QLabel("Opacité")
+        op_lbl.setMinimumWidth(70)
+        op_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+
+        self._opacity_slider = QSlider(Qt.Horizontal)
+        self._opacity_slider.setRange(35, 100)
+        self._opacity_slider.setSingleStep(1)
+        self._opacity_slider.setPageStep(5)
+        self._opacity_slider.setValue(int(max(35, min(100, round(initial_opacity * 100)))))
+        self._opacity_slider.setStyleSheet(f"""
+            QSlider::groove:horizontal {{
+                border: 1px solid {BORDER};
+                height: 8px;
+                background: #0f1116;
+                border-radius: 4px;
+            }}
+            QSlider::sub-page:horizontal {{ background: {TEAL}; border-radius: 4px; }}
+            QSlider::add-page:horizontal {{ background: #0f1116; border-radius: 4px; }}
+            QSlider::handle:horizontal {{
+                background: {TEXT};
+                border: 1px solid {BORDER};
+                width: 14px;
+                margin: -4px 0;
+                border-radius: 7px;
+            }}
+        """)
+
+        self._opacity_value = QLabel("")
+        self._opacity_value.setMinimumWidth(40)
+        self._opacity_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self._opacity_value.setStyleSheet(f"color: {TEXT}; font-size: 11px; font-weight: 600;")
+
+        op_row.addWidget(op_lbl)
+        op_row.addWidget(self._opacity_slider, 1)
+        op_row.addWidget(self._opacity_value)
+        lay.addLayout(op_row)
+
+        # Police
+        font_row = QHBoxLayout()
+        font_row.setSpacing(8)
+        font_lbl = QLabel("Police")
+        font_lbl.setMinimumWidth(70)
+        font_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        self._font_combo = QComboBox()
+        self._font_combo.addItems(self.FONT_CHOICES)
+        if initial_font in self.FONT_CHOICES:
+            self._font_combo.setCurrentText(initial_font)
+        self._font_combo.setStyleSheet(_combo_qss)
+        font_row.addWidget(font_lbl)
         font_row.addWidget(self._font_combo, 1)
         lay.addLayout(font_row)
 
-        font_hint = QLabel("Choisis la police principale de l'interface.")
-        font_hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
-        lay.addWidget(font_hint)
-
+        # Palette
         palette_row = QHBoxLayout()
         palette_row.setSpacing(8)
-
-        palette_name = QLabel("Palette")
-        palette_name.setMinimumWidth(70)
-        palette_name.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
-
-        self._palette_combo = QComboBox(card)
+        palette_lbl = QLabel("Palette")
+        palette_lbl.setMinimumWidth(70)
+        palette_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        self._palette_combo = QComboBox()
         for key, label in self.PALETTE_CHOICES:
             self._palette_combo.addItem(label, key)
         for i in range(self._palette_combo.count()):
             if self._palette_combo.itemData(i) == initial_palette:
                 self._palette_combo.setCurrentIndex(i)
                 break
-        self._palette_combo.setStyleSheet(self._font_combo.styleSheet())
-
-        palette_row.addWidget(palette_name)
+        self._palette_combo.setStyleSheet(_combo_qss)
+        palette_row.addWidget(palette_lbl)
         palette_row.addWidget(self._palette_combo, 1)
         lay.addLayout(palette_row)
 
+        # Forme
         shape_row = QHBoxLayout()
         shape_row.setSpacing(8)
-
-        shape_name = QLabel("Forme")
-        shape_name.setMinimumWidth(70)
-        shape_name.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
-
-        self._shape_combo = QComboBox(card)
+        shape_lbl = QLabel("Forme")
+        shape_lbl.setMinimumWidth(70)
+        shape_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        self._shape_combo = QComboBox()
         for radius, label in self.SHAPE_CHOICES:
             self._shape_combo.addItem(label, radius)
         for i in range(self._shape_combo.count()):
             if int(self._shape_combo.itemData(i)) == int(initial_corner_radius):
                 self._shape_combo.setCurrentIndex(i)
                 break
-        self._shape_combo.setStyleSheet(self._font_combo.styleSheet())
-
-        shape_row.addWidget(shape_name)
+        self._shape_combo.setStyleSheet(_combo_qss)
+        shape_row.addWidget(shape_lbl)
         shape_row.addWidget(self._shape_combo, 1)
         lay.addLayout(shape_row)
 
-        shape_hint = QLabel("Modifie l'arrondi global de la fenetre overlay.")
-        shape_hint.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
-        lay.addWidget(shape_hint)
-
+        # Connecter les signaux
         self._opacity_slider.valueChanged.connect(self._on_slider_change)
         self._font_combo.currentTextChanged.connect(self._on_font_change)
         self._palette_combo.currentIndexChanged.connect(self._on_palette_change)
         self._shape_combo.currentIndexChanged.connect(self._on_shape_change)
         self._on_slider_change(self._opacity_slider.value())
 
-        return card
+    # ── Contenu : carte Données ───────────────────────────────────────────
 
-    def _build_placeholder_card(self) -> QFrame:
-        card = QFrame(self)
-        card.setStyleSheet(
-            f"""
-            QFrame {{
-                background: {BG_PANEL};
-                border: 1px solid {BORDER};
-                border-radius: 4px;
-            }}
-            """
+    def _populate_data_card(self, lay: QVBoxLayout):
+        desc = QLabel(
+            "Efface l'historique des logs et repart à zéro.\n"
+            "Le montant de kamas sera redemandé au prochain lancement."
         )
+        desc.setWordWrap(True)
+        desc.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+        lay.addWidget(desc)
 
-        lay = QVBoxLayout(card)
-        lay.setContentsMargins(10, 10, 10, 10)
-        lay.setSpacing(6)
+        btn = QPushButton("Réinitialiser les données")
+        btn.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent;
+                color: #e05555;
+                border: 1px solid #8b2222;
+                border-radius: 6px;
+                padding: 6px 14px;
+                font-size: 11px;
+                font-weight: 600;
+            }}
+            QPushButton:hover {{
+                background: rgba(200,60,60,0.12);
+                border-color: #e05555;
+            }}
+        """)
+        btn.clicked.connect(self.reset_requested)
+        lay.addWidget(btn)
 
-        head = QLabel("A venir")
-        head.setStyleSheet(f"color: {TEXT}; font-size: 12px; font-weight: 700;")
-        body = QLabel("Disposition reservee pour les prochains reglages (theme, raccourcis, comportement).")
-        body.setWordWrap(True)
-        body.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
-
-        lay.addWidget(head)
-        lay.addWidget(body)
-        return card
+    # ── Slots ─────────────────────────────────────────────────────────────
 
     def _on_slider_change(self, value: int):
         self._opacity_value.setText(f"{value}%")

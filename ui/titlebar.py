@@ -1,10 +1,11 @@
 # ui/titlebar.py — Barre de titre custom (drag, pin, fold, close)
 
 from pathlib import Path
+import zipfile
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore    import Qt, pyqtSignal, QSize
-from PyQt5.QtGui     import QPainter, QColor, QPen, QIcon, QLinearGradient
+from PyQt5.QtGui     import QPainter, QColor, QPen, QIcon, QLinearGradient, QPixmap
 
 from ui.theme import (
     BG_PANEL, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM, BORDER, RED
@@ -12,6 +13,111 @@ from ui.theme import (
 
 HEIGHT = 40
 _ICON_DIR = Path(__file__).resolve().parent / "assets" / "titlebar"
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_CLASS_ICON_CACHE_DIR = _PROJECT_ROOT / "data" / "ankama_cdn" / "class_icons"
+_ZAAP_WAKFU_ICON = Path.home() / "AppData" / "Roaming" / "zaap" / "repositories" / "production" / "wakfu" / "main" / "data" / "icon.png"
+_WAKFU_INSTALL_ROOT = Path("H:/Games/Wakfu")
+_WAKFU_GUI_JAR = _WAKFU_INSTALL_ROOT / "contents" / "gui_jar" / "gui.jar"
+
+_CLASS_TO_ID = {
+    "feca": 1,
+    "osamodas": 2,
+    "enutrof": 3,
+    "sram": 4,
+    "xelor": 5,
+    "ecaflip": 6,
+    "eniripsa": 7,
+    "iop": 8,
+    "cra": 9,
+    "sadida": 10,
+    "sacrier": 11,
+    "pandawa": 12,
+    "rogue": 13,
+    "masqueraider": 14,
+    "ouginak": 15,
+    "foggernaut": 16,
+    "elio": 18,
+    "huppermage": 19,
+}
+
+
+def _normalize_class_key(value: str) -> str:
+    key = (value or "").strip().lower().replace(" ", "-")
+    aliases = {
+        "steam": "foggernaut",
+        "zobal": "masqueraider",
+        "enu": "enutrof",
+        "eca": "ecaflip",
+        "eni": "eniripsa",
+        "sacri": "sacrier",
+        "osa": "osamodas",
+    }
+    return aliases.get(key, key or "iop")
+
+
+def _class_icon_candidates(class_key: str) -> list[str]:
+    key = _normalize_class_key(class_key)
+    cid = _CLASS_TO_ID.get(key, 4)
+    return [
+        f"icons/popupIcons/breed{cid}.tga",
+        f"breeds/icons/small/{cid}.tga",
+        f"breeds/icons/Hud/{cid}.tga",
+        f"breeds/icons/Big/{cid}.tga",
+    ]
+
+
+def _breed_icon_candidates(breed_id: int) -> list[str]:
+    bid = int(breed_id)
+    return [
+        f"icons/popupIcons/breed{bid}.tga",
+        f"breeds/icons/small/{bid}.tga",
+        f"breeds/icons/Hud/{bid}.tga",
+        f"breeds/icons/Big/{bid}.tga",
+    ]
+
+
+def _extract_icon_from_wakfu_install(class_key: str, target_path: Path) -> bool:
+    if not _WAKFU_GUI_JAR.exists():
+        return False
+
+    try:
+        with zipfile.ZipFile(_WAKFU_GUI_JAR, "r") as zf:
+            for entry in _class_icon_candidates(class_key):
+                try:
+                    data = zf.read(entry)
+                except KeyError:
+                    continue
+                if len(data) < 128:
+                    continue
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_bytes(data)
+                return True
+    except OSError:
+        return False
+
+    return False
+
+
+def _extract_icon_from_wakfu_install_by_breed_id(breed_id: int, target_path: Path) -> bool:
+    if not _WAKFU_GUI_JAR.exists():
+        return False
+
+    try:
+        with zipfile.ZipFile(_WAKFU_GUI_JAR, "r") as zf:
+            for entry in _breed_icon_candidates(breed_id):
+                try:
+                    data = zf.read(entry)
+                except KeyError:
+                    continue
+                if len(data) < 128:
+                    continue
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_bytes(data)
+                return True
+    except OSError:
+        return False
+
+    return False
 
 
 class _TitleBtn(QPushButton):
@@ -121,11 +227,15 @@ class TitleBar(QWidget):
         lay.setSpacing(6)
 
         # Titre
-        self._lbl = QLabel("⚡ WAKFU")
+        self._class_icon = QLabel("")
+        self._class_icon.setFixedSize(54, 54)
+        self._class_icon.setScaledContents(False)
+        self._lbl = QLabel("WAKFU")
 
         # Infos session (timer, perso)
         self._info = QLabel("")
 
+        lay.addWidget(self._class_icon)
         lay.addWidget(self._lbl)
         lay.addSpacing(6)
         lay.addWidget(self._info)
@@ -146,6 +256,7 @@ class TitleBar(QWidget):
         lay.addWidget(self._btn_click)
         lay.addWidget(self._btn_fold)
         lay.addWidget(self._btn_close)
+        self.set_class_icon("iop")
         self.set_palette(self._palette)
 
     # ── API publique ───────────────────────────────────────────────
@@ -161,6 +272,54 @@ class TitleBar(QWidget):
         self._click_through = bool(enabled)
         self._btn_click.set_active(self._click_through)
 
+    def set_class_icon(self, class_key: str):
+        key = _normalize_class_key(class_key)
+        class_id = _CLASS_TO_ID.get(key, 4)
+        cache_file = _CLASS_ICON_CACHE_DIR / f"class_{class_id}_{key}.tga"
+
+        if not cache_file.exists():
+            _extract_icon_from_wakfu_install(key, cache_file)
+
+        source = cache_file if cache_file.exists() else (_ZAAP_WAKFU_ICON if _ZAAP_WAKFU_ICON.exists() else None)
+        if source is None:
+            self._class_icon.clear()
+            return
+
+        pix = QPixmap(str(source))
+        if pix.isNull():
+            self._class_icon.clear()
+            return
+
+        self._class_icon.setPixmap(
+            pix.scaled(54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        )
+        self._class_icon.setToolTip(f"Classe: {key}")
+
+    def set_class_icon_by_breed_id(self, breed_id: int):
+        try:
+            bid = int(breed_id)
+        except (TypeError, ValueError):
+            return
+
+        cache_file = _CLASS_ICON_CACHE_DIR / f"breed_{bid}.tga"
+        if not cache_file.exists():
+            _extract_icon_from_wakfu_install_by_breed_id(bid, cache_file)
+
+        source = cache_file if cache_file.exists() else (_ZAAP_WAKFU_ICON if _ZAAP_WAKFU_ICON.exists() else None)
+        if source is None:
+            self._class_icon.clear()
+            return
+
+        pix = QPixmap(str(source))
+        if pix.isNull():
+            self._class_icon.clear()
+            return
+
+        self._class_icon.setPixmap(
+            pix.scaled(54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        )
+        self._class_icon.setToolTip(f"Breed: {bid}")
+
     @property
     def is_click_through(self) -> bool:
         return self._click_through
@@ -175,6 +334,7 @@ class TitleBar(QWidget):
         self._lbl.setStyleSheet(
             f"color: {teal}; font-weight: 800; font-size: 13px; letter-spacing: 1px;"
         )
+        self._class_icon.setStyleSheet("background: transparent;")
         self._info.setStyleSheet(f"color: {text_dim}; font-size: 10px;")
         self._btn_pin.set_palette(self._palette)
         self._btn_click.set_palette(self._palette)

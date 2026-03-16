@@ -1,15 +1,20 @@
 {
   "character": "L'Immortel",
+  "character_class": "sram",
   "server": "Ogrest",
   "account": "Kairozadyk",
-  "base_kamas": 161403,
+  "base_kamas": 576869,
   "manual_kamas_delta": 0,
-  "onboarding_done": false,
+  "onboarding_done": true,
+  "last_session_end": "2026-03-16 13:24:09",
   "character_level": 0,
   "character_xp_current": 0,
   "character_xp_total": 0,
   "overlay_mode": true,
   "overlay_opacity": 0.92,
   "overlay_position": "right",
-  "click_through": false
+  "click_through": false,
+  "known_character_classes": {
+    "L'Immortel": "sram"
+  }
 }
