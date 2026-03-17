@@ -21,6 +21,7 @@ from core.kamas_history import (
 from core.permanent_journal import sync_permanent_journal, query_character_info
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
+from ui.tabs.hdv import HdvTab
 from ui.tabs.options import OptionsTab
 from ui.tabs.transactions import TransactionsTab
 from ui.tabs.personnage import PersonnageTab
@@ -481,6 +482,10 @@ class OverlayWindow(QWidget):
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
                 self._options_tab = w
+            elif name == "HDV":
+                w = HdvTab(self)
+                w.set_market_settings(self._market_default_days, self._market_territory_rate)
+                self._hdv_tab = w
             elif name == "Personnage":
                 w = PersonnageTab(self)
                 self._personnage_tab = w
@@ -1838,7 +1843,8 @@ class OverlayWindow(QWidget):
         for widget in self._tab_widgets:
             if isinstance(widget, TransactionsTab):
                 widget.set_market_settings(days, rate)
-                break
+            elif isinstance(widget, HdvTab):
+                widget.set_market_settings(days, rate)
 
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)
