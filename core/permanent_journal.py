@@ -1,24 +1,84 @@
 from __future__ import annotations
 
-import io
+# permanent_journal.py — Wakfu Companion Assistant
+# Source de vérité unique : all_events.jsonl (structuré) + all_events.log (lisible)
+# Migration automatique des journaux legacy au premier démarrage.
+
 import json
 import os
 import re
 import socket
 import struct
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[1]
-_PERM_DIR = _PROJECT_ROOT / "logs" / "permanent"
-_PERM_EVENTS_LOG = _PERM_DIR / "kamas_events.jsonl"
-_RECORDER_STATE = _PERM_DIR / "recorder_state.json"
+_PROJECT_ROOT        = Path(__file__).resolve().parents[1]
+_PERM_DIR            = _PROJECT_ROOT / "logs" / "permanent"
+_ALL_EVENTS_LOG      = _PERM_DIR / "all_events.jsonl"      # structuré, source unique
+_ALL_EVENTS_READABLE = _PERM_DIR / "all_events.log"        # companion lisible
+_RECORDER_STATE      = _PERM_DIR / "recorder_state.json"
 
-_APPDATA_WAKFU_DIR = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
-_RAW_WAKFU_CHAT_LOG = _APPDATA_WAKFU_DIR / "wakfu_chat.log"
-_RAW_WAKFU_LOG = _APPDATA_WAKFU_DIR / "wakfu.log"
+# Sources legacy (lecture seule — absorbées lors de la migration)
+_LEGACY_KAMAS_JSONL = _PERM_DIR / "kamas_events.jsonl"
+_LEGACY_CHAT_LOG    = _PERM_DIR / "chat_events.log"
+_LEGACY_JOURNAL_LOG = _PERM_DIR / "journal_events.log"
+
+# Incrémenter pour forcer un rebuild au prochain démarrage
+_JOURNAL_VERSION = 5
+
+_APPDATA_WAKFU_DIR     = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
+_RAW_WAKFU_CHAT_LOG    = _APPDATA_WAKFU_DIR / "wakfu_chat.log"
+_RAW_WAKFU_LOG         = _APPDATA_WAKFU_DIR / "wakfu.log"
 _RAW_WAKFU_JOURNAL_LOG = _APPDATA_WAKFU_DIR / "wakfu_journal.log"
+
+# ── Patterns timestamp ────────────────────────────────────────────────────────
+
+_CLIENT_TIME_RE = re.compile(r"\b(\d{2}):(\d{2}):(\d{2}),(\d{3})\b")
+
+_WAKFU_TIME_RE = re.compile(
+    r"nous sommes le .+?\((\d{1,2})/(\d{1,2})/(\d{2})\)\s+et il est\s+(\d{1,2}):(\d{2})",
+    re.IGNORECASE,
+)
+
+# Format des fichiers legacy (chat_events.log / journal_events.log) :
+# [YYYY-MM-DD HH:MM:SS.mmm][source_file]  INFO HH:MM:SS,mmm ... ligne de log
+_LEGACY_LINE_RE = re.compile(
+    r"^\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})[\.\d]*\]\[([^\]]+)\]\s*(.*)"
+)
+
+# ── Patterns événements ───────────────────────────────────────────────────────
+
+# Canaux de chat joueur reconnus (pour analytique communautaire)
+_CHAT_CHANNELS = frozenset({
+    "guilde", "alliance", "commerce", "recrutement", "général", "general",
+    "zone", "équipe", "groupe", "team", "cogestion",
+    "recrutement (fr)", "recrutement (en)", "recrutement (es)", "recrutement (pt)",
+})
+
+# [Canal] Pseudo : message  — capture les messages de chat joueur
+_CHAT_RE = re.compile(
+    r"\[([^\]]+)\]\s+(.+?)\s*:\s*(.*)",
+)
+
+# Retour du marché : "Vous avez vendu X objets pour un prix total de Y§ pendant votre absence"
+_MARKET_SOLD_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez vendu\s+([0-9\s\u00a0\u202f.,]+)\s+objets?\s+pour un prix total de\s+([0-9\s\u00a0\u202f.,]+)\s*§",
+    re.IGNORECASE,
+)
+# "Vous avez vendu [item] contre X kamas"
+_MARKET_SOLD_ITEM_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez vendu\s+(.+?)\s+contre\s+([0-9\s\u00a0\u202f.,]+)\s+kamas?",
+    re.IGNORECASE,
+)
+# Quête réussie / échouée
+_QUEST_DONE_RE  = re.compile(r"\[Information \(jeu\)\]\s+Quête accomplie\s*:\s*(.+)", re.IGNORECASE)
+_QUEST_FAIL_RE  = re.compile(r"\[Information \(jeu\)\]\s+Quête échouée\s*:\s*(.+)",  re.IGNORECASE)
+# Connexion / déconnexion
+_LOGIN_RE  = re.compile(r"\[Information \(jeu\)\]\s+Vous êtes maintenant connecté", re.IGNORECASE)
+_LOGOUT_RE = re.compile(r"\[Information \(jeu\)\]\s+Vous venez de vous déconnecter", re.IGNORECASE)
+# Mort de personnage
+_DEATH_RE = re.compile(r"\[Information \(combat\)\]\s+(.+?)\s+est mort", re.IGNORECASE)
 
 _GAIN_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez gagné\s+([0-9\s\u00a0\u202f\xa0.,]+)\s+kamas?\b",
@@ -28,18 +88,48 @@ _LOSS_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez perdu\s+([0-9\s\u00a0\u202f\xa0.,]+)\s+kamas?\b",
     re.IGNORECASE,
 )
-_INNER_TIME_RE = re.compile(r"\b(\d{2}:\d{2}:\d{2}),(\d{3})\b")
+_SPELL_RE = re.compile(
+    r"\[Information \(combat\)\]\s+(.+?)\s+lance le sort\s+(.+?)(?:\s*\(|\s*$)",
+    re.IGNORECASE,
+)
+_XP_COMBAT_RE = re.compile(
+    r"\[Information \(combat\)\]\s+(.+?)\s*:\s*\+([0-9\s\u00a0\u202f.,]+)\s*points d'XP\.\s*Prochain niveau dans\s*:\s*([0-9\s\u00a0\u202f.,]+)",
+    re.IGNORECASE,
+)
+_XP_PROF_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+(.+?)\s*:\s*\+([0-9\s\u00a0\u202f.,]+)\s*points d'XP\.\s*Prochain niveau dans\s*:\s*([0-9\s\u00a0\u202f.,]+)",
+    re.IGNORECASE,
+)
+_LEVEL_UP_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+(.+?)\s+gagne un niveau.*?niveau\s+(\d+)",
+    re.IGNORECASE,
+)
+_WHOIS_RE = re.compile(
+    r"Le joueur\s+(.+?)\s+\(([^)]+)\)\s+est connecté sur le serveur\s+(.+?)(?:\.|$)",
+    re.IGNORECASE,
+)
+_BREED_FL_RE = re.compile(
+    r"\[_FL_\].*?fightId=\d+\s+(.+?)\s+breed\s*:\s*(\d+)\s+\[[^\]]+\]\s+isControlledByAI=false",
+    re.IGNORECASE,
+)
+_LOC_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous vous trouvez en\s+\((-?\d+),\s*(-?\d+),\s*(-?\d+)\)\s+de l'instance\s+([0-9\s\u00a0\u202f\xa0]+)",
+    re.IGNORECASE,
+)
+_PING_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Ping\s*:\s*(\d+)\s*ms",
+    re.IGNORECASE,
+)
+_PLAYED_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez joué\s+(.+)",
+    re.IGNORECASE,
+)
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-def get_permanent_events_log_path() -> Path:
-    return _PERM_EVENTS_LOG
-
-
-def get_permanent_events_size() -> int:
-    try:
-        return int(_PERM_EVENTS_LOG.stat().st_size) if _PERM_EVENTS_LOG.exists() else 0
-    except OSError:
-        return 0
+def _parse_num(raw: str) -> int | None:
+    digits = re.sub(r"[^0-9]", "", raw)
+    return int(digits) if digits else None
 
 
 def _parse_local_iso(raw: str) -> datetime | None:
@@ -53,10 +143,334 @@ def _parse_local_iso(raw: str) -> datetime | None:
         return None
 
 
-def _parse_kamas_token(raw: str) -> int | None:
-    digits = re.sub(r"[^0-9]", "", raw)
-    return int(digits) if digits else None
+def _parse_iso_date(raw: str | None) -> date | None:
+    if not raw:
+        return None
+    try:
+        return date.fromisoformat(str(raw))
+    except ValueError:
+        return None
 
+
+# ── Event parsing ─────────────────────────────────────────────────────────────
+
+def _parse_event(raw_line: str) -> tuple[str, dict] | None:
+    m = _GAIN_RE.search(raw_line)
+    if m:
+        amt = _parse_num(m.group(1))
+        if amt and amt > 0:
+            return "kamas_gain", {"amount": amt}
+
+    m = _LOSS_RE.search(raw_line)
+    if m:
+        amt = _parse_num(m.group(1))
+        if amt and amt > 0:
+            return "kamas_loss", {"amount": amt}
+
+    m = _SPELL_RE.search(raw_line)
+    if m:
+        spell = m.group(2).strip().rstrip("(").strip()
+        if spell:
+            return "spell_cast", {"character": m.group(1).strip(), "spell": spell}
+
+    m = _XP_COMBAT_RE.search(raw_line)
+    if m:
+        xp = _parse_num(m.group(2))
+        xp_next = _parse_num(m.group(3))
+        if xp and xp > 0:
+            return "xp_combat", {
+                "character": m.group(1).strip(),
+                "xp": xp,
+                "xp_to_next": xp_next,
+            }
+
+    m = _XP_PROF_RE.search(raw_line)
+    if m:
+        xp = _parse_num(m.group(2))
+        xp_next = _parse_num(m.group(3))
+        if xp and xp > 0:
+            return "xp_profession", {
+                "profession": m.group(1).strip(),
+                "xp": xp,
+                "xp_to_next": xp_next,
+            }
+
+    m = _LEVEL_UP_RE.search(raw_line)
+    if m:
+        lvl = _parse_num(m.group(2))
+        if lvl:
+            return "level_up", {"character": m.group(1).strip(), "level": int(lvl)}
+
+    m = _WHOIS_RE.search(raw_line)
+    if m:
+        return "whois", {
+            "character": m.group(1).strip(),
+            "account": m.group(2).strip(),
+            "server": m.group(3).strip(),
+        }
+
+    m = _BREED_FL_RE.search(raw_line)
+    if m:
+        try:
+            bid = int(m.group(2))
+        except ValueError:
+            return None
+        return "breed", {"character": m.group(1).strip(), "breed_id": bid}
+
+    m = _LOC_RE.search(raw_line)
+    if m:
+        instance = _parse_num(m.group(4))
+        return "location", {
+            "x": int(m.group(1)),
+            "y": int(m.group(2)),
+            "z": int(m.group(3)),
+            "instance": instance,
+        }
+
+    m = _PING_RE.search(raw_line)
+    if m:
+        return "ping", {"ms": int(m.group(1))}
+
+    m = _PLAYED_RE.search(raw_line)
+    if m:
+        return "played", {"raw": m.group(1).strip()}
+
+    m = _WAKFU_TIME_RE.search(raw_line)
+    if m:
+        d, mo, yy, hh, mm = (int(g) for g in m.groups())
+        return "time_anchor", {
+            "real_date": f"20{yy:02d}-{mo:02d}-{d:02d}",
+            "real_time": f"{hh:02d}:{mm:02d}",
+        }
+
+    # ── Marché ────────────────────────────────────────────────────────────────
+    m = _MARKET_SOLD_RE.search(raw_line)
+    if m:
+        qty   = _parse_num(m.group(1))
+        total = _parse_num(m.group(2))
+        if total:
+            return "market_sold", {"quantity": qty, "total": total}
+
+    m = _MARKET_SOLD_ITEM_RE.search(raw_line)
+    if m:
+        price = _parse_num(m.group(2))
+        if price:
+            return "market_sold_item", {"item": m.group(1).strip(), "price": price}
+
+    # ── Quêtes ────────────────────────────────────────────────────────────────
+    m = _QUEST_DONE_RE.search(raw_line)
+    if m:
+        return "quest_complete", {"name": m.group(1).strip().strip('"')}
+
+    m = _QUEST_FAIL_RE.search(raw_line)
+    if m:
+        return "quest_fail", {"name": m.group(1).strip().strip('"')}
+
+    # ── Connexion ─────────────────────────────────────────────────────────────
+    if _LOGIN_RE.search(raw_line):
+        return "login", {}
+
+    if _LOGOUT_RE.search(raw_line):
+        return "logout", {}
+
+    # ── Mort ──────────────────────────────────────────────────────────────────
+    m = _DEATH_RE.search(raw_line)
+    if m:
+        return "death", {"character": m.group(1).strip()}
+
+    # ── Chat joueur (canaux identifiés) ───────────────────────────────────────
+    # Testé en dernier — pattern large, ne capture que les canaux connus
+    m = _CHAT_RE.search(raw_line)
+    if m:
+        channel = m.group(1).strip().lower()
+        if channel in _CHAT_CHANNELS:
+            author  = m.group(2).strip()
+            message = m.group(3).strip()
+            if author:
+                return "chat", {
+                    "channel": m.group(1).strip(),
+                    "author":  author,
+                    "message": message,
+                }
+
+    return None
+
+
+def _make_fingerprint(event_type: str, data: dict, client_clock: str) -> str:
+    if event_type in ("kamas_gain", "kamas_loss"):
+        return f"{client_clock}|{event_type}|{data['amount']}"
+    if event_type == "spell_cast":
+        return f"{client_clock}|spell|{data['character'].lower()}|{data['spell'].lower()}"
+    if event_type in ("xp_combat", "xp_profession"):
+        key = data.get("character") or data.get("profession") or ""
+        return f"{client_clock}|{event_type}|{key.lower()}|{data.get('xp')}"
+    if event_type == "level_up":
+        return f"{client_clock}|level_up|{data['character'].lower()}|{data['level']}"
+    if event_type == "whois":
+        return f"{client_clock}|whois|{data['character'].lower()}|{data['account'].lower()}"
+    if event_type == "breed":
+        return f"{client_clock}|breed|{data['character'].lower()}|{data['breed_id']}"
+    if event_type == "location":
+        return f"{client_clock}|loc|{data['x']}|{data['y']}|{data['z']}|{data.get('instance')}"
+    if event_type == "ping":
+        return f"{client_clock}|ping|{data['ms']}"
+    if event_type == "played":
+        return f"{client_clock}|played|{data['raw'][:40].lower()}"
+    if event_type == "time_anchor":
+        return f"{client_clock}|time_anchor|{data['real_date']}"
+    if event_type in ("market_sold", "market_sold_item"):
+        return f"{client_clock}|{event_type}|{data.get('total') or data.get('price')}"
+    if event_type in ("quest_complete", "quest_fail"):
+        return f"{client_clock}|{event_type}|{data['name'][:60].lower()}"
+    if event_type in ("login", "logout"):
+        return f"{client_clock}|{event_type}"
+    if event_type == "death":
+        return f"{client_clock}|death|{data['character'].lower()}"
+    if event_type == "chat":
+        return f"{client_clock}|chat|{data['channel'].lower()}|{data['author'].lower()}|{data['message'][:40].lower()}"
+    return f"{client_clock}|{event_type}|{json.dumps(data, ensure_ascii=False)[:80]}"
+
+
+# ── Format lisible ─────────────────────────────────────────────────────────────
+
+def _format_log_line(entry: dict) -> str:
+    """Formate une entrée all_events en ligne lisible pour all_events.log."""
+    ts    = entry.get("ts_local", "")[:19]   # YYYY-MM-DD HH:MM:SS
+    etype = entry.get("type", "unknown")
+    src   = entry.get("source_file", "")
+    data  = entry.get("data") or {}
+
+    if etype == "kamas_gain":
+        detail = f"+{data.get('amount', 0):,} ₭".replace(",", " ")
+    elif etype == "kamas_loss":
+        detail = f"-{data.get('amount', 0):,} ₭".replace(",", " ")
+    elif etype == "spell_cast":
+        detail = f"{data.get('character', '?')} › {data.get('spell', '?')}"
+    elif etype in ("xp_combat", "xp_profession"):
+        key = data.get("character") or data.get("profession") or "?"
+        detail = f"{key} +{data.get('xp', 0):,} XP".replace(",", " ")
+    elif etype == "level_up":
+        detail = f"{data.get('character', '?')} › niveau {data.get('level', '?')}"
+    elif etype == "whois":
+        detail = f"{data.get('character', '?')} ({data.get('account', '?')}) @ {data.get('server', '?')}"
+    elif etype == "breed":
+        detail = f"{data.get('character', '?')} breed={data.get('breed_id', '?')}"
+    elif etype == "location":
+        detail = f"({data.get('x')}, {data.get('y')}, {data.get('z')}) instance {data.get('instance')}"
+    elif etype == "ping":
+        detail = f"{data.get('ms')} ms"
+    elif etype == "played":
+        detail = data.get("raw", "")
+    elif etype == "time_anchor":
+        detail = f"{data.get('real_date')} {data.get('real_time')}"
+    elif etype == "market_sold":
+        qty = data.get("quantity") or "?"
+        total = f"{data.get('total', 0):,}".replace(",", " ")
+        detail = f"{qty} objets → {total} ₭"
+    elif etype == "market_sold_item":
+        price = f"{data.get('price', 0):,}".replace(",", " ")
+        detail = f"{data.get('item', '?')} → {price} ₭"
+    elif etype == "quest_complete":
+        detail = f"✓ {data.get('name', '')}"
+    elif etype == "quest_fail":
+        detail = f"✗ {data.get('name', '')}"
+    elif etype in ("login", "logout"):
+        detail = etype
+    elif etype == "death":
+        detail = f"{data.get('character', '?')} mort"
+    elif etype == "chat":
+        detail = f"[{data.get('channel', '?')}] {data.get('author', '?')} : {data.get('message', '')[:60]}"
+    else:
+        detail = json.dumps(data, ensure_ascii=False)[:80]
+
+    return f"{ts}  {etype:<18}  {detail:<50}  [{src}]"
+
+
+# ── Timestamp reconstruction ──────────────────────────────────────────────────
+
+def _count_crossings_and_anchor(path: Path, start_pos: int) -> tuple[int, date | None]:
+    crossings = 0
+    prev_secs: int | None = None
+    latest_anchor: date | None = None
+    try:
+        with path.open("rb") as fh:
+            fh.seek(max(0, start_pos))
+            for raw_bytes in fh:
+                raw = raw_bytes.decode("utf-8", errors="ignore")
+                ta = _WAKFU_TIME_RE.search(raw)
+                if ta:
+                    d, mo, yy = int(ta.group(1)), int(ta.group(2)), int(ta.group(3))
+                    try:
+                        latest_anchor = date(2000 + yy, mo, d)
+                    except ValueError:
+                        pass
+                m = _CLIENT_TIME_RE.search(raw)
+                if not m:
+                    continue
+                secs = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + int(m.group(3))
+                if prev_secs is not None and (prev_secs - secs) > 3600:
+                    crossings += 1
+                prev_secs = secs
+    except OSError:
+        pass
+    return crossings, latest_anchor
+
+
+# ── NTP ───────────────────────────────────────────────────────────────────────
+
+def _query_ntp_utc(server: str, timeout_s: float) -> datetime | None:
+    packet = b"\x1b" + 47 * b"\0"
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(timeout_s)
+            sock.sendto(packet, (server, 123))
+            data, _addr = sock.recvfrom(48)
+    except OSError:
+        return None
+    if len(data) < 48:
+        return None
+    sec_1900, frac = struct.unpack("!II", data[40:48])
+    sec_1970 = sec_1900 - 2208988800
+    if sec_1970 <= 0:
+        return None
+    return datetime.fromtimestamp(sec_1970 + frac / float(1 << 32), tz=timezone.utc)
+
+
+def _get_atomic_offset_ms(state: dict) -> float | None:
+    sync = state.get("time_sync")
+    if not isinstance(sync, dict):
+        sync = {}
+    now_mono   = time.monotonic()
+    valid_until = float(sync.get("valid_until_mono", 0.0) or 0.0)
+    cached = sync.get("offset_ms")
+    if cached is not None and now_mono <= valid_until:
+        try:
+            return float(cached)
+        except (TypeError, ValueError):
+            pass
+    local_utc = datetime.now(timezone.utc)
+    ntp_utc = None
+    for server in ("time.windows.com", "pool.ntp.org", "time.google.com"):
+        ntp_utc = _query_ntp_utc(server, timeout_s=0.8)
+        if ntp_utc is not None:
+            break
+    if ntp_utc is None:
+        sync.update({"offset_ms": None, "status": "unavailable",
+                     "checked_at_utc": local_utc.isoformat(),
+                     "valid_until_mono": now_mono + 120.0})
+        state["time_sync"] = sync
+        _write_state(state)
+        return None
+    offset_ms = (ntp_utc - local_utc).total_seconds() * 1000.0
+    sync.update({"offset_ms": offset_ms, "status": "ok",
+                 "checked_at_utc": local_utc.isoformat(),
+                 "valid_until_mono": now_mono + 600.0})
+    state["time_sync"] = sync
+    _write_state(state)
+    return offset_ms
+
+
+# ── État ──────────────────────────────────────────────────────────────────────
 
 def _read_state() -> dict:
     if not _RECORDER_STATE.exists():
@@ -70,307 +484,804 @@ def _read_state() -> dict:
 def _write_state(state: dict):
     try:
         _PERM_DIR.mkdir(parents=True, exist_ok=True)
-        _RECORDER_STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+        _RECORDER_STATE.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     except OSError:
         pass
 
 
-def _query_ntp_utc(server: str, timeout_s: float) -> datetime | None:
-    # Minimal SNTP query (RFC 4330) over UDP.
-    packet = b"\x1b" + 47 * b"\0"
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.settimeout(timeout_s)
-            sock.sendto(packet, (server, 123))
-            data, _addr = sock.recvfrom(48)
-    except OSError:
-        return None
-
-    if len(data) < 48:
-        return None
-
-    sec_1900, frac = struct.unpack("!II", data[40:48])
-    sec_1970 = sec_1900 - 2208988800
-    if sec_1970 <= 0:
-        return None
-
-    frac_s = frac / float(1 << 32)
-    return datetime.fromtimestamp(sec_1970 + frac_s, tz=timezone.utc)
-
-
-def _get_atomic_offset_ms(state: dict) -> float | None:
-    sync = state.get("time_sync")
-    if not isinstance(sync, dict):
-        sync = {}
-
-    now_mono = time.monotonic()
-    valid_until = float(sync.get("valid_until_mono", 0.0) or 0.0)
-    cached = sync.get("offset_ms")
-
-    if cached is not None and now_mono <= valid_until:
-        try:
-            return float(cached)
-        except (TypeError, ValueError):
-            pass
-
-    local_utc = datetime.now(timezone.utc)
-    ntp_utc = None
-    for server in ("time.windows.com", "pool.ntp.org", "time.google.com"):
-        ntp_utc = _query_ntp_utc(server, timeout_s=0.8)
-        if ntp_utc is not None:
-            break
-
-    if ntp_utc is None:
-        sync.update({
-            "offset_ms": None,
-            "status": "unavailable",
-            "checked_at_utc": local_utc.isoformat(),
-            "valid_until_mono": now_mono + 120.0,
-        })
-        state["time_sync"] = sync
-        _write_state(state)
-        return None
-
-    offset_ms = (ntp_utc - local_utc).total_seconds() * 1000.0
-    sync.update({
-        "offset_ms": offset_ms,
-        "status": "ok",
-        "checked_at_utc": local_utc.isoformat(),
-        "valid_until_mono": now_mono + 600.0,
-    })
-    state["time_sync"] = sync
-    _write_state(state)
-    return offset_ms
-
-
-def _resolve_client_local(client_time: str, ref_local: datetime) -> datetime | None:
-    try:
-        parsed = datetime.strptime(client_time, "%H:%M:%S.%f")
-    except ValueError:
-        return None
-
-    base = ref_local.replace(
-        hour=parsed.hour,
-        minute=parsed.minute,
-        second=parsed.second,
-        microsecond=parsed.microsecond,
-    )
-    candidates = (base - timedelta(days=1), base, base + timedelta(days=1))
-    chosen = min(candidates, key=lambda dt: abs((dt - ref_local).total_seconds()))
-
-    if chosen > ref_local:
-        past_candidates = [dt for dt in candidates if dt <= ref_local]
-        if past_candidates:
-            chosen = min(past_candidates, key=lambda dt: abs((dt - ref_local).total_seconds()))
-        else:
-            chosen = ref_local
-
-    return chosen
-
+# ── Sources live ──────────────────────────────────────────────────────────────
 
 def _iter_raw_sources() -> list[Path]:
-    # Inclut aussi les fichiers rotatifs (.1/.2/...) pour l'historique long.
+    """Retourne tous les fichiers log Wakfu live existants, du plus ancien au plus récent."""
     candidates: dict[str, Path] = {}
     patterns = ("wakfu_chat.log*", "wakfu.log*", "wakfu_journal.log*")
     for pat in patterns:
         for path in _APPDATA_WAKFU_DIR.glob(pat):
-            if not path.is_file():
-                continue
-            candidates[str(path)] = path
-
+            if path.is_file():
+                candidates[str(path)] = path
     existing: list[tuple[float, Path]] = []
     for path in candidates.values():
         try:
             st = path.stat()
         except OSError:
             continue
-        if st.st_size <= 0:
-            continue
-        existing.append((float(st.st_mtime), path))
-
-    # Chronologique: plus ancien -> plus recent.
+        if st.st_size > 0:
+            existing.append((float(st.st_mtime), path))
     existing.sort(key=lambda item: item[0])
     return [path for _mtime, path in existing]
 
 
 def _iter_new_lines(path: Path, start_pos: int):
-    with path.open("rb") as fh_bin:
-        fh_bin.seek(max(0, start_pos))
+    with path.open("rb") as fh:
+        fh.seek(max(0, start_pos))
         while True:
-            offset = fh_bin.tell()
-            chunk = fh_bin.readline()
+            offset = fh.tell()
+            chunk = fh.readline()
             if not chunk:
                 break
             yield offset, chunk.decode("utf-8", errors="ignore")
-        return fh_bin.tell()
 
 
-def _line_fingerprint(raw_line: str, kind: str, amount: int, client_clock: str | None) -> str:
-    lower = raw_line.lower()
-    marker = "[information (jeu)]"
-    idx = lower.find(marker)
-    if idx >= 0:
-        normalized = raw_line[idx:].strip().lower()
+# ── Migration des sources legacy ──────────────────────────────────────────────
+
+def _migrate_kamas_events(fps_set: set[str], fps_list: list[str]) -> list[dict]:
+    """
+    Lit kamas_events.jsonl (et ses backups) — utilise resolved_client_local
+    comme timestamp exact. Retourne une liste d'entrées all_events prêtes à écrire.
+    """
+    sources: list[Path] = sorted(_PERM_DIR.glob("kamas_events.backup_*.jsonl"))
+    if _LEGACY_KAMAS_JSONL.exists():
+        sources.append(_LEGACY_KAMAS_JSONL)
+    # Inclure aussi la version absorbée (renommée après le premier rebuild)
+    absorbed = _LEGACY_KAMAS_JSONL.with_suffix(".absorbed")
+    if absorbed.exists() and absorbed not in sources:
+        sources.append(absorbed)
+
+    entries: list[dict] = []
+    for src in sources:
+        try:
+            lines = src.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                data = json.loads(line)
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(data, dict):
+                continue
+            kind = str(data.get("kind") or "").strip().lower()
+            if kind not in ("gain", "loss"):
+                continue
+            try:
+                amount = int(data.get("amount") or 0)
+            except (TypeError, ValueError):
+                continue
+            # Utilise resolved_client_local (reconstruit au moment de la capture)
+            ts_str = str(data.get("resolved_client_local") or data.get("ts_local") or "")
+            if not ts_str:
+                continue
+            client_time = str(data.get("client_time") or data.get("ts_client") or "")
+            event_type = "kamas_gain" if kind == "gain" else "kamas_loss"
+            fp = _make_fingerprint(event_type, {"amount": amount}, client_time)
+            if fp in fps_set:
+                continue
+            fps_set.add(fp)
+            fps_list.append(fp)
+            entries.append({
+                "ts_local":    ts_str,
+                "ts_client":   client_time,
+                "source_file": str(data.get("source_file") or src.name),
+                "type":        event_type,
+                "data":        {"amount": amount},
+            })
+    return entries
+
+
+def _migrate_legacy_log_file(path: Path, fps_set: set[str], fps_list: list[str]) -> list[dict]:
+    """
+    Lit chat_events.log ou journal_events.log.
+    Format : [YYYY-MM-DD HH:MM:SS.mmm][source_file]  raw_game_log_line
+    La date système [YYYY-MM-DD] est utilisée comme date de l'événement.
+    Le timestamp client dans raw_line donne l'heure précise.
+    """
+    if not path.exists():
+        return []
+    entries: list[dict] = []
+    try:
+        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except OSError:
+        return []
+
+    for line in lines:
+        m_sys = _LEGACY_LINE_RE.match(line)
+        if not m_sys:
+            continue
+        sys_date_str = m_sys.group(1)    # YYYY-MM-DD
+        source_file  = m_sys.group(3)    # e.g. "wakfu.log"
+        raw_content  = m_sys.group(4)    # la ligne brute du jeu
+
+        try:
+            sys_date = date.fromisoformat(sys_date_str)
+        except ValueError:
+            continue
+
+        m_ct = _CLIENT_TIME_RE.search(raw_content)
+        if not m_ct:
+            continue
+        h, mn, s, ms = int(m_ct.group(1)), int(m_ct.group(2)), int(m_ct.group(3)), int(m_ct.group(4))
+        client_clock = f"{h:02d}:{mn:02d}:{s:02d}.{ms:03d}"
+
+        evt = _parse_event(raw_content)
+        if evt is None:
+            continue
+        event_type, event_data = evt
+
+        fp = _make_fingerprint(event_type, event_data, client_clock)
+        if fp in fps_set:
+            continue
+        fps_set.add(fp)
+        fps_list.append(fp)
+
+        ts_local = datetime(sys_date.year, sys_date.month, sys_date.day, h, mn, s, ms * 1000)
+        entries.append({
+            "ts_local":    ts_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
+            "ts_client":   client_clock,
+            "source_file": source_file,
+            "type":        event_type,
+            "data":        event_data,
+        })
+    return entries
+
+
+# ── Absorption sources externes (archives, realtime, racine) ─────────────────
+
+_GAME_LOG_PAT = re.compile(r"(?:^|[\\/])wakfu(?:_chat|_journal)?\.log(?:\.\d+)?$", re.IGNORECASE)
+_ARCHIVE_DATE_PAT = re.compile(r"(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})")
+
+
+def _date_from_name(name: str) -> date | None:
+    m = _ARCHIVE_DATE_PAT.search(name)
+    if m:
+        try:
+            return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            return None
+    return None
+
+
+_KAMAS_TYPES = frozenset({"kamas_gain", "kamas_loss"})
+
+
+def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
+                      archive_date: date | None = None,
+                      skip_kamas: bool = False) -> list[dict]:
+    """
+    Lit un fichier log Wakfu brut (format natif : HH:MM:SS,mmm ou INFO HH:MM:SS,mmm).
+    Utilise archive_date comme ancre de date si fournie (plus fiable que le mtime).
+    skip_kamas=True exclut kamas_gain/kamas_loss (pour le rebuild historique multi-perso).
+    Retourne la liste d'entrées all_events.
+    """
+    try:
+        file_size = int(path.stat().st_size)
+        if file_size == 0:
+            return []
+        ref_mtime = datetime.fromtimestamp(path.stat().st_mtime)
+    except OSError:
+        return []
+
+    crossings, anchor = _count_crossings_and_anchor(path, 0)
+    if anchor is not None:
+        current_date = anchor
+    elif archive_date is not None:
+        # L'archive date est la date de capture → remonter en arrière selon les crossings
+        current_date = archive_date - timedelta(days=crossings)
     else:
-        normalized = raw_line.strip().lower()
-    return f"{client_clock or ''}|{kind}|{amount}|{normalized}"
+        current_date = (ref_mtime - timedelta(days=crossings)).date()
+
+    last_client_secs: int | None = None
+    entries: list[dict] = []
+
+    for _, raw_line in _iter_new_lines(path, 0):
+        # Les fichiers projet-legacy ont le préfixe [timestamp][source] — les ignorer ici
+        # (ils sont gérés par _migrate_legacy_log_file)
+        if _LEGACY_LINE_RE.match(raw_line):
+            continue
+
+        m_ts = _CLIENT_TIME_RE.search(raw_line)
+        if not m_ts:
+            continue
+        h, mn, s, ms = int(m_ts.group(1)), int(m_ts.group(2)), int(m_ts.group(3)), int(m_ts.group(4))
+        client_secs  = h * 3600 + mn * 60 + s
+        client_clock = f"{h:02d}:{mn:02d}:{s:02d}.{ms:03d}"
+
+        if last_client_secs is not None and (last_client_secs - client_secs) > 3600:
+            current_date += timedelta(days=1)
+        last_client_secs = client_secs
+
+        ta = _WAKFU_TIME_RE.search(raw_line)
+        if ta:
+            d_, mo_, yy_ = int(ta.group(1)), int(ta.group(2)), int(ta.group(3))
+            try:
+                current_date = date(2000 + yy_, mo_, d_)
+            except ValueError:
+                pass
+
+        ts_local = datetime(current_date.year, current_date.month, current_date.day,
+                            h, mn, s, ms * 1000)
+        ts_local_str = ts_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+        evt = _parse_event(raw_line)
+        if evt is None:
+            continue
+        event_type, event_data = evt
+
+        if skip_kamas and event_type in _KAMAS_TYPES:
+            continue
+
+        fp = _make_fingerprint(event_type, event_data, client_clock)
+        if fp in fps_set:
+            continue
+        fps_set.add(fp)
+        fps_list.append(fp)
+
+        entries.append({
+            "ts_local":    ts_local_str,
+            "ts_client":   client_clock,
+            "source_file": path.name,
+            "type":        event_type,
+            "data":        event_data,
+        })
+
+    return entries
 
 
-def sync_permanent_kamas_journal() -> int:
+def _absorb_external_sources(fps_set: set[str], fps_list: list[str]) -> list[dict]:
+    """
+    Absorbe toutes les sources externes de logs Wakfu :
+      - logs/archives/auto/wakfu_logs_*  (dossiers et ZIPs)
+      - logs/archives/*.zip              (archive manuelle)
+      - logs/realtime/wakfu*.log*        (logs realtime copiés)
+      - logs/wakfu_chat.log              (racine projet)
+      - logs/wakfu_journal.log           (racine projet)
+    Après absorption, supprime les fichiers source.
+    Retourne la liste de toutes les entrées parsées.
+    """
+    import zipfile
+    import shutil
+    import tempfile
+
+    all_entries: list[dict] = []
+    to_delete: list[Path] = []
+
+    def _absorb_file(path: Path, archive_date: date | None = None):
+        # skip_kamas=True : les logs bruts couvrent tous les personnages,
+        # les kamas sont fournis exclusivement par _migrate_kamas_events()
+        entries = _parse_raw_source(path, fps_set, fps_list, archive_date, skip_kamas=True)
+        all_entries.extend(entries)
+
+    def _absorb_zip(zip_path: Path, archive_date: date | None = None):
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                names = [n for n in zf.namelist() if _GAME_LOG_PAT.search(n)]
+                # Exclure les fichiers project_logs/ (déjà absorbés via legacy migration)
+                names = [n for n in names if "project_logs" not in n.lower()]
+                if not names:
+                    return
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    for name in names:
+                        try:
+                            zf.extract(name, tmpdir)
+                            tmp = Path(tmpdir) / name
+                            if tmp.exists() and tmp.stat().st_size > 0:
+                                _absorb_file(tmp, archive_date)
+                        except Exception:
+                            continue
+        except Exception:
+            pass
+
+    # ── logs/archives/auto/ ───────────────────────────────────────────────────
+    auto_dir = _PROJECT_ROOT / "logs" / "archives" / "auto"
+    if auto_dir.exists():
+        seen_zips: set[str] = set()
+        for item in sorted(auto_dir.iterdir()):
+            if item.name == "archive_runs.log":
+                to_delete.append(item)
+                continue
+            arc_date = _date_from_name(item.name)
+            if item.suffix == ".zip" and item.is_file():
+                _absorb_zip(item, arc_date)
+                to_delete.append(item)
+                seen_zips.add(item.stem)
+            elif item.is_dir() and item.name.startswith("wakfu_logs_"):
+                for pat in ("wakfu_chat.log*", "wakfu.log*", "wakfu_journal.log*"):
+                    for f in sorted(item.glob(pat)):
+                        _absorb_file(f, arc_date)
+                to_delete.append(item)
+
+    # ── logs/archives/*.zip (archive manuelle) ────────────────────────────────
+    archives_root = _PROJECT_ROOT / "logs" / "archives"
+    if archives_root.exists():
+        for item in archives_root.iterdir():
+            if item.suffix == ".zip" and item.is_file():
+                arc_date = _date_from_name(item.name)
+                _absorb_zip(item, arc_date)
+                to_delete.append(item)
+            elif item.is_dir() and item.name.startswith("archive_"):
+                arc_date = _date_from_name(item.name)
+                for pat in ("wakfu_chat.log*", "wakfu.log*", "wakfu_journal.log*"):
+                    for f in sorted(item.rglob(pat)):
+                        if "project_logs" not in str(f).lower():
+                            _absorb_file(f, arc_date)
+                to_delete.append(item)
+
+    # ── logs/realtime/ — game logs parsés + tous les autres logs Wakfu supprimés
+    realtime_dir = _PROJECT_ROOT / "logs" / "realtime"
+    if realtime_dir.exists():
+        for pat in ("wakfu_chat.log*", "wakfu.log*", "wakfu_journal.log*"):
+            for f in sorted(realtime_dir.glob(pat)):
+                _absorb_file(f)
+                to_delete.append(f)
+        # Tous les autres logs Wakfu (animation, camera, fileLoading, lua, etc.)
+        # ne contiennent pas d'événements utiles mais viennent du jeu → nettoyer
+        absorbed = {str(f) for f in to_delete}
+        for f in realtime_dir.glob("wakfu_*.log*"):
+            if f.is_file() and str(f) not in absorbed:
+                to_delete.append(f)
+
+    # ── logs/ racine ──────────────────────────────────────────────────────────
+    logs_root = _PROJECT_ROOT / "logs"
+    for fname in ("wakfu_chat.log", "wakfu_journal.log"):
+        f = logs_root / fname
+        if f.exists():
+            _absorb_file(f)
+            to_delete.append(f)
+
+    # ── Nettoyage ─────────────────────────────────────────────────────────────
+    for item in to_delete:
+        try:
+            if item.is_dir():
+                shutil.rmtree(item, ignore_errors=True)
+            elif item.is_file():
+                item.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    return all_entries
+
+
+# ── Rebuild complet ───────────────────────────────────────────────────────────
+
+def rebuild_all_events() -> dict[str, int]:
+    """
+    Reconstruit all_events.jsonl et all_events.log depuis zéro :
+    1. Absorbe kamas_events.jsonl (timestamps exacts via resolved_client_local)
+    2. Absorbe chat_events.log et journal_events.log (date système + heure client)
+    3. Lit tous les logs Wakfu live depuis le début (AppData)
+    4. Déduplique, trie chronologiquement, écrit les deux fichiers
+    Retourne {"all": N, "kamas": N_kamas}.
+    """
+    _PERM_DIR.mkdir(parents=True, exist_ok=True)
+    state = _read_state()
+    offset_ms = _get_atomic_offset_ms(state)
+
+    fps_list: list[str] = []
+    fps_set:  set[str]  = set()
+
+    all_entries: list[dict] = []
+
+    # ── 1. Migration kamas_events.jsonl (timestamps fiables) ─────────────────
+    kamas_entries = _migrate_kamas_events(fps_set, fps_list)
+    all_entries.extend(kamas_entries)
+
+    # ── 2. Migration legacy logs (chat_events.log, journal_events.log) ───────
+    for legacy_path in (_LEGACY_CHAT_LOG, _LEGACY_JOURNAL_LOG):
+        legacy_entries = _migrate_legacy_log_file(legacy_path, fps_set, fps_list)
+        all_entries.extend(legacy_entries)
+
+    # ── 3. Absorption archives, realtime, racine ──────────────────────────────
+    external_entries = _absorb_external_sources(fps_set, fps_list)
+    all_entries.extend(external_entries)
+
+    # ── 4. Lecture live depuis AppData (depuis position 0) ───────────────────
+    sources_list = _iter_raw_sources()
+    all_sources_state: dict = {}
+
+    for source in sources_list:
+        source_key = str(source)
+        try:
+            ref_mtime = datetime.fromtimestamp(source.stat().st_mtime)
+            file_size = int(source.stat().st_size)
+        except OSError:
+            continue
+
+        crossings, anchor = _count_crossings_and_anchor(source, 0)
+        current_date: date = anchor if anchor is not None else (ref_mtime - timedelta(days=crossings)).date()
+        last_client_secs: int | None = None
+
+        for _, raw_line in _iter_new_lines(source, 0):
+            m_ts = _CLIENT_TIME_RE.search(raw_line)
+            if not m_ts:
+                continue
+            h, mn, s, ms = int(m_ts.group(1)), int(m_ts.group(2)), int(m_ts.group(3)), int(m_ts.group(4))
+            client_secs  = h * 3600 + mn * 60 + s
+            client_clock = f"{h:02d}:{mn:02d}:{s:02d}.{ms:03d}"
+
+            if last_client_secs is not None and (last_client_secs - client_secs) > 3600:
+                current_date += timedelta(days=1)
+            last_client_secs = client_secs
+
+            ta = _WAKFU_TIME_RE.search(raw_line)
+            if ta:
+                d_, mo_, yy_ = int(ta.group(1)), int(ta.group(2)), int(ta.group(3))
+                try:
+                    current_date = date(2000 + yy_, mo_, d_)
+                except ValueError:
+                    pass
+
+            ts_local = datetime(current_date.year, current_date.month, current_date.day,
+                                h, mn, s, ms * 1000)
+            ts_local_str = ts_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+            evt = _parse_event(raw_line)
+            if evt is None:
+                continue
+            event_type, event_data = evt
+
+            # Les fichiers rotatifs (wakfu.log.1, .log.2, etc.) couvrent plusieurs
+            # personnages avec dates potentiellement fausses — on y ignore les kamas.
+            # Le fichier principal (wakfu_chat.log, wakfu.log) = session courante = ok.
+            if event_type in _KAMAS_TYPES and re.search(r'\.\d+$', source.name):
+                continue
+
+            fp = _make_fingerprint(event_type, event_data, client_clock)
+            if fp in fps_set:
+                continue
+            fps_set.add(fp)
+            fps_list.append(fp)
+
+            all_entries.append({
+                "ts_local":      ts_local_str,
+                "ts_client":     client_clock,
+                "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                "source_file":   source.name,
+                "type":          event_type,
+                "data":          event_data,
+            })
+
+        try:
+            final_pos = int(source.stat().st_size)
+        except OSError:
+            final_pos = 0
+        all_sources_state[source_key] = {
+            "pos":              final_pos,
+            "current_date":     current_date.isoformat(),
+            "last_client_secs": last_client_secs,
+        }
+
+    # ── 5. Tri chronologique ──────────────────────────────────────────────────
+    def _sort_key(e: dict) -> str:
+        return e.get("ts_local") or ""
+
+    all_entries.sort(key=_sort_key)
+
+    # ── 5. Écriture des deux fichiers ─────────────────────────────────────────
+    count_all   = len(all_entries)
+    count_kamas = sum(1 for e in all_entries if e.get("type") in ("kamas_gain", "kamas_loss"))
+
+    try:
+        with (_ALL_EVENTS_LOG.open("w", encoding="utf-8") as jfh,
+              _ALL_EVENTS_READABLE.open("w", encoding="utf-8") as lfh):
+            for entry in all_entries:
+                jfh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+                lfh.write(_format_log_line(entry) + "\n")
+    except OSError:
+        pass
+
+    # ── 6. Mise à jour de l'état ──────────────────────────────────────────────
+    state["all_sources"]     = all_sources_state
+    state["all_fps"]         = fps_list[-12_000:]
+    state["journal_version"] = _JOURNAL_VERSION
+    _write_state(state)
+
+    # ── 7. Nettoyage des fichiers legacy (absorbés, plus nécessaires) ──────────
+    _cleanup_legacy_files()
+
+    return {"all": count_all, "kamas": count_kamas}
+
+
+def _cleanup_legacy_files():
+    """Supprime les fichiers legacy après migration réussie dans all_events.jsonl."""
+    to_remove = [
+        _LEGACY_CHAT_LOG,
+        _LEGACY_JOURNAL_LOG,
+    ]
+    # Sauvegardes kamas
+    to_remove.extend(_PERM_DIR.glob("kamas_events.backup_*.jsonl"))
+    # recorder_status.log (ancien format de debug)
+    to_remove.append(_PERM_DIR / "recorder_status.log")
+
+    for path in to_remove:
+        try:
+            if path.exists():
+                path.unlink()
+        except OSError:
+            pass
+
+    # kamas_events.jsonl : renommer en .absorbed pour référence, pas supprimer
+    if _LEGACY_KAMAS_JSONL.exists():
+        target = _LEGACY_KAMAS_JSONL.with_suffix(".absorbed")
+        try:
+            _LEGACY_KAMAS_JSONL.rename(target)
+        except OSError:
+            pass
+
+
+# ── Sync incrémental (appende uniquement les nouveaux événements) ─────────────
+
+def sync_permanent_journal() -> dict[str, int]:
+    """
+    Appende dans all_events.jsonl/all_events.log les nouvelles lignes
+    des logs Wakfu live depuis la dernière position connue.
+    Si journal_version a changé, déclenche un rebuild complet.
+    Retourne {"all": N}.
+    """
     _PERM_DIR.mkdir(parents=True, exist_ok=True)
     state = _read_state()
 
+    # Rebuild si version obsolète ou journal vide
+    if (state.get("journal_version") != _JOURNAL_VERSION
+            or not _ALL_EVENTS_LOG.exists()
+            or _ALL_EVENTS_LOG.stat().st_size == 0):
+        return rebuild_all_events()
+
     sources_list = _iter_raw_sources()
     if not sources_list:
-        return 0
+        return {"all": 0}
 
-    sources = state.get("sources")
-    if not isinstance(sources, dict):
-        sources = {}
-
-    recent_fps = state.get("recent_fingerprints")
-    if not isinstance(recent_fps, list):
-        recent_fps = []
-    fps_list = [str(v) for v in recent_fps if isinstance(v, str)]
-    fps_set = set(fps_list)
+    all_sources_state: dict = state.get("all_sources") if isinstance(state.get("all_sources"), dict) else {}
+    all_fps_list: list[str] = state.get("all_fps") if isinstance(state.get("all_fps"), list) else []
+    all_fps_set: set[str] = set(str(v) for v in all_fps_list if isinstance(v, str))
 
     offset_ms = _get_atomic_offset_ms(state)
-    appended = 0
+    count_all = 0
 
     try:
-        with _PERM_EVENTS_LOG.open("a", encoding="utf-8") as out_fh:
+        with (_ALL_EVENTS_LOG.open("a", encoding="utf-8") as jfh,
+              _ALL_EVENTS_READABLE.open("a", encoding="utf-8") as lfh):
             for source in sources_list:
                 source_key = str(source)
-                source_state = sources.get(source_key)
-                if not isinstance(source_state, dict):
-                    source_state = {}
+                all_src = all_sources_state.get(source_key)
+                if not isinstance(all_src, dict):
+                    all_src = {}
 
                 try:
-                    source_ref_local = datetime.fromtimestamp(source.stat().st_mtime)
-                except OSError:
-                    source_ref_local = datetime.now()
-
-                try:
-                    size = int(source.stat().st_size)
+                    ref_mtime = datetime.fromtimestamp(source.stat().st_mtime)
+                    file_size = int(source.stat().st_size)
                 except OSError:
                     continue
 
-                start_pos = int(source_state.get("pos", 0) or 0)
-                if start_pos < 0 or start_pos > size:
+                start_pos = int(all_src.get("pos", 0) or 0)
+                if start_pos < 0 or start_pos > file_size:
                     start_pos = 0
 
-                last_pos = start_pos
-                for line_pos, raw_line in _iter_new_lines(source, start_pos):
-                    last_pos = line_pos
-                    gain_m = _GAIN_RE.search(raw_line)
-                    loss_m = _LOSS_RE.search(raw_line)
-                    if not gain_m and not loss_m:
+                current_date: date | None = _parse_iso_date(all_src.get("current_date"))
+                last_client_secs: int | None = all_src.get("last_client_secs")
+
+                if current_date is None:
+                    crossings, anchor = _count_crossings_and_anchor(source, start_pos)
+                    current_date = anchor if anchor is not None else (ref_mtime - timedelta(days=crossings)).date()
+                    last_client_secs = None
+
+                for _, raw_line in _iter_new_lines(source, start_pos):
+                    m_ts = _CLIENT_TIME_RE.search(raw_line)
+                    if not m_ts:
+                        continue
+                    h, mn, s, ms = int(m_ts.group(1)), int(m_ts.group(2)), int(m_ts.group(3)), int(m_ts.group(4))
+                    client_secs  = h * 3600 + mn * 60 + s
+                    client_clock = f"{h:02d}:{mn:02d}:{s:02d}.{ms:03d}"
+
+                    if last_client_secs is not None and (last_client_secs - client_secs) > 3600:
+                        current_date += timedelta(days=1)
+                    last_client_secs = client_secs
+
+                    ta = _WAKFU_TIME_RE.search(raw_line)
+                    if ta:
+                        d_, mo_, yy_ = int(ta.group(1)), int(ta.group(2)), int(ta.group(3))
+                        try:
+                            current_date = date(2000 + yy_, mo_, d_)
+                        except ValueError:
+                            pass
+
+                    ts_local = datetime(current_date.year, current_date.month, current_date.day,
+                                        h, mn, s, ms * 1000)
+                    ts_local_str = ts_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+                    evt = _parse_event(raw_line)
+                    if evt is None:
+                        continue
+                    event_type, event_data = evt
+
+                    fp = _make_fingerprint(event_type, event_data, client_clock)
+                    if fp in all_fps_set:
                         continue
 
-                    if gain_m:
-                        amount = _parse_kamas_token(gain_m.group(1))
-                        kind = "gain"
-                    else:
-                        amount = _parse_kamas_token(loss_m.group(1))
-                        kind = "loss"
-
-                    if amount is None or amount <= 0:
-                        continue
-
-                    now_local = datetime.now()
-                    now_utc = datetime.now(timezone.utc)
-                    inner = _INNER_TIME_RE.search(raw_line)
-                    client_clock = None
-                    resolved_client_local = source_ref_local
-                    if inner:
-                        client_clock = f"{inner.group(1)}.{inner.group(2)}"
-                        resolved = _resolve_client_local(client_clock, source_ref_local)
-                        if resolved is not None:
-                            resolved_client_local = resolved
-
-                    fp = _line_fingerprint(raw_line, kind, int(amount), client_clock)
-                    if fp in fps_set:
-                        continue
-
-                    atomic_utc = None
-                    quality = "local-only"
-                    if offset_ms is not None:
-                        atomic_utc = now_utc + timedelta(milliseconds=float(offset_ms))
-                        quality = "atomic"
-
-                    entry = {
-                        "ts_local": now_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
-                        "ts_local_utc": now_utc.isoformat(),
-                        "ts_atomic_utc": atomic_utc.isoformat() if atomic_utc is not None else None,
-                        "atomic_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
-                        "sync_quality": quality,
-                        "source_file": source.name,
-                        "source_offset": int(line_pos),
-                        "client_time": client_clock,
-                        "resolved_client_local": resolved_client_local.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3],
-                        "kind": kind,
-                        "amount": int(amount),
-                        "raw": raw_line.strip(),
+                    entry: dict = {
+                        "ts_local":      ts_local_str,
+                        "ts_client":     client_clock,
+                        "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                        "source_file":   source.name,
+                        "type":          event_type,
+                        "data":          event_data,
                     }
-                    out_fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
-                    appended += 1
+                    jfh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+                    lfh.write(_format_log_line(entry) + "\n")
+                    count_all += 1
 
-                    fps_set.add(fp)
-                    fps_list.append(fp)
-                    if len(fps_list) > 8000:
-                        drop_count = len(fps_list) - 8000
-                        for old_fp in fps_list[:drop_count]:
-                            fps_set.discard(old_fp)
-                        fps_list = fps_list[drop_count:]
+                    all_fps_set.add(fp)
+                    all_fps_list.append(fp)
+                    if len(all_fps_list) > 12_000:
+                        drop = len(all_fps_list) - 12_000
+                        for old in all_fps_list[:drop]:
+                            all_fps_set.discard(old)
+                        all_fps_list = all_fps_list[drop:]
 
                 try:
-                    last_pos = int(source.stat().st_size)
+                    final_pos = int(source.stat().st_size)
                 except OSError:
-                    pass
-                source_state["pos"] = max(start_pos, int(last_pos))
-                sources[source_key] = source_state
+                    final_pos = start_pos
+                all_src["pos"]              = max(start_pos, final_pos)
+                all_src["current_date"]     = current_date.isoformat()
+                all_src["last_client_secs"] = last_client_secs
+                all_sources_state[source_key] = all_src
+
     except OSError:
-        return appended
+        pass
 
-    state["sources"] = sources
-    state["active_source"] = str(sources_list[0]) if sources_list else ""
-    state["recent_fingerprints"] = fps_list[-8000:]
+    state["all_sources"]     = all_sources_state
+    state["all_fps"]         = all_fps_list[-12_000:]
     _write_state(state)
-    return appended
+
+    return {"all": count_all}
 
 
-def _iter_permanent_events():
-    if not _PERM_EVENTS_LOG.exists():
+# ── Compat. ascendante ────────────────────────────────────────────────────────
+
+def sync_permanent_kamas_journal() -> int:
+    """Maintenu pour compatibilité."""
+    result = sync_permanent_journal()
+    return result.get("kamas", result.get("all", 0))
+
+
+# ── Requêtes all_events ───────────────────────────────────────────────────────
+
+def _iter_all_events(type_filter: str | None = None):
+    if not _ALL_EVENTS_LOG.exists():
         return
     try:
-        with _PERM_EVENTS_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+        with _ALL_EVENTS_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
             for line in fh:
                 raw = line.strip()
                 if not raw:
                     continue
                 try:
-                    data = json.loads(raw)
+                    entry = json.loads(raw)
                 except (ValueError, TypeError):
                     continue
-                if not isinstance(data, dict):
+                if not isinstance(entry, dict):
                     continue
-                kind = str(data.get("kind") or "").strip().lower()
-                if kind not in ("gain", "loss"):
+                if type_filter and entry.get("type") != type_filter:
                     continue
+                yield entry
+    except OSError:
+        return
+
+
+def _norm_name(s: str) -> str:
+    """Normalise un nom pour comparaison : minuscules + apostrophes uniformes."""
+    return s.strip().lower().replace("\u2019", "'").replace("\u02bc", "'")
+
+
+def query_character_info(name: str) -> dict:
+    """
+    Retourne les dernières informations connues pour un personnage :
+    {breed_id, last_spell, last_xp_gain, last_xp_to_next, account, server, last_seen_ts}
+    """
+    name_lower = _norm_name(name)
+    result: dict = {}
+
+    for entry in _iter_all_events():
+        t    = entry.get("type", "")
+        data = entry.get("data", {})
+        ts   = entry.get("ts_local", "")
+
+        if t in ("spell_cast", "xp_combat", "level_up", "breed") and data:
+            char = _norm_name(str(data.get("character") or ""))
+            if char != name_lower:
+                continue
+            result["last_seen_ts"] = ts
+            if t == "spell_cast":
+                result.setdefault("last_spell", data.get("spell"))
+            elif t == "xp_combat":
+                result["last_xp_gain"]    = data.get("xp")
+                result["last_xp_to_next"] = data.get("xp_to_next")
+            elif t == "level_up":
+                result["last_level"] = data.get("level")
+            elif t == "breed":
+                result["breed_id"] = data.get("breed_id")
+
+        elif t == "whois" and data:
+            char = _norm_name(str(data.get("character") or ""))
+            if char == name_lower:
+                result["account"] = data.get("account")
+                result["server"]  = data.get("server")
+                result["last_seen_ts"] = ts
+
+    return result
+
+
+# ── Requêtes kamas ────────────────────────────────────────────────────────────
+
+def get_permanent_events_log_path() -> Path:
+    return _ALL_EVENTS_LOG
+
+
+def get_permanent_events_size() -> int:
+    try:
+        return int(_ALL_EVENTS_LOG.stat().st_size) if _ALL_EVENTS_LOG.exists() else 0
+    except OSError:
+        return 0
+
+
+def get_active_permanent_log_size() -> int:
+    return get_permanent_events_size()
+
+
+def _iter_permanent_events():
+    """
+    Itère les événements kamas depuis all_events.jsonl.
+    Déduplication intégrée par fingerprint.
+    """
+    if not _ALL_EVENTS_LOG.exists():
+        return
+    seen: set[str] = set()
+    try:
+        with _ALL_EVENTS_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                raw = line.strip()
+                if not raw:
+                    continue
+                try:
+                    entry = json.loads(raw)
+                except (ValueError, TypeError):
+                    continue
+                if not isinstance(entry, dict):
+                    continue
+                t = entry.get("type", "")
+                if t not in ("kamas_gain", "kamas_loss"):
+                    continue
+                data = entry.get("data") or {}
                 try:
                     amount = int(data.get("amount") or 0)
                 except (TypeError, ValueError):
                     continue
-                dt = _parse_local_iso(str(data.get("resolved_client_local") or ""))
-                if dt is None:
-                    dt = _parse_local_iso(str(data.get("ts_local") or ""))
+                client_time = str(entry.get("ts_client") or "")
+                kind = "gain" if t == "kamas_gain" else "loss"
+                fp = f"{client_time}|{kind}|{amount}"
+                if fp in seen:
+                    continue
+                seen.add(fp)
+                dt = _parse_local_iso(str(entry.get("ts_local") or ""))
                 if dt is None:
                     continue
                 yield {
-                    "dt": dt,
-                    "kind": kind,
+                    "dt":     dt,
+                    "kind":   kind,
                     "amount": amount,
-                    "source_offset": int(data.get("source_offset") or 0),
                 }
     except OSError:
         return
@@ -388,54 +1299,21 @@ def get_permanent_events_start_ts() -> str | None:
     return None
 
 
+# Alias utilisé dans kamas_history.py
+get_permanent_log_start_ts = get_permanent_events_start_ts
+
+
 def replay_permanent_delta(since_iso: str | None, file_offset: int = 0) -> int:
-    sync_permanent_kamas_journal()
-
-    file_size = get_permanent_events_size()
-    use_offset = file_offset > 0 and file_offset < file_size
-
-    since_dt: datetime | None = None
-    if since_iso and not use_offset:
-        since_dt = _parse_local_iso(since_iso)
-
+    _ = file_offset  # kept for API compat
+    sync_permanent_journal()
+    since_dt: datetime | None = _parse_local_iso(since_iso) if since_iso else None
     delta = 0
-    try:
-        with _PERM_EVENTS_LOG.open("rb") as fh_bin:
-            if use_offset:
-                fh_bin.seek(file_offset)
-            fh = io.TextIOWrapper(fh_bin, encoding="utf-8", errors="ignore")
-            for line in fh:
-                raw = line.strip()
-                if not raw:
-                    continue
-                try:
-                    data = json.loads(raw)
-                except (ValueError, TypeError):
-                    continue
-                if not isinstance(data, dict):
-                    continue
-
-                kind = str(data.get("kind") or "").strip().lower()
-                if kind not in ("gain", "loss"):
-                    continue
-
-                try:
-                    amount = int(data.get("amount") or 0)
-                except (TypeError, ValueError):
-                    continue
-
-                if since_dt is not None and not use_offset:
-                    evt_dt = _parse_local_iso(str(data.get("resolved_client_local") or ""))
-                    if evt_dt is None:
-                        evt_dt = _parse_local_iso(str(data.get("ts_local") or ""))
-                    if evt_dt is None or evt_dt <= since_dt:
-                        continue
-
-                if kind == "gain":
-                    delta += amount
-                else:
-                    delta -= amount
-    except OSError:
-        return 0
-
+    for evt in _iter_permanent_events():
+        if since_dt is not None and evt["dt"] <= since_dt:
+            continue
+        delta += evt["amount"] if evt["kind"] == "gain" else -evt["amount"]
     return delta
+
+
+# Alias maintenu pour kamas_history.py
+replay_kamas_delta = replay_permanent_delta

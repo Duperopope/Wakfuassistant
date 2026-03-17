@@ -87,4 +87,4 @@ def write_kamas_correction(value: int) -> str:
 
 def replay_kamas_delta(since_iso: str | None, file_offset: int = 0) -> int:
     """Retourne le delta kamas depuis le journal permanent normalise."""
-    return replay_permanent_delta(since_iso, file_offset)
+    return replay_permanent_delta(since_iso)
