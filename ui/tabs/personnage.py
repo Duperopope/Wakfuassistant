@@ -149,6 +149,11 @@ class PersonnageTab(BaseTab):
             _extract_icon_from_wakfu_install_by_breed_id(bid, cache_file)
         self._load_icon(cache_file, tooltip=f"Breed : {bid}")
 
+    def clear_class_icon(self):
+        """Efface l'icône de classe (changement de personnage)."""
+        self._class_icon.clear()
+        self._class_icon.setToolTip("")
+
     # ── Privé ──────────────────────────────────────────────────────
 
     def _load_icon(self, source, tooltip: str = ""):

@@ -1496,14 +1496,22 @@ class OverlayWindow(QWidget):
         self._current_character_name = name or None
         self._session_connected = (new_state == GameState.IN_GAME)
 
-        if new_state == GameState.SELECTING:
-            # Reset character-specific state
-            self._last_detected_class = None
-            self._last_level = None
-            self._last_xp_gain = None
+        # Toujours effacer l'état du perso précédent (changement de perso OU écran sélection)
+        self._last_detected_class = None
+        self._last_level = None
+        self._last_xp_gain = None
+
+        if new_state == GameState.IN_GAME and name:
+            # Charger la classe mise en cache pour ce personnage si elle est connue
+            cached_class = self._read_known_character_classes().get(name)
+            if cached_class:
+                self._last_detected_class = cached_class
 
         if self._personnage_tab is not None:
             self._personnage_tab.set_game_state(new_state)
+            # Effacer l'icône si aucune classe connue pour ce perso
+            if not self._last_detected_class:
+                self._personnage_tab.clear_class_icon()
 
         self._refresh_title_info()
 
