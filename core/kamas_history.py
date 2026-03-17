@@ -16,12 +16,17 @@ from datetime import datetime
 from pathlib import Path
 
 from core.permanent_journal import (
+    estimate_market_price,
     get_permanent_events_log_path,
     get_permanent_events_size,
     get_permanent_events_start_ts,
     replay_permanent_delta,
     sync_permanent_kamas_journal,
 )
+
+__all__ = [
+    "estimate_market_price",
+]
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _JOURNAL      = _PROJECT_ROOT / "data" / "kamas_journal.jsonl"

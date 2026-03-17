@@ -5,6 +5,7 @@ from __future__ import annotations
 # Migration automatique des journaux legacy au premier démarrage.
 
 import json
+import math as _math
 import os
 import re
 import socket
@@ -714,6 +715,45 @@ def _market_detect(event_type: str, event_data: dict, client_clock: str,
         pending[0] = None
 
     return event_type, event_data, True
+
+
+def _market_tax_rate(days: int, territory_pct: int) -> float:
+    """Taux de taxe effectif pour une durée de dépôt.
+    28j = 100 %, 14j = 50 %, 7j = 33.33 % du taux territoire.
+    """
+    if days == 28:
+        factor = 1.0
+    elif days == 14:
+        factor = 0.5
+    elif days == 7:
+        factor = 1.0 / 3.0
+    else:
+        factor = days / 28.0
+    return territory_pct / 100.0 * factor
+
+
+def estimate_market_price(
+    tax: int,
+    qty: int,
+    days: int = 28,
+    territory_pct: int = 5,
+) -> tuple[int, int]:
+    """Estime la fourchette de prix/unité d'après la taxe de dépôt.
+
+    Le jeu calcule : taxe = round_half_up(prix × qty × taux)
+    Donc : (taxe − 0.5) / (qty × taux)  ≤  prix  <  (taxe + 0.5) / (qty × taux)
+
+    Retourne (prix_min, prix_max) par unité.
+    """
+    rate = _market_tax_rate(days, territory_pct)
+    if rate <= 0 or qty <= 0 or tax <= 0:
+        return (0, 0)
+    denom = qty * rate
+    min_price = _math.ceil((tax - 0.5) / denom)
+    max_price = _math.ceil((tax + 0.5) / denom) - 1
+    if max_price < min_price:
+        max_price = min_price
+    return (min_price, max_price)
 
 
 def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
