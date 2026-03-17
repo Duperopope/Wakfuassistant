@@ -421,6 +421,7 @@ class HdvTab(BaseTab):
             btn.clicked.connect(lambda _checked=False, k=key: self._switch_to(k))
 
         self._switch_to("overview")
+        self.refresh()
 
     def _switch_to(self, key: str):
         self._tab_bar.set_active(key)
