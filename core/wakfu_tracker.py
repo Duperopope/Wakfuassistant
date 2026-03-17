@@ -16,9 +16,9 @@ class GameState(Enum):
     SELECTING = "selecting"
     IN_GAME   = "in_game"
 
-# "L'immortel - Wakfu"  →  group(1) = "L'immortel"
-# "Wakfu"               →  pas de match → aucun personnage connecté
-_RE_TITLE = _re.compile(r'^(.+?)\s*-\s*[Ww]akfu\s*$')
+# "L'immortel - WAKFU" ou "L'immortel - Wakfu"  →  group(1) = "L'immortel"
+# "WAKFU" / "Wakfu"                              →  pas de match → écran sélection
+_RE_TITLE = _re.compile(r'^(.+?)\s*-\s*wakfu\s*$', _re.IGNORECASE)
 
 
 class WakfuTracker(QObject):
