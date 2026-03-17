@@ -892,6 +892,7 @@ class TransactionsTab(BaseTab):
         header.sectionResized.connect(self._on_column_resized)
         header.sectionMoved.connect(self._on_columns_reordered)
         self._table.viewport().installEventFilter(self)
+        self._table.viewport().setMouseTracking(True)
         table_layout.addWidget(self._table, 1)
         root.addWidget(table_card, 1)
 
@@ -1215,10 +1216,28 @@ class TransactionsTab(BaseTab):
             alt = _fmt_kamas_short(total) if not t_short else f"{_fmt_kamas(total)} {_KAMA_SYMBOL}"
             self._taxes_chip.setToolTip(f"-{alt}" if total >= 100_000 or t_short else "")
 
+    def _update_hdv_previsionnel(self):
+        """Calcule la valeur prévisionnelle totale des dépôts marché."""
+        if not self._deposit_events:
+            self._hdv_previsionnel_label.setText("--")
+            return
+        total = 0
+        for dep in self._deposit_events:
+            lo, hi = estimate_market_price(
+                dep["tax"], dep["qty"],
+                self._market_default_days,
+                self._market_territory_rate,
+            )
+            total += round((lo + hi) / 2) * dep["qty"]
+        txt = _fmt_kamas_short(total) if total >= 100_000 else _fmt_kamas(total)
+        self._hdv_previsionnel_label.setText(f"+{txt}")
+        self._hdv_previsionnel_label.setStyleSheet(f"color: {TEAL}; font-size: 16px; font-weight: 800;")
+
     def set_market_settings(self, days: int, rate: int):
         """Met à jour les paramètres marché et recalcule les libellés."""
         self._market_default_days = days
         self._market_territory_rate = rate
+        self._update_hdv_previsionnel()
 
     def _on_chart_view_stats(self, pct: float, _first: int, _last: int, gains: int, losses: int):
         # Methode conservee pour compatibilite; la carte affiche desormais
@@ -2700,6 +2719,7 @@ class TransactionsTab(BaseTab):
         self._reset_chart_view_on_next_render = False
         self._refresh_range_label_from_view()
         self._update_metrics_from_visible_range()
+        self._update_hdv_previsionnel()
 
         display_events = self._sorted_events_for_table()
         self._display_events = display_events
