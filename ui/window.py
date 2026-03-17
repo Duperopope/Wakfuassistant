@@ -18,13 +18,21 @@ from core.kamas_history import (
     replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction,
     get_last_correction_ts, get_permanent_log_start_ts, get_active_permanent_log_size,
 )
-from core.permanent_journal import sync_permanent_journal, query_character_info
+from core.permanent_journal import (
+    sync_permanent_journal, query_character_info,
+    query_last_server, query_unique_chat_authors,
+    query_profession_tracking, replay_character_xp_since,
+    query_log_start_date, query_inventory,
+)
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.hdv import HdvTab
 from ui.tabs.options import OptionsTab
 from ui.tabs.transactions import TransactionsTab
 from ui.tabs.personnage import PersonnageTab
+from ui.tabs.metiers import MetiersTab
+from ui.tabs.combat import CombatTab
+from ui.tabs.inventaire import InventaireTab
 from core.wakfu_tracker import WakfuTracker, GameState
 
 DEFAULT_W = 895
@@ -108,6 +116,29 @@ _KAMA_CANDIDATE_BLOCKLIST = (
     "reward",
     "tax",
     "class ",
+)
+_WHOIS_RE = re.compile(
+    r"Le joueur\s+(.+?)\s+\([^)]+\)\s+est connecté sur le serveur\s+(.+?)(?:\.|$)",
+    re.IGNORECASE,
+)
+_ITEM_GAIN_LOOT_RE_WIN = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez ramass[eé]\s+(\d+)x\s+(.+?)\s*\.",
+    re.IGNORECASE,
+)
+_ITEM_GAIN_INV_RE_WIN = _ITEM_GAIN_LOOT_RE_WIN  # même pattern
+_ITEM_LOSS_RE_WIN = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez perdu\s+(\d+)x\s+(.+?)\s*\.",
+    re.IGNORECASE,
+)
+_DEATH_RE_COMBAT = re.compile(r"\[Information \(combat\)\]\s+(.+?)\s+est mort", re.IGNORECASE)
+_KO_RE_COMBAT    = re.compile(r"\[Information \(combat\)\]\s+(.+?)\s+est KO\s*!", re.IGNORECASE)
+_HP_LOSS_RE_COMBAT = re.compile(
+    r"\[Information \(combat\)\]\s+(.+?)\s*:\s*-([\d\s\u00a0\u202f]+)\s+PV",
+    re.IGNORECASE,
+)
+_XP_PROF_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+(.+?)\s*:\s*\+([0-9\s\u00a0\u202f.,]+)\s*points d'XP\.\s*Prochain niveau dans\s*:\s*([0-9\s\u00a0\u202f.,]+)",
+    re.IGNORECASE,
 )
 _CONNECTED_MARKERS = (
     "on remet la frame world",
@@ -341,11 +372,11 @@ class OverlayWindow(QWidget):
         self._last_level: int | None = None
         self._last_xp_gain: int | None = None
         self._last_xp_to_next: int | None = None
+        self._session_xp_gained: int = 0   # XP accumulé cette session
         self._last_crit_percent: int | None = None
         self._last_ap: int | None = None
         self._last_mp: int | None = None
         self._last_wp: int | None = None
-        self._last_hp_percent: int | None = None
         self._inventory_open: bool | None = None
         self._character_sheet_open: bool | None = None
         self._current_kamas: int | None = None
@@ -354,8 +385,19 @@ class OverlayWindow(QWidget):
         self._runtime_kamas_delta: int = 0
         self._interface_feed_mtime: int = 0
         self._interface_feed_path: Path | None = None
-        self._options_tab: "OptionsTab | None" = None
-        self._personnage_tab: "PersonnageTab | None" = None
+        self._options_tab:    "OptionsTab | None"        = None
+        self._personnage_tab: "PersonnageTab | None"     = None
+        self._library_panel:   "WidgetLibraryPanel | None" = None
+        self._metiers_tab:    "MetiersTab | None"         = None
+        self._combat_tab:     "CombatTab | None"          = None
+        self._inventaire_tab: "InventaireTab | None"      = None
+        self._session_combat_count:  int               = 0
+        self._combat_last_attacker:  str | None        = None  # dernier monstre ayant agi
+        self._combat_damage_by:      dict[str, int]    = {}    # monstre → dégâts infligés au joueur
+        self._combat_killed_by:      dict[str, int]    = {}    # monstre → kills du joueur
+        self._last_server:    str | None                  = None
+        self._unique_players: int | None                  = None
+        self._log_start_date: str | None                  = None
         self._stats_labels: dict[str, QLabel] = {}
         self._runtime_kama_candidates_prev: dict[str, int] = {}
         self._runtime_kama_candidate_scores: dict[str, int] = {}
@@ -364,6 +406,7 @@ class OverlayWindow(QWidget):
         self._runtime_kama_reliable: bool = False
         self._runtime_kama_last_delta_applied: int = 0
         self._runtime_kama_truth_hint: int | None = self._parse_int_token(os.environ.get("WAKFU_KAMA_TRUTH_HINT"))
+        self._known_character_vitals: dict[str, dict] = {}
         self._onboarding_done: bool = True
         self._onboarding_page: "OnboardingPage | None" = None
 
@@ -379,6 +422,11 @@ class OverlayWindow(QWidget):
         self._start_timer()
         self._check_onboarding()
         QApplication.instance().installEventFilter(self)
+        # Restaure les positions éditées (après que show() ait fixé les géométries)
+        from ui.drag_editor import EditModeManager
+        QTimer.singleShot(150, EditModeManager.instance().apply_saved_positions)
+        # Charge les données historiques (serveur + métiers) depuis le log permanent
+        QTimer.singleShot(300, self._load_journal_history)
 
     # ── Initialisation ────────────────────────────────────────────
 
@@ -395,6 +443,10 @@ class OverlayWindow(QWidget):
         self._opacity = max(0.35, min(1.0, float(saved_opacity)))
         self.setWindowOpacity(self._opacity)
         self._font_family = self._settings.value("ui_font_family", "Noto Sans", type=str)
+        import ui.theme as _theme
+        _theme.FONT_TITLE = self._settings.value("ui_font_title", _theme.FONT_TITLE, type=str)
+        _theme.FONT_BODY  = self._settings.value("ui_font_body",  _theme.FONT_BODY,  type=str)
+        _theme.FONT_LABEL = self._settings.value("ui_font_label", _theme.FONT_LABEL, type=str)
         self._apply_app_font_style()
         default_w = self._settings.value("default_window_width", DEFAULT_W, type=int)
         default_h = self._settings.value("default_window_height", DEFAULT_H, type=int)
@@ -441,6 +493,20 @@ class OverlayWindow(QWidget):
         self._titlebar.set_palette(self._palette)
         root.addWidget(self._titlebar)
 
+        # ── Bannière mode édition (F11) ──────────────────────────────────
+        from ui.drag_editor import EditModeManager
+        self._edit_banner = QLabel("  ✥  Mode Édition  —  F11 pour quitter  ")
+        self._edit_banner.setAlignment(Qt.AlignCenter)
+        self._edit_banner.setFixedHeight(22)
+        self._edit_banner.setStyleSheet(
+            "QLabel { background: rgba(80,180,255,0.15); color: #50B4FF;"
+            " font-size: 11px; font-weight: bold;"
+            " border-bottom: 1px solid rgba(80,180,255,0.4); }"
+        )
+        self._edit_banner.setVisible(False)
+        root.addWidget(self._edit_banner)
+        EditModeManager.instance().edit_mode_changed.connect(self._edit_banner.setVisible)
+
         self._tabbar = TabBar(self)
         self._tabbar.set_palette(self._palette)
         root.addWidget(self._tabbar)
@@ -455,6 +521,7 @@ class OverlayWindow(QWidget):
                 w.set_short_kamas(self._short_kamas)
                 w.set_market_settings(self._market_default_days, self._market_territory_rate)
             elif name == "Options":
+                import ui.theme as _theme
                 w = OptionsTab(
                     self._opacity,
                     self._ct_opacity,
@@ -465,10 +532,16 @@ class OverlayWindow(QWidget):
                     self._fold_anchor_bottom,
                     initial_market_days=self._market_default_days,
                     initial_market_rate=self._market_territory_rate,
+                    initial_font_title=self._settings.value("ui_font_title", _theme.FONT_TITLE, type=str),
+                    initial_font_body=self._settings.value("ui_font_body",   _theme.FONT_BODY,  type=str),
+                    initial_font_label=self._settings.value("ui_font_label", _theme.FONT_LABEL, type=str),
                     parent=self,
                 )
                 w.opacity_changed.connect(self.set_overlay_opacity)
                 w.font_changed.connect(self.set_overlay_font_family)
+                w.font_title_changed.connect(lambda f: self._set_font_role("title", f))
+                w.font_body_changed.connect(lambda f:  self._set_font_role("body",  f))
+                w.font_label_changed.connect(lambda f: self._set_font_role("label", f))
                 w.palette_changed.connect(self.set_overlay_palette)
                 w.shape_changed.connect(self.set_window_corner_radius)
                 w.reset_requested.connect(self._on_reset_requested)
@@ -478,6 +551,9 @@ class OverlayWindow(QWidget):
                 w.fold_anchor_changed.connect(self._on_fold_anchor_changed)
                 w.ct_opacity_changed.connect(self._on_ct_opacity_changed)
                 w.market_settings_changed.connect(self._on_market_settings_changed)
+                w.xp_calibrated.connect(self._on_xp_calibrated)
+                w.profession_xp_calibrated.connect(self._on_profession_xp_calibrated)
+                w.profession_state_calibrated.connect(self._on_profession_state_calibrated)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -489,6 +565,16 @@ class OverlayWindow(QWidget):
             elif name == "Personnage":
                 w = PersonnageTab(self)
                 self._personnage_tab = w
+                w.gender_changed.connect(self._on_gender_changed)
+            elif name == "Inventaire":
+                w = InventaireTab(self)
+                self._inventaire_tab = w
+            elif name == "Combat":
+                w = CombatTab(self)
+                self._combat_tab = w
+            elif name in ("Metier", "Metiers"):
+                w = MetiersTab(self)
+                self._metiers_tab = w
             else:
                 w = PlaceholderTab(name)
             self._stack.addWidget(w)
@@ -570,7 +656,7 @@ class OverlayWindow(QWidget):
             wp = "?" if self._last_wp is None else str(self._last_wp)
             self._stats_labels["apmpwp"].setText(f"{ap}/{mp}/{wp}")
 
-        self._stats_labels["hp"].setText("--" if self._last_hp_percent is None else f"{self._last_hp_percent}%")
+        self._stats_labels["hp"].setText("--")
 
         if self._inventory_open is None and self._character_sheet_open is None:
             self._stats_labels["ui"].setText("--")
@@ -655,6 +741,159 @@ class OverlayWindow(QWidget):
         mappings[character_name] = class_key
         data["known_character_classes"] = mappings
         self._write_config_json(data)
+
+    def _read_known_character_genders(self) -> dict[str, str]:
+        data = self._read_config_json()
+        mappings = data.get("known_character_genders")
+        if not isinstance(mappings, dict):
+            return {}
+        out: dict[str, str] = {}
+        for key, value in mappings.items():
+            name = _normalize_character_name(str(key or ""))
+            gender = str(value or "").strip().lower()
+            if name and gender in ("type_0", "type_1"):
+                out[name] = gender
+        return out
+
+    def _write_known_character_gender(self, character_name: str, gender: "str | None"):
+        character_name = _normalize_character_name(character_name)
+        if not character_name:
+            return
+        data = self._read_config_json()
+        mappings = data.get("known_character_genders")
+        if not isinstance(mappings, dict):
+            mappings = {}
+        if gender in ("type_0", "type_1"):
+            mappings[character_name] = gender
+        else:
+            mappings.pop(character_name, None)
+        data["known_character_genders"] = mappings
+        self._write_config_json(data)
+
+    def _read_known_character_vitals(self) -> dict[str, dict]:
+        data = self._read_config_json()
+        mappings = data.get("known_character_vitals")
+        if not isinstance(mappings, dict):
+            return {}
+        out: dict[str, dict] = {}
+        for key, value in mappings.items():
+            name = _normalize_character_name(str(key or ""))
+            if not name or not isinstance(value, dict):
+                continue
+            item: dict = {}
+            for field in ("xp_gained", "xp_to_next", "level"):
+                raw = value.get(field)
+                try:
+                    num = int(raw)
+                except (TypeError, ValueError):
+                    continue
+                item[field] = num
+            for field in ("xp_truth_ts", "hp_truth_ts"):
+                raw = str(value.get(field) or "").strip()
+                if raw:
+                    item[field] = raw
+            if item:
+                out[name] = item
+        return out
+
+    def _write_known_character_vitals(self, character_name: str, patch: dict):
+        name = _normalize_character_name(character_name)
+        if not name:
+            return
+        data = self._read_config_json()
+        mappings = data.get("known_character_vitals")
+        if not isinstance(mappings, dict):
+            mappings = {}
+
+        current = mappings.get(name)
+        if not isinstance(current, dict):
+            current = {}
+
+        changed = False
+        for key, raw_val in patch.items():
+            if key in ("xp_truth_ts", "hp_truth_ts"):
+                val = str(raw_val or "").strip()
+                if not val:
+                    continue
+            else:
+                try:
+                    val = int(raw_val)
+                except (TypeError, ValueError):
+                    continue
+            if current.get(key) != val:
+                current[key] = val
+                changed = True
+
+        if not changed:
+            return
+
+        mappings[name] = current
+        data["known_character_vitals"] = mappings
+        self._write_config_json(data)
+        self._known_character_vitals[name] = {
+            "xp_gained": int(current.get("xp_gained", 0) or 0),
+            "xp_to_next": int(current.get("xp_to_next", 0) or 0),
+
+            "level": int(current.get("level", 0) or 0),
+            "xp_truth_ts": str(current.get("xp_truth_ts") or ""),
+            "hp_truth_ts": str(current.get("hp_truth_ts") or ""),
+        }
+
+    def _restore_character_vitals(self, character_name: str | None):
+        if not character_name:
+            self._session_xp_gained = 0
+            self._last_xp_to_next = None
+
+            self._session_combat_count = 0
+            return
+
+        name = _normalize_character_name(character_name)
+        vitals = self._known_character_vitals.get(name, {})
+
+        xp_gained = int(vitals.get("xp_gained", 0) or 0)
+        xp_to_next = vitals.get("xp_to_next")
+        level = vitals.get("level")
+        xp_truth_ts = str(vitals.get("xp_truth_ts") or "").strip()
+
+        self._session_xp_gained = max(0, xp_gained)
+        self._last_xp_to_next = int(xp_to_next) if xp_to_next is not None else None
+        self._session_combat_count = 0
+
+        if level is not None and int(level) > 0:
+            self._last_level = int(level)
+
+        # Reconstruction retroactive depuis le point de calibration (heure de verite).
+        if xp_truth_ts:
+            replay = replay_character_xp_since(character_name, xp_truth_ts)
+            delta = int(replay.get("xp_gained", 0) or 0)
+            self._session_xp_gained = max(0, self._session_xp_gained + delta)
+            xp_next_replay = replay.get("xp_to_next")
+            if xp_next_replay is not None:
+                self._last_xp_to_next = int(xp_next_replay)
+            lvl_replay = replay.get("level")
+            if lvl_replay is not None:
+                self._last_level = int(lvl_replay)
+            self._session_combat_count = int(replay.get("combat_count", 0) or 0)
+
+        # Fallback: dernière valeur connue dans le journal permanent.
+        try:
+            sync_permanent_journal()
+            info = query_character_info(character_name)
+            if self._last_xp_to_next is None:
+                xp_next = self._parse_int_token(str(info.get("last_xp_to_next", "")))
+                if xp_next is not None:
+                    self._last_xp_to_next = xp_next
+            if self._last_level is None:
+                lvl = self._parse_int_token(str(info.get("last_level", "")))
+                if lvl is not None:
+                    self._last_level = lvl
+        except Exception:
+            pass
+
+    def _on_gender_changed(self, gender: "str | None"):
+        name = self._current_character_name
+        if name:
+            self._write_known_character_gender(name, gender)
 
     def _write_character_class(self, class_key: str):
         class_key = str(class_key or "").strip().lower()
@@ -814,6 +1053,39 @@ class OverlayWindow(QWidget):
             self._personnage_tab.set_connection_status(conn_status)
             if self._last_detected_class:
                 self._personnage_tab.set_class_icon(self._last_detected_class)
+                # Icône dans la barre repliée
+                from PyQt5.QtGui import QPixmap as _QPixmap
+                from pathlib import Path as _Path
+                _icons_dir = _Path(__file__).resolve().parents[1] / "wakassets" / "breedsIcons"
+                from ui.titlebar import _CLASS_TO_ID, _normalize_class_key
+                _bid = _CLASS_TO_ID.get(_normalize_class_key(self._last_detected_class), 4)
+                _icon_file = _icons_dir / f"{_bid}.png"
+                if _icon_file.exists():
+                    self._titlebar.set_folded_class_icon(_QPixmap(str(_icon_file)))
+            if self._current_character_name:
+                known_genders = self._read_known_character_genders()
+                name_key = _normalize_character_name(self._current_character_name)
+                self._personnage_tab.set_gender(known_genders.get(name_key))
+            # XP bar — progress = session_xp / (session_xp + xp_to_next)
+            xp_gained  = self._session_xp_gained or 0
+            xp_to_next = self._last_xp_to_next or 0
+            xp_total   = xp_gained + xp_to_next
+            self._personnage_tab.set_xp(xp_gained, xp_total if xp_total > 0 else 1)
+            # Stats session (affichage minutes restantes)
+            elapsed_s = max(0, int(self._elapsed_seconds))
+            self._personnage_tab.set_xp_remaining(xp_to_next, xp_gained, elapsed_s)
+
+        # Combats jusqu'au prochain niveau
+        if self._personnage_tab is not None:
+            if self._session_combat_count > 0 and self._last_xp_to_next and self._session_xp_gained:
+                avg = self._session_xp_gained / self._session_combat_count
+                combats_needed = max(1, int(self._last_xp_to_next / avg + 0.5)) if avg > 0 else None
+            else:
+                combats_needed = None
+            self._personnage_tab.set_combats_to_level(combats_needed)
+
+        if self._combat_tab is not None and self._current_character_name:
+            self._combat_tab.set_character_name(self._current_character_name)
 
         # ── Métriques épinglées → TitleBar (mode replié) ─────────────────
         for widget in self._tab_widgets:
@@ -981,9 +1253,84 @@ class OverlayWindow(QWidget):
                     self._runtime_kamas_delta -= loss
                     changed = True
 
+            # ── Whois (serveur) ──────────────────────────────────────────
+            whois_m = _WHOIS_RE.search(raw_line)
+            if whois_m:
+                server = whois_m.group(2).strip()
+                if server and server != self._last_server:
+                    self._last_server = server
+                    if self._personnage_tab is not None:
+                        self._personnage_tab.set_server(
+                            server, self._unique_players,
+                            getattr(self, "_log_start_date", None)
+                        )
+
+            # ── Inventaire (ramassage / pertes) ──────────────────────────
+            if self._inventaire_tab is not None:
+                item_m = _ITEM_GAIN_LOOT_RE_WIN.search(raw_line)
+                if item_m:
+                    qty  = self._parse_int_token(item_m.group(1)) or 1
+                    name = item_m.group(2).strip().rstrip(".")
+                    if name:
+                        self._inventaire_tab.on_item_gained(name, qty)
+                else:
+                    item_loss_m = _ITEM_LOSS_RE_WIN.search(raw_line)
+                    if item_loss_m:
+                        qty  = self._parse_int_token(item_loss_m.group(1)) or 1
+                        name = item_loss_m.group(2).strip().rstrip(".")
+                        if name:
+                            self._inventaire_tab.on_item_lost(name, qty)
+
+            # ── XP Métier ────────────────────────────────────────────────
+            xp_prof_m = _XP_PROF_RE.search(raw_line)
+            if xp_prof_m:
+                prof_name  = xp_prof_m.group(1).strip()
+                xp_gain    = self._parse_int_token(xp_prof_m.group(2))
+                xp_to_next = self._parse_int_token(xp_prof_m.group(3))
+                if prof_name and xp_gain and self._metiers_tab is not None:
+                    self._metiers_tab.on_xp_profession(prof_name, xp_gain, xp_to_next or 0)
+
             # ── Événements filtrés par nom de personnage ─────────────────
             if target_name is None:
                 continue
+
+            # ── Feed combat tab + tracking attaquant ─────────────────────
+            spell_m = _SPELL_CAST_RE.search(raw_line)
+            if spell_m:
+                caster = _normalize_character_name(spell_m.group(1)).lower()
+                if caster == target_name:
+                    if self._combat_tab is not None:
+                        self._combat_tab.on_spell_cast(spell_m.group(2).strip())
+                    if self._personnage_tab is not None:
+                        self._personnage_tab.on_spell_cast(spell_m.group(2).strip())
+                else:
+                    # Sort d'un monstre → mémoriser comme attaquant courant
+                    self._combat_last_attacker = spell_m.group(1).strip()
+
+            hp_loss_m = _HP_LOSS_RE_COMBAT.search(raw_line)
+            if hp_loss_m:
+                victim = _normalize_character_name(hp_loss_m.group(1)).lower()
+                if victim == target_name and self._combat_last_attacker:
+                    amt = self._parse_int_token(hp_loss_m.group(2)) or 0
+                    atk = self._combat_last_attacker
+                    self._combat_damage_by[atk] = self._combat_damage_by.get(atk, 0) + amt
+                    if self._combat_tab is not None:
+                        self._combat_tab.on_player_damage(atk, amt)
+                    if self._personnage_tab is not None:
+                        self._personnage_tab.on_player_damage(atk, amt)
+
+            ko_m = _KO_RE_COMBAT.search(raw_line)
+            death_m2 = _DEATH_RE_COMBAT.search(raw_line)
+            for m in (ko_m, death_m2):
+                if m:
+                    victim = _normalize_character_name(m.group(1)).lower()
+                    if victim == target_name and self._combat_last_attacker:
+                        atk = self._combat_last_attacker
+                        self._combat_killed_by[atk] = self._combat_killed_by.get(atk, 0) + 1
+                        if self._combat_tab is not None:
+                            self._combat_tab.on_player_killed_by(atk)
+                        if self._personnage_tab is not None:
+                            self._personnage_tab.on_player_killed_by(atk)
 
             xp_match = _COMBAT_XP_RE.search(raw_line)
             if xp_match:
@@ -992,10 +1339,31 @@ class OverlayWindow(QWidget):
                     xp_gain = self._parse_int_token(xp_match.group(2))
                     xp_to_next = self._parse_int_token(xp_match.group(3))
                     if xp_gain is not None and xp_gain != self._last_xp_gain:
+                        self._session_xp_gained += xp_gain
+                        self._session_combat_count += 1
                         self._last_xp_gain = xp_gain
+                        if self._current_character_name:
+                            vitals = self._known_character_vitals.get(
+                                _normalize_character_name(self._current_character_name),
+                                {},
+                            )
+                            if not str(vitals.get("xp_truth_ts") or "").strip():
+                                self._write_known_character_vitals(
+                                    self._current_character_name,
+                                    {"xp_gained": self._session_xp_gained},
+                                )
                         changed = True
+                        if self._combat_tab is not None:
+                            self._combat_tab.on_xp_combat(xp_gain, xp_to_next or 0)
+                        if self._personnage_tab is not None:
+                            self._personnage_tab.on_xp_combat(xp_gain, xp_to_next or 0)
                     if xp_to_next is not None and xp_to_next != self._last_xp_to_next:
                         self._last_xp_to_next = xp_to_next
+                        if self._current_character_name:
+                            self._write_known_character_vitals(
+                                self._current_character_name,
+                                {"xp_to_next": self._last_xp_to_next},
+                            )
                         changed = True
 
             crit_match = _CRIT_RE.search(raw_line)
@@ -1014,6 +1382,11 @@ class OverlayWindow(QWidget):
                     level_value = self._parse_int_token(level_match.group(2))
                     if level_value is not None and level_value != self._last_level:
                         self._last_level = level_value
+                        if self._current_character_name:
+                            self._write_known_character_vitals(
+                                self._current_character_name,
+                                {"level": self._last_level},
+                            )
                         changed = True
 
         if not self._runtime_kama_reliable:
@@ -1028,6 +1401,7 @@ class OverlayWindow(QWidget):
     def _load_kamas_config_values(self):
         sync_permanent_journal()
         data = self._read_config_json()
+        self._known_character_vitals = self._read_known_character_vitals()
         self._onboarding_done = bool(data.get("onboarding_done", False))
         self._market_default_days = int(data.get("market_default_days", 28) or 28)
         self._market_territory_rate = int(data.get("market_territory_rate", 5) or 5)
@@ -1255,10 +1629,13 @@ class OverlayWindow(QWidget):
             self._last_wp = wp_value
             changed = True
 
-        hp_value = self._parse_int_token(str(payload.get("hp_percent", "")))
-        if hp_value is not None and hp_value != self._last_hp_percent:
-            self._last_hp_percent = hp_value
-            changed = True
+        # hp_percent tracking removed - no longer persistent
+
+        if self._last_level is not None and self._current_character_name:
+            self._write_known_character_vitals(
+                self._current_character_name,
+                {"level": self._last_level},
+            )
 
         inventory_open_value = payload.get("inventory_open")
         if isinstance(inventory_open_value, bool) and inventory_open_value != self._inventory_open:
@@ -1621,6 +1998,7 @@ class OverlayWindow(QWidget):
         self._last_detected_class = None
         self._last_level = None
         self._last_xp_gain = None
+        self._restore_character_vitals(self._current_character_name)
 
         if new_state == GameState.IN_GAME and name:
             _dbg = [f"_on_character_changed name={name!r} repr={[hex(ord(c)) for c in name[:8]]}"]
@@ -1774,6 +2152,70 @@ class OverlayWindow(QWidget):
             self._settings.setValue("default_relative_size_rw", float(rw))
             self._settings.setValue("default_relative_size_rh", float(rh))
 
+    # ── Bibliothèque de widgets (F1 en mode Édition) ──────────────────────────
+
+    def _toggle_library_panel(self):
+        if self._library_panel is None:
+            self._create_library_panel()
+        if self._library_panel.isVisible():
+            self._library_panel.hide()
+        else:
+            self._position_library_panel()
+            self._library_panel.show()
+            self._library_panel.raise_()
+            from ui.drag_editor import EditModeManager
+            self._library_panel.refresh_states(EditModeManager.instance()._sections)
+
+    def _hide_library_panel(self):
+        if self._library_panel is not None:
+            self._library_panel.hide()
+
+    def _create_library_panel(self):
+        from ui.widget_library import WidgetLibraryPanel
+        panel = WidgetLibraryPanel(parent=self)
+        panel.xp_style_changed.connect(self._on_library_xp_style)
+        panel.section_toggle.connect(self._on_library_section_toggle)
+        self._library_panel = panel
+
+    def _position_library_panel(self):
+        if self._library_panel is None:
+            return
+        pw = self._library_panel.width()
+        ph = self.height() - self._titlebar.height() - 10
+        self._library_panel.setFixedHeight(max(200, ph))
+        self._library_panel.move(self.width() - pw - 8, self._titlebar.height() + 5)
+
+    def _on_library_xp_style(self, idx: int):
+        if self._personnage_tab is not None:
+            self._personnage_tab.set_xp_style(idx)
+
+    def _on_library_section_toggle(self, section_id: str, visible: bool):
+        from ui.drag_editor import EditModeManager
+        mgr = EditModeManager.instance()
+        for s in mgr._sections:
+            if s._id == section_id:
+                if visible:
+                    s.show()
+                else:
+                    s.hide()
+                break
+        mgr.save_visibility(section_id, visible)
+        # Quand on active le ring de niveau, masquer la barre XP (et vice-versa)
+        if section_id == "p.level_ring" and visible:
+            for s in mgr._sections:
+                if s._id == "p.xpbar":
+                    s.hide()
+                    if self._library_panel:
+                        self._library_panel.refresh_states(mgr._sections)
+                    break
+        elif section_id == "p.xpbar" and visible:
+            for s in mgr._sections:
+                if s._id == "p.level_ring":
+                    s.hide()
+                    if self._library_panel:
+                        self._library_panel.refresh_states(mgr._sections)
+                    break
+
     def set_overlay_opacity(self, opacity: float):
         self._opacity = max(0.35, min(1.0, float(opacity)))
         if not self._click_through:
@@ -1786,6 +2228,98 @@ class OverlayWindow(QWidget):
         self._font_family = str(family)
         self._apply_app_font_style()
         self._settings.setValue("ui_font_family", self._font_family)
+
+    def _set_font_role(self, role: str, family: str):
+        if not family:
+            return
+        import ui.theme as _theme
+        if role == "title":
+            _theme.FONT_TITLE = family
+        elif role == "body":
+            _theme.FONT_BODY = family
+        elif role == "label":
+            _theme.FONT_LABEL = family
+        self._settings.setValue(f"ui_font_{role}", family)
+        if self._personnage_tab is not None:
+            self._personnage_tab.refresh_fonts()
+
+    def _load_journal_history(self):
+        """Charge serveur + XP métiers depuis le log permanent au démarrage."""
+        try:
+            server = query_last_server()
+            unique = query_unique_chat_authors()
+            log_start = query_log_start_date()
+            self._unique_players = unique
+            self._log_start_date = log_start
+            if server:
+                self._last_server = server
+                if self._personnage_tab is not None:
+                    self._personnage_tab.set_server(server, unique, log_start)
+        except Exception:
+            pass
+        try:
+            prof_data = query_profession_tracking()
+            if prof_data and self._metiers_tab is not None:
+                self._metiers_tab.load_history(prof_data)
+        except Exception:
+            pass
+        try:
+            from core.permanent_journal import query_combat_stats
+            combat_data = query_combat_stats(self._current_character_name)
+            if self._combat_tab is not None:
+                self._combat_tab.load_history(combat_data)
+                if self._current_character_name:
+                    self._combat_tab.set_character_name(self._current_character_name)
+            if self._personnage_tab is not None:
+                self._personnage_tab.load_combat_history(combat_data)
+        except Exception:
+            pass
+        try:
+            inv_data = query_inventory()
+            if inv_data and self._inventaire_tab is not None:
+                self._inventaire_tab.load_history(inv_data)
+        except Exception:
+            pass
+
+    def _on_xp_calibrated(self, level: int, xp_total: int, xp_gained: int):
+        self._session_xp_gained = max(0, int(xp_gained))
+        self._last_xp_to_next = max(0, int(xp_total) - int(xp_gained))
+        if self._current_character_name:
+            self._write_known_character_vitals(
+                self._current_character_name,
+                {
+                    "level": int(level),
+                    "xp_gained": self._session_xp_gained,
+                    "xp_to_next": self._last_xp_to_next,
+                    "xp_truth_ts": now_ms_iso(),
+                },
+            )
+        self._write_config_patch({
+            "xp_calibration": {
+                "level": level,
+                "xp_total": xp_total,
+                "xp_gained": xp_gained,
+            }
+        })
+        self._refresh_title_info()
+
+
+
+    def _on_profession_xp_calibrated(self, profession: str, xp_gain: int, xp_to_next: int):
+        if self._metiers_tab is not None:
+            self._metiers_tab.on_xp_profession(profession, int(xp_gain), int(xp_to_next))
+
+    def _on_profession_state_calibrated(self, profession: str, level: int, xp_gain: int, xp_to_next: int):
+        if self._metiers_tab is not None:
+            self._metiers_tab.apply_profession_calibration(
+                profession,
+                int(level),
+                int(xp_gain),
+                int(xp_to_next),
+            )
+        # Update player level
+        if int(level) > 0:
+            self._last_level = int(level)
 
     def set_overlay_palette(self, palette_name: str):
         if not palette_name:
@@ -1939,8 +2473,10 @@ class OverlayWindow(QWidget):
 
         if t == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
             lpos = self.mapFromGlobal(event.globalPos())
-            if not self._folded and self.rect().contains(lpos):
+            if self.rect().contains(lpos):
                 edge = _edge_at(lpos, self.width(), self.height())
+                if self._folded:
+                    edge &= (_L | _R)   # only horizontal resize when folded
                 if edge:
                     self._resize_dir     = edge
                     self._resize_start_p = event.globalPos()
@@ -1955,8 +2491,10 @@ class OverlayWindow(QWidget):
                 self._do_resize(gpos)
                 return True
             # Mise à jour du curseur via override global (évite que les enfants l'écrasent).
-            if not self._folded and self.rect().contains(lpos) and not (event.buttons() & Qt.LeftButton):
+            if self.rect().contains(lpos) and not (event.buttons() & Qt.LeftButton):
                 edge = _edge_at(lpos, self.width(), self.height())
+                if self._folded:
+                    edge &= (_L | _R)
                 cursor = _CURSORS.get(edge)
                 if cursor is not None:
                     if not self._cursor_overridden:
@@ -1983,6 +2521,20 @@ class OverlayWindow(QWidget):
                         self._save_relative_layout()
                 self._drag_pos   = None
                 self._resize_dir = 0
+                return True
+
+        elif t == QEvent.KeyPress and event.key() == Qt.Key_F11:
+            from ui.drag_editor import EditModeManager
+            mgr = EditModeManager.instance()
+            mgr.toggle()
+            if not mgr.active:
+                self._hide_library_panel()
+            return True
+
+        elif t == QEvent.KeyPress and event.key() == Qt.Key_F1:
+            from ui.drag_editor import EditModeManager
+            if EditModeManager.instance().active:
+                self._toggle_library_panel()
                 return True
 
         return super().eventFilter(obj, event)
@@ -2041,7 +2593,8 @@ class OverlayWindow(QWidget):
 
     def _update_cursor(self, pos: QPoint):
         if self._folded:
-            self.setCursor(Qt.ArrowCursor)
+            edge = _edge_at(pos, self.width(), self.height()) & (_L | _R)
+            self.setCursor(_CURSORS.get(edge, Qt.ArrowCursor))
             return
         edge = _edge_at(pos, self.width(), self.height())
         if edge in _CURSORS:
@@ -2072,6 +2625,8 @@ class OverlayWindow(QWidget):
         super().resizeEvent(event)
         self._apply_rounded_mask()
         self._position_click_unlock_button()
+        from ui.drag_editor import EditModeManager
+        EditModeManager.instance().resize_all()
 
     def moveEvent(self, event):
         super().moveEvent(event)

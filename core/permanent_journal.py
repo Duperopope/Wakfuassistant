@@ -26,7 +26,7 @@ _LEGACY_CHAT_LOG    = _PERM_DIR / "chat_events.log"
 _LEGACY_JOURNAL_LOG = _PERM_DIR / "journal_events.log"
 
 # Incrémenter pour forcer un rebuild au prochain démarrage
-_JOURNAL_VERSION = 6
+_JOURNAL_VERSION = 7  # item_gained (ramassé) ajouté
 
 _APPDATA_WAKFU_DIR     = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
 _RAW_WAKFU_CHAT_LOG    = _APPDATA_WAKFU_DIR / "wakfu_chat.log"
@@ -80,6 +80,11 @@ _LOGIN_RE  = re.compile(r"\[Information \(jeu\)\]\s+Vous êtes maintenant connec
 _LOGOUT_RE = re.compile(r"\[Information \(jeu\)\]\s+Vous venez de vous déconnecter", re.IGNORECASE)
 # Mort de personnage
 _DEATH_RE = re.compile(r"\[Information \(combat\)\]\s+(.+?)\s+est mort", re.IGNORECASE)
+_KO_RE    = re.compile(r"\[Information \(combat\)\]\s+(.+?)\s+est KO\s*!", re.IGNORECASE)
+_HP_LOSS_RE = re.compile(
+    r"\[Information \(combat\)\]\s+(.+?)\s*:\s*-([\d\s\u00a0\u202f]+)\s+PV",
+    re.IGNORECASE,
+)
 
 _GAIN_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez gagné\s+([0-9\s\u00a0\u202f\xa0.,]+)\s+kamas?\b",
@@ -94,6 +99,13 @@ _ITEM_LOSS_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez perdu\s+(\d+)x\s+(.+?)\s*\.",
     re.IGNORECASE,
 )
+# Ramassage : "[Information (jeu)] Vous avez ramassé Nx Nom ."
+_ITEM_GAIN_LOOT_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez ramass[eé]\s+(\d+)x\s+(.+?)\s*\.",
+    re.IGNORECASE,
+)
+# Alias non utilisé — gardé pour compatibilité ascendante
+_ITEM_GAIN_INV_RE = _ITEM_GAIN_LOOT_RE
 _SPELL_RE = re.compile(
     r"\[Information \(combat\)\]\s+(.+?)\s+lance le sort\s+(.+?)(?:\s*\(|\s*$)",
     re.IGNORECASE,
@@ -260,6 +272,15 @@ def _parse_event(raw_line: str) -> tuple[str, dict] | None:
         if qty > 0 and item:
             return "item_lost", {"qty": qty, "item": item}
 
+    m = _ITEM_GAIN_LOOT_RE.search(raw_line)
+    if m is None:
+        m = _ITEM_GAIN_INV_RE.search(raw_line)
+    if m:
+        qty = _parse_num(m.group(1)) or 1
+        item = m.group(2).strip().rstrip(".")
+        if qty > 0 and item:
+            return "item_gained", {"qty": qty, "item": item}
+
     # ── Marché ────────────────────────────────────────────────────────────────
     m = _MARKET_SOLD_RE.search(raw_line)
     if m:
@@ -294,6 +315,16 @@ def _parse_event(raw_line: str) -> tuple[str, dict] | None:
     m = _DEATH_RE.search(raw_line)
     if m:
         return "death", {"character": m.group(1).strip()}
+
+    m = _KO_RE.search(raw_line)
+    if m:
+        return "ko", {"character": m.group(1).strip()}
+
+    m = _HP_LOSS_RE.search(raw_line)
+    if m:
+        hp = _parse_num(m.group(2))
+        if hp and hp > 0:
+            return "hp_loss", {"character": m.group(1).strip(), "amount": hp}
 
     # ── Chat joueur (canaux identifiés) ───────────────────────────────────────
     # Testé en dernier — pattern large, ne capture que les canaux connus
@@ -343,10 +374,16 @@ def _make_fingerprint(event_type: str, data: dict, client_clock: str) -> str:
         return f"{client_clock}|{event_type}"
     if event_type == "death":
         return f"{client_clock}|death|{data['character'].lower()}"
+    if event_type == "ko":
+        return f"{client_clock}|ko|{data['character'].lower()}"
+    if event_type == "hp_loss":
+        return f"{client_clock}|hp_loss|{data['character'].lower()}|{data.get('amount', 0)}"
     if event_type == "chat":
         return f"{client_clock}|chat|{data['channel'].lower()}|{data['author'].lower()}|{data['message'][:40].lower()}"
     if event_type == "item_lost":
         return f"{client_clock}|item_lost|{data['item'][:40].lower()}|{data.get('qty', 1)}"
+    if event_type == "item_gained":
+        return f"{client_clock}|item_gained|{data['item'][:40].lower()}|{data.get('qty', 1)}"
     if event_type == "market_deposit":
         return f"{client_clock}|market_deposit|{data['item'][:40].lower()}|{data.get('qty', 1)}|{data.get('tax', 0)}"
     return f"{client_clock}|{event_type}|{json.dumps(data, ensure_ascii=False)[:80]}"
@@ -403,6 +440,10 @@ def _format_log_line(entry: dict) -> str:
         detail = f"[{data.get('channel', '?')}] {data.get('author', '?')} : {data.get('message', '')[:60]}"
     elif etype == "item_lost":
         detail = f"{data.get('qty', '?')}x {data.get('item', '?')}"
+    elif etype == "item_gained":
+        qty = data.get("qty", 1)
+        item = data.get("item", "?")
+        detail = f"+{qty}x {item}"
     elif etype == "market_deposit":
         item = data.get("item", "?")
         qty  = data.get("qty", 1)
@@ -1402,6 +1443,332 @@ def query_character_info(name: str) -> dict:
                 result["last_seen_ts"] = ts
 
     return result
+
+
+# ── Requêtes serveur / joueurs ────────────────────────────────────────────────
+
+def query_log_start_date() -> str | None:
+    """Retourne la date du premier événement enregistré dans all_events.jsonl (format JJ/MM/AAAA)."""
+    if not _ALL_EVENTS_LOG.exists():
+        return None
+    try:
+        with _ALL_EVENTS_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                raw = line.strip()
+                if not raw:
+                    continue
+                try:
+                    entry = json.loads(raw)
+                except (ValueError, TypeError):
+                    continue
+                if not isinstance(entry, dict):
+                    continue
+                ts = entry.get("ts_local") or entry.get("ts")
+                if ts:
+                    dt = _parse_local_iso(ts)
+                    if dt:
+                        return dt.strftime("%d/%m/%Y")
+                    # Fallback: try raw date prefix
+                    if len(ts) >= 10:
+                        try:
+                            d = datetime.fromisoformat(ts[:10])
+                            return d.strftime("%d/%m/%Y")
+                        except ValueError:
+                            pass
+    except OSError:
+        pass
+    return None
+
+
+def query_last_server() -> str | None:
+    """Retourne le dernier serveur détecté via /whois dans all_events.jsonl."""
+    result = None
+    for entry in _iter_all_events("whois"):
+        server = entry.get("data", {}).get("server")
+        if server:
+            result = server
+    return result
+
+
+def query_unique_chat_authors() -> int:
+    """Compte le nombre d'auteurs uniques ayant écrit dans le chat (log permanent)."""
+    authors: set[str] = set()
+    for entry in _iter_all_events("chat"):
+        author = entry.get("data", {}).get("author")
+        if author:
+            authors.add(str(author).lower().strip())
+    return len(authors)
+
+
+def query_profession_xp() -> dict[str, dict]:
+    """
+    Retourne les dernières données XP connues par métier depuis all_events.jsonl.
+    Clé = nom du métier, valeur = {xp, xp_to_next, ts}
+    """
+    result: dict[str, dict] = {}
+    for entry in _iter_all_events("xp_profession"):
+        data = entry.get("data", {})
+        prof = data.get("profession")
+        if not prof:
+            continue
+        result[prof] = {
+            "xp":        data.get("xp", 0),
+            "xp_to_next": data.get("xp_to_next", 0),
+            "ts":        entry.get("ts_local", ""),
+        }
+    return result
+
+
+def query_profession_tracking() -> dict[str, dict]:
+    """
+    Retourne un suivi enrichi par metier depuis all_events.jsonl.
+    Clé = nom du métier, valeur = {xp_gained, xp_to_next, count, ts}
+    """
+    result: dict[str, dict] = {}
+    for entry in _iter_all_events("xp_profession"):
+        data = entry.get("data", {})
+        prof = str(data.get("profession") or "").strip()
+        if not prof:
+            continue
+        xp = int(data.get("xp", 0) or 0)
+        xp_next = int(data.get("xp_to_next", 0) or 0)
+        row = result.get(prof)
+        if row is None:
+            row = {"xp_gained": 0, "xp_to_next": 0, "count": 0, "ts": ""}
+            result[prof] = row
+        row["xp_gained"] += max(0, xp)
+        row["xp_to_next"] = max(0, xp_next)
+        row["count"] += 1
+        row["ts"] = str(entry.get("ts_local", ""))
+    return result
+
+
+def replay_character_xp_since(character_name: str, since_iso: str | None) -> dict:
+    """
+    Rejoue l'XP combat d'un personnage depuis une date de reference.
+    Retourne {xp_gained, xp_to_next, level, combat_count, last_ts}.
+    """
+    name_lower = _norm_name(character_name)
+    since_dt: datetime | None = _parse_local_iso(since_iso) if since_iso else None
+
+    xp_gained = 0
+    xp_to_next: int | None = None
+    level: int | None = None
+    combat_count = 0
+    last_ts = ""
+
+    for entry in _iter_all_events():
+        ts = str(entry.get("ts_local") or "")
+        dt = _parse_local_iso(ts)
+        if since_dt is not None and dt is not None and dt <= since_dt:
+            continue
+
+        etype = entry.get("type", "")
+        data = entry.get("data", {})
+        if not isinstance(data, dict):
+            continue
+
+        if etype == "xp_combat":
+            char = _norm_name(str(data.get("character") or ""))
+            if char != name_lower:
+                continue
+            xp = int(data.get("xp", 0) or 0)
+            xp_gained += max(0, xp)
+            xp_to_next = int(data.get("xp_to_next", 0) or 0)
+            combat_count += 1
+            last_ts = ts or last_ts
+        elif etype == "level_up":
+            char = _norm_name(str(data.get("character") or ""))
+            if char != name_lower:
+                continue
+            try:
+                level = int(data.get("level"))
+            except (TypeError, ValueError):
+                pass
+            last_ts = ts or last_ts
+
+    return {
+        "xp_gained": xp_gained,
+        "xp_to_next": xp_to_next,
+        "level": level,
+        "combat_count": combat_count,
+        "last_ts": last_ts,
+    }
+
+
+def query_inventory() -> dict[str, int]:
+    """
+    Retourne l'inventaire net (gained - lost) depuis all_events.jsonl.
+    Clé = nom de l'objet, valeur = quantité nette (peut être 0 si tout perdu).
+    """
+    counts: dict[str, int] = {}
+    for entry in _iter_all_events():
+        etype = entry.get("type")
+        data  = entry.get("data", {})
+        item  = str(data.get("item", "")).strip()
+        if not item:
+            continue
+        qty = int(data.get("qty", 1))
+        if etype == "item_gained":
+            counts[item] = counts.get(item, 0) + qty
+        elif etype in ("item_lost", "market_deposit"):
+            counts[item] = counts.get(item, 0) - qty
+    # Remove items with zero or negative net quantity
+    return {k: v for k, v in counts.items() if v > 0}
+
+
+def _compute_turn_combos(player_spells: list[dict]) -> list[dict]:
+    """Group spell_cast events into 35-second turns, return top combos by unique spell count."""
+    TURN_GAP = 35  # seconds
+
+    if not player_spells:
+        return []
+
+    turns: list[list[dict]] = []
+    current: list[dict] = []
+    last_dt = None
+
+    for s in player_spells:
+        dt = _parse_local_iso(s["ts"])
+        if dt is None:
+            continue
+        if last_dt is not None and (dt - last_dt).total_seconds() > TURN_GAP:
+            if current:
+                turns.append(current)
+            current = []
+        current.append(s)
+        last_dt = dt
+
+    if current:
+        turns.append(current)
+
+    result = []
+    for turn in turns:
+        unique = list(dict.fromkeys(s["spell"] for s in turn))
+        if len(unique) >= 2:
+            result.append({
+                "spells": unique,
+                "count":  len(unique),
+                "ts":     turn[0]["ts"],
+            })
+
+    result.sort(key=lambda x: x["count"], reverse=True)
+    return result[:5]
+
+
+def _compute_best_xp_sessions(xp_events: list[dict]) -> list[dict]:
+    """Group xp_combat events within 5 min into sessions, rank by XP/h."""
+    SESSION_GAP = 300  # 5 minutes
+
+    if not xp_events:
+        return []
+
+    sessions: list[list[dict]] = []
+    current: list[dict] = []
+    last_dt = None
+
+    for ev in xp_events:
+        dt = _parse_local_iso(ev["ts"])
+        if dt is None:
+            continue
+        enriched = {**ev, "_dt": dt}
+        if last_dt is not None and (dt - last_dt).total_seconds() > SESSION_GAP:
+            if current:
+                sessions.append(current)
+            current = []
+        current.append(enriched)
+        last_dt = dt
+
+    if current:
+        sessions.append(current)
+
+    result = []
+    for session in sessions:
+        total_xp = sum(e["xp"] for e in session)
+        t0 = session[0]["_dt"]
+        t1 = session[-1]["_dt"]
+        duration = max(30, (t1 - t0).total_seconds())
+        xph = int(total_xp / duration * 3600)
+        result.append({
+            "total_xp":  total_xp,
+            "duration_s": int(duration),
+            "xph":        xph,
+            "ts":         session[0]["ts"],
+            "count":      len(session),
+        })
+
+    result.sort(key=lambda x: x["xph"], reverse=True)
+    return result[:5]
+
+
+def query_combat_stats(char_name: str | None = None) -> dict:
+    """
+    Single-pass scan of all_events.jsonl.
+    Corrèle spell_cast → hp_loss / ko pour attribuer dégâts et kills au bon monstre.
+    Returns:
+        spell_counts: dict[str, int]
+        killed_by: dict[str, int]      # monster → times it killed the player
+        damage_by: dict[str, int]      # monster → total HP damage dealt to player
+        xp_events: list[{ts, xp, xp_to_next}]
+        turn_combos: list[{spells, count, ts}]
+        best_xp_sessions: list[{total_xp, duration_s, xph, ts, count}]
+    """
+    spell_counts: dict[str, int] = {}
+    killed_by:    dict[str, int] = {}
+    damage_by:    dict[str, int] = {}
+    xp_events:    list[dict]     = []
+    player_spells: list[dict]    = []
+
+    char_lower = char_name.lower().strip() if char_name else None
+
+    # Context: last non-player entity that cast a spell (= current attacker)
+    last_attacker: str | None = None
+
+    for entry in _iter_all_events():
+        t    = entry.get("type")
+        data = entry.get("data", {})
+        ts   = entry.get("ts_local", "")
+
+        if t == "spell_cast":
+            char  = str(data.get("character") or "").strip()
+            spell = str(data.get("spell") or "").strip()
+            if not spell:
+                continue
+            if char_lower is None or char.lower() == char_lower:
+                spell_counts[spell] = spell_counts.get(spell, 0) + 1
+                player_spells.append({"ts": ts, "spell": spell})
+            else:
+                # Non-player caster → remember as current attacker
+                last_attacker = char
+
+        elif t == "xp_combat":
+            char = str(data.get("character") or "").strip()
+            if char_lower is None or char.lower() == char_lower:
+                xp_events.append({
+                    "ts":        ts,
+                    "xp":        data.get("xp", 0) or 0,
+                    "xp_to_next": data.get("xp_to_next", 0) or 0,
+                })
+
+        elif t == "hp_loss":
+            char = str(data.get("character") or "").strip()
+            if char_lower and char.lower() == char_lower and last_attacker:
+                amt = data.get("amount", 0) or 0
+                damage_by[last_attacker] = damage_by.get(last_attacker, 0) + amt
+
+        elif t in ("ko", "death"):
+            char = str(data.get("character") or "").strip()
+            if char_lower and char.lower() == char_lower and last_attacker:
+                killed_by[last_attacker] = killed_by.get(last_attacker, 0) + 1
+
+    return {
+        "spell_counts":     spell_counts,
+        "killed_by":        killed_by,
+        "damage_by":        damage_by,
+        "xp_events":        xp_events,
+        "turn_combos":      _compute_turn_combos(player_spells),
+        "best_xp_sessions": _compute_best_xp_sessions(xp_events),
+    }
 
 
 # ── Requêtes kamas ────────────────────────────────────────────────────────────

@@ -13,7 +13,8 @@ from ui.theme import (
 )
 
 HEIGHT = 40
-_ICON_DIR = Path(__file__).resolve().parent / "assets" / "titlebar"
+_ICON_DIR    = Path(__file__).resolve().parent / "assets" / "titlebar"
+_HEADER_PNG  = Path(__file__).resolve().parent / "assets" / "wakfu_theme" / "extracted" / "HeaderLarge.png"
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _CLASS_ICON_CACHE_DIR = _PROJECT_ROOT / "data" / "ankama_cdn" / "class_icons"
 _ZAAP_WAKFU_ICON = Path.home() / "AppData" / "Roaming" / "zaap" / "repositories" / "production" / "wakfu" / "main" / "data" / "icon.png"
@@ -260,7 +261,15 @@ class TitleBar(QWidget):
         self._metrics_row = QWidget()
         self._metrics_layout = QHBoxLayout(self._metrics_row)
         self._metrics_layout.setContentsMargins(0, 0, 0, 0)
-        self._metrics_layout.setSpacing(14)
+        self._metrics_layout.setSpacing(10)
+
+        # Icône de classe (premier élément en mode replié)
+        self._folded_class_icon = QLabel()
+        self._folded_class_icon.setFixedSize(26, 26)
+        self._folded_class_icon.setAlignment(Qt.AlignCenter)
+        self._folded_class_icon.setStyleSheet("background: transparent;")
+        self._folded_class_icon.setVisible(False)
+        self._metrics_layout.addWidget(self._folded_class_icon)
 
         # Pool de 5 labels réutilisables (évite la création dynamique à chaque tick)
         self._metric_labels: list[QLabel] = []
@@ -305,6 +314,17 @@ class TitleBar(QWidget):
 
     def set_class_icon(self, class_key: str):
         """No-op : l'icône de classe est désormais dans PersonnageTab."""
+
+    def set_folded_class_icon(self, pix: "QPixmap | None"):
+        """Affiche l'icône de classe dans la barre repliée."""
+        if pix and not pix.isNull():
+            self._folded_class_icon.setPixmap(
+                pix.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            )
+            self._folded_class_icon.setVisible(self._folded)
+        else:
+            self._folded_class_icon.clear()
+            self._folded_class_icon.setVisible(False)
 
     def set_class_icon_by_breed_id(self, breed_id: int):
         """No-op : l'icône de classe est désormais dans PersonnageTab."""
@@ -373,6 +393,12 @@ class TitleBar(QWidget):
         self._enutrium_icon.setVisible(not self._folded)
         self._lbl.setVisible(not self._folded)
         self._metrics_row.setVisible(self._folded)
+        # Icône de classe visible seulement si repliée et définie
+        self._folded_class_icon.setVisible(
+            self._folded and not self._folded_class_icon.pixmap() is None
+            and not self._folded_class_icon.pixmap().isNull()
+            if self._folded_class_icon.pixmap() else False
+        )
         self.fold_toggled.emit(self._folded)
 
     def _toggle_click_through(self):
@@ -397,15 +423,36 @@ class TitleBar(QWidget):
     # ── Rendu ──────────────────────────────────────────────────────
 
     def paintEvent(self, _event):
+        from PyQt5.QtCore import QRect
         p = QPainter(self)
-        # Fond
-        base = QColor(self._palette.get("BG_PANEL", BG_PANEL))
-        top = QColor(base).lighter(108)
-        grad = QLinearGradient(0, 0, 0, self.height())
-        grad.setColorAt(0.0, top)
-        grad.setColorAt(1.0, base)
-        p.fillRect(self.rect(), grad)
+        # Texture HeaderLarge.png — crop vertical centré sur 40 px, scale horizontal
+        if _HEADER_PNG.exists():
+            if not hasattr(self, "_header_pix_cache"):
+                self._header_pix_cache = QPixmap(str(_HEADER_PNG))
+            pix = self._header_pix_cache
+            if not pix.isNull():
+                src_w, src_h = pix.width(), pix.height()
+                bar_h = self.height()
+                if src_h > bar_h:
+                    # Crop centré : on prend les bar_h pixels du milieu
+                    y_off = (src_h - bar_h) // 2
+                    src_rect = QRect(0, y_off, src_w, bar_h)
+                else:
+                    src_rect = pix.rect()
+                p.drawPixmap(self.rect(), pix, src_rect)
+            else:
+                self._paint_fallback_bg(p)
+        else:
+            self._paint_fallback_bg(p)
         # Ligne teal en bas
         p.setPen(QPen(QColor(self._palette.get("TEAL", TEAL)), 1))
         y = self.height() - 1
         p.drawLine(0, y, self.width(), y)
+
+    def _paint_fallback_bg(self, p: QPainter):
+        base = QColor(self._palette.get("BG_PANEL", BG_PANEL))
+        top  = QColor(base).lighter(108)
+        grad = QLinearGradient(0, 0, 0, self.height())
+        grad.setColorAt(0.0, top)
+        grad.setColorAt(1.0, base)
+        p.fillRect(self.rect(), grad)

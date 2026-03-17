@@ -26,6 +26,7 @@ from core.permanent_journal import (
 
 __all__ = [
     "estimate_market_price",
+    "list_kamas_corrections",
 ]
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -73,6 +74,39 @@ def get_last_correction_ts() -> str | None:
     except (OSError, json.JSONDecodeError, AttributeError):
         pass
     return None
+
+
+def list_kamas_corrections(limit: int = 200) -> list[dict]:
+    """Retourne les corrections kamas du journal dédié, triées décroissantes par timestamp."""
+    if not _JOURNAL.exists():
+        return []
+    rows: list[dict] = []
+    try:
+        with _JOURNAL.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                raw = line.strip()
+                if not raw:
+                    continue
+                try:
+                    obj = json.loads(raw)
+                except (json.JSONDecodeError, TypeError, ValueError):
+                    continue
+                if not isinstance(obj, dict):
+                    continue
+                ts = str(obj.get("ts") or "").strip()
+                if not ts:
+                    continue
+                try:
+                    value = int(obj.get("value"))
+                except (TypeError, ValueError):
+                    continue
+                rows.append({"ts": ts, "value": value})
+    except OSError:
+        return []
+
+    rows.sort(key=lambda r: str(r.get("ts") or ""), reverse=True)
+    lim = max(1, int(limit))
+    return rows[:lim]
 
 
 def write_kamas_correction(value: int) -> str:

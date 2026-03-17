@@ -1,0 +1,26 @@
+{
+  "source": "https://wakfu.cdn.ankama.com/gamedata/theme/theme.json",
+  "base_url": "https://wakfu.cdn.ankama.com/gamedata/theme/",
+  "references": [
+    {
+      "raw": "theme/appSkin/BorderTopDark.png",
+      "resolved_url": "https://wakfu.cdn.ankama.com/gamedata/theme/theme/appSkin/BorderTopDark.png"
+    },
+    {
+      "raw": "theme/appSkin/BtnCloseDark.png",
+      "resolved_url": "https://wakfu.cdn.ankama.com/gamedata/theme/theme/appSkin/BtnCloseDark.png"
+    },
+    {
+      "raw": "theme/appSkin/BtnMaximizeDark.png",
+      "resolved_url": "https://wakfu.cdn.ankama.com/gamedata/theme/theme/appSkin/BtnMaximizeDark.png"
+    },
+    {
+      "raw": "theme/appSkin/BtnMinimizeDark.png",
+      "resolved_url": "https://wakfu.cdn.ankama.com/gamedata/theme/theme/appSkin/BtnMinimizeDark.png"
+    },
+    {
+      "raw": "theme/appSkin/BtnRestoreDark.png",
+      "resolved_url": "https://wakfu.cdn.ankama.com/gamedata/theme/theme/appSkin/BtnRestoreDark.png"
+    }
+  ]
+}

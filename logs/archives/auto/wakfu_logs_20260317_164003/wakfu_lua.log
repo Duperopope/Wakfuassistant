@@ -1,0 +1,44 @@
+ERROR 15:29:41,061 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2250.lua) [string "scenario/2250.lua"]:24: attempt to call global 'displayPath' (a nil value)
+ERROR 19:25:52,705 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 19:25:52,706 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 04:33:14,041 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1008990.lua) [string "1008990.lua"]:8: attempt to index global 'SpellEffect' (a nil value)
+ERROR 21:04:56,965 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1008990.lua) [string "1008990.lua"]:8: attempt to index global 'SpellEffect' (a nil value)
+ERROR 03:10:08,727 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1008990.lua) [string "1008990.lua"]:8: attempt to index global 'SpellEffect' (a nil value)
+ERROR 04:32:59,886 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2015.lua) fichier=scenario/2015.lua ligne=45 org.keplerproject.luajava.LuaException: fichier=scenario/2015.lua ligne=45 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:33:33,777 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2018.lua) fichier=scenario/2018.lua ligne=35 org.keplerproject.luajava.LuaException: fichier=scenario/2018.lua ligne=35 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:35:20,979 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2016.lua) fichier=scenario/2016.lua ligne=55 org.keplerproject.luajava.LuaException: fichier=scenario/2016.lua ligne=55 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:37:42,352 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2015.lua) fichier=scenario/2015.lua ligne=45 org.keplerproject.luajava.LuaException: fichier=scenario/2015.lua ligne=45 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:38:09,903 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2018.lua) fichier=scenario/2018.lua ligne=35 org.keplerproject.luajava.LuaException: fichier=scenario/2018.lua ligne=35 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:39:37,013 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/2016.lua) fichier=scenario/2016.lua ligne=55 org.keplerproject.luajava.LuaException: fichier=scenario/2016.lua ligne=55 Type de valeur de retour incorrecte :INTEGERattendue: LONG
+ERROR 04:41:35,683 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) [string "1040.lua"]:300: attempt to perform arithmetic on global 'targetApsDelay' (a nil value)
+ERROR 04:41:38,300 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) [string "1040.lua"]:300: attempt to perform arithmetic on global 'targetApsDelay' (a nil value)
+ERROR 04:42:56,373 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) [string "1040.lua"]:300: attempt to perform arithmetic on global 'targetApsDelay' (a nil value)
+ERROR 04:42:58,994 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) [string "1040.lua"]:300: attempt to perform arithmetic on global 'targetApsDelay' (a nil value)
+ERROR 14:14:39,828 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1006180.lua) [string "1006180.lua"]:69: attempt to compare number with nil
+ERROR 17:56:52,907 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 17:56:58,608 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 17:57:38,037 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 17:57:56,093 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 17:58:09,475 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 17:58:15,759 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 18:26:54,956 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 18:27:00,755 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 21:55:36,852 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 22:19:45,636 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1008990.lua) [string "1008990.lua"]:8: attempt to index global 'SpellEffect' (a nil value)
+ERROR 03:08:20,347 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 03:08:22,193 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (42007570.lua) [string "42007570.lua"]:34: attempt to index global 'SpellEffect' (a nil value)
+ERROR 11:35:35,614 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1258041410.lua) [string "-1258041410.lua"]:255: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 12:09:56,286 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (genericIEActions/2960.lua) Cannot invoke "fEm.setBubbleIsVisible(boolean)" because "<local3>" is null
+ERROR 16:21:45,979 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/1692.lua) [string "scenario/1692.lua"]:46: attempt to call global 'displayPath' (a nil value)
+ERROR 16:39:19,438 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (scenario/1692.lua) [string "scenario/1692.lua"]:46: attempt to call global 'displayPath' (a nil value)
+ERROR 21:04:06,768 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1008990.lua) [string "1008990.lua"]:8: attempt to index global 'SpellEffect' (a nil value)
+ERROR 10:50:51,888 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027540.lua) [string "-1147027540.lua"]:292: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 10:50:51,892 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027540.lua) [string "-1147027540.lua"]:292: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 10:50:51,893 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027540.lua) [string "-1147027540.lua"]:292: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 11:04:36,325 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027590.lua) [string "-1147027590.lua"]:293: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 11:06:36,572 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027540.lua) [string "-1147027540.lua"]:292: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 20:49:04,033 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 21:25:40,362 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 21:46:36,596 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (1040.lua) java.util.ConcurrentModificationException
+ERROR 11:52:27,732 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (-1147027540.lua) [string "-1147027540.lua"]:292: attempt to index global 'WakfuScriptedAction' (a nil value)
+ERROR 12:46:36,871 [AWT-EventQueue-0] (aFs:303) - [LUA] RUNTIME_ERROR (emotes/20371.lua) Cannot invoke "Ni.Sn()" because "this.crg" is null

@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QObject, QTimer, QProcess, QLockFile
-from ui.theme  import QSS
+from ui.theme  import QSS, load_app_fonts
 from ui.window import OverlayWindow
 
 
@@ -109,6 +109,7 @@ def _acquire_single_instance_lock() -> QLockFile | None:
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Wakfu Assistant")
+    load_app_fonts()
     app.setStyleSheet(QSS)
 
     app._instance_lock = _acquire_single_instance_lock()

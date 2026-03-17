@@ -34,6 +34,7 @@ _ICON_DIR.mkdir(parents=True, exist_ok=True)
 _name_index: dict[str, int] | None = None          # fr_normalized → gfxId
 _data_index: dict[str, dict] | None = None         # fr_normalized → {title, level, rarity, desc, type_id}
 _type_index: dict[int, str] | None = None          # itemTypeId → nom FR nettoyé
+_rarity_index: dict[str, tuple[int, ...]] | None = None  # fr_normalized → rarities disponibles
 _index_lock = threading.Lock()
 
 _RE_PLURAL = _re.compile(r"\{[^}]+\}")             # retire {[~1]?s:} etc.
@@ -43,14 +44,14 @@ def _clean_type(name: str) -> str:
     return _RE_PLURAL.sub("", name).strip()
 
 _RARITY_FR: dict[int, tuple[str, str]] = {        # rarity → (label_fr, couleur_hex)
-    0: ("Commun",      "#8e9db0"),
-    1: ("Commun",      "#8e9db0"),
-    2: ("Peu commun",  "#5aaa5a"),
-    3: ("Rare",        "#4a7acc"),
-    4: ("Mythique",    "#c05ac0"),
-    5: ("Légendaire",  "#d4853a"),
-    6: ("Relique",     "#cc4444"),
-    7: ("Souvenir",    "#c8b84a"),
+    0: ("Ancien",                "#BCC0C0"),
+    1: ("Commun",                "#BCC0C0"),
+    2: ("Rare",                  "#28F18B"),
+    3: ("Mythique",              "#FD8E39"),
+    4: ("Légendaire",            "#FEDE71"),
+    5: ("Relique",               "#FF47E7"),
+    6: ("Souvenir",              "#8FC7E2"),
+    7: ("Épique",                "#FD87BA"),
 }
 
 
@@ -60,10 +61,11 @@ def _normalize(name: str) -> str:
     return "".join(c for c in nfkd if not unicodedata.combining(c))
 
 
-def _build_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str]]:
+def _build_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str], dict[str, tuple[int, ...]]]:
     gfx: dict[str, int] = {}
     dat: dict[str, dict] = {}
     typ: dict[int, str]  = {}
+    rarity_map: dict[str, set[int]] = {}
 
     # itemTypes.json
     if _TYPES_JSON.exists():
@@ -88,13 +90,20 @@ def _build_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str]]:
                     gfx.setdefault(key, int(g))
                     if key not in dat:
                         base = item_def.get("baseParameters") or {}
+                        rarity_raw = base.get("rarity")
+                        rarity = int(rarity_raw) if isinstance(rarity_raw, int) else None
                         dat[key] = {
                             "title":   fr,
                             "level":   item_def.get("level"),
-                            "rarity":  base.get("rarity"),
+                            "rarity":  rarity,
                             "type_id": base.get("itemTypeId"),
                             "desc":    (it.get("description") or {}).get("fr") or "",
                         }
+                    else:
+                        rarity_raw = (item_def.get("baseParameters") or {}).get("rarity")
+                        rarity = int(rarity_raw) if isinstance(rarity_raw, int) else None
+                    if rarity is not None:
+                        rarity_map.setdefault(key, set()).add(rarity)
         except Exception:
             pass
 
@@ -127,44 +136,69 @@ def _build_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str]]:
                     key = _normalize(fr)
                     gfx.setdefault(key, int(g))
                     if key not in dat:
+                        rarity_raw = dfn.get("rarity")
+                        rarity = int(rarity_raw) if isinstance(rarity_raw, int) else None
                         dat[key] = {
                             "title":   fr,
                             "level":   dfn.get("level"),
-                            "rarity":  dfn.get("rarity"),
+                            "rarity":  rarity,
                             "type_id": dfn.get("itemTypeId"),
                             "desc":    (it.get("description") or {}).get("fr") or "",
                         }
+                    else:
+                        rarity_raw = dfn.get("rarity")
+                        rarity = int(rarity_raw) if isinstance(rarity_raw, int) else None
+                    if rarity is not None:
+                        rarity_map.setdefault(key, set()).add(rarity)
         except Exception:
             pass
 
-    return gfx, dat, typ
+    rarity_idx: dict[str, tuple[int, ...]] = {}
+    for key, values in rarity_map.items():
+        rarity_idx[key] = tuple(sorted(values))
+
+    return gfx, dat, typ, rarity_idx
 
 
-def _get_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str]]:
-    global _name_index, _data_index, _type_index
+def _get_indexes() -> tuple[dict[str, int], dict[str, dict], dict[int, str], dict[str, tuple[int, ...]]]:
+    global _name_index, _data_index, _type_index, _rarity_index
     if _name_index is None:
         with _index_lock:
             if _name_index is None:
-                _name_index, _data_index, _type_index = _build_indexes()
-    return _name_index, _data_index, _type_index
+                _name_index, _data_index, _type_index, _rarity_index = _build_indexes()
+    return _name_index, _data_index, _type_index, (_rarity_index or {})
 
 
 def get_gfx_id(name: str) -> int | None:
     """Retourne le gfxId pour un nom d'objet FR, ou None si inconnu."""
-    gfx, _, _ = _get_indexes()
+    gfx, _, _, _ = _get_indexes()
     return gfx.get(_normalize(name))
 
 
 def get_item_data(name: str) -> dict | None:
     """Retourne {title, level, rarity, type_id, desc} pour un nom d'objet FR, ou None."""
-    _, dat, _ = _get_indexes()
+    _, dat, _, _ = _get_indexes()
     return dat.get(_normalize(name))
 
 
 def get_type_name(type_id: int) -> str | None:
     """Retourne le nom FR du type d'objet (ex. 'Récolte du Trappeur'), ou None."""
-    _, _, typ = _get_indexes()
+    _, _, typ, _ = _get_indexes()
     return typ.get(type_id)
+
+
+def get_item_rarity_candidates(name: str) -> list[int]:
+    """Retourne la liste triée des raretés réellement disponibles pour un objet."""
+    _, dat, _, rarity_idx = _get_indexes()
+    key = _normalize(name)
+    values = list(rarity_idx.get(key, ()))
+    if values:
+        return values
+    data = dat.get(key) or {}
+    rarity = data.get("rarity")
+    if isinstance(rarity, int) and 0 <= rarity <= 7:
+        return [rarity]
+    return []
 
 
 # ── Cache mémoire ──────────────────────────────────────────────────────────────

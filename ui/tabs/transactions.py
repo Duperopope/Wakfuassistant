@@ -1138,8 +1138,10 @@ class TransactionsTab(BaseTab):
             self._set_taxes_metric(self._cached_taxes)
 
     def _disp(self, value: int) -> str:
-        """Format historique selon le réglage Options."""
-        return _fmt_kamas_short(value) if self._short_kamas else _fmt_kamas_with_symbol(value)
+        """Format affiche dans l'historique: toujours avec symbole kama."""
+        if self._short_kamas:
+            return f"{_fmt_kamas_short(value)} {_KAMA_SYMBOL}"
+        return _fmt_kamas_with_symbol(value)
 
     @staticmethod
     def _chip_display(value: int, short: bool) -> tuple[str, bool]:

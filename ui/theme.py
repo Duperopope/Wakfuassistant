@@ -1,5 +1,26 @@
 # ui/theme.py — Palette et QSS Wakfu (dark + teal)
 
+from pathlib import Path
+
+# ── Polices ───────────────────────────────────────────────────────────────────
+
+FONT_DIR   = Path(__file__).resolve().parent / "assets" / "fonts"
+FONT_TITLE = "Cinzel"       # Titres / noms
+FONT_BODY  = "Nunito Sans"  # Texte courant
+FONT_LABEL = "Rajdhani"     # Labels / badges / valeurs
+
+
+def load_app_fonts() -> None:
+    """Charge les polices custom dans QFontDatabase (appeler avant QApplication.exec)."""
+    from PyQt5.QtGui import QFontDatabase
+    if not FONT_DIR.exists():
+        return
+    for f in FONT_DIR.glob("*.ttf"):
+        QFontDatabase.addApplicationFont(str(f))
+    for f in FONT_DIR.glob("*.otf"):
+        QFontDatabase.addApplicationFont(str(f))
+
+
 DEFAULT_PALETTE = "wakfu"
 
 PALETTES = {
@@ -262,13 +283,13 @@ QPushButton:pressed {{
 
 /* Tooltips */
 QToolTip {{
-    background: {p['BG_PANEL2']};
-    border: 1px solid {p['BORDER2']};
-    border-radius: 8px;
-    color: {p['TEXT']};
-    padding: 6px 10px;
+    background: rgba(30, 79, 136, 245);
+    border: 2px solid {p['BORDER2']};
+    border-radius: 10px;
+    color: #E8F0FF;
+    padding: 8px 12px;
     font-size: 11px;
-    font-weight: 400;
+    font-weight: 600;
     opacity: 240;
 }}
 """
