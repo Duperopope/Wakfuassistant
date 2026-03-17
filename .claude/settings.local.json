@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:5000/api/data)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(''''Session:'''', d[''''session''''][''''elapsed_str'''']\\); print\\(''''Events:'''', d[''''watcher''''][''''events'''']\\); print\\(''''Items CDN:'''', len\\(d[''''item_categories'''']\\)\\); print\\(''''OK!''''\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(powershell -Command \"Start-Process python -ArgumentList ''run_browser.py'' -WorkingDirectory ''H:\\\\Code\\\\Wakfuassistant'' -RedirectStandardOutput ''logs\\\\run.log'' -RedirectStandardError ''logs\\\\run_err.log'' -WindowStyle Hidden\")",
+      "Bash(powershell -Command \"Start-Process ''http://localhost:5000''\")",
+      "Bash(pip list:*)",
+      "Bash(python -c \"from PyQt5.QtWidgets import QApplication; print\\(''''PyQt5 OK''''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \":*)",
+      "Bash(powershell -Command \":*)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''main.py''\\).read\\(\\)\\); print\\(''Syntax OK''\\)\")"
+    ]
+  }
+}
