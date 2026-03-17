@@ -1,10 +1,14 @@
-# ui/tabs/base.py — Classe de base + placeholder
+# ui/tabs/base.py — Classe de base + placeholder + WIP widget
 
+from pathlib import Path
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPainter, QColor, QMovie
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt5.QtCore    import Qt
-from PyQt5.QtGui     import QPainter, QColor
 
-from ui.theme import BG, TEXT_DIM, TEAL, BORDER
+from ui.theme import BG, TEXT_DIM, TEAL
+
+_WIP_GIF = Path(__file__).resolve().parents[1] / "assets" / "Parts" / "wip.gif"
 
 
 class BaseTab(QWidget):
@@ -25,34 +29,44 @@ class BaseTab(QWidget):
         pass
 
 
+class WipWidget(QWidget):
+    """Widget 'Work In Progress' : affiche le gif animé wip.gif centré."""
+
+    def __init__(self, label: str = "", parent=None):
+        super().__init__(parent)
+        lay = QVBoxLayout(self)
+        lay.setAlignment(Qt.AlignCenter)
+        lay.setContentsMargins(20, 20, 20, 20)
+        lay.setSpacing(10)
+
+        # GIF animé
+        gif_lbl = QLabel()
+        gif_lbl.setAlignment(Qt.AlignCenter)
+        gif_lbl.setStyleSheet("background: transparent;")
+        if _WIP_GIF.exists():
+            movie = QMovie(str(_WIP_GIF))
+            gif_lbl.setMovie(movie)
+            movie.start()
+        else:
+            gif_lbl.setText("🚧")
+            gif_lbl.setStyleSheet("font-size: 32px; background: transparent;")
+        lay.addWidget(gif_lbl)
+
+        if label:
+            lbl = QLabel(label)
+            lbl.setAlignment(Qt.AlignCenter)
+            lbl.setWordWrap(True)
+            lbl.setStyleSheet(
+                f"color: {TEXT_DIM}; font-size: 10px; background: transparent;"
+            )
+            lay.addWidget(lbl)
+
+
 class PlaceholderTab(BaseTab):
-    """Onglet vide affiché avant implémentation."""
+    """Onglet vide affiché avant implémentation — affiche le gif WIP."""
 
     def __init__(self, name: str, parent=None):
         super().__init__(parent)
-
         lay = QVBoxLayout(self)
         lay.setAlignment(Qt.AlignCenter)
-
-        icon = QLabel("🚧")
-        icon.setAlignment(Qt.AlignCenter)
-        icon.setStyleSheet("font-size: 32px; background: transparent;")
-
-        lbl = QLabel(f"Onglet <b>{name}</b>")
-        lbl.setAlignment(Qt.AlignCenter)
-        lbl.setStyleSheet(
-            f"color: {TEXT_DIM}; font-size: 13px; background: transparent;"
-        )
-
-        sub = QLabel("En cours de construction")
-        sub.setAlignment(Qt.AlignCenter)
-        sub.setStyleSheet(
-            f"color: {TEAL}; font-size: 10px; background: transparent; "
-            f"letter-spacing: 1px;"
-        )
-
-        lay.addWidget(icon)
-        lay.addSpacing(8)
-        lay.addWidget(lbl)
-        lay.addSpacing(4)
-        lay.addWidget(sub)
+        lay.addWidget(WipWidget(f"Onglet {name}"))

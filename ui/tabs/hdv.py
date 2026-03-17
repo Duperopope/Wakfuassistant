@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 )
 
 from core.permanent_journal import estimate_market_price, read_permanent_market_deposits
-from ui.tabs.base import BaseTab
+from ui.tabs.base import BaseTab, WipWidget
 from ui.theme import (
     BG, BG_PANEL, BG_PANEL2, BORDER, BORDER2,
     GREEN, RED, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM,
@@ -179,29 +179,6 @@ class _SubTabBar(QWidget):
 
     def buttons(self) -> dict[str, QPushButton]:
         return self._btns
-
-
-# ── Placeholder page ──────────────────────────────────────────────────────────
-
-class _PlaceholderPage(QWidget):
-    def __init__(self, title: str, hint: str = "", parent=None):
-        super().__init__(parent)
-        lay = QVBoxLayout(self)
-        lay.setAlignment(Qt.AlignCenter)
-        lay.setContentsMargins(20, 20, 20, 20)
-        lbl = QLabel(title)
-        lbl.setAlignment(Qt.AlignCenter)
-        lbl.setStyleSheet(
-            f"color:{TEXT_DIM};font-size:14px;font-weight:600;background:transparent;"
-        )
-        lay.addWidget(lbl)
-        if hint:
-            sub = QLabel(hint)
-            sub.setAlignment(Qt.AlignCenter)
-            sub.setWordWrap(True)
-            sub.setStyleSheet(f"color:{TEXT_DIM};font-size:10px;background:transparent;")
-            lay.addSpacing(6)
-            lay.addWidget(sub)
 
 
 # ── Overview page — market intelligence ──────────────────────────────────────
@@ -430,18 +407,9 @@ class HdvTab(BaseTab):
 
         self._pages["overview"]     = self._overview_page
         self._pages["mes_ventes"]   = self._mes_ventes_page
-        self._pages["mes_achats"]   = _PlaceholderPage(
-            "Mes offres d'achat",
-            "Les ordres d'achat seront capturés automatiquement depuis les logs du jeu.",
-        )
-        self._pages["offres_vente"] = _PlaceholderPage(
-            "Offres de vente",
-            "Données issues du scan de l'HDV — fonctionnalité à venir.",
-        )
-        self._pages["offres_achat"] = _PlaceholderPage(
-            "Offres d'achat",
-            "Données issues du scan de l'HDV — fonctionnalité à venir.",
-        )
+        self._pages["mes_achats"]   = WipWidget("Mes offres d'achat")
+        self._pages["offres_vente"] = WipWidget("Offres de vente · scan HDV")
+        self._pages["offres_achat"] = WipWidget("Offres d'achat · scan HDV")
 
         for page in self._pages.values():
             self._stack.addWidget(page)
