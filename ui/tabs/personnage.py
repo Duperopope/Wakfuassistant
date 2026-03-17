@@ -10,6 +10,7 @@ from PyQt5.QtGui import QPixmap
 
 from ui.tabs.base import BaseTab
 from ui.theme import TEAL, TEXT, TEXT_DIM, BORDER, GREEN, RED
+from core.wakfu_tracker import GameState
 from ui.titlebar import (
     _normalize_class_key,
     _CLASS_TO_ID,
@@ -112,8 +113,23 @@ class PersonnageTab(BaseTab):
             self._status_lbl.setText("● déconnecté")
             self._status_lbl.setStyleSheet(f"color: {RED}; font-size: 10px;")
         else:
-            self._status_lbl.setText("connexion ?")
+            self._status_lbl.setText("◌ écran de sélection")
             self._status_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+
+    def set_game_state(self, state: "GameState"):
+        if state == GameState.OFFLINE:
+            self._status_lbl.setText("● Wakfu non détecté")
+            self._status_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+            self._name_lbl.setText("—")
+            self._class_lbl.setText("—")
+            self._level_lbl.setText("")
+        elif state == GameState.SELECTING:
+            self._status_lbl.setText("◌ Écran de sélection")
+            self._status_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px;")
+            self._name_lbl.setText("—")
+            self._class_lbl.setText("—")
+            self._level_lbl.setText("")
+        # IN_GAME: no-op, data is set by individual setters
 
     def set_class_icon(self, class_key: str):
         key = _normalize_class_key(class_key)

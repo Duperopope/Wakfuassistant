@@ -7,7 +7,14 @@ import win32gui
 import win32con
 import win32process
 import win32api
+from enum import Enum
 from PyQt5.QtCore import QObject, QTimer, pyqtSignal
+
+
+class GameState(Enum):
+    OFFLINE   = "offline"
+    SELECTING = "selecting"
+    IN_GAME   = "in_game"
 
 # "L'immortel - Wakfu"  →  group(1) = "L'immortel"
 # "Wakfu"               →  pas de match → aucun personnage connecté
@@ -217,3 +224,11 @@ class WakfuTracker(QObject):
     @property
     def is_focused(self) -> bool:
         return self._was_focused
+
+    @property
+    def game_state(self) -> GameState:
+        if self._hwnd is None:
+            return GameState.OFFLINE
+        if self._last_character:
+            return GameState.IN_GAME
+        return GameState.SELECTING

@@ -24,7 +24,7 @@ from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
 from ui.tabs.transactions import TransactionsTab
 from ui.tabs.personnage import PersonnageTab
-from core.wakfu_tracker import WakfuTracker
+from core.wakfu_tracker import WakfuTracker, GameState
 
 DEFAULT_W = 895
 DEFAULT_H = 590
@@ -231,6 +231,7 @@ class OverlayWindow(QWidget):
         self._click_through = self._settings.value("click_through", False, type=bool)
         self._click_unlock_btn: QPushButton | None = None
         self._elapsed_seconds: int = 0
+        self._game_state: GameState = GameState.OFFLINE
         self._session_connected: bool | None = None
         self._log_read_pos: int = 0
         self._journal_read_pos: int = 0
@@ -701,7 +702,8 @@ class OverlayWindow(QWidget):
             self._personnage_tab.set_character_name(self._current_character_name)
             self._personnage_tab.set_class_name(self._last_detected_class)
             self._personnage_tab.set_level(self._last_level)
-            self._personnage_tab.set_connection_status(self._session_connected)
+            conn_status = True if self._game_state == GameState.IN_GAME else (None if self._game_state == GameState.SELECTING else False)
+            self._personnage_tab.set_connection_status(conn_status)
             if self._last_detected_class:
                 self._personnage_tab.set_class_icon(self._last_detected_class)
 
@@ -1257,22 +1259,6 @@ class OverlayWindow(QWidget):
         state = self._parse_log_state(blob)
         changed = False
 
-        connected = state.get("connected")
-        if connected is not None and connected != self._session_connected:
-            self._session_connected = bool(connected)
-            changed = True
-            # En cas de déconnexion, on évite de rester bloqué sur un ancien perso.
-            if not self._session_connected:
-                self._last_detected_class = None
-
-        character_name = state.get("character_name")
-        if isinstance(character_name, str) and character_name.strip():
-            normalized_name = _normalize_character_name(character_name)
-            if normalized_name != self._current_character_name:
-                self._current_character_name = normalized_name
-                self._write_character_name(normalized_name)
-                changed = True
-
         breed_id = state.get("breed_id")
         class_key = state.get("class_key")
         if not class_key and self._current_character_name:
@@ -1485,17 +1471,40 @@ class OverlayWindow(QWidget):
 
     def _on_wakfu_lost(self):
         self._wakfu_rect = None
+        if self._game_state != GameState.OFFLINE:
+            self._game_state = GameState.OFFLINE
+            self._current_character_name = None
+            self._session_connected = False
+            self._last_detected_class = None
+            self._last_level = None
+            if self._personnage_tab is not None:
+                self._personnage_tab.set_game_state(GameState.OFFLINE)
+            self._refresh_title_info()
         self.hide()
         self._update_click_unlock_button_visibility()
 
     def _on_character_changed(self, name: str):
-        """Déclenché dès que le titre de la fenêtre Wakfu change.
-        name = "" → écran de sélection / déconnecté.
-        name = "L'immortel" → personnage actif."""
-        if name == self._current_character_name:
+        """Déclenché dès que le titre de la fenêtre Wakfu change."""
+        new_state = GameState.IN_GAME if name else GameState.SELECTING
+        name_changed = (name or None) != self._current_character_name
+        state_changed = new_state != self._game_state
+
+        if not name_changed and not state_changed:
             return
+
+        self._game_state = new_state
         self._current_character_name = name or None
-        self._session_connected = bool(name)
+        self._session_connected = (new_state == GameState.IN_GAME)
+
+        if new_state == GameState.SELECTING:
+            # Reset character-specific state
+            self._last_detected_class = None
+            self._last_level = None
+            self._last_xp_gain = None
+
+        if self._personnage_tab is not None:
+            self._personnage_tab.set_game_state(new_state)
+
         self._refresh_title_info()
 
     def _on_wakfu_geometry(self, x: int, y: int, w: int, h: int):
