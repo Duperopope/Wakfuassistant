@@ -66,6 +66,7 @@ class TransactionEvent:
     amount: int
     correction_ts: str | None = None
     correction_line_no: int | None = None
+    tooltip: str | None = None
 
 
 def _parse_ts(raw: str) -> datetime:
@@ -1764,8 +1765,10 @@ class TransactionsTab(BaseTab):
                 price_str = f"~{_fmt_kamas(lo)} {_KAMA_SYMBOL}/u"
             else:
                 price_str = f"~{_fmt_kamas(lo)}–{_fmt_kamas(hi)} {_KAMA_SYMBOL}/u"
-            qty_str = f" ×{qty}" if qty > 1 else ""
-            _deposit_by_sec_amt[f"{sec}|{tax}"] = f"Taxe: {item}{qty_str} — {price_str}"
+            qty_str = f"×{qty}  " if qty > 1 else ""
+            duration_label = f"{self._market_default_days}j, {self._market_territory_rate}%"
+            tip = f"{qty_str}{price_str}  ({duration_label})"
+            _deposit_by_sec_amt[f"{sec}|{tax}"] = (f"Taxe: {item}", tip)
 
         seen: set[tuple[str, str, int, int]] = set()
         for item in read_permanent_kamas_events():
@@ -1786,10 +1789,14 @@ class TransactionsTab(BaseTab):
             seen.add(key)
 
             # Libellé enrichi si la perte correspond à un dépôt marché
+            tooltip: str | None = None
             if kind == "loss":
                 sec = dt.strftime("%H:%M:%S")
-                deposit_label = _deposit_by_sec_amt.get(f"{sec}|{amount}")
-                libelle = deposit_label if deposit_label else "Perte de kamas"
+                deposit_entry = _deposit_by_sec_amt.get(f"{sec}|{amount}")
+                if deposit_entry:
+                    libelle, tooltip = deposit_entry
+                else:
+                    libelle = "Perte de kamas"
             else:
                 libelle = "Gain de kamas"
 
@@ -1799,6 +1806,7 @@ class TransactionsTab(BaseTab):
                     kind=kind,
                     libelle=libelle,
                     amount=amount,
+                    tooltip=tooltip,
                 )
             )
 
@@ -2719,6 +2727,8 @@ class TransactionsTab(BaseTab):
 
             type_item = QTableWidgetItem(tx_type)
             libelle_item = QTableWidgetItem(self._effective_libelle(evt))
+            if evt.tooltip:
+                libelle_item.setToolTip(evt.tooltip)
             amount_item = QTableWidgetItem(amount_text)
             if self._short_kamas:
                 amount_item.setToolTip(_fmt_kamas_with_symbol(evt.amount))
