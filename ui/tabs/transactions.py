@@ -30,7 +30,12 @@ from PyQt5.QtWidgets import (
     QGraphicsOpacityEffect,
 )
 
-from core.permanent_journal import read_permanent_kamas_events, sync_permanent_kamas_journal
+from core.permanent_journal import (
+    estimate_market_price,
+    read_permanent_kamas_events,
+    read_permanent_market_deposits,
+    sync_permanent_kamas_journal,
+)
 from ui.tabs.base import BaseTab
 from ui.theme import BG_PANEL, BORDER, GREEN, RED, TEAL, TEXT, TEXT_DIM
 
@@ -698,11 +703,16 @@ class TransactionsTab(BaseTab):
         self._gains_chip:  "_ClickableFrame | None" = None
         self._losses_chip: "_ClickableFrame | None" = None
         self._net_chip:    "_ClickableFrame | None" = None
+        self._taxes_chip:  "_ClickableFrame | None" = None
         self._kamas_chip:  "_ClickableFrame | None" = None
         self._cached_gains: int = 0
         self._cached_losses: int = 0
         self._cached_net: int = 0
         self._cached_kamas: "int | None" = None
+        self._cached_taxes: int = 0
+        self._deposit_events: "list[dict]" = []   # {dt, ts_client, item, qty, tax}
+        self._market_default_days: int = 28
+        self._market_territory_rate: int = 5
         self._column_layout_schema_migrated = False
         self._persist_debounce = QTimer(self)
         self._persist_debounce.setSingleShot(True)
@@ -737,6 +747,7 @@ class TransactionsTab(BaseTab):
         self._gains_chip  = gains_chip
         self._losses_chip = pertes_chip
         self._net_chip    = net_chip
+        self._taxes_chip  = taxes_chip
         self._kamas_chip  = kamas_chip
 
         for _chip, _key in (
@@ -1121,6 +1132,8 @@ class TransactionsTab(BaseTab):
             self._set_flow_metrics(self._cached_gains, self._cached_losses)
         elif key in ("net", "kamas"):
             self._set_balance_metrics(self._cached_net, self._cached_kamas)
+        elif key == "taxes":
+            self._set_taxes_metric(self._cached_taxes)
 
     def _disp(self, value: int) -> str:
         """Format historique selon le réglage Options."""
@@ -1190,6 +1203,21 @@ class TransactionsTab(BaseTab):
                 self._kamas_chip._kama_icon.setVisible(k_icon)
                 alt = _fmt_kamas_short(ck) if not k_short else f"{_fmt_kamas(ck)} {_KAMA_SYMBOL}"
                 self._kamas_chip.setToolTip(alt if ck >= 100_000 or k_short else "")
+
+    def _set_taxes_metric(self, total: int):
+        self._cached_taxes = total
+        t_short = self._chip_short.get("taxes", False)
+        t_txt, t_icon = self._chip_display(total, t_short)
+        self._taxes_label.setText(f"-{t_txt}")
+        if hasattr(self, "_taxes_chip") and self._taxes_chip:
+            self._taxes_chip._kama_icon.setVisible(t_icon)
+            alt = _fmt_kamas_short(total) if not t_short else f"{_fmt_kamas(total)} {_KAMA_SYMBOL}"
+            self._taxes_chip.setToolTip(f"-{alt}" if total >= 100_000 or t_short else "")
+
+    def set_market_settings(self, days: int, rate: int):
+        """Met à jour les paramètres marché et recalcule les libellés."""
+        self._market_default_days = days
+        self._market_territory_rate = rate
 
     def _on_chart_view_stats(self, pct: float, _first: int, _last: int, gains: int, losses: int):
         # Methode conservee pour compatibilite; la carte affiche desormais
@@ -1596,6 +1624,7 @@ class TransactionsTab(BaseTab):
         if total <= 0:
             self._set_flow_metrics(0, 0)
             self._set_balance_metrics(0, None)
+            self._set_taxes_metric(0)
             return
 
         start = max(0, min(total, int(self._view_start)))
@@ -1611,12 +1640,24 @@ class TransactionsTab(BaseTab):
         losses = sum(evt.amount for evt in visible_events if evt.kind == "loss")
         net = gains - losses
 
+        # Taxes : dépôts marché dans la plage visible
+        if self._deposit_events and visible_events:
+            v_start = visible_events[0].dt
+            v_end   = visible_events[-1].dt
+            taxes = sum(
+                d["tax"] for d in self._deposit_events
+                if v_start <= d["dt"] <= v_end
+            )
+        else:
+            taxes = sum(d["tax"] for d in self._deposit_events)
+
         current_val: int | None = None
         if self._rendered_series:
             current_val = int(self._rendered_series[-1][1])
 
         self._set_flow_metrics(gains, losses)
         self._set_balance_metrics(net, current_val)
+        self._set_taxes_metric(taxes)
 
     @staticmethod
     def _parse_kamas_token(raw: str) -> int | None:
@@ -1705,6 +1746,27 @@ class TransactionsTab(BaseTab):
         # Mise a jour du journal permanent normalise (client/local/atomic).
         sync_permanent_kamas_journal()
 
+        # Chargement des dépôts marché pour enrichir les libellés
+        self._deposit_events = read_permanent_market_deposits()
+        # Index ts_client[:8] (HH:MM:SS) + montant → libellé estimé
+        _deposit_by_sec_amt: dict[str, str] = {}
+        for dep in self._deposit_events:
+            sec = dep["ts_client"][:8]   # HH:MM:SS
+            tax = dep["tax"]
+            item = dep["item"]
+            qty  = dep["qty"]
+            lo, hi = estimate_market_price(
+                tax, qty,
+                self._market_default_days,
+                self._market_territory_rate,
+            )
+            if lo == hi:
+                price_str = f"~{_fmt_kamas(lo)} {_KAMA_SYMBOL}/u"
+            else:
+                price_str = f"~{_fmt_kamas(lo)}–{_fmt_kamas(hi)} {_KAMA_SYMBOL}/u"
+            qty_str = f" ×{qty}" if qty > 1 else ""
+            _deposit_by_sec_amt[f"{sec}|{tax}"] = f"Taxe: {item}{qty_str} — {price_str}"
+
         seen: set[tuple[str, str, int, int]] = set()
         for item in read_permanent_kamas_events():
             dt = item.get("dt")
@@ -1723,11 +1785,19 @@ class TransactionsTab(BaseTab):
                 continue
             seen.add(key)
 
+            # Libellé enrichi si la perte correspond à un dépôt marché
+            if kind == "loss":
+                sec = dt.strftime("%H:%M:%S")
+                deposit_label = _deposit_by_sec_amt.get(f"{sec}|{amount}")
+                libelle = deposit_label if deposit_label else "Perte de kamas"
+            else:
+                libelle = "Gain de kamas"
+
             self._events.append(
                 TransactionEvent(
                     dt=dt,
                     kind=kind,
-                    libelle="Gain de kamas" if kind == "gain" else "Perte de kamas",
+                    libelle=libelle,
                     amount=amount,
                 )
             )

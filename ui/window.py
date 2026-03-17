@@ -452,6 +452,7 @@ class OverlayWindow(QWidget):
             if name == "Transactions":
                 w = TransactionsTab(self)
                 w.set_short_kamas(self._short_kamas)
+                w.set_market_settings(self._market_default_days, self._market_territory_rate)
             elif name == "Options":
                 w = OptionsTab(
                     self._opacity,
@@ -1834,6 +1835,10 @@ class OverlayWindow(QWidget):
         data["market_default_days"] = days
         data["market_territory_rate"] = rate
         self._write_config_json(data)
+        for widget in self._tab_widgets:
+            if isinstance(widget, TransactionsTab):
+                widget.set_market_settings(days, rate)
+                break
 
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)

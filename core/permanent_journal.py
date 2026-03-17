@@ -1473,6 +1473,48 @@ def read_permanent_kamas_events() -> list[dict]:
     return events
 
 
+def read_permanent_market_deposits() -> list[dict]:
+    """Retourne tous les market_deposit depuis all_events.jsonl, triés par date.
+
+    Chaque entrée : {dt, ts_client, item, qty, tax}
+    """
+    if not _ALL_EVENTS_LOG.exists():
+        return []
+    results: list[dict] = []
+    try:
+        with _ALL_EVENTS_LOG.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                raw = line.strip()
+                if not raw:
+                    continue
+                try:
+                    entry = json.loads(raw)
+                except (ValueError, TypeError):
+                    continue
+                if not isinstance(entry, dict) or entry.get("type") != "market_deposit":
+                    continue
+                data = entry.get("data") or {}
+                dt = _parse_local_iso(str(entry.get("ts_local") or ""))
+                if dt is None:
+                    continue
+                try:
+                    tax = int(data.get("tax") or 0)
+                    qty = int(data.get("qty") or 1)
+                except (TypeError, ValueError):
+                    continue
+                results.append({
+                    "dt":        dt,
+                    "ts_client": str(entry.get("ts_client") or ""),
+                    "item":      str(data.get("item") or "?"),
+                    "qty":       qty,
+                    "tax":       tax,
+                })
+    except OSError:
+        pass
+    results.sort(key=lambda x: x["dt"])
+    return results
+
+
 def get_permanent_events_start_ts() -> str | None:
     for evt in _iter_permanent_events() or []:
         return evt["dt"].strftime("%Y-%m-%d %H:%M:%S")
