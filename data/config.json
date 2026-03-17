@@ -1,6 +1,6 @@
 {
   "character": "L'Immortel",
-  "character_class": "sram",
+  "character_class": "sacrier",
   "server": "Ogrest",
   "account": "Kairozadyk",
   "base_kamas": 577306,
@@ -15,9 +15,32 @@
   "overlay_position": "right",
   "click_through": false,
   "known_character_classes": {
-    "L'Immortel": "sram"
+    "L'Immortel": "sram",
+    "Madame Céleste": "elio",
+    "Zadykiop": "iop",
+    "Zadykcra": "cra",
+    "Zadykeca": "ecaflip",
+    "Zadykzobal": "masqueraider",
+    "Zadykouginak": "ouginak",
+    "Chienchien": "ouginak",
+    "Zadykeni": "eniripsa",
+    "Zadykfec": "feca",
+    "Zadyksadi": "sadida",
+    "La Goulue": "sadida",
+    "Zadykenu": "enutrof",
+    "Phorreur": "enutrof",
+    "Zadyksteam": "foggernaut",
+    "Zadykhupper": "huppermage",
+    "Zadykosam": "osamodas",
+    "Zadykpanda": "pandawa",
+    "Zadykroubla": "rogue",
+    "Tristepin": "rogue",
+    "Zadyksacri": "sacrier",
+    "L'Intemporel Kairos": "xelor"
   },
   "perm_log_offset": 3704353,
   "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
-  "journal_read_pos": 57617
+  "journal_read_pos": 752674,
+  "market_default_days": 28,
+  "market_territory_rate": 5
 }

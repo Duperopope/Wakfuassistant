@@ -171,6 +171,7 @@ class OptionsTab(BaseTab):
     transactions_refresh_requested = pyqtSignal()
     short_numbers_changed  = pyqtSignal(bool)  # format court des kamas
     fold_anchor_changed    = pyqtSignal(bool)  # ancrage bas quand replié
+    market_settings_changed = pyqtSignal(int, int)  # (days, territory_rate_percent)
 
     FONT_CHOICES = [
         "Segoe UI Variable",
@@ -210,6 +211,8 @@ class OptionsTab(BaseTab):
         initial_corner_radius: int = 24,
         initial_short_kamas: bool = False,
         initial_fold_anchor_bottom: bool = False,
+        initial_market_days: int = 28,
+        initial_market_rate: int = 5,
         parent: QWidget | None = None,
     ):
         super().__init__(parent)
@@ -242,8 +245,17 @@ class OptionsTab(BaseTab):
         self._populate_data_card(self._data_card.body_layout())
         root.addWidget(self._data_card)
 
+        # ── Carte Gameplay ───────────────────────────────────────────────
+        self._gameplay_card = CollapsibleCard("Gameplay", collapsed=True, parent=self)
+        self._populate_gameplay_card(
+            self._gameplay_card.body_layout(),
+            initial_market_days,
+            initial_market_rate,
+        )
+        root.addWidget(self._gameplay_card)
+
         # Accordéon : ouverture d'une carte replie les autres
-        self._all_cards: list[CollapsibleCard] = [self._display_card, self._data_card]
+        self._all_cards: list[CollapsibleCard] = [self._display_card, self._data_card, self._gameplay_card]
         for card in self._all_cards:
             card.expanded.connect(lambda c=card: self._on_card_expanded(c))
 
@@ -644,6 +656,90 @@ class OptionsTab(BaseTab):
         reset_btn.clicked.connect(self.reset_requested)
         lay.addWidget(reset_btn)
 
+    # ── Contenu : carte Gameplay ──────────────────────────────────────────
+
+    def _populate_gameplay_card(self, lay: QVBoxLayout, initial_market_days: int = 28, initial_market_rate: int = 5):
+        _combo_qss = f"""
+            QComboBox {{
+                background: #0f1116;
+                border: 1px solid {BORDER};
+                border-radius: 8px;
+                padding: 5px 10px;
+                color: {TEXT};
+                min-height: 22px;
+            }}
+            QComboBox:hover {{ border-color: {TEAL}; }}
+            QComboBox::drop-down {{ border: none; width: 20px; }}
+            QComboBox QAbstractItemView {{
+                background: {BG_PANEL};
+                border: 1px solid {BORDER};
+                color: {TEXT};
+                selection-background-color: rgba(30,180,176,0.18);
+            }}
+        """
+
+        lay.addWidget(_section_label("MARCHÉ"))
+        lay.addWidget(_sep_line())
+
+        # Durée de publication par défaut
+        days_row = QHBoxLayout()
+        days_row.setSpacing(8)
+        days_lbl = QLabel("Durée défaut")
+        days_lbl.setMinimumWidth(90)
+        days_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        self._market_days_combo = QComboBox()
+        for days, label in [(7, "7 jours"), (14, "14 jours"), (28, "28 jours")]:
+            self._market_days_combo.addItem(label, days)
+        for i in range(self._market_days_combo.count()):
+            if self._market_days_combo.itemData(i) == initial_market_days:
+                self._market_days_combo.setCurrentIndex(i)
+                break
+        self._market_days_combo.setStyleSheet(_combo_qss)
+        self._market_days_combo.setToolTip(
+            "Durée de publication utilisée pour estimer le prix\n"
+            "des objets à partir de la taxe de dépôt marché.\n"
+            "Modifiable par transaction dans l'historique."
+        )
+        days_row.addWidget(days_lbl)
+        days_row.addWidget(self._market_days_combo, 1)
+        lay.addLayout(days_row)
+
+        # Taux territoire
+        rate_row = QHBoxLayout()
+        rate_row.setSpacing(8)
+        rate_lbl = QLabel("Taux territoire")
+        rate_lbl.setMinimumWidth(90)
+        rate_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 11px;")
+        self._market_rate_combo = QComboBox()
+        for rate, label in [(5, "Standard  (5%)"), (10, "Astrub  (10%)")]:
+            self._market_rate_combo.addItem(label, rate)
+        for i in range(self._market_rate_combo.count()):
+            if self._market_rate_combo.itemData(i) == initial_market_rate:
+                self._market_rate_combo.setCurrentIndex(i)
+                break
+        self._market_rate_combo.setStyleSheet(_combo_qss)
+        self._market_rate_combo.setToolTip(
+            "Taux de taxe du territoire de vente.\n"
+            "Standard : 5%  |  Astrub : 10%\n"
+            "Utilisé pour calculer le prix estimé depuis la taxe payée."
+        )
+        rate_row.addWidget(rate_lbl)
+        rate_row.addWidget(self._market_rate_combo, 1)
+        lay.addLayout(rate_row)
+
+        # Note explicative
+        note = QLabel(
+            "Prix estimé = taxe ÷ (taux × durée/28j)\n"
+            "Ex : taxe 125₭, 7j, 5% → 7 500₭/unité"
+        )
+        note.setStyleSheet(f"color: {TEXT_DIM}; font-size: 9px; padding-top: 4px;")
+        note.setWordWrap(True)
+        lay.addWidget(note)
+
+        # Signaux
+        self._market_days_combo.currentIndexChanged.connect(self._on_market_settings_change)
+        self._market_rate_combo.currentIndexChanged.connect(self._on_market_settings_change)
+
     # ── API publique ──────────────────────────────────────────────────────
 
     def set_session_time(self, elapsed_seconds: int, status: str):
@@ -752,3 +848,10 @@ class OptionsTab(BaseTab):
         if self._building:
             return
         self.fold_anchor_changed.emit(bool(state))
+
+    def _on_market_settings_change(self, _index: int = 0):
+        if self._building:
+            return
+        days = int(self._market_days_combo.currentData() or 28)
+        rate = int(self._market_rate_combo.currentData() or 5)
+        self.market_settings_changed.emit(days, rate)

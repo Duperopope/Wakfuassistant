@@ -25,7 +25,7 @@ _LEGACY_CHAT_LOG    = _PERM_DIR / "chat_events.log"
 _LEGACY_JOURNAL_LOG = _PERM_DIR / "journal_events.log"
 
 # Incrémenter pour forcer un rebuild au prochain démarrage
-_JOURNAL_VERSION = 5
+_JOURNAL_VERSION = 6
 
 _APPDATA_WAKFU_DIR     = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
 _RAW_WAKFU_CHAT_LOG    = _APPDATA_WAKFU_DIR / "wakfu_chat.log"
@@ -86,6 +86,11 @@ _GAIN_RE = re.compile(
 )
 _LOSS_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez perdu\s+([0-9\s\u00a0\u202f\xa0.,]+)\s+kamas?\b",
+    re.IGNORECASE,
+)
+# Dépôt marché : "Vous avez perdu Nx [Item Name] ."
+_ITEM_LOSS_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez perdu\s+(\d+)x\s+(.+?)\s*\.",
     re.IGNORECASE,
 )
 _SPELL_RE = re.compile(
@@ -243,6 +248,17 @@ def _parse_event(raw_line: str) -> tuple[str, dict] | None:
             "real_time": f"{hh:02d}:{mm:02d}",
         }
 
+    m = _ITEM_LOSS_RE.search(raw_line)
+    if m:
+        qty_str = m.group(1)
+        item = m.group(2).strip().rstrip(".")
+        try:
+            qty = int(qty_str)
+        except ValueError:
+            qty = 1
+        if qty > 0 and item:
+            return "item_lost", {"qty": qty, "item": item}
+
     # ── Marché ────────────────────────────────────────────────────────────────
     m = _MARKET_SOLD_RE.search(raw_line)
     if m:
@@ -328,6 +344,10 @@ def _make_fingerprint(event_type: str, data: dict, client_clock: str) -> str:
         return f"{client_clock}|death|{data['character'].lower()}"
     if event_type == "chat":
         return f"{client_clock}|chat|{data['channel'].lower()}|{data['author'].lower()}|{data['message'][:40].lower()}"
+    if event_type == "item_lost":
+        return f"{client_clock}|item_lost|{data['item'][:40].lower()}|{data.get('qty', 1)}"
+    if event_type == "market_deposit":
+        return f"{client_clock}|market_deposit|{data['item'][:40].lower()}|{data.get('qty', 1)}|{data.get('tax', 0)}"
     return f"{client_clock}|{event_type}|{json.dumps(data, ensure_ascii=False)[:80]}"
 
 
@@ -380,6 +400,13 @@ def _format_log_line(entry: dict) -> str:
         detail = f"{data.get('character', '?')} mort"
     elif etype == "chat":
         detail = f"[{data.get('channel', '?')}] {data.get('author', '?')} : {data.get('message', '')[:60]}"
+    elif etype == "item_lost":
+        detail = f"{data.get('qty', '?')}x {data.get('item', '?')}"
+    elif etype == "market_deposit":
+        item = data.get("item", "?")
+        qty  = data.get("qty", 1)
+        tax  = data.get("tax", 0)
+        detail = f"{qty}x {item}  taxe -{tax:,} ₭".replace(",", "\u202f")
     else:
         detail = json.dumps(data, ensure_ascii=False)[:80]
 
@@ -657,6 +684,38 @@ def _date_from_name(name: str) -> date | None:
 _KAMAS_TYPES = frozenset({"kamas_gain", "kamas_loss"})
 
 
+def _market_detect(event_type: str, event_data: dict, client_clock: str,
+                   pending: list) -> tuple[str | None, dict | None, bool]:
+    """
+    Détecte les dépôts marché : item_lost suivi de kamas_loss à la même seconde.
+    pending = [dict | None]  (boîte mutable pour l'état entre appels)
+    Retourne (event_type, event_data, should_emit).
+    """
+    sec = client_clock[:8]  # HH:MM:SS
+
+    if event_type == "item_lost":
+        pending[0] = {"item": event_data["item"], "qty": event_data["qty"], "sec": sec}
+        return None, None, False  # ne pas émettre item_lost seul
+
+    if event_type == "kamas_loss" and pending[0] is not None:
+        p = pending[0]
+        if sec == p["sec"]:
+            # Taxe de dépôt marché confirmée → émettre market_deposit (analytics)
+            # Le kamas_loss original est conservé pour le solde (should_emit=True)
+            pending[0] = None
+            return "market_deposit", {
+                "item": p["item"],
+                "qty":  p["qty"],
+                "tax":  event_data["amount"],
+            }, True  # will emit market_deposit; caller also emits kamas_loss
+        else:
+            pending[0] = None
+    elif pending[0] is not None:
+        pending[0] = None
+
+    return event_type, event_data, True
+
+
 def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
                       archive_date: date | None = None,
                       skip_kamas: bool = False) -> list[dict]:
@@ -685,6 +744,7 @@ def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
 
     last_client_secs: int | None = None
     entries: list[dict] = []
+    _pending_item: list = [None]
 
     for _, raw_line in _iter_new_lines(path, 0):
         # Les fichiers projet-legacy ont le préfixe [timestamp][source] — les ignorer ici
@@ -717,11 +777,37 @@ def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
 
         evt = _parse_event(raw_line)
         if evt is None:
+            _pending_item[0] = None  # flush pending on parse failure
             continue
         event_type, event_data = evt
 
         if skip_kamas and event_type in _KAMAS_TYPES:
+            _pending_item[0] = None
             continue
+
+        # Market deposit detection
+        if event_type == "item_lost":
+            md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _pending_item)
+            continue  # never emit item_lost standalone
+
+        if event_type == "kamas_loss" and _pending_item[0] is not None:
+            md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _pending_item)
+            if md_type == "market_deposit":
+                # Emit market_deposit for analytics
+                fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
+                if fp_md not in fps_set:
+                    fps_set.add(fp_md)
+                    fps_list.append(fp_md)
+                    entries.append({
+                        "ts_local":    ts_local_str,
+                        "ts_client":   client_clock,
+                        "source_file": path.name,
+                        "type":        "market_deposit",
+                        "data":        md_data,
+                    })
+                # Then fall through to also emit kamas_loss for balance
+        elif _pending_item[0] is not None:
+            _pending_item[0] = None
 
         fp = _make_fingerprint(event_type, event_data, client_clock)
         if fp in fps_set:
@@ -890,6 +976,7 @@ def rebuild_all_events() -> dict[str, int]:
     # ── 4. Lecture live depuis AppData (depuis position 0) ───────────────────
     sources_list = _iter_raw_sources()
     all_sources_state: dict = {}
+    _rebuild_pending: list = [None]
 
     for source in sources_list:
         source_key = str(source)
@@ -902,6 +989,7 @@ def rebuild_all_events() -> dict[str, int]:
         crossings, anchor = _count_crossings_and_anchor(source, 0)
         current_date: date = anchor if anchor is not None else (ref_mtime - timedelta(days=crossings)).date()
         last_client_secs: int | None = None
+        _rebuild_pending[0] = None
 
         for _, raw_line in _iter_new_lines(source, 0):
             m_ts = _CLIENT_TIME_RE.search(raw_line)
@@ -929,14 +1017,37 @@ def rebuild_all_events() -> dict[str, int]:
 
             evt = _parse_event(raw_line)
             if evt is None:
+                _rebuild_pending[0] = None
                 continue
             event_type, event_data = evt
 
-            # Les fichiers rotatifs (wakfu.log.1, .log.2, etc.) couvrent plusieurs
-            # personnages avec dates potentiellement fausses — on y ignore les kamas.
-            # Le fichier principal (wakfu_chat.log, wakfu.log) = session courante = ok.
+            # Les fichiers rotatifs : on ignore les kamas (multi-perso, dates fausses)
             if event_type in _KAMAS_TYPES and re.search(r'\.\d+$', source.name):
+                _rebuild_pending[0] = None
                 continue
+
+            # Market deposit detection
+            if event_type == "item_lost":
+                _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                continue
+
+            if event_type == "kamas_loss" and _rebuild_pending[0] is not None:
+                md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                if md_type == "market_deposit":
+                    fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
+                    if fp_md not in fps_set:
+                        fps_set.add(fp_md)
+                        fps_list.append(fp_md)
+                        all_entries.append({
+                            "ts_local":      ts_local_str,
+                            "ts_client":     client_clock,
+                            "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                            "source_file":   source.name,
+                            "type":          "market_deposit",
+                            "data":          md_data,
+                        })
+            elif _rebuild_pending[0] is not None:
+                _rebuild_pending[0] = None
 
             fp = _make_fingerprint(event_type, event_data, client_clock)
             if fp in fps_set:
@@ -1049,6 +1160,7 @@ def sync_permanent_journal() -> dict[str, int]:
 
     offset_ms = _get_atomic_offset_ms(state)
     count_all = 0
+    _sync_pending: list = [None]
 
     try:
         with (_ALL_EVENTS_LOG.open("a", encoding="utf-8") as jfh,
@@ -1077,6 +1189,7 @@ def sync_permanent_journal() -> dict[str, int]:
                     current_date = anchor if anchor is not None else (ref_mtime - timedelta(days=crossings)).date()
                     last_client_secs = None
 
+                _sync_pending[0] = None
                 for _, raw_line in _iter_new_lines(source, start_pos):
                     m_ts = _CLIENT_TIME_RE.search(raw_line)
                     if not m_ts:
@@ -1103,8 +1216,35 @@ def sync_permanent_journal() -> dict[str, int]:
 
                     evt = _parse_event(raw_line)
                     if evt is None:
+                        _sync_pending[0] = None
                         continue
                     event_type, event_data = evt
+
+                    # Market deposit detection
+                    if event_type == "item_lost":
+                        _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        continue
+
+                    if event_type == "kamas_loss" and _sync_pending[0] is not None:
+                        md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        if md_type == "market_deposit":
+                            fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
+                            if fp_md not in all_fps_set:
+                                entry_md: dict = {
+                                    "ts_local":      ts_local_str,
+                                    "ts_client":     client_clock,
+                                    "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                                    "source_file":   source.name,
+                                    "type":          "market_deposit",
+                                    "data":          md_data,
+                                }
+                                jfh.write(json.dumps(entry_md, ensure_ascii=False) + "\n")
+                                lfh.write(_format_log_line(entry_md) + "\n")
+                                count_all += 1
+                                all_fps_set.add(fp_md)
+                                all_fps_list.append(fp_md)
+                    elif _sync_pending[0] is not None:
+                        _sync_pending[0] = None
 
                     fp = _make_fingerprint(event_type, event_data, client_clock)
                     if fp in all_fps_set:

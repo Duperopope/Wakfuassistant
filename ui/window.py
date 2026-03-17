@@ -18,7 +18,7 @@ from core.kamas_history import (
     replay_kamas_delta, now_iso, now_ms_iso, write_kamas_correction,
     get_last_correction_ts, get_permanent_log_start_ts, get_active_permanent_log_size,
 )
-from core.permanent_journal import sync_permanent_kamas_journal
+from core.permanent_journal import sync_permanent_journal, query_character_info
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.options import OptionsTab
@@ -120,19 +120,125 @@ _DISCONNECTED_MARKERS = (
     "connexion avec le serveur perdue",
 )
 _SPELL_CLASS_SIGNATURES = {
+    # ── Confirmés par combats réels (17/03/2026) ───────────────────
+    "feca": (
+        "fecalistofedes", "fécalistofedes",
+    ),
+    "osamodas": (
+        "forme draconique",
+        "tempete de sable", "tempête de sable",
+        "pesanteur",
+    ),
+    "enutrof": (
+        "dette",
+        "excavation",
+        "filouterie",
+        "meteore", "météore",
+        "pelle du jugement",
+        "purge",
+    ),
     "sram": (
         "kleptosram",
         "fourberie",
+        "arnaque",
+        "invisibilite", "invisibilité",
+        "saignee mortelle", "saignée mortelle",
+        "mise a mort", "mise à mort",
+        "premier sang",
         "attaque perfide",
         "assassinat",
-        "mise a mort",
-        "mise à mort",
-        "saignee mortelle",
-        "saignée mortelle",
-        "premier sang",
-        "arnaque",
-        "invisibilite",
-        "invisibilité",
+        "piege de teleportation", "piège de téléportation",
+        "ouvrir les veines",
+        "galopade",
+    ),
+    "xelor": (
+        "aiguille",
+        "sablier",
+        "ralentissement",
+        "desynchronisation", "désynchronisation",
+        "contre la montre",
+    ),
+    "ecaflip": (
+        "craps",
+        "ecaflip",          # Les Bébétards d'Ecaflip, etc.
+        "quitte ou double",
+        "la roue de la fortune",
+        "bond du felin", "bond du félin",
+        "la croquette",
+        "hermite poilu",
+        "lune poilue",
+        "chacrifice",
+        "relance",
+    ),
+    "eniripsa": (
+        "anatomie",
+        "contre-nature",
+        "cure alternative",
+        "explo-soin",
+        "mot soignant",
+        "vivification",
+    ),
+    "iop": (
+        "fulgur",
+        "jabs",
+        "roknocerok",
+        "ebranler", "ébranler",
+        "epee celeste", "épée céleste",
+    ),
+    "cra": (
+        "fleche", "flèche",     # Flèche chercheuse / d'immolation / cinglante…
+        "balise de destruction",
+        "balise d'alignement",
+        "pluie de fleches", "pluie de flèches",
+    ),
+    "sadida": (
+        "graine",
+        "vaporiser",
+        "poignee de lianes", "poignée de lianes",
+        "insolence",
+    ),
+    "sacrier": (
+        "aversion",
+        "furie sanguinaire",
+        "pied rocheux",
+        "poing tatoue agrippant", "poing tatoué agrippant",
+        "sang pour sang",
+        "chatiment ose", "châtiment osé",
+    ),
+    "pandawa": (
+        "chamrak",
+        "nuage laiteux",
+        "tonneau",
+        "triple karma leet",
+        "tournee generale", "tournée générale",
+        "souffle enflamme", "souffle enflammé",
+    ),
+    "rogue": (
+        "dynamite",
+        "mitraille",
+        "bombe",
+    ),
+    "masqueraider": (
+        "masque de psychopathe",
+        "felure", "félure",
+        "armature",
+        "coup de pied fouette", "coup de pied fouetté",
+    ),
+    "ouginak": (
+        "chienchien",
+        "emeute", "émeute",
+        "ougigarou",
+        "bastonnade",
+        "croc-en-jambe",
+    ),
+    "foggernaut": (
+        "steamerator",
+        "tir de destruction",
+        "tir d'alignement",
+        "tir de distance",
+        "tourelle",
+        "crache flammes",
+        "pietinement", "piétinement",
     ),
     "elio": (
         "portail",
@@ -140,24 +246,13 @@ _SPELL_CLASS_SIGNATURES = {
         "cataclysme",
         "exaltation",
         "affliction",
-        "barriere",
-        "barrière",
+        "barriere", "barrière",
     ),
-    "xelor": (
-        "aiguille",
-        "sablier",
-        "ralentissement",
-        "desynchronisation",
-        "désynchronisation",
-        "contre la montre",
-    ),
-    "cra": (
-        "fleche perçante",
-        "flèche perçante",
-        "fleche explosive",
-        "flèche explosive",
-        "fleche tempete",
-        "flèche tempête",
+    "huppermage": (
+        "disque luminescent",
+        "flux d'energie", "flux d'énergie",
+        "eboulement", "éboulement",
+        "coeur de lumiere", "cœur de lumière",
     ),
 }
 
@@ -165,6 +260,8 @@ _SPELL_CLASS_SIGNATURES = {
 def _normalize_character_name(value: str) -> str:
     name = str(value or "").strip()
     name = re.sub(r"^fightId=\d+\s+", "", name, flags=re.IGNORECASE)
+    # Normalise les apostrophes typographiques (titre Windows) vers apostrophe droite (logs)
+    name = name.replace("\u2019", "'").replace("\u02bc", "'")
     return name.strip()
 
 # Bitmask directions resize
@@ -225,6 +322,8 @@ class OverlayWindow(QWidget):
         self._palette_name = self._settings.value("ui_palette", DEFAULT_PALETTE, type=str)
         self._short_kamas: bool = bool(self._settings.value("short_kamas", False, type=bool))
         self._fold_anchor_bottom: bool = bool(self._settings.value("fold_anchor_bottom", False, type=bool))
+        self._market_default_days: int = 28
+        self._market_territory_rate: int = 5
         saved_ct = self._settings.value("ct_opacity", 0.60, type=float)
         self._ct_opacity: float = max(0.05, min(0.85, float(saved_ct)))
         self._palette = get_palette(self._palette_name)
@@ -362,7 +461,9 @@ class OverlayWindow(QWidget):
                     self._corner_radius,
                     self._short_kamas,
                     self._fold_anchor_bottom,
-                    self,
+                    initial_market_days=self._market_default_days,
+                    initial_market_rate=self._market_territory_rate,
+                    parent=self,
                 )
                 w.opacity_changed.connect(self.set_overlay_opacity)
                 w.font_changed.connect(self.set_overlay_font_family)
@@ -374,6 +475,7 @@ class OverlayWindow(QWidget):
                 w.short_numbers_changed.connect(self._on_short_kamas_changed)
                 w.fold_anchor_changed.connect(self._on_fold_anchor_changed)
                 w.ct_opacity_changed.connect(self._on_ct_opacity_changed)
+                w.market_settings_changed.connect(self._on_market_settings_changed)
                 w.set_kamas(self._current_kamas)
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
@@ -678,7 +780,7 @@ class OverlayWindow(QWidget):
 
     def _tick(self):
         self._elapsed_seconds = self._t0.secsTo(QDateTime.currentDateTime())
-        sync_permanent_kamas_journal()
+        sync_permanent_journal()
         self._sync_character_info_from_interface_feed()
         self._sync_character_info_from_journal()
         self._refresh_title_info()
@@ -918,9 +1020,11 @@ class OverlayWindow(QWidget):
             self._refresh_title_info()
 
     def _load_kamas_config_values(self):
-        sync_permanent_kamas_journal()
+        sync_permanent_journal()
         data = self._read_config_json()
         self._onboarding_done = bool(data.get("onboarding_done", False))
+        self._market_default_days = int(data.get("market_default_days", 28) or 28)
+        self._market_territory_rate = int(data.get("market_territory_rate", 5) or 5)
 
         self._base_kamas = int(data.get("base_kamas", 0) or 0)
 
@@ -1259,11 +1363,21 @@ class OverlayWindow(QWidget):
         state = self._parse_log_state(blob)
         changed = False
 
-        breed_id = state.get("breed_id")
-        class_key = state.get("class_key")
+        breed_id      = state.get("breed_id")
+        breed_char    = state.get("character_name")   # perso auquel appartient ce breed_id
+        class_key     = state.get("class_key")
+
+        # N'utiliser breed_id que s'il appartient explicitement au personnage actif.
+        # Un log peut contenir des _FL_ d'autres joueurs dans le même combat.
+        cur = _normalize_character_name(self._current_character_name or "").lower()
+        breed_belongs = (
+            breed_char is not None
+            and _normalize_character_name(str(breed_char)).lower() == cur
+        )
+
         if not class_key and self._current_character_name:
             class_key = self._read_known_character_classes().get(self._current_character_name)
-        if not class_key and breed_id is not None:
+        if not class_key and breed_id is not None and breed_belongs:
             class_key = _BREED_TO_CLASS.get(int(breed_id))
 
         if breed_id is None and not class_key:
@@ -1281,7 +1395,8 @@ class OverlayWindow(QWidget):
                 if self._current_character_name:
                     self._write_known_character_class(self._current_character_name, class_key)
                 changed = True
-            self._titlebar.set_class_icon(class_key)
+            if self._personnage_tab is not None:
+                self._personnage_tab.set_class_icon(class_key)
         if changed:
             self._refresh_title_info()
 
@@ -1502,15 +1617,40 @@ class OverlayWindow(QWidget):
         self._last_xp_gain = None
 
         if new_state == GameState.IN_GAME and name:
-            # Charger la classe mise en cache pour ce personnage si elle est connue
+            _dbg = [f"_on_character_changed name={name!r} repr={[hex(ord(c)) for c in name[:8]]}"]
+            # 1. Cache config.json
             cached_class = self._read_known_character_classes().get(name)
+            _dbg.append(f"cache={cached_class!r}")
             if cached_class:
                 self._last_detected_class = cached_class
+            else:
+                # 2. Journal permanent : breed_id ou sort déjà observé
+                sync_permanent_journal()
+                perm = query_character_info(name)
+                _dbg.append(f"perm={perm}")
+                resolved = None
+                if perm.get("breed_id") is not None:
+                    resolved = _BREED_TO_CLASS.get(int(perm["breed_id"]))
+                if not resolved and perm.get("last_spell"):
+                    resolved = OverlayWindow._infer_class_from_spell(perm["last_spell"])
+                _dbg.append(f"resolved={resolved!r}")
+                if resolved:
+                    self._last_detected_class = resolved
+                    self._write_known_character_class(name, resolved)
+                else:
+                    self._log_read_pos = 0
+            try:
+                (_PROJECT_ROOT / "logs" / "debug_char.txt").write_text(
+                    "\n".join(_dbg), encoding="utf-8"
+                )
+            except Exception:
+                pass
 
         if self._personnage_tab is not None:
             self._personnage_tab.set_game_state(new_state)
-            # Effacer l'icône si aucune classe connue pour ce perso
-            if not self._last_detected_class:
+            if self._last_detected_class:
+                self._personnage_tab.set_class_icon(self._last_detected_class)
+            else:
                 self._personnage_tab.clear_class_icon()
 
         self._refresh_title_info()
@@ -1686,6 +1826,14 @@ class OverlayWindow(QWidget):
         self._settings.setValue("ct_opacity", self._ct_opacity)
         if self._click_through:
             self.setWindowOpacity(self._ct_opacity)
+
+    def _on_market_settings_changed(self, days: int, rate: int):
+        self._market_default_days = days
+        self._market_territory_rate = rate
+        data = self._read_config_json()
+        data["market_default_days"] = days
+        data["market_territory_rate"] = rate
+        self._write_config_json(data)
 
     def set_click_through(self, enabled: bool):
         self._click_through = bool(enabled)
