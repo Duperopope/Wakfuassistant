@@ -6,6 +6,23 @@ __pycache__/
 # Environnement virtuel
 .venv/
 
+# === LOGS BRUTS — jamais versionnes ===
+logs/
+!logs/realtime/
+
+# === REALTIME — uniquement snapshots structures ===
+logs/realtime/*
+!logs/realtime/*.json
+!logs/realtime/*.jsonl
+
+# Bases de donnees binaires (SQLite) — locales uniquement
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
 # Backups
 *.bak
 *.bak-*
