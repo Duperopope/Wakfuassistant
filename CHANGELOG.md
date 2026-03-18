@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-03-18 (nuit) : Premiere session autonome de l'agent - Infrastructure corrigee et operationnelle.
+
+Actions effectuees :
+- Corrige health_check.py : caracteres Unicode (coches) remplaces par OK/ERREUR pour compatibilite Windows cp1252
+- Corrige tests calibration_history et game_database : les modules n'ont pas de classes, utilisent des fonctions directes
+- Corrige test kamas_history : expression reguliere pour format de date sans T
+- Corrige health_check.py : chemin config.json pointe vers data/config.json
+- Resultat : 7 tests passent, health_check passe
+
 2026-03-18 : Mise en place de l'infrastructure de tests automatisés (pytest), script de vérification health_check.py et création des fichiers de tests unitaires pour les modules principaux. Première exécution de health_check.
 - [2026-03-18 22:34:47] [INFO] OpenClaw diagnostic follow-up: fallback corrige github-copilot/claude-opus-4-6 -> github-copilot/gpt-4.1 (agents.defaults.model.fallbacks). Gateway redemarre.
 - [2026-03-18 22:34:47] [INFO] Workaround bug #17385: openclaw agent --agent main --message 'Dis bonjour' --local echoue avec session lock timeout sur tous les candidats; appel API direct gateway via curl sur /api/v1/agent retourne Not Found.
