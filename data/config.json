@@ -47,7 +47,7 @@
   },
   "perm_log_offset": 5214611,
   "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
-  "journal_read_pos": 770528,
+  "journal_read_pos": 953426,
   "market_default_days": 28,
   "market_territory_rate": 5,
   "known_character_genders": {
@@ -65,7 +65,7 @@
       "hp_truth_ts": "2026-03-17 18:23:45.334",
       "level": 1,
       "xp_gained": 694933543,
-      "xp_to_next": 181565710,
+      "xp_to_next": 181560518,
       "xp_truth_ts": "2026-03-17 18:27:53.936"
     },
     "Zadyk Le Magnifique": {
