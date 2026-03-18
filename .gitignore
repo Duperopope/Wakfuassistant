@@ -7,13 +7,18 @@ __pycache__/
 .venv/
 
 # === LOGS BRUTS — jamais versionnes ===
-logs/
+logs/*
 !logs/realtime/
 
 # === REALTIME — uniquement snapshots structures ===
 logs/realtime/*
 !logs/realtime/*.json
 !logs/realtime/*.jsonl
+
+# Exception utile pour partage de contexte IA
+!logs/permanent/
+logs/permanent/*
+!logs/permanent/all_events.jsonl
 
 # Bases de donnees binaires (SQLite) — locales uniquement
 *.db
