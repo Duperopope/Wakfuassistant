@@ -393,7 +393,6 @@ class OverlayWindow(QWidget):
         self._interface_feed_path: Path | None = None
         self._options_tab:    "OptionsTab | None"        = None
         self._personnage_tab: "PersonnageTab | None"     = None
-        self._library_panel:   "WidgetLibraryPanel | None" = None
         self._metiers_tab:    "MetiersTab | None"         = None
         self._combat_tab:     "CombatTab | None"          = None
         self._inventaire_tab: "InventaireTab | None"      = None
@@ -428,9 +427,6 @@ class OverlayWindow(QWidget):
         self._start_timer()
         self._check_onboarding()
         QApplication.instance().installEventFilter(self)
-        # Restaure les positions éditées (après que show() ait fixé les géométries)
-        from ui.drag_editor import EditModeManager
-        QTimer.singleShot(150, EditModeManager.instance().apply_saved_positions)
         # Charge les données historiques (serveur + métiers) depuis le log permanent
         QTimer.singleShot(300, self._load_journal_history)
 
@@ -498,20 +494,6 @@ class OverlayWindow(QWidget):
         self._titlebar.set_class_icon(self._read_character_class())
         self._titlebar.set_palette(self._palette)
         root.addWidget(self._titlebar)
-
-        # ── Bannière mode édition (F11) ──────────────────────────────────
-        from ui.drag_editor import EditModeManager
-        self._edit_banner = QLabel("  ✥  Mode Édition  —  F11 pour quitter  ")
-        self._edit_banner.setAlignment(Qt.AlignCenter)
-        self._edit_banner.setFixedHeight(22)
-        self._edit_banner.setStyleSheet(
-            "QLabel { background: rgba(80,180,255,0.15); color: #50B4FF;"
-            " font-size: 11px; font-weight: bold;"
-            " border-bottom: 1px solid rgba(80,180,255,0.4); }"
-        )
-        self._edit_banner.setVisible(False)
-        root.addWidget(self._edit_banner)
-        EditModeManager.instance().edit_mode_changed.connect(self._edit_banner.setVisible)
 
         self._tabbar = TabBar(self)
         self._tabbar.set_palette(self._palette)
@@ -2200,70 +2182,6 @@ class OverlayWindow(QWidget):
             self._settings.setValue("default_relative_size_rw", float(rw))
             self._settings.setValue("default_relative_size_rh", float(rh))
 
-    # ── Bibliothèque de widgets (F1 en mode Édition) ──────────────────────────
-
-    def _toggle_library_panel(self):
-        if self._library_panel is None:
-            self._create_library_panel()
-        if self._library_panel.isVisible():
-            self._library_panel.hide()
-        else:
-            self._position_library_panel()
-            self._library_panel.show()
-            self._library_panel.raise_()
-            from ui.drag_editor import EditModeManager
-            self._library_panel.refresh_states(EditModeManager.instance()._sections)
-
-    def _hide_library_panel(self):
-        if self._library_panel is not None:
-            self._library_panel.hide()
-
-    def _create_library_panel(self):
-        from ui.widget_library import WidgetLibraryPanel
-        panel = WidgetLibraryPanel(parent=self)
-        panel.xp_style_changed.connect(self._on_library_xp_style)
-        panel.section_toggle.connect(self._on_library_section_toggle)
-        self._library_panel = panel
-
-    def _position_library_panel(self):
-        if self._library_panel is None:
-            return
-        pw = self._library_panel.width()
-        ph = self.height() - self._titlebar.height() - 10
-        self._library_panel.setFixedHeight(max(200, ph))
-        self._library_panel.move(self.width() - pw - 8, self._titlebar.height() + 5)
-
-    def _on_library_xp_style(self, idx: int):
-        if self._personnage_tab is not None:
-            self._personnage_tab.set_xp_style(idx)
-
-    def _on_library_section_toggle(self, section_id: str, visible: bool):
-        from ui.drag_editor import EditModeManager
-        mgr = EditModeManager.instance()
-        for s in mgr._sections:
-            if s._id == section_id:
-                if visible:
-                    s.show()
-                else:
-                    s.hide()
-                break
-        mgr.save_visibility(section_id, visible)
-        # Quand on active le ring de niveau, masquer la barre XP (et vice-versa)
-        if section_id == "p.level_ring" and visible:
-            for s in mgr._sections:
-                if s._id == "p.xpbar":
-                    s.hide()
-                    if self._library_panel:
-                        self._library_panel.refresh_states(mgr._sections)
-                    break
-        elif section_id == "p.xpbar" and visible:
-            for s in mgr._sections:
-                if s._id == "p.level_ring":
-                    s.hide()
-                    if self._library_panel:
-                        self._library_panel.refresh_states(mgr._sections)
-                    break
-
     def set_overlay_opacity(self, opacity: float):
         self._opacity = max(0.35, min(1.0, float(opacity)))
         if not self._click_through:
@@ -2569,20 +2487,6 @@ class OverlayWindow(QWidget):
                 self._resize_dir = 0
                 return True
 
-        elif t == QEvent.KeyPress and event.key() == Qt.Key_F11:
-            from ui.drag_editor import EditModeManager
-            mgr = EditModeManager.instance()
-            mgr.toggle()
-            if not mgr.active:
-                self._hide_library_panel()
-            return True
-
-        elif t == QEvent.KeyPress and event.key() == Qt.Key_F1:
-            from ui.drag_editor import EditModeManager
-            if EditModeManager.instance().active:
-                self._toggle_library_panel()
-                return True
-
         return super().eventFilter(obj, event)
 
     def mousePressEvent(self, event):
@@ -2671,8 +2575,6 @@ class OverlayWindow(QWidget):
         super().resizeEvent(event)
         self._apply_rounded_mask()
         self._position_click_unlock_button()
-        from ui.drag_editor import EditModeManager
-        EditModeManager.instance().resize_all()
 
     def moveEvent(self, event):
         super().moveEvent(event)
