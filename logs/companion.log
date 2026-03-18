@@ -1,0 +1,16 @@
+2026-03-16 03:25:26,129 [INFO] wakfu_companion | ============================================================
+2026-03-16 03:25:26,129 [INFO] wakfu_companion | Wakfu Companion v4.0.0 — Overlay Edition
+2026-03-16 03:25:26,129 [INFO] wakfu_companion | ============================================================
+2026-03-16 03:25:26,151 [INFO] wakfu_companion | Database initialisee: H:\Code\Wakfuassistant\data\wakfu_tracker.db
+2026-03-16 03:25:27,501 [INFO] wakfu_companion | ItemDB CDN: version=1.91.1.53 chargee
+2026-03-16 03:25:27,522 [INFO] wakfu_companion | ItemDB: 25859 noms indexes
+2026-03-16 03:29:10,611 [INFO] wakfu_companion | ============================================================
+2026-03-16 03:29:10,612 [INFO] wakfu_companion | Wakfu Companion v4.0.0 — Overlay Edition
+2026-03-16 03:29:10,612 [INFO] wakfu_companion | ============================================================
+2026-03-16 03:29:10,618 [INFO] wakfu_companion | Database initialisee: H:\Code\Wakfuassistant\data\wakfu_tracker.db
+2026-03-16 03:29:11,649 [INFO] wakfu_companion | ItemDB CDN: version=1.91.1.53 chargee
+2026-03-16 03:29:11,671 [INFO] wakfu_companion | ItemDB: 25859 noms indexes
+2026-03-16 03:29:11,674 [INFO] wakfu_companion | Rattrapage du log existant...
+2026-03-16 03:29:11,687 [INFO] wakfu_companion | Rattrapage: 1212 lignes, 4 events
+2026-03-16 03:34:25,938 [INFO] wakfu_companion | Metier Trappeur: lvl=111 xp=0 target=0
+2026-03-16 03:54:00,386 [DEBUG] wakfu_companion | SSE client disconnected (GeneratorExit)

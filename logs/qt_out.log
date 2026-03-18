@@ -1,0 +1,9 @@
+2026-03-16 04:06:04,542 [INFO] wakfu: Config: {'character': "L'Immortel", 'server': 'Ogrest', 'account': 'Kairozadyk', 'base_kamas': 161403, 'manual_kamas_delta': 0, 'onboarding_done': False, 'character_level': 0, 'character_xp_current': 0, 'character_xp_total': 0, 'overlay_mode': True, 'overlay_opacity': 0.92, 'overlay_position': 'right', 'click_through': False}
+2026-03-16 04:06:04,544 [INFO] wakfu: Database ready: H:\Code\Wakfuassistant\data\wakfu_tracker.db
+2026-03-16 04:06:04,545 [INFO] wakfu: Session #5 started for 'L'Immortel'
+2026-03-16 04:06:04,545 [INFO] wakfu: LogWatcher started on C:\Users\Smedj\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log
+2026-03-16 04:06:04,546 [INFO] wakfu: LogWatcher: watching C:\Users\Smedj\AppData\Roaming\zaap\gamesLogs\wakfu\logs\wakfu.log
+2026-03-16 04:06:06,758 [DEBUG] wakfu: ItemDB: loaded items.json from CDN
+2026-03-16 04:06:07,162 [DEBUG] wakfu: ItemDB: loaded jobsItems.json from CDN
+2026-03-16 04:06:07,241 [DEBUG] wakfu: ItemDB: loaded resources.json from CDN
+2026-03-16 04:06:07,243 [INFO] wakfu: ItemDB loaded: 6692 items (version 1.91.1.53)

@@ -1,0 +1,117 @@
+{
+  "character": "L'Immortel",
+  "character_class": "xelor",
+  "server": "Ogrest",
+  "account": "Kairozadyk",
+  "base_kamas": 724018,
+  "manual_kamas_delta": 0,
+  "onboarding_done": true,
+  "last_session_end": "2026-03-18 10:28:59",
+  "character_level": 0,
+  "character_xp_current": 0,
+  "character_xp_total": 0,
+  "overlay_mode": true,
+  "overlay_opacity": 0.92,
+  "overlay_position": "right",
+  "click_through": false,
+  "known_character_classes": {
+    "L'Immortel": "sram",
+    "Madame Céleste": "elio",
+    "Zadykiop": "iop",
+    "Zadykcra": "cra",
+    "Zadykeca": "ecaflip",
+    "Zadykzobal": "masqueraider",
+    "Zadykouginak": "ouginak",
+    "Chienchien": "ouginak",
+    "Zadykeni": "eniripsa",
+    "Zadykfec": "feca",
+    "Zadyksadi": "sadida",
+    "La Goulue": "sadida",
+    "Zadykenu": "enutrof",
+    "Phorreur": "enutrof",
+    "Zadyksteam": "foggernaut",
+    "Zadykhupper": "huppermage",
+    "Zadykosam": "osamodas",
+    "Zadykpanda": "pandawa",
+    "Zadykroubla": "rogue",
+    "Tristepin": "rogue",
+    "Zadyksacri": "sacrier",
+    "L'Intemporel Kairos": "xelor",
+    "Double Sram": "sram",
+    "Zadyk Le Magnifique": "sacrier",
+    "Divinité Rolex": "xelor",
+    "Laronu": "sacrier",
+    "Passe Par La": "elio",
+    "Divinité Du Sacrifice": "xelor",
+    "Fée Aspirine": "sacrier"
+  },
+  "perm_log_offset": 5214611,
+  "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
+  "journal_read_pos": 764926,
+  "market_default_days": 28,
+  "market_territory_rate": 5,
+  "known_character_genders": {
+    "L'Immortel": "type_0",
+    "Zadyk Le Magnifique": "type_0"
+  },
+  "xp_calibration": {
+    "level": 181,
+    "xp_total": 1205379743,
+    "xp_gained": 694933543
+  },
+  "known_character_vitals": {
+    "L'Immortel": {
+      "hp_percent": 100,
+      "hp_truth_ts": "2026-03-17 18:23:45.334",
+      "level": 1,
+      "xp_gained": 694933543,
+      "xp_to_next": 181565710,
+      "xp_truth_ts": "2026-03-17 18:27:53.936"
+    },
+    "Zadyk Le Magnifique": {
+      "level": 181
+    },
+    "Divinité Rolex": {
+      "level": 181,
+      "xp_gained": 12111,
+      "xp_to_next": 106756052
+    },
+    "Madame Céleste": {
+      "level": 181
+    },
+    "Laronu": {
+      "level": 181
+    },
+    "Tatisri": {
+      "level": 181
+    },
+    "Boget": {
+      "level": 181
+    },
+    "Betrappe": {
+      "level": 181
+    },
+    "Enustart": {
+      "level": 181
+    },
+    "Passe Par La": {
+      "level": 181,
+      "xp_gained": 1338,
+      "xp_to_next": 1463
+    },
+    "L'Intemporel Kairos": {
+      "level": 181
+    },
+    "Divinité Du Sacrifice": {
+      "level": 181,
+      "xp_gained": 4652,
+      "xp_to_next": 83833097
+    },
+    "Tristepin": {
+      "level": 181
+    },
+    "Fée Aspirine": {
+      "level": 181
+    }
+  }
+}

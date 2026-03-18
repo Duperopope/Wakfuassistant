@@ -1,0 +1,7 @@
+{
+  "source": "heap-scan",
+  "hint": 576869,
+  "updated_at": 1773660678,
+  "status": "error",
+  "error": "java.lang.NullPointerException: Cannot invoke \"java.util.HashMap.values()\" because \"this.uxw\" is null"
+}
