@@ -56,7 +56,7 @@ _JOURNAL_LOG_PATHS = (
     Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs" / "wakfu_journal.log",
     Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs" / "wakfu.log",
 )
-_CLASS_SYNC_MS = 2500
+_CLASS_SYNC_MS = 500
 _LOG_BOOTSTRAP_CHUNK = 650_000
 _BREED_TO_CLASS = {
     1: "feca",
@@ -143,16 +143,20 @@ _XP_PROF_RE = re.compile(
     r"\[Information \(jeu\)\]\s+(.+?)\s*:\s*\+([0-9\s\u00a0\u202f.,]+)\s*points d'XP\.\s*Prochain niveau dans\s*:\s*([0-9\s\u00a0\u202f.,]+)",
     re.IGNORECASE,
 )
-_CONNECTED_MARKERS = (
+_SERVER_SELECT_MARKERS = (
+    "token obtained from zaap",
+    "connexion au proxy :wakfu-dispatcher.ankama-games.com",
+    "authentication result 0",
+)
+_IN_GAME_LOG_MARKERS = (
     "on remet la frame world",
     "personal_space_enter_result_message (success=true)",
-    "onnewconnection channelhandlercontext",
-    "connexion au proxy :wakfu-ogrest",
 )
-_DISCONNECTED_MARKERS = (
-    "sending disconnectionmessage to servers",
-    "[chat] connection closed",
-    "connexion avec le serveur perdue",
+# Marqueurs de déconnexion : remise à zéro du sous-état log (→ SELECTING générique)
+_LOGOFF_MARKERS = (
+    "{logoff}",
+    "unloading characterchoicedialog",
+    "launcher button clicked",
 )
 _SPELL_CLASS_SIGNATURES = {
     # ── Confirmés par combats réels (17/03/2026) ───────────────────
@@ -366,7 +370,7 @@ class OverlayWindow(QWidget):
         self._click_unlock_btn: QPushButton | None = None
         self._elapsed_seconds: int = 0
         self._game_state: GameState = GameState.OFFLINE
-        self._session_connected: bool | None = None
+        self._log_game_state: GameState | None = None
         self._log_read_pos: int = 0
         self._journal_read_pos: int = 0
         self._journal_log_path: Path | None = None
@@ -1051,12 +1055,12 @@ class OverlayWindow(QWidget):
 
     def _refresh_title_info(self):
         e = max(0, int(self._elapsed_seconds))
-        if self._session_connected is True:
+        if self._game_state == GameState.IN_GAME:
             status = "connecté"
-        elif self._session_connected is False:
+        elif self._game_state == GameState.OFFLINE:
             status = "déconnecté"
         else:
-            status = "connexion ?"
+            status = "connexion..."
 
         # ── Timer + statut → OptionsTab (Données) ─────────────────────────
         if self._options_tab is not None:
@@ -1068,8 +1072,17 @@ class OverlayWindow(QWidget):
             self._personnage_tab.set_character_name(self._current_character_name)
             self._personnage_tab.set_class_name(self._last_detected_class)
             self._personnage_tab.set_level(self._last_level)
-            conn_status = True if self._game_state == GameState.IN_GAME else (None if self._game_state == GameState.SELECTING else False)
-            self._personnage_tab.set_connection_status(conn_status)
+            # Calcul de l'état d'affichage à partir de la fenêtre ET des logs
+            if self._game_state == GameState.IN_GAME:
+                display_state = GameState.IN_GAME
+            elif self._game_state == GameState.OFFLINE:
+                display_state = GameState.OFFLINE
+            else:  # SELECTING — les logs précisent l'état réel
+                if self._log_game_state in (GameState.SERVER_SELECT, GameState.CHAR_SELECT):
+                    display_state = self._log_game_state
+                else:
+                    display_state = GameState.SELECTING
+            self._personnage_tab.set_display_state(display_state)
             if self._last_detected_class:
                 self._personnage_tab.set_class_icon(self._last_detected_class)
                 # Icône dans la barre repliée
@@ -1776,6 +1789,23 @@ class OverlayWindow(QWidget):
         state = self._parse_log_state(blob)
         changed = False
 
+        # État log → 4-state machine
+        log_state = state.get("log_state")
+
+        # Nouveau cycle d'auth Zaap : une déconnexion a eu lieu avant même si le log
+        # n'a pas émis de marqueur explicite. On remet le sous-état à None (SELECTING
+        # générique) pour refléter l'état intermédiaire avant que SERVER_SELECT s'installe.
+        if state.get("new_cycle") and self._log_game_state not in (None, GameState.SELECTING):
+            self._log_game_state = None
+            self._last_detected_class = None
+            changed = True
+
+        if log_state is not None and log_state != self._log_game_state:
+            self._log_game_state = log_state
+            changed = True
+            if log_state in (GameState.OFFLINE, GameState.SELECTING):
+                self._last_detected_class = None
+
         breed_id      = state.get("breed_id")
         breed_char    = state.get("character_name")   # perso auquel appartient ce breed_id
         class_key     = state.get("class_key")
@@ -1851,7 +1881,8 @@ class OverlayWindow(QWidget):
 
     @staticmethod
     def _parse_log_state(blob: str) -> dict[str, int | str | bool | None]:
-        connected: bool | None = None
+        log_state: "GameState | None" = None
+        new_cycle: bool = False   # True si un nouveau cycle d'auth Zaap commence
         breed_id: int | None = None
         character_name: str | None = None
         inferred_classes: dict[str, str] = {}
@@ -1859,12 +1890,31 @@ class OverlayWindow(QWidget):
         for raw_line in blob.splitlines():
             line = raw_line.lower()
 
-            if any(marker in line for marker in _DISCONNECTED_MARKERS):
-                connected = False
+            # Sélection de serveur (liste des serveurs affichée)
+            # "token obtained from zaap" = début d'un NOUVEAU cycle de connexion :
+            # s'il y avait déjà un état log, ça signifie une déconnexion entre les deux.
+            if any(marker in line for marker in _SERVER_SELECT_MARKERS):
+                if "token obtained from zaap" in line:
+                    new_cycle = True
+                log_state = GameState.SERVER_SELECT
                 continue
 
-            if any(marker in line for marker in _CONNECTED_MARKERS):
-                connected = True
+            # Déconnexion : remise à zéro du sous-état (SELECTING générique, avant reconnexion Zaap)
+            if any(marker in line for marker in _LOGOFF_MARKERS):
+                log_state = GameState.SELECTING
+                continue
+
+            # Serveur sélectionné → écran de sélection de personnage
+            # {Dispatch} = le dispatcher se déconnecte après avoir redirigé vers le serveur de jeu
+            if "authentication token received from dispatch server" in line:
+                log_state = GameState.CHAR_SELECT
+                continue
+            if "sending disconnectionmessage" in line and "{dispatch}" in line:
+                log_state = GameState.CHAR_SELECT
+                continue
+
+            if any(marker in line for marker in _IN_GAME_LOG_MARKERS):
+                log_state = GameState.IN_GAME
 
             player_match = _PLAYER_BREED_LINE_RE.search(raw_line)
             if player_match:
@@ -1873,7 +1923,7 @@ class OverlayWindow(QWidget):
                     breed_id = int(player_match.group(2))
                 except ValueError:
                     breed_id = None
-                connected = True
+                log_state = GameState.IN_GAME
                 continue
 
             spell_match = _SPELL_CAST_RE.search(raw_line)
@@ -1893,15 +1943,17 @@ class OverlayWindow(QWidget):
             except ValueError:
                 continue
 
-            connected = True
+            log_state = GameState.IN_GAME
 
         class_key = None
         if character_name:
             class_key = inferred_classes.get(character_name)
         if class_key is None and breed_id is not None:
             class_key = _BREED_TO_CLASS.get(breed_id)
+
         return {
-            "connected": connected,
+            "log_state": log_state,
+            "new_cycle": new_cycle,
             "breed_id": breed_id,
             "character_name": character_name,
             "class_key": class_key,
@@ -2001,12 +2053,10 @@ class OverlayWindow(QWidget):
         self._wakfu_rect = None
         if self._game_state != GameState.OFFLINE:
             self._game_state = GameState.OFFLINE
+            self._log_game_state = None
             self._current_character_name = None
-            self._session_connected = False
             self._last_detected_class = None
             self._last_level = None
-            if self._personnage_tab is not None:
-                self._personnage_tab.set_game_state(GameState.OFFLINE)
             self._refresh_title_info()
         self.hide()
         self._update_click_unlock_button_visibility()
@@ -2020,9 +2070,17 @@ class OverlayWindow(QWidget):
         if not name_changed and not state_changed:
             return
 
+        prev_game_state = self._game_state
         self._game_state = new_state
         self._current_character_name = name or None
-        self._session_connected = (new_state == GameState.IN_GAME)
+
+        if new_state == GameState.IN_GAME:
+            # En jeu : plus besoin du sous-état log
+            self._log_game_state = None
+        elif prev_game_state == GameState.IN_GAME:
+            # Retour au menu depuis le jeu → forcément sélection de personnage
+            self._log_game_state = GameState.CHAR_SELECT
+        # Sinon (SELECTING→SELECTING) : on laisse les marqueurs log raffiner
 
         # Toujours effacer l'état du perso précédent (changement de perso OU écran sélection)
         self._last_detected_class = None
@@ -2061,7 +2119,6 @@ class OverlayWindow(QWidget):
                 pass
 
         if self._personnage_tab is not None:
-            self._personnage_tab.set_game_state(new_state)
             if self._last_detected_class:
                 self._personnage_tab.set_class_icon(self._last_detected_class)
             else:

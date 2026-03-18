@@ -12,9 +12,11 @@ from PyQt5.QtCore import QObject, QTimer, pyqtSignal
 
 
 class GameState(Enum):
-    OFFLINE   = "offline"
-    SELECTING = "selecting"
-    IN_GAME   = "in_game"
+    OFFLINE       = "offline"
+    SERVER_SELECT = "server_select"   # sélection de serveur
+    CHAR_SELECT   = "char_select"     # sélection de personnage
+    SELECTING     = "selecting"       # fenêtre ouverte, état log inconnu
+    IN_GAME       = "in_game"
 
 # "L'immortel - WAKFU" ou "L'immortel - Wakfu"  →  group(1) = "L'immortel"
 # "WAKFU" / "Wakfu"                              →  pas de match → écran sélection
@@ -41,7 +43,7 @@ class WakfuTracker(QObject):
     focus_changed     = pyqtSignal(bool)                  # True si Wakfu est au premier plan
     character_changed = pyqtSignal(str)                   # "" = déconnecté / écran de sélection
 
-    _POLL_MS = 3
+    _POLL_MS = 500
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -158,6 +160,7 @@ class WakfuTracker(QObject):
             self._was_minimized = False
             self._was_focused   = False
             self._last_rect     = (0, 0, 0, 0)
+            self._last_character = "\x00"  # Force character_changed au prochain poll
             self.found.emit(hwnd)
 
         # Wakfu est-il la fenêtre active ?
