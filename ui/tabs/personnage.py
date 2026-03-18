@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QFrame,
     QPushButton,
     QSizePolicy,
+    QStackedWidget,
 )
 
 from ui.tabs.base import BaseTab
@@ -467,6 +468,27 @@ class PersonnageTab(BaseTab):
         self._rt_last_spell_ts: float | None = None
 
         root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+
+        self._stack = QStackedWidget()
+        root.addWidget(self._stack)
+
+        # ── Page offline / sélection ──────────────────────────────────────
+        _offline_page = QWidget()
+        _ol = QVBoxLayout(_offline_page)
+        self._offline_lbl = QLabel("● Déconnecté")
+        self._offline_lbl.setAlignment(Qt.AlignCenter)
+        self._offline_lbl.setFont(QFont(FONT_LABEL, 11))
+        self._offline_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
+        _ol.addWidget(self._offline_lbl)
+        self._stack.addWidget(_offline_page)   # index 0
+
+        # ── Page contenu (in-game) ───────────────────────────────────────
+        _main_page = QWidget()
+        self._stack.addWidget(_main_page)      # index 1
+
+        root = QVBoxLayout(_main_page)
         root.setContentsMargins(18, 14, 18, 14)
         root.setSpacing(10)
 
@@ -853,16 +875,16 @@ class PersonnageTab(BaseTab):
             self._panel_combo_best.set_empty("Pas encore de combo detecte")
 
     def set_game_state(self, state: GameState):
-        if state == GameState.OFFLINE:
-            self.set_connection_status(False)
-            self._name_lbl.setText("—")
-            self._class_lbl.setText("—")
-            self._level_lbl.setText("")
-        elif state == GameState.SELECTING:
-            self.set_connection_status(None)
-            self._name_lbl.setText("—")
-            self._class_lbl.setText("—")
-            self._level_lbl.setText("")
+        if state == GameState.IN_GAME:
+            self._stack.setCurrentIndex(1)
+        else:
+            if state == GameState.OFFLINE:
+                self._offline_lbl.setText("● Déconnecté")
+                self._offline_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
+            else:  # SELECTING
+                self._offline_lbl.setText("◌ Sélection du personnage")
+                self._offline_lbl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+            self._stack.setCurrentIndex(0)
 
     def set_gender(self, gender: str | None):
         if gender not in _TYPE_CYCLE:
