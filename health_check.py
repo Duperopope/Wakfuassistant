@@ -12,7 +12,7 @@ DATA_DIRS = [
 ]
 
 CONFIG_FILES = [
-    "config.json"
+    "data/config.json"
 ]
 
 ALL_EVENTS_PATH = "all_events.jsonl"
@@ -82,7 +82,7 @@ def check_py_syntax():
 
 def summary_and_exit():
     for check, ok in RESULTS:
-        print("✓" if ok else "✗", check)
+        print(("OK" if ok else "ERREUR"), check)
     if all(ok for _, ok in RESULTS):
         sys.exit(0)
     else:
