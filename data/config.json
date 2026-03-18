@@ -3,10 +3,10 @@
   "character_class": "xelor",
   "server": "Ogrest",
   "account": "Kairozadyk",
-  "base_kamas": 724018,
+  "base_kamas": 710657,
   "manual_kamas_delta": 0,
   "onboarding_done": true,
-  "last_session_end": "2026-03-18 10:28:59",
+  "last_session_end": "2026-03-18 22:21:08",
   "character_level": 0,
   "character_xp_current": 0,
   "character_xp_total": 0,
@@ -45,9 +45,9 @@
     "Divinité Du Sacrifice": "xelor",
     "Fée Aspirine": "sacrier"
   },
-  "perm_log_offset": 5214611,
+  "perm_log_offset": 5750279,
   "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
-  "journal_read_pos": 7775,
+  "journal_read_pos": 181731,
   "market_default_days": 28,
   "market_territory_rate": 5,
   "known_character_genders": {
@@ -63,7 +63,7 @@
     "L'Immortel": {
       "hp_percent": 100,
       "hp_truth_ts": "2026-03-17 18:23:45.334",
-      "level": 1,
+      "level": 181,
       "xp_gained": 694933543,
       "xp_to_next": 181560518,
       "xp_truth_ts": "2026-03-17 18:27:53.936"
@@ -100,7 +100,9 @@
       "xp_to_next": 1463
     },
     "L'Intemporel Kairos": {
-      "level": 181
+      "level": 181,
+      "xp_gained": 15384,
+      "xp_to_next": 46242932
     },
     "Divinité Du Sacrifice": {
       "level": 181,
