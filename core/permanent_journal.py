@@ -16,7 +16,7 @@ from pathlib import Path
 
 _PROJECT_ROOT        = Path(__file__).resolve().parents[1]
 _PERM_DIR            = _PROJECT_ROOT / "logs" / "permanent"
-_ALL_EVENTS_LOG      = _PERM_DIR / "all_events.jsonl"      # structuré, source unique
+_ALL_EVENTS_LOG      = _PERM_DIR / "all_events.jsonl"      # structuré, source unique (toujours UTF-8)
 _ALL_EVENTS_READABLE = _PERM_DIR / "all_events.log"        # companion lisible
 _RECORDER_STATE      = _PERM_DIR / "recorder_state.json"
 
