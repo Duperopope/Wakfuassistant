@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Agent-Class: wakfu2.RuntimeAgentBgyProbeOnce
-Premain-Class: wakfu2.RuntimeAgentBgyProbeOnce
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-

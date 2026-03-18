@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Agent-Class: wakfu2.RuntimeAgentBgTDump
-Premain-Class: wakfu2.RuntimeAgentBgTDump
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-

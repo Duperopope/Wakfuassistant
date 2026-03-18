@@ -42,7 +42,7 @@ from ui.titlebar import (
 )
 
 _ROOT = Path(__file__).resolve().parents[2]
-_WAKASSETS_ICONS = _ROOT / "wakassets" / "breedsIcons"
+_WAKASSETS_ICONS = _ROOT / "data" / "wakassets" / "breedsIcons"
 _ILLUS_DIR = _ROOT / "data" / "ankama_official" / "wakassets" / "breedsIllusrations"
 _EMOTE_DIR = _ROOT / "data" / "ankama_official" / "wakassets" / "emoteIconsPlayers"
 _EMOTE_FALLBACK = _EMOTE_DIR / "041.png"

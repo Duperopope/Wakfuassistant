@@ -1093,7 +1093,7 @@ class OverlayWindow(QWidget):
                 # Icône dans la barre repliée
                 from PyQt5.QtGui import QPixmap as _QPixmap
                 from pathlib import Path as _Path
-                _icons_dir = _Path(__file__).resolve().parents[1] / "wakassets" / "breedsIcons"
+                _icons_dir = _Path(__file__).resolve().parents[1] / "data" / "wakassets" / "breedsIcons"
                 from ui.titlebar import _CLASS_TO_ID, _normalize_class_key
                 _bid = _CLASS_TO_ID.get(_normalize_class_key(self._last_detected_class), 4)
                 _icon_file = _icons_dir / f"{_bid}.png"
