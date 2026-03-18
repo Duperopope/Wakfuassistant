@@ -133,13 +133,18 @@ def list_recipes(profession: str, recipe_type: str) -> list[dict]:
             if not isinstance(comps, list):
                 comps = []
             out.append({
-                "id": str(r.get("id", "")),
+                "id":          str(r.get("id", "")),
+                "item_id":     int(r["item_id"]) if r.get("item_id") is not None else None,
                 "output_item": str(r.get("output_item", "")).strip(),
-                "output_qty": max(1, int(r.get("output_qty", 1) or 1)),
+                "output_qty":  max(1, int(r.get("output_qty", 1) or 1)),
+                "xp":          int(r["xp"]) if r.get("xp") is not None else None,
+                "craft_level": int(r["craft_level"]) if r.get("craft_level") is not None else None,
+                "rarity":      int(r["rarity"]) if r.get("rarity") is not None else None,
                 "components": [
                     {
-                        "item": str(c.get("item", "")).strip(),
-                        "qty": max(1, int(c.get("qty", 1) or 1)),
+                        "item":    str(c.get("item", "")).strip(),
+                        "item_id": int(c["item_id"]) if c.get("item_id") is not None else None,
+                        "qty":     max(1, int(c.get("qty", 1) or 1)),
                     }
                     for c in comps if isinstance(c, dict)
                 ],
@@ -155,14 +160,20 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
     rid = str(recipe.get("id", "")).strip()
     if not rid:
         rid = f"{pkey}-{rkey}-{abs(hash((recipe.get('output_item'), recipe.get('output_qty'), len(recipe.get('components', []))))) % 10_000_000}"
+    _opt_int = lambda k: int(recipe[k]) if recipe.get(k) is not None else None
     normalized = {
-        "id": rid,
+        "id":          rid,
+        "item_id":     _opt_int("item_id"),
         "output_item": str(recipe.get("output_item", "")).strip(),
-        "output_qty": max(1, int(recipe.get("output_qty", 1) or 1)),
+        "output_qty":  max(1, int(recipe.get("output_qty", 1) or 1)),
+        "xp":          _opt_int("xp"),
+        "craft_level": _opt_int("craft_level"),
+        "rarity":      _opt_int("rarity"),
         "components": [
             {
-                "item": str(c.get("item", "")).strip(),
-                "qty": max(1, int(c.get("qty", 1) or 1)),
+                "item":    str(c.get("item", "")).strip(),
+                "item_id": int(c["item_id"]) if c.get("item_id") is not None else None,
+                "qty":     max(1, int(c.get("qty", 1) or 1)),
             }
             for c in recipe.get("components", []) if isinstance(c, dict)
         ],

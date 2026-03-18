@@ -777,16 +777,37 @@ class PersonnageTab(BaseTab):
         self._rt_fight_turns = []
         self._refresh_combo_panels()
 
-    def set_connection_status(self, connected: bool | None):
-        if connected is True:
+    def set_display_state(self, state: GameState):
+        """Met à jour le QStackedWidget et les labels selon l'état du jeu."""
+        if state == GameState.IN_GAME:
+            # En jeu — page contenu
+            self._stack.setCurrentIndex(1)
             self._status_lbl.setText("● Connecté")
             self._status_lbl.setStyleSheet(f"color: {GREEN}; background: transparent;")
-        elif connected is False:
-            self._status_lbl.setText("● Déconnecté")
-            self._status_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
         else:
-            self._status_lbl.setText("◌ Écran de sélection")
-            self._status_lbl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+            # Pas en jeu — page vide avec statut adapté
+            self._stack.setCurrentIndex(0)
+            if state == GameState.OFFLINE:
+                self._offline_lbl.setText("● Déconnecté")
+                self._offline_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
+            elif state == GameState.SERVER_SELECT:
+                self._offline_lbl.setText("◌ Sélection de serveur")
+                self._offline_lbl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+            elif state == GameState.CHAR_SELECT:
+                self._offline_lbl.setText("◌ Sélection de personnage")
+                self._offline_lbl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+            else:  # SELECTING (écran login / déconnecté)
+                self._offline_lbl.setText("● Déconnecté")
+                self._offline_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
+
+    def set_connection_status(self, connected: bool | None):
+        """Compatibilité — préférer set_display_state."""
+        if connected is True:
+            self.set_display_state(GameState.IN_GAME)
+        elif connected is False:
+            self.set_display_state(GameState.OFFLINE)
+        else:
+            self.set_display_state(GameState.SELECTING)
 
     def _finalize_current_turn(self):
         if len(self._rt_current_turn) < 2:
@@ -875,16 +896,8 @@ class PersonnageTab(BaseTab):
             self._panel_combo_best.set_empty("Pas encore de combo detecte")
 
     def set_game_state(self, state: GameState):
-        if state == GameState.IN_GAME:
-            self._stack.setCurrentIndex(1)
-        else:
-            if state == GameState.OFFLINE:
-                self._offline_lbl.setText("● Déconnecté")
-                self._offline_lbl.setStyleSheet(f"color: {RED}; background: transparent;")
-            else:  # SELECTING
-                self._offline_lbl.setText("◌ Sélection du personnage")
-                self._offline_lbl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
-            self._stack.setCurrentIndex(0)
+        """Compatibilité — préférer set_display_state."""
+        self.set_display_state(state)
 
     def set_gender(self, gender: str | None):
         if gender not in _TYPE_CYCLE:

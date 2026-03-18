@@ -7,7 +7,7 @@ from PyQt5.QtGui     import QPainter, QColor, QPen, QFont, QFontMetrics
 from ui.theme import BG_PANEL, BG, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM, BORDER
 
 HEIGHT  = 30
-TABS    = ["Personnage", "Inventaire", "HDV", "Transactions", "Combat", "Metiers", "Options"]
+TABS    = ["Personnage", "Inventaire", "Transactions", "Combat", "Metiers", "Options"]
 
 
 class _TabBtn(QPushButton):

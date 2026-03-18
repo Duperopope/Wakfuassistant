@@ -1057,8 +1057,12 @@ class OverlayWindow(QWidget):
         e = max(0, int(self._elapsed_seconds))
         if self._game_state == GameState.IN_GAME:
             status = "connecté"
-        elif self._game_state == GameState.OFFLINE:
+        elif self._game_state in (GameState.OFFLINE, GameState.SELECTING):
             status = "déconnecté"
+        elif self._game_state == GameState.SERVER_SELECT:
+            status = "sélection serveur"
+        elif self._game_state == GameState.CHAR_SELECT:
+            status = "sélection personnage"
         else:
             status = "connexion..."
 
@@ -1883,6 +1887,7 @@ class OverlayWindow(QWidget):
     def _parse_log_state(blob: str) -> dict[str, int | str | bool | None]:
         log_state: "GameState | None" = None
         new_cycle: bool = False   # True si un nouveau cycle d'auth Zaap commence
+        auth_token_received: bool = False  # True si le dispatch a envoyé un token de jeu
         breed_id: int | None = None
         character_name: str | None = None
         inferred_classes: dict[str, str] = {}
@@ -1891,25 +1896,37 @@ class OverlayWindow(QWidget):
             line = raw_line.lower()
 
             # Sélection de serveur (liste des serveurs affichée)
-            # "token obtained from zaap" = début d'un NOUVEAU cycle de connexion :
-            # s'il y avait déjà un état log, ça signifie une déconnexion entre les deux.
+            # "token obtained from zaap" = début d'un NOUVEAU cycle de connexion.
             if any(marker in line for marker in _SERVER_SELECT_MARKERS):
                 if "token obtained from zaap" in line:
                     new_cycle = True
+                    auth_token_received = False  # Nouveau cycle : reset du flag dispatch
                 log_state = GameState.SERVER_SELECT
                 continue
 
-            # Déconnexion : remise à zéro du sous-état (SELECTING générique, avant reconnexion Zaap)
+            # Déconnexion : remise à zéro du sous-état (SELECTING générique)
             if any(marker in line for marker in _LOGOFF_MARKERS):
                 log_state = GameState.SELECTING
+                auth_token_received = False
                 continue
 
-            # Serveur sélectionné → écran de sélection de personnage
-            # {Dispatch} = le dispatcher se déconnecte après avoir redirigé vers le serveur de jeu
+            # Serveur sélectionné → écran de sélection de personnage.
+            # Le dispatcher envoie d'abord un "authentication token" (redirection vers le
+            # serveur de jeu), PUIS se déconnecte avec {Dispatch}.
+            # Si {Dispatch} arrive SANS token préalable → déconnexion depuis l'écran serveur.
             if "authentication token received from dispatch server" in line:
+                auth_token_received = True
                 log_state = GameState.CHAR_SELECT
                 continue
             if "sending disconnectionmessage" in line and "{dispatch}" in line:
+                if auth_token_received:
+                    log_state = GameState.CHAR_SELECT   # Redirection normale vers char select
+                else:
+                    log_state = GameState.SELECTING     # Déconnexion depuis l'écran serveur
+                continue
+
+            # Confirmation sélection de personnage : le chat est chargé pour l'écran de choix.
+            if "loading chat file." in line:
                 log_state = GameState.CHAR_SELECT
                 continue
 

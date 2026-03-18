@@ -986,9 +986,20 @@ class OptionsTab(BaseTab):
         prof_row.addWidget(prof_btn)
         lay.addLayout(prof_row)
 
-        self._prof_last_entry_lbl = QLabel("")
-        self._prof_last_entry_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 9px;")
-        lay.addWidget(self._prof_last_entry_lbl)
+        # Zone d'affichage des métiers enregistrés
+        self._prof_entries_container = QWidget()
+        self._prof_entries_layout = QVBoxLayout(self._prof_entries_container)
+        self._prof_entries_layout.setContentsMargins(0, 0, 0, 0)
+        self._prof_entries_layout.setSpacing(2)
+        
+        scroll = QScrollArea()
+        scroll.setWidget(self._prof_entries_container)
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"QScrollArea {{ border: 1px solid {BORDER}; background: rgba(255,255,255,0.01); border-radius: 4px; }}")
+        scroll.setFixedHeight(120)
+        lay.addWidget(scroll)
+        
+        self._refresh_profession_entries()
         lay.addStretch(1)
 
     def _build_data_history_tab(self, container: QWidget):
@@ -1145,10 +1156,9 @@ class OptionsTab(BaseTab):
             self.set_kamas_last_entry(ts)
         health = last_entry("health")
         xp = last_entry("xp")
-        prof = last_entry("xp_profession")
         self.set_health_last_entry(health.get("ts") if health else None)
         self.set_xp_last_entry(xp.get("ts") if xp else None)
-        self.set_prof_last_entry(prof.get("ts") if prof else None)
+        self._refresh_profession_entries()
         self._refresh_calibration_history()
 
     def set_log_start_date(self, ts: str | None):
@@ -1197,13 +1207,7 @@ class OptionsTab(BaseTab):
             return
         self._xp_last_entry_lbl.setText(f"✎ XP enregistrée : {_format_ts(ts)}")
 
-    def set_prof_last_entry(self, ts: str | None):
-        if not hasattr(self, "_prof_last_entry_lbl"):
-            return
-        if not ts:
-            self._prof_last_entry_lbl.setText("")
-            return
-        self._prof_last_entry_lbl.setText(f"✎ XP métier enregistrée : {_format_ts(ts)}")
+
 
     def _on_kamas_confirm(self):
         text = self._kamas_input.text().strip()
@@ -1275,7 +1279,7 @@ class OptionsTab(BaseTab):
             "xp_gained": xp_gained,
             "xp_to_next": xp_to_next,
         })
-        self.set_prof_last_entry(entry.get("ts"))
+        self._refresh_profession_entries()
         self._refresh_calibration_history()
         self.profession_xp_calibrated.emit(profession, xp_gained, xp_to_next)
         self.profession_state_calibrated.emit(profession, level, xp_gained, xp_to_next)
@@ -1305,6 +1309,43 @@ class OptionsTab(BaseTab):
                 return "XP métiers", f"{prof} · niv {lvl} · +{gained} · reste {nxt}", ts
             return "XP métiers", f"{prof} · +{gained} · reste {nxt}", ts
         return kind or "Autre", str(payload), ts
+
+    def _refresh_profession_entries(self):
+        """Affiche les métiers enregistrés dans la zone scrollable."""
+        while self._prof_entries_layout.count():
+            item = self._prof_entries_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        entries = list_entries(kind="xp_profession", limit=20)
+        if not entries:
+            empty_lbl = QLabel("Aucun métier enregistré")
+            empty_lbl.setStyleSheet(f"color: {TEXT_DIM}; font-size: 10px; padding: 8px;")
+            self._prof_entries_layout.addWidget(empty_lbl)
+            return
+        
+        # Reverse pour afficher les plus récents en premier
+        for entry in reversed(entries):
+            payload = entry.get("payload", {}) if isinstance(entry.get("payload"), dict) else {}
+            prof = payload.get("profession", "?")
+            lvl = payload.get("level")
+            gained = payload.get("xp_gained")
+            nxt = payload.get("xp_to_next")
+            ts = _format_ts(str(entry.get("ts", "")))
+            
+            # Formater l'info
+            if isinstance(lvl, int):
+                info = f"{prof.upper()} · Niv {lvl} · +{gained} · Reste {nxt} | {ts}"
+            else:
+                info = f"{prof.upper()} · +{gained} · Reste {nxt} | {ts}"
+            
+            row_lbl = QLabel(info)
+            row_lbl.setStyleSheet(f"color: {TEXT}; font-size: 10px; padding: 4px 6px; background: rgba(30,180,176,0.05); border-radius: 3px;")
+            row_lbl.setWordWrap(True)
+            row_lbl.setMaximumHeight(28)
+            self._prof_entries_layout.addWidget(row_lbl)
+        
+        self._prof_entries_layout.addStretch(1)
 
     def _refresh_calibration_history(self):
         if not hasattr(self, "_calib_table"):

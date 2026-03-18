@@ -43,7 +43,7 @@ class WakfuTracker(QObject):
     focus_changed     = pyqtSignal(bool)                  # True si Wakfu est au premier plan
     character_changed = pyqtSignal(str)                   # "" = déconnecté / écran de sélection
 
-    _POLL_MS = 500
+    _POLL_MS = 200
 
     def __init__(self, parent=None):
         super().__init__(parent)

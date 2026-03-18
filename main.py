@@ -100,7 +100,7 @@ class LiveUiReloader(QObject):
 def _acquire_single_instance_lock() -> QLockFile | None:
     lock_path = Path(tempfile.gettempdir()) / "wakfuassistant-overlay.lock"
     lock = QLockFile(str(lock_path))
-    lock.setStaleLockTime(0)
+    lock.setStaleLockTime(3000)
     if not lock.tryLock(0):
         return None
     return lock

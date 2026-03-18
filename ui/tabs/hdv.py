@@ -38,6 +38,7 @@ from core.item_icons import (
 )
 from core.permanent_journal import estimate_market_price, read_permanent_market_deposits
 from ui.tabs.base import BaseTab
+from ui.tabs.transactions import TransactionsTab
 from ui.theme import (
     BG, BG_PANEL, BG_PANEL2, BORDER, BORDER2,
     GREEN, RED, TEAL, TEAL_BRIGHT, TEXT, TEXT_DIM,
@@ -58,7 +59,8 @@ _RARITY_BORDER_FILE = {
 }
 
 _SUB_TABS = [
-    ("overview",     "Overview"),
+    ("flux",         "Flux"),
+    ("overview",     "Trends"),
     ("mes_ventes",   "Mes ventes"),
     ("mes_achats",   "Mes achats"),
     ("offres_vente", "Offres de vente"),
@@ -1188,6 +1190,8 @@ class HdvTab(BaseTab):
             ["OBJET", "ACHETEURS", "QTE DEM.", f"PRIX/U ({_KAMA})", "MAJ"],
         )
 
+        self._flux_page = TransactionsTab(self)
+        self._pages["flux"]         = self._flux_page
         self._pages["overview"]     = self._overview_page
         self._pages["mes_ventes"]   = self._mes_ventes_page
         self._pages["mes_achats"]   = self._mes_achats_page
@@ -1203,9 +1207,9 @@ class HdvTab(BaseTab):
         for key, btn in self._tab_bar.buttons().items():
             btn.clicked.connect(lambda _checked=False, k=key: self._switch_to(k))
 
-        initial_key = str(self._settings.value("hdv_last_subtab", "overview", type=str) or "overview")
+        initial_key = str(self._settings.value("hdv_last_subtab", "flux", type=str) or "flux")
         if initial_key not in self._pages:
-            initial_key = "overview"
+            initial_key = "flux"
         self._switch_to(initial_key)
 
         # Service d'icônes
@@ -1354,10 +1358,18 @@ class HdvTab(BaseTab):
     def set_market_settings(self, days: int, rate: int):
         self._market_days = days
         self._market_rate = rate
+        self._flux_page.set_market_settings(days, rate)
         self._refresh_pages()
+
+    def set_short_kamas(self, enabled: bool):
+        self._flux_page.set_short_kamas(enabled)
+
+    def get_pinned_metrics(self):
+        return self._flux_page.get_pinned_metrics()
 
     def refresh(self):
         self._deposits = read_permanent_market_deposits()
+        self._flux_page.refresh()
         self._refresh_pages()
 
     def _refresh_pages(self):
