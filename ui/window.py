@@ -22,13 +22,12 @@ from core.permanent_journal import (
     sync_permanent_journal, query_character_info,
     query_last_server, query_unique_chat_authors,
     query_profession_tracking, replay_character_xp_since,
-    query_log_start_date, query_inventory,
+    query_log_start_date, query_inventory, query_played_time,
 )
 from ui.tabbar   import TabBar, TABS
 from ui.tabs.base import PlaceholderTab
 from ui.tabs.hdv import HdvTab
 from ui.tabs.options import OptionsTab
-from ui.tabs.transactions import TransactionsTab
 from ui.tabs.personnage import PersonnageTab
 from ui.tabs.metiers import MetiersTab
 from ui.tabs.combat import CombatTab
@@ -96,6 +95,10 @@ _LEVEL_RE = re.compile(
 )
 _KAMAS_GAIN_RE = re.compile(
     r"\[Information \(jeu\)\]\s+Vous avez gagné\s+([0-9\s\u00a0\u202f.,]+)\s+kamas?\b",
+    re.IGNORECASE,
+)
+_PLAYED_LOG_RE = re.compile(
+    r"\[Information \(jeu\)\]\s+Vous avez joué\s+(.+)",
     re.IGNORECASE,
 )
 _KAMAS_LOSS_RE = re.compile(
@@ -372,7 +375,10 @@ class OverlayWindow(QWidget):
         self._last_level: int | None = None
         self._last_xp_gain: int | None = None
         self._last_xp_to_next: int | None = None
-        self._session_xp_gained: int = 0   # XP accumulé cette session
+        self._session_xp_gained: int = 0   # XP absolu dans le niveau (depuis calibration)
+        self._session_xp_at_start: int = 0  # baseline au chargement du perso (pour le taux)
+        self._played_seconds_anchor: int | None = None  # secondes jouées au moment de l'ancre
+        self._played_anchor_ts: "QDateTime | None" = None  # moment réel de l'ancre
         self._last_crit_percent: int | None = None
         self._last_ap: int | None = None
         self._last_mp: int | None = None
@@ -516,11 +522,7 @@ class OverlayWindow(QWidget):
 
         self._tab_widgets: list[QWidget] = []
         for name in TABS:
-            if name == "Transactions":
-                w = TransactionsTab(self)
-                w.set_short_kamas(self._short_kamas)
-                w.set_market_settings(self._market_default_days, self._market_territory_rate)
-            elif name == "Options":
+            if name == "Options":
                 import ui.theme as _theme
                 w = OptionsTab(
                     self._opacity,
@@ -558,8 +560,9 @@ class OverlayWindow(QWidget):
                 w.set_kamas_last_entry(get_last_correction_ts())
                 w.set_log_start_date(get_permanent_log_start_ts())
                 self._options_tab = w
-            elif name == "HDV":
+            elif name == "Transactions":
                 w = HdvTab(self)
+                w.set_short_kamas(self._short_kamas)
                 w.set_market_settings(self._market_default_days, self._market_territory_rate)
                 self._hdv_tab = w
             elif name == "Personnage":
@@ -842,8 +845,8 @@ class OverlayWindow(QWidget):
     def _restore_character_vitals(self, character_name: str | None):
         if not character_name:
             self._session_xp_gained = 0
+            self._session_xp_at_start = 0
             self._last_xp_to_next = None
-
             self._session_combat_count = 0
             return
 
@@ -861,6 +864,15 @@ class OverlayWindow(QWidget):
 
         if level is not None and int(level) > 0:
             self._last_level = int(level)
+
+        # Calibration XP (widget données) — source la plus fiable pour le niveau.
+        try:
+            cfg = self._read_config_json()
+            calib_level = int(cfg.get("xp_calibration", {}).get("level", 0) or 0)
+            if calib_level > (self._last_level or 0):
+                self._last_level = calib_level
+        except Exception:
+            pass
 
         # Reconstruction retroactive depuis le point de calibration (heure de verite).
         if xp_truth_ts:
@@ -889,6 +901,31 @@ class OverlayWindow(QWidget):
                     self._last_level = lvl
         except Exception:
             pass
+
+        # Temps joué — ancre depuis la dernière entrée /played du journal.
+        self._played_seconds_anchor = None
+        self._played_anchor_ts = None
+        try:
+            played = query_played_time()
+            if played is not None:
+                from core.permanent_journal import _parse_local_iso as _pli
+                from datetime import timezone as _tz
+                secs = int(played["seconds"])
+                anchor_dt = _pli(played["ts_local"])
+                if anchor_dt is not None:
+                    # Calcul de l'offset entre l'ancre et maintenant
+                    import datetime as _dt
+                    now_utc = _dt.datetime.now(_tz.utc)
+                    anchor_utc = anchor_dt.replace(tzinfo=_tz.utc) if anchor_dt.tzinfo is None else anchor_dt
+                    elapsed_since_anchor = max(0, int((now_utc - anchor_utc).total_seconds()))
+                    self._played_seconds_anchor = secs + elapsed_since_anchor
+                    self._played_anchor_ts = QDateTime.currentDateTime()
+        except Exception:
+            pass
+
+        # Baseline pour calcul du taux XP/h depuis ce chargement
+        self._session_xp_at_start = self._session_xp_gained
+        self._t0 = QDateTime.currentDateTime()
 
     def _on_gender_changed(self, gender: "str | None"):
         name = self._current_character_name
@@ -1066,30 +1103,31 @@ class OverlayWindow(QWidget):
                 known_genders = self._read_known_character_genders()
                 name_key = _normalize_character_name(self._current_character_name)
                 self._personnage_tab.set_gender(known_genders.get(name_key))
-            # XP bar — progress = session_xp / (session_xp + xp_to_next)
+            # XP bar — progress absolu dans le niveau
             xp_gained  = self._session_xp_gained or 0
             xp_to_next = self._last_xp_to_next or 0
             xp_total   = xp_gained + xp_to_next
             self._personnage_tab.set_xp(xp_gained, xp_total if xp_total > 0 else 1)
-            # Stats session (affichage minutes restantes)
+            # Taux XP/h et temps restant : XP gagné depuis le chargement du perso uniquement
             elapsed_s = max(0, int(self._elapsed_seconds))
-            self._personnage_tab.set_xp_remaining(xp_to_next, xp_gained, elapsed_s)
+            xp_since_load = max(0, xp_gained - self._session_xp_at_start)
+            self._personnage_tab.set_xp_remaining(xp_to_next, xp_since_load, elapsed_s)
 
-        # Combats jusqu'au prochain niveau
+        # Temps joué sur ce personnage
         if self._personnage_tab is not None:
-            if self._session_combat_count > 0 and self._last_xp_to_next and self._session_xp_gained:
-                avg = self._session_xp_gained / self._session_combat_count
-                combats_needed = max(1, int(self._last_xp_to_next / avg + 0.5)) if avg > 0 else None
+            if self._played_seconds_anchor is not None and self._played_anchor_ts is not None:
+                extra = max(0, self._played_anchor_ts.secsTo(QDateTime.currentDateTime()))
+                total_played = self._played_seconds_anchor + extra
             else:
-                combats_needed = None
-            self._personnage_tab.set_combats_to_level(combats_needed)
+                total_played = None
+            self._personnage_tab.set_played_time(total_played)
 
         if self._combat_tab is not None and self._current_character_name:
             self._combat_tab.set_character_name(self._current_character_name)
 
         # ── Métriques épinglées → TitleBar (mode replié) ─────────────────
         for widget in self._tab_widgets:
-            if isinstance(widget, TransactionsTab):
+            if isinstance(widget, HdvTab):
                 self._titlebar.set_folded_metrics(widget.get_pinned_metrics())
                 break
 
@@ -1097,7 +1135,7 @@ class OverlayWindow(QWidget):
 
     def _refresh_transactions_tab(self):
         for widget in self._tab_widgets:
-            if isinstance(widget, TransactionsTab):
+            if isinstance(widget, HdvTab):
                 widget.refresh()
                 break
 
@@ -1389,6 +1427,14 @@ class OverlayWindow(QWidget):
                             )
                         changed = True
 
+            played_m = _PLAYED_LOG_RE.search(raw_line)
+            if played_m:
+                from core.permanent_journal import _parse_played_seconds as _pps
+                secs = _pps(played_m.group(1))
+                if secs is not None:
+                    self._played_seconds_anchor = secs
+                    self._played_anchor_ts = QDateTime.currentDateTime()
+
         if not self._runtime_kama_reliable:
             computed_kamas = self._base_kamas + self._manual_kamas_delta + self._runtime_kamas_delta
             if computed_kamas >= 0 and computed_kamas != self._current_kamas:
@@ -1589,9 +1635,11 @@ class OverlayWindow(QWidget):
         changed = False
 
         level_value = self._parse_int_token(str(payload.get("level", "")))
-        if level_value is not None and level_value != self._last_level:
-            self._last_level = level_value
-            changed = True
+        if level_value is not None and level_value > 0 and level_value != self._last_level:
+            # Le niveau ne peut jamais régresser — ignore les valeurs inférieures au niveau connu.
+            if level_value >= (self._last_level or 0):
+                self._last_level = level_value
+                changed = True
 
         crit_value = self._parse_int_token(str(payload.get("critical_percent", "")))
         if crit_value is not None and crit_value != self._last_crit_percent:
@@ -2353,7 +2401,7 @@ class OverlayWindow(QWidget):
         self._short_kamas = enabled
         self._settings.setValue("short_kamas", enabled)
         for widget in self._tab_widgets:
-            if isinstance(widget, TransactionsTab):
+            if isinstance(widget, HdvTab):
                 widget.set_short_kamas(enabled)
                 break
 
@@ -2375,9 +2423,7 @@ class OverlayWindow(QWidget):
         data["market_territory_rate"] = rate
         self._write_config_json(data)
         for widget in self._tab_widgets:
-            if isinstance(widget, TransactionsTab):
-                widget.set_market_settings(days, rate)
-            elif isinstance(widget, HdvTab):
+            if isinstance(widget, HdvTab):
                 widget.set_market_settings(days, rate)
 
     def set_click_through(self, enabled: bool):

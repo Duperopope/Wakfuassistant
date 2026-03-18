@@ -3,10 +3,10 @@
   "character_class": "sram",
   "server": "Ogrest",
   "account": "Kairozadyk",
-  "base_kamas": 577306,
+  "base_kamas": 663349,
   "manual_kamas_delta": 0,
   "onboarding_done": true,
-  "last_session_end": "2026-03-16 15:20:02.854",
+  "last_session_end": "2026-03-17 22:09:21",
   "character_level": 0,
   "character_xp_current": 0,
   "character_xp_total": 0,
@@ -39,9 +39,9 @@
     "L'Intemporel Kairos": "xelor",
     "Double Sram": "sram"
   },
-  "perm_log_offset": 3704353,
+  "perm_log_offset": 4816765,
   "journal_log_path": "C:\\Users\\Smedj\\AppData\\Roaming\\zaap\\gamesLogs\\wakfu\\logs\\wakfu.log",
-  "journal_read_pos": 301412,
+  "journal_read_pos": 714200,
   "market_default_days": 28,
   "market_territory_rate": 5,
   "known_character_genders": {
@@ -56,9 +56,9 @@
     "L'Immortel": {
       "hp_percent": 100,
       "hp_truth_ts": "2026-03-17 18:23:45.334",
-      "level": 1,
+      "level": 181,
       "xp_gained": 694933543,
-      "xp_to_next": 495884510,
+      "xp_to_next": 304400457,
       "xp_truth_ts": "2026-03-17 18:27:53.936"
     }
   }

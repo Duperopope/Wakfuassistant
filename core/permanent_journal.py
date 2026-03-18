@@ -1906,3 +1906,49 @@ def replay_permanent_delta(since_iso: str | None, file_offset: int = 0) -> int:
 
 # Alias maintenu pour kamas_history.py
 replay_kamas_delta = replay_permanent_delta
+
+
+def _parse_played_seconds(raw: str) -> int | None:
+    """
+    Parse 'X jours Y heures Z minutes W secondes sur ce personnage.'
+    Retourne le total en secondes, ou None si non parseable.
+    """
+    import re as _re
+    raw = str(raw or "")
+    total = 0
+    found = False
+    m = _re.search(r"(\d+)\s+jour", raw)
+    if m:
+        total += int(m.group(1)) * 86400
+        found = True
+    m = _re.search(r"(\d+)\s+heure", raw)
+    if m:
+        total += int(m.group(1)) * 3600
+        found = True
+    m = _re.search(r"(\d+)\s+minute", raw)
+    if m:
+        total += int(m.group(1)) * 60
+        found = True
+    m = _re.search(r"(\d+)\s+seconde", raw)
+    if m:
+        total += int(m.group(1))
+        found = True
+    return total if found else None
+
+
+def query_played_time() -> dict | None:
+    """
+    Retourne la dernière entrée 'played' connue dans all_events.jsonl.
+    Format: {seconds: int, ts_local: str}
+    Retourne None si aucune entrée trouvée.
+    """
+    result: dict | None = None
+    for entry in _iter_all_events("played"):
+        raw = str(entry.get("data", {}).get("raw", ""))
+        secs = _parse_played_seconds(raw)
+        if secs is not None:
+            result = {
+                "seconds": secs,
+                "ts_local": str(entry.get("ts_local", "")),
+            }
+    return result

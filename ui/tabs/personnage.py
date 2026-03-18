@@ -47,7 +47,6 @@ _ILLUS_DIR = _ROOT / "data" / "ankama_official" / "wakassets" / "breedsIllusrati
 _EMOTE_DIR = _ROOT / "data" / "ankama_official" / "wakassets" / "emoteIconsPlayers"
 _EMOTE_FALLBACK = _EMOTE_DIR / "041.png"
 
-_TYPE_COLORS = {"type_0": TEAL, "type_1": "#f472b6"}
 _TYPE_CYCLE = ["type_0", "type_1"]
 
 _ZONE_BY_LEVEL: list[tuple[int, str]] = [
@@ -312,6 +311,104 @@ class _XPBar(QWidget):
             fn = XP_PAINT_FN.get(self._style, paint_official_fallback)
             fn(p, rect, self._progress, txt)
 
+class _XPProgressCard(QFrame):
+    """Card large à 3 colonnes : XP/heure · Temps restant · Temps joué."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet(
+            f"QFrame{{background: rgba(255,255,255,0.03); border: 1px solid {BORDER}; border-radius: 8px;}}"
+        )
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setFixedHeight(62)
+
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(0)
+
+        self._vals: list[QLabel] = []
+
+        # ── Colonnes 0 et 1 : XP/h et Temps restant (layout standard) ────
+        for i, title in enumerate(("XP / HEURE", "TEMPS RESTANT")):
+            if i > 0:
+                div = QFrame()
+                div.setFrameShape(QFrame.VLine)
+                div.setFixedWidth(1)
+                div.setStyleSheet(f"background: {BORDER}; border: none;")
+                lay.addWidget(div)
+
+            cell = QWidget()
+            cell.setStyleSheet("background: transparent; border: none;")
+            cl = QVBoxLayout(cell)
+            cl.setContentsMargins(10, 6, 10, 6)
+            cl.setSpacing(2)
+
+            val = QLabel("—")
+            val.setAlignment(Qt.AlignCenter)
+            vf = QFont(FONT_LABEL, 14)
+            vf.setWeight(QFont.Bold)
+            val.setFont(vf)
+            val.setStyleSheet(f"color: {TEAL_BRIGHT}; background: transparent;")
+
+            ttl = QLabel(title)
+            ttl.setAlignment(Qt.AlignCenter)
+            ttl.setFont(QFont(FONT_LABEL, 8))
+            ttl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+
+            cl.addWidget(val)
+            cl.addWidget(ttl)
+            lay.addWidget(cell, 1)
+            self._vals.append(val)
+
+        # ── Colonne 2 : Temps joué — layout spécial (jours + h/min) ──────
+        div = QFrame()
+        div.setFrameShape(QFrame.VLine)
+        div.setFixedWidth(1)
+        div.setStyleSheet(f"background: {BORDER}; border: none;")
+        lay.addWidget(div)
+
+        played_cell = QWidget()
+        played_cell.setStyleSheet("background: transparent; border: none;")
+        pcl = QVBoxLayout(played_cell)
+        pcl.setContentsMargins(10, 5, 10, 5)
+        pcl.setSpacing(0)
+
+        self._played_main = QLabel("—")
+        self._played_main.setAlignment(Qt.AlignCenter)
+        mf = QFont(FONT_LABEL, 13)
+        mf.setWeight(QFont.Bold)
+        self._played_main.setFont(mf)
+        self._played_main.setStyleSheet(f"color: {TEAL_BRIGHT}; background: transparent;")
+
+        self._played_sub = QLabel("")
+        self._played_sub.setAlignment(Qt.AlignCenter)
+        self._played_sub.setFont(QFont(FONT_LABEL, 9))
+        self._played_sub.setStyleSheet(f"color: {TEAL}; background: transparent;")
+
+        ttl = QLabel("TEMPS JOUÉ")
+        ttl.setAlignment(Qt.AlignCenter)
+        ttl.setFont(QFont(FONT_LABEL, 8))
+        ttl.setStyleSheet(f"color: {TEXT_DIM}; background: transparent;")
+
+        pcl.addWidget(self._played_main)
+        pcl.addWidget(self._played_sub)
+        pcl.addWidget(ttl)
+        lay.addWidget(played_cell, 1)
+
+    def _set(self, idx: int, value: str, color: str | None = None):
+        self._vals[idx].setText(value or "—")
+        self._vals[idx].setStyleSheet(f"color: {color or TEAL_BRIGHT}; background: transparent;")
+
+    def set_xph(self, value: str, color: str | None = None):      self._set(0, value, color)
+    def set_remaining(self, value: str, color: str | None = None): self._set(1, value, color)
+
+    def set_played(self, main: str, sub: str = "", color: str | None = None):
+        self._played_main.setText(main or "—")
+        self._played_main.setStyleSheet(f"color: {color or TEAL_BRIGHT}; background: transparent;")
+        self._played_sub.setText(sub)
+        self._played_sub.setVisible(bool(sub))
+
+
 class _StatBox(QFrame):
     def __init__(self, title: str, parent=None):
         super().__init__(parent)
@@ -452,15 +549,11 @@ class PersonnageTab(BaseTab):
 
         stats = QHBoxLayout()
         stats.setSpacing(8)
-        self._card_xph = _StatBox("⚡ XP / HEURE")
-        self._card_remaining = _StatBox("📈 RESTE")
         self._card_zone = _StatBox("🗺 ZONE")
-        self._card_combats = _StatBox("⚔ COMBATS / NIV")
+        self._card_xp_progress = _XPProgressCard()
 
-        stats.addWidget(self._card_xph)
-        stats.addWidget(self._card_remaining)
-        stats.addWidget(self._card_zone)
-        stats.addWidget(self._card_combats)
+        stats.addWidget(self._card_zone, 1)
+        stats.addWidget(self._card_xp_progress, 3)
         root.addLayout(stats)
 
         # Bloc combat réorganisé dans Personnage
@@ -495,7 +588,6 @@ class PersonnageTab(BaseTab):
         self._kamas_proxy = QLabel("")
         self._refresh_gender_btn()
         self._card_zone.set_value("—")
-        self._card_combats.set_value("—")
         self._refresh_combat_panels()
 
     def set_server(self, name: str | None, unique_players: int | None = None, log_start: str | None = None):
@@ -548,41 +640,61 @@ class PersonnageTab(BaseTab):
         self._xp_bar.set_xp(self._xp_current, self._xp_total)
 
     def set_xp_remaining(self, xp_to_next: int | None, xp_gained: int | None = None, elapsed_s: int | None = None):
-        """Affiche les minutes restantes jusqu'au prochain niveau.
-        
-        Calcule: xp_per_hour = (xp_gained / elapsed_s) * 3600
-                 minutes = xp_to_next / (xp_per_hour / 60)
-        """
         if xp_to_next is None or int(xp_to_next) <= 0:
-            self._card_remaining.set_value("—", TEXT_DIM)
-        elif xp_gained is None or int(xp_gained) <= 0:
-            # Pas encore d'XP gagné: affiche l'infini
-            self._card_remaining.set_value("∞", TEXT_DIM)
-        elif elapsed_s is None or int(elapsed_s) <= 0:
-            # Pas assez de temps écoulé
-            self._card_remaining.set_value("∞", TEXT_DIM)
-        else:
-            # Calcule minutes restantes
-            xp_per_hour = (int(xp_gained) / int(elapsed_s)) * 3600
-            if xp_per_hour > 0:
-                minutes = int(xp_to_next) / (xp_per_hour / 60)
-                if minutes < 1:
-                    display = f"< 1 min"
-                elif minutes < 60:
-                    display = f"{int(minutes)}m"
-                else:
-                    hours = int(minutes / 60)
-                    mins = int(minutes % 60)
-                    display = f"{hours}h{mins:02d}m"
-                self._card_remaining.set_value(display, TEAL_BRIGHT)
-            else:
-                self._card_remaining.set_value("∞", TEXT_DIM)
+            self._card_xp_progress.set_remaining("—", TEXT_DIM)
+            self._card_xp_progress.set_xph("—", TEXT_DIM)
+            return
 
-    def set_combats_to_level(self, n: int | None):
-        if n is None or int(n) <= 0:
-            self._card_combats.set_value("—", TEXT_DIM)
+        if xp_gained is None or int(xp_gained) <= 0 or elapsed_s is None or int(elapsed_s) <= 0:
+            self._card_xp_progress.set_remaining("∞", TEXT_DIM)
+            self._card_xp_progress.set_xph("—", TEXT_DIM)
+            return
+
+        xp_per_hour = (int(xp_gained) / int(elapsed_s)) * 3600
+        if xp_per_hour > 0:
+            # XP/heure
+            v = int(xp_per_hour)
+            if v >= 1_000_000:
+                xph_str = f"{v/1_000_000:.1f}M/h"
+            elif v >= 1_000:
+                xph_str = f"{v//1_000}K/h"
+            else:
+                xph_str = f"{v}/h"
+            self._card_xp_progress.set_xph(xph_str, TEAL_BRIGHT)
+
+            # Temps restant
+            minutes = int(xp_to_next) / (xp_per_hour / 60)
+            if minutes < 1:
+                display = "< 1 min"
+            elif minutes < 60:
+                display = f"{int(minutes)}m"
+            else:
+                hours = int(minutes / 60)
+                mins = int(minutes % 60)
+                display = f"{hours}h{mins:02d}m"
+            self._card_xp_progress.set_remaining(display, TEAL_BRIGHT)
         else:
-            self._card_combats.set_value(str(int(n)), TEAL_BRIGHT)
+            self._card_xp_progress.set_xph("—", TEXT_DIM)
+            self._card_xp_progress.set_remaining("∞", TEXT_DIM)
+
+    def set_played_time(self, total_seconds: int | None):
+        if total_seconds is None or total_seconds <= 0:
+            self._card_xp_progress.set_played("—", "", TEXT_DIM)
+            return
+        s = int(total_seconds)
+        days, rem = divmod(s, 86400)
+        hours, rem = divmod(rem, 3600)
+        minutes = rem // 60
+        if days > 0:
+            main = f"{days} jour{'s' if days > 1 else ''}"
+            sub  = f"{hours}h {minutes:02d}m"
+        elif hours > 0:
+            main = f"{hours}h {minutes:02d}m"
+            sub  = ""
+        else:
+            main = f"{minutes} min"
+            sub  = ""
+        self._card_xp_progress.set_played(main, sub, TEAL_BRIGHT)
 
     def load_combat_history(self, stats: dict):
         self._rt_spell_counts = dict(stats.get("spell_counts", {}))
@@ -808,11 +920,9 @@ class PersonnageTab(BaseTab):
         self.gender_changed.emit(self._gender)
 
     def _refresh_gender_btn(self):
-        opposite = "type_0" if self._gender == "type_1" else "type_1"
-        _ = _TYPE_COLORS.get(opposite, TEXT_DIM)
         icon_path = _EMOTE_FALLBACK
         if self._current_breed_id is not None:
-            icon_path = _emote_path(self._current_breed_id, opposite)
+            icon_path = _emote_path(self._current_breed_id, self._gender)
 
         if icon_path.exists():
             pix = QPixmap(str(icon_path)).scaled(56, 56, Qt.KeepAspectRatio, Qt.SmoothTransformation)
