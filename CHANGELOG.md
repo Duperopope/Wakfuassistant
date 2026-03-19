@@ -54,6 +54,10 @@ Verification effectuee :
 
 Conclusion : L'encodage etait deja correct. Le sync retourne 0 car il ne capture que les NOUVEAUX evenements temps reel, pas le total cumule.
 
+2026-03-19 - Tests: Ajout tests permanents_journal pour couverture _parse_event et estimation market price
+- Ajout tests unitaires pour _parse_event (kamas_gain, quest_complete, login)
+- Ajout test_estimate_market_price pour la fonction d'estimation des prix de dépôt
+
 2026-03-18 23:35 - Diagnostic et verification du tracking des transactions
 
 Analyse effectuee :

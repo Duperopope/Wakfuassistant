@@ -758,6 +758,58 @@ def _market_detect(event_type: str, event_data: dict, client_clock: str,
     return event_type, event_data, True
 
 
+def _emit_event_entry(
+    event_type: str,
+    event_data: dict,
+    client_clock: str,
+    ts_local_str: str,
+    source_name: str,
+    offset_ms: float | None,
+    fps_set: set[str],
+    fps_list: list[str],
+    pending: list,
+) -> dict | None:
+    """
+    Traite un événement: market deposit detection, fingerprint dédoublonnage.
+    Retourne l'entrée à émettre, ou None si skipper (doublon ou item_lost solo).
+    Met à jour fps_set et fps_list.
+    """
+    if event_type == "item_lost":
+        _market_detect(event_type, event_data, client_clock, pending)
+        return None
+
+    md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, pending)
+
+    if md_type == "market_deposit":
+        fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
+        if fp_md in fps_set:
+            return None
+        fps_set.add(fp_md)
+        fps_list.append(fp_md)
+        return {
+            "ts_local":      ts_local_str,
+            "ts_client":     client_clock,
+            "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+            "source_file":   source_name,
+            "type":          "market_deposit",
+            "data":          md_data,
+        }
+
+    fp = _make_fingerprint(event_type, event_data, client_clock)
+    if fp in fps_set:
+        return None
+    fps_set.add(fp)
+    fps_list.append(fp)
+    return {
+        "ts_local":      ts_local_str,
+        "ts_client":     client_clock,
+        "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+        "source_file":   source_name,
+        "type":          event_type,
+        "data":          event_data,
+    }
+
+
 def _market_tax_rate(days: int, territory_pct: int) -> float:
     """Taux de taxe effectif pour une durée de dépôt.
     28j = 100 %, 14j = 50 %, 7j = 33.33 % du taux territoire.
@@ -771,6 +823,9 @@ def _market_tax_rate(days: int, territory_pct: int) -> float:
     else:
         factor = days / 28.0
     return territory_pct / 100.0 * factor
+
+
+ 
 
 
 def estimate_market_price(
@@ -1019,6 +1074,9 @@ def _absorb_external_sources(fps_set: set[str], fps_list: list[str]) -> list[dic
             pass
 
     return all_entries
+
+
+"""Removed duplicate _build_entry defined here; keep the later 6-arg version."""
 
 
 # ── Rebuild complet ───────────────────────────────────────────────────────────
