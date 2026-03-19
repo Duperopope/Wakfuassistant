@@ -1,8 +1,16 @@
 # CHANGELOG
 
+2026-03-19 - Stabilisation des tests et correction des recettes
+- Fix: Assure la mise à jour unique des recettes via upsert_recipe sans duplication lors de changements mineurs (ID déterministe)
+- Tests: documentation des tests unitaires et résultats attendus
+- Docs: Mise à jour de docs/Codebase et de la structure de suivi des changements
+
 2026-03-19 - Correction health_check.py
 - Fix: Ajout support UTF-8 pour stdout (encodage Windows)
 - Fix: Correction du chemin vers all_events.jsonl (logs/permanent/)
+
+2026-03-19 - Wrapper compat OpenCode/test tooling
+- Ajout: wrapper core/database.py pour compatibilite import core.database (fallback vers core.game_database)
 
 2026-03-19 - Correction bug upsert_recipe (doublons)
 - Fix: `upsert_recipe` générait un nouvel ID à chaque modification de `output_qty`, créant des doublons au lieu de mettre à jour. L'ID est maintenant basé uniquement sur `output_item` et `components_len` (stable), pas sur `output_qty` (modifiable).
