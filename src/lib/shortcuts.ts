@@ -9,6 +9,9 @@ console.log("[Shortcuts] Module initialisé");
  */
 export async function registerShortcuts(): Promise<void> {
   try {
+    // Désenregistrer d'abord au cas où (HMR / redémarrage)
+    try { await unregister("F12"); } catch { /* ignoré si pas encore enregistré */ }
+
     await register("F12", async () => {
       const current = isClickThrough();
       await setClickThrough(!current);

@@ -1,8 +1,8 @@
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getAppWindow } from "./tauri";
 import { defaultWindowIcon } from "@tauri-apps/api/app";
-import { exit } from "@tauri-apps/plugin-process";
+import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { setClickThrough, isClickThrough } from "./overlayTracker";
 
 console.log("[Tray] Module initialisé");
@@ -15,7 +15,7 @@ let trayIcon: TrayIcon | null = null;
 export async function setupTray(): Promise<void> {
   try {
     // Récupérer l'icône par défaut
-    let icon = await defaultWindowIcon();
+    const icon = await defaultWindowIcon() ?? undefined;
 
     // Créer le menu tray
     const menu = await Menu.new({
@@ -25,7 +25,8 @@ export async function setupTray(): Promise<void> {
           text: "Afficher/Masquer",
           action: async () => {
             try {
-              const win = getCurrentWindow();
+              const win = getAppWindow();
+              if (!win) return;
               const visible = await win.isVisible();
               if (visible) {
                 await win.hide();
@@ -49,6 +50,18 @@ export async function setupTray(): Promise<void> {
               console.log(`[Tray] Click-through: ${!current}`);
             } catch (e) {
               console.error("[Tray] Erreur toggle-click-through:", e);
+            }
+          },
+        },
+        {
+          id: "restart",
+          text: "Redémarrer",
+          action: async () => {
+            try {
+              console.log("[Tray] Redémarrage...");
+              await relaunch();
+            } catch (e) {
+              console.error("[Tray] Erreur relaunch:", e);
             }
           },
         },

@@ -1,7 +1,6 @@
 import type { Component } from "solid-js";
 import { For, createSignal } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import { getCurrentWindow, LogicalSize, LogicalPosition } from "@tauri-apps/api/window";
 import {
   baySnap, setBaySnap,
   widgetRows,
@@ -51,50 +50,23 @@ const [collapsed,   setCollapsed]   = createSignal(false);
 const [hoveredTab,  setHoveredTab]  = createSignal<TabId | null>(null);
 
 const WidgetBay: Component = () => {
-  const appWindow = getCurrentWindow();
-
   /** Nombre de lignes de widgets visibles selon le snap actuel */
   const visibleRows = () => Math.floor((baySnap() - TAB_STRIP_H) / WIDGET_ROW_H);
 
   /** Cycle le snap de la baie (48 → 112 → 176 → 48 …) */
-  const cycleBaySnap = async () => {
+  const cycleBaySnap = () => {
     const idx      = BAY_SNAPS.findIndex((s) => s === baySnap());
     const nextSnap = BAY_SNAPS[(idx + 1) % BAY_SNAPS.length];
-    const oldSnap  = baySnap();
     setBaySnap(nextSnap);
-
-    // En mode collapsed, la fenêtre doit suivre (ancrage bas)
-    if (collapsed()) {
-      const pos   = await appWindow.outerPosition();
-      const scale = await appWindow.scaleFactor();
-      await appWindow.setPosition(
-        new LogicalPosition(pos.x / scale, pos.y / scale + oldSnap - nextSnap)
-      );
-      await appWindow.setSize(new LogicalSize(WINDOW_WIDTH, nextSnap));
-    }
+    console.log(`[WidgetBay] Bay snap → ${nextSnap}`);
   };
 
-  /** Bascule entre vue complète et vue miniature (baie seule) */
-  const toggleCollapse = async () => {
-    const next  = !collapsed();
-    const bh    = baySnap();
-    const pos   = await appWindow.outerPosition();
-    const scale = await appWindow.scaleFactor();
-    const lx    = pos.x / scale;
-    const ly    = pos.y / scale;
-
-    if (next) {
-      // Réduction → ancrer le bas, rétrécir vers le bas
-      await appWindow.setSize(new LogicalSize(WINDOW_WIDTH, bh));
-      await appWindow.setPosition(new LogicalPosition(lx, ly + FULL_HEIGHT - bh));
-    } else {
-      // Expansion → ancrer le bas, déployer vers le haut
-      await appWindow.setPosition(new LogicalPosition(lx, ly - (FULL_HEIGHT - bh)));
-      await appWindow.setSize(new LogicalSize(WINDOW_WIDTH, FULL_HEIGHT));
-    }
-
+  /** Bascule entre vue complète et vue miniature (tab bar seule) */
+  const toggleCollapse = () => {
+    const next = !collapsed();
     setHoveredTab(null);
     setCollapsed(next);
+    console.log(`[WidgetBay] collapsed → ${next}`);
   };
 
   return (

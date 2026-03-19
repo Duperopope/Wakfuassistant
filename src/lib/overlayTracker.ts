@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWindow, LogicalPosition, LogicalSize } from "@tauri-apps/api/window";
+import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/window";
+import { getAppWindow } from "./tauri";
 import { createSignal } from "solid-js";
 
 interface WakfuWindowInfo {
@@ -11,87 +12,111 @@ interface WakfuWindowInfo {
   is_minimized: boolean;
   is_visible: boolean;
   title: string;
+  dpi: number;
 }
 
-// État interne du tracker
+// ── État interne ────────────────────────────────────────────────────────────
 let trackerId: ReturnType<typeof setInterval> | null = null;
 let lastWakfuInfo: WakfuWindowInfo | null = null;
 const [clickThroughEnabled, setClickThroughEnabled] = createSignal(false);
 
+// Quand true, le tracker ne repositionne/redimensionne PAS la fenêtre
+let positionLocked = false;
+
 console.log("[OverlayTracker] Module initialisé");
 
-/**
- * Récupère les infos de la fenêtre Wakfu
- */
+export function lockPosition(): void {
+  positionLocked = true;
+  console.log("[OverlayTracker] Position LOCKED");
+}
+
+export function unlockPosition(): void {
+  positionLocked = false;
+  lastWakfuInfo = null;
+  console.log("[OverlayTracker] Position UNLOCKED");
+}
+
+export function isPositionLocked(): boolean {
+  return positionLocked;
+}
+
+// ── Fonctions internes ──────────────────────────────────────────────────────
+
 async function getWakfuWindowInfo(): Promise<WakfuWindowInfo> {
   try {
-    const info = await invoke<WakfuWindowInfo>("get_wakfu_window_info");
-    return info;
+    return await invoke<WakfuWindowInfo>("get_wakfu_window_info");
   } catch (e) {
     console.error("[OverlayTracker] Erreur get_wakfu_window_info:", e);
-    return { found: false, x: 0, y: 0, width: 0, height: 0, is_minimized: false, is_visible: false, title: "" };
+    return { found: false, x: 0, y: 0, width: 0, height: 0, is_minimized: false, is_visible: false, title: "", dpi: 96 };
   }
 }
 
 /**
- * Repositionne et redimensionne l'overlay à la même position que Wakfu
+ * Positionne l'overlay en coin supérieur droit de la fenêtre Wakfu.
+ * Utilise PhysicalPosition/PhysicalSize car GetWindowRect retourne des pixels physiques.
  */
 async function syncOverlayPosition(wakfuInfo: WakfuWindowInfo): Promise<void> {
-  const appWindow = getCurrentWindow();
+  const appWindow = getAppWindow();
+  if (!appWindow) return;
 
   try {
-    // Marge pour afficher l'overlay à proximité de Wakfu (coin supérieur droit)
     const OVERLAY_WIDTH = 400;
     const OVERLAY_HEIGHT = 300;
+
+    // Positionner en haut à droite de Wakfu, avec une marge de 10px
     const overlayX = wakfuInfo.x + wakfuInfo.width - OVERLAY_WIDTH - 10;
     const overlayY = wakfuInfo.y + 10;
 
-    await appWindow.setPosition(new LogicalPosition(overlayX, overlayY));
-    await appWindow.setSize(new LogicalSize(OVERLAY_WIDTH, OVERLAY_HEIGHT));
+    console.log(`[OverlayTracker] Wakfu: pos=(${wakfuInfo.x},${wakfuInfo.y}) size=${wakfuInfo.width}x${wakfuInfo.height} dpi=${wakfuInfo.dpi} title="${wakfuInfo.title}"`);
+    console.log(`[OverlayTracker] Overlay → PhysicalPosition(${overlayX}, ${overlayY}) PhysicalSize(${OVERLAY_WIDTH}, ${OVERLAY_HEIGHT})`);
 
-    console.debug(`[OverlayTracker] Position sync: (${overlayX}, ${overlayY})`);
+    await appWindow.setPosition(new PhysicalPosition(overlayX, overlayY));
+    await appWindow.setSize(new PhysicalSize(OVERLAY_WIDTH, OVERLAY_HEIGHT));
   } catch (e) {
     console.error("[OverlayTracker] Erreur sync position:", e);
   }
 }
 
-/**
- * Boucle principale : interroge Wakfu toutes les secondes
- */
+// ── Boucle principale (1 Hz) ────────────────────────────────────────────────
+
 async function trackLoop(): Promise<void> {
+  const appWindow = getAppWindow();
+  if (!appWindow) return;
+
   const wakfuInfo = await getWakfuWindowInfo();
 
   if (!wakfuInfo.found) {
-    // Wakfu pas trouvée : masquer l'overlay
     try {
-      await getCurrentWindow().hide();
-      console.debug("[OverlayTracker] Wakfu non trouvée → overlay masqué");
+      await appWindow.hide();
     } catch (e) {
-      console.error("[OverlayTracker] Erreur hide:", e);
+      console.error("[OverlayTracker] Erreur hide (not found):", e);
     }
     lastWakfuInfo = null;
     return;
   }
 
   if (wakfuInfo.is_minimized || !wakfuInfo.is_visible) {
-    // Wakfu minimisée : masquer l'overlay
     try {
-      await getCurrentWindow().hide();
-      console.debug("[OverlayTracker] Wakfu minimisée → overlay masqué");
+      await appWindow.hide();
     } catch (e) {
-      console.error("[OverlayTracker] Erreur hide:", e);
+      console.error("[OverlayTracker] Erreur hide (minimized):", e);
     }
     return;
   }
 
-  // Wakfu visible : afficher l'overlay
+  // Wakfu visible → afficher l'overlay
   try {
-    await getCurrentWindow().show();
+    await appWindow.show();
   } catch (e) {
     console.error("[OverlayTracker] Erreur show:", e);
   }
 
-  // Vérifier si la position/taille a changé (optimisation)
+  // Ne PAS repositionner si la position est verrouillée
+  if (positionLocked) {
+    return;
+  }
+
+  // Repositionner seulement si Wakfu a bougé/changé de taille
   if (
     !lastWakfuInfo ||
     lastWakfuInfo.x !== wakfuInfo.x ||
@@ -100,15 +125,13 @@ async function trackLoop(): Promise<void> {
     lastWakfuInfo.height !== wakfuInfo.height
   ) {
     await syncOverlayPosition(wakfuInfo);
-    console.debug("[OverlayTracker] Position mise à jour");
   }
 
   lastWakfuInfo = wakfuInfo;
 }
 
-/**
- * Démarre le suivi de la fenêtre Wakfu (1 Hz)
- */
+// ── API publique ────────────────────────────────────────────────────────────
+
 export async function startOverlayTracker(): Promise<void> {
   if (trackerId !== null) {
     console.warn("[OverlayTracker] Tracker déjà actif");
@@ -117,7 +140,6 @@ export async function startOverlayTracker(): Promise<void> {
 
   console.log("[OverlayTracker] Démarrage du tracker");
 
-  // Initialiser l'overlay
   try {
     await setOverlayAlwaysOnTop(true);
     console.log("[OverlayTracker] Always-on-top activé");
@@ -125,17 +147,17 @@ export async function startOverlayTracker(): Promise<void> {
     console.error("[OverlayTracker] Erreur always-on-top:", e);
   }
 
-  // Boucle toutes les secondes
+  // Premier tick immédiat
+  trackLoop().catch((e) => console.error("[OverlayTracker] Erreur premier tick:", e));
+
+  // Puis toutes les secondes
   trackerId = setInterval(() => {
     trackLoop().catch((e) => console.error("[OverlayTracker] Erreur boucle:", e));
   }, 1000);
 
-  console.log("[OverlayTracker] Tracker actif");
+  console.log("[OverlayTracker] Tracker actif (1 Hz)");
 }
 
-/**
- * Arrête le suivi
- */
 export function stopOverlayTracker(): void {
   if (trackerId !== null) {
     clearInterval(trackerId);
@@ -144,12 +166,10 @@ export function stopOverlayTracker(): void {
   }
 }
 
-/**
- * Bascule le click-through (curseur passe à travers l'overlay)
- */
 export async function setClickThrough(enabled: boolean): Promise<void> {
   try {
-    const appWindow = getCurrentWindow();
+    const appWindow = getAppWindow();
+    if (!appWindow) return;
     await invoke("toggle_click_through", { enabled, window: appWindow });
     setClickThroughEnabled(enabled);
     console.log(`[OverlayTracker] Click-through: ${enabled}`);
@@ -158,12 +178,10 @@ export async function setClickThrough(enabled: boolean): Promise<void> {
   }
 }
 
-/**
- * Définit always-on-top
- */
 export async function setOverlayAlwaysOnTop(enabled: boolean): Promise<void> {
   try {
-    const appWindow = getCurrentWindow();
+    const appWindow = getAppWindow();
+    if (!appWindow) return;
     await invoke("set_overlay_always_on_top", { enabled, window: appWindow });
     console.log(`[OverlayTracker] Always-on-top: ${enabled}`);
   } catch (e) {
@@ -171,9 +189,6 @@ export async function setOverlayAlwaysOnTop(enabled: boolean): Promise<void> {
   }
 }
 
-/**
- * Retourne l'état du click-through
- */
 export function isClickThrough(): boolean {
   return clickThroughEnabled();
 }

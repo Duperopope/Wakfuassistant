@@ -1,4 +1,19 @@
 import { invoke, Channel } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
+/**
+ * Wrapper HMR-safe autour de getCurrentWindow().
+ * Pendant un hot-reload Vite, le bridge Tauri (__TAURI_INTERNALS__)
+ * peut être momentanément undefined — cette fonction retourne null
+ * au lieu de crasher.
+ */
+export function getAppWindow() {
+  try {
+    return getCurrentWindow();
+  } catch {
+    return null;
+  }
+}
 
 // =============================================
 // TYPES — miroirs exacts des structs Rust

@@ -1,9 +1,8 @@
 import type { Component } from "solid-js";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { gameState } from "../../stores/sessionStore";
+import { getAppWindow } from "../../lib/tauri";
 
 const Titlebar: Component = () => {
-  const appWindow = getCurrentWindow();
 
   const stateColor = () => {
     const s = gameState();
@@ -56,7 +55,7 @@ const Titlebar: Component = () => {
 
       {/* Bouton fermer */}
       <button
-        onClick={() => appWindow.close()}
+        onClick={() => getAppWindow()?.close()}
         class="w-7 h-7 flex items-center justify-center rounded hover:bg-defeat-red/80 text-text-muted hover:text-white transition-colors"
         title="Fermer"
       >

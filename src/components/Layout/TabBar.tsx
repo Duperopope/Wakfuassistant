@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import { For, createSignal } from "solid-js";
-import { getCurrentWindow, LogicalSize, LogicalPosition } from "@tauri-apps/api/window";
+import { LogicalSize, LogicalPosition } from "@tauri-apps/api/window";
+import { getAppWindow } from "../../lib/tauri";
 import { session } from "../../stores/sessionStore";
 
 export type TabId = "character" | "combat" | "professions" | "economy" | "options";
@@ -56,9 +57,9 @@ function widgetColor(id: TabId): string {
 }
 
 const TabBar: Component = () => {
-  const appWindow = getCurrentWindow();
-
   const toggleCollapse = async () => {
+    const appWindow = getAppWindow();
+    if (!appWindow) return;
     const next = !collapsed();
     const pos = await appWindow.outerPosition();
     const scale = await appWindow.scaleFactor();

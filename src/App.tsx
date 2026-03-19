@@ -86,14 +86,11 @@ const App: Component = () => {
     );
   });
 
-  onCleanup(async () => {
+  onCleanup(() => {
     stopOverlayTracker();
-    unregisterShortcuts().catch((e) =>
-      console.error("[App] Erreur unregisterShortcuts:", e)
-    );
-    closeTray().catch((e) =>
-      console.error("[App] Erreur closeTray:", e)
-    );
+    // En mode HMR, le bridge Tauri peut être détruit — on ignore les erreurs
+    try { unregisterShortcuts().catch(() => {}); } catch {}
+    try { closeTray().catch(() => {}); } catch {}
   });
 
   return (
