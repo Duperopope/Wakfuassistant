@@ -92,6 +92,7 @@ pub enum XpSource {
     Unknown,
 }
 
+#[allow(dead_code)] // Utilisé en Phase 4 pour la persistance DB
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimestampedEvent {
     pub id: Option<i64>,

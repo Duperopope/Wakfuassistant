@@ -4,10 +4,10 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use notify::{RecursiveMode, Watcher};
+use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
 use tauri::ipc::Channel;
-use tracing::{error, info, warn};
+use tracing::info;
 
 use crate::models::game_event::{GameEvent, LogSource};
 use crate::services::log_parser::LogParser;

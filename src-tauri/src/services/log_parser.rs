@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use tracing::{debug, warn};
+use tracing::debug;
 
 use crate::models::game_event::{GameEvent, KamasSource, LogSource, XpSource};
 
@@ -14,6 +14,7 @@ struct PatternEntry {
     extract: fn(&regex::Captures) -> Option<GameEvent>,
     /// Exemples réels tirés des journaux d'écoute (docs/RND/).
     /// Servent de documentation et de base pour les tests unitaires.
+    #[cfg_attr(not(test), allow(dead_code))]
     examples: &'static [&'static str],
 }
 
@@ -24,7 +25,8 @@ enum PatternSource {
     Both,
     /// Exclusif à wakfu.log (combat, connexion, état technique)
     MainOnly,
-    /// Exclusif à wakfu_chat.log
+    /// Exclusif à wakfu_chat.log (utilisé en Phase 4)
+    #[allow(dead_code)]
     ChatOnly,
 }
 
@@ -487,7 +489,7 @@ static PATTERNS: LazyLock<Vec<PatternEntry>> = LazyLock::new(|| {
             source: PatternSource::Both,
             regex: &RE_QUEST_COMPLETED,
             extract: |caps| {
-                let quest = caps[1].trim().to_string();
+                let _quest = caps[1].trim().to_string();
                 Some(GameEvent::XpGained {
                     amount: 0,
                     source: XpSource::Quest,
@@ -608,7 +610,8 @@ impl LogParser {
         }
     }
 
-    /// Parse un batch de lignes
+    /// Parse un batch de lignes (utilisé par les commandes de rescan)
+    #[allow(dead_code)]
     pub fn parse_batch(&mut self, lines: &[String], source: LogSource) -> Vec<GameEvent> {
         lines.iter().map(|l| self.parse_line(l, source.clone())).collect()
     }

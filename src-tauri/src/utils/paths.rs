@@ -95,12 +95,14 @@ pub fn database_path() -> PathBuf {
     app_data_dir().join("wakfu_overlay.db")
 }
 
-/// Chemin du fichier de configuration utilisateur
+/// Chemin du fichier de configuration utilisateur (Phase 4)
+#[allow(dead_code)]
 pub fn config_path() -> PathBuf {
     app_data_dir().join("config.json")
 }
 
-/// Chemin du répertoire de cache CDN
+/// Chemin du répertoire de cache CDN (Phase 5)
+#[allow(dead_code)]
 pub fn cdn_cache_dir() -> PathBuf {
     app_data_dir().join("cdn_cache")
 }
