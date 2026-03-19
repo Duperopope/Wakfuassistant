@@ -21,6 +21,10 @@ Verification effectuee :
 - rebuild_all_events retourne {"all": 25264, "kamas": 797}
 - 7 tests passent
 
+2026-03-19 - Documentation phase 1: Codebase docs ajoutés
+- Ajout: docs/Codebase/Overview.md et docs/Codebase/Testing.md
+- Phase 1 terminee: documentation applicative complete et prete pour la phase 2
+
 Conclusion : L'encodage etait deja correct. Le sync retourne 0 car il ne capture que les NOUVEAUX evenements temps reel, pas le total cumule.
 
 2026-03-18 23:35 - Diagnostic et verification du tracking des transactions
