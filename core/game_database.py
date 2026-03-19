@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 from threading import Lock
 
@@ -159,7 +160,26 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
     rkey = "incoming" if str(recipe_type or "").strip().lower() == "incoming" else "outgoing"
     rid = str(recipe.get("id", "")).strip()
     if not rid:
-        rid = f"{pkey}-{rkey}-{abs(hash((recipe.get('output_item'), recipe.get('output_qty'), len(recipe.get('components', []))))) % 10_000_000}"
+        # Generate a stable, deterministic id based on essential recipe contents
+        # This ensures repeated upserts of the same recipe update the existing entry
+        output_item = str(recipe.get("output_item", "")).strip()
+        components = recipe.get("components", [])
+        comps = []
+        for c in components:
+            if isinstance(c, dict):
+                comps.append({
+                    "item": str(c.get("item", "")).strip(),
+                    "qty": int(c.get("qty", 1) or 1),
+                })
+        # Normalize order for deterministic hashing
+        comps.sort(key=lambda x: x["item"])
+        data = {
+            "output_item": output_item,
+            "output_qty": int(recipe.get("output_qty", 1) or 1),
+            "components": comps,
+        }
+        hash_digest = hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()[:8]
+        rid = f"{pkey}-{rkey}-{hash_digest}"
     _opt_int = lambda k: int(recipe[k]) if recipe.get(k) is not None else None
     normalized = {
         "id":          rid,
