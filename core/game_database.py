@@ -209,12 +209,18 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
             if not isinstance(by_prof.get(rk), list):
                 by_prof[rk] = []
         lst: list[dict] = by_prof[rkey]
+        # If an entry with the same id already exists, update it.
         for i, existing in enumerate(lst):
             if isinstance(existing, dict) and str(existing.get("id", "")) == rid:
                 lst[i] = normalized
                 _write_db(db)
                 return
+        # No existing entry with this id. Before appending, ensure no duplicates exist
+        # for this same id (defensive): remove any stale duplicates, then append.
+        if any(isinstance(r, dict) and str(r.get("id", "")) == rid for r in lst):
+            lst = [r for r in lst if not (isinstance(r, dict) and str(r.get("id", "")) == rid)]
         lst.append(normalized)
+        by_prof[rkey] = lst
         _write_db(db)
 
 
