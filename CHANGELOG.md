@@ -31,6 +31,20 @@
 - `Cargo.toml` — ajout notify 8, notify-debouncer-mini 0.6, `rust-version = "1.80"` (LazyLock stable)
 - 16 tests unitaires (8 parser + 5 FSM + 3 méta-tests) — tous passent
 
+### Phase 3a — Squelette UI (validation bout-en-bout)
+
+- `globals.css` — thème gaming Tailwind v4 (oklch), scrollbar custom, fond transparent
+- `vite.config.ts` — intégration @tailwindcss/vite, port 1420, target es2021
+- `lib/tauri.ts` — couche IPC typée : types miroirs des structs Rust, `startPipeline()` via Channel
+- `stores/sessionStore.ts` — store SolidJS réactif, signaux GameState/ParserHealth/recentEvents, `initPipeline()`
+- `Titlebar.tsx` — barre de titre custom draggable (data-tauri-drag-region), indicateur FSM coloré, boutons minimize/close SVG
+- `TabBar.tsx` — 5 onglets avec signal activeTab, highlight doré
+- `CharacterTab.tsx` — affichage kamas (balance + delta), XP, combats, winrate, feed d'événements récents, indicateur santé parser
+- `App.tsx` — assembleur avec Switch/Match, placeholders Phase 4
+- `capabilities/default.json` — permissions fenêtre (dragging, close, minimize, click-through)
+- Suppression du scaffold Vite par défaut (App.css, index.css, assets demo)
+- TypeScript 0 erreurs, Rust 0 warnings, 16 tests toujours verts
+
 ---
 
 ## v1.0-final — Prototype Python/PyQt5 (archivé)

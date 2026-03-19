@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* === THEME GAMING WAKFU OVERLAY === */
+@theme {
+  /* Palette principale - inspirée de l'ambiance Wakfu */
+  --color-overlay-bg: oklch(0.15 0.01 260);        /* Fond quasi-noir bleuté */
+  --color-overlay-surface: oklch(0.20 0.015 260);   /* Surface des cartes */
+  --color-overlay-border: oklch(0.30 0.02 260);     /* Bordures subtiles */
+
+  /* Accent - Or Wakfu (kamas) */
+  --color-kamas: oklch(0.80 0.15 85);
+  --color-kamas-dim: oklch(0.65 0.12 85);
+
+  /* Sémantique */
+  --color-xp-blue: oklch(0.70 0.15 250);
+  --color-victory-green: oklch(0.72 0.19 155);
+  --color-defeat-red: oklch(0.65 0.20 25);
+  --color-profession-purple: oklch(0.68 0.15 300);
+
+  /* Texte */
+  --color-text-primary: oklch(0.92 0.01 260);
+  --color-text-secondary: oklch(0.60 0.01 260);
+  --color-text-muted: oklch(0.45 0.01 260);
+
+  /* Titlebar */
+  --color-titlebar: oklch(0.12 0.01 260);
+
+  /* Tailles spécifiques overlay */
+  --spacing-titlebar: 32px;
+}
+
+/* === BASE === */
+@layer base {
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    /* Empêcher la sélection de texte dans l'overlay */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Scrollbar gaming discrète */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-overlay-border);
+    border-radius: 2px;
+  }
+}
