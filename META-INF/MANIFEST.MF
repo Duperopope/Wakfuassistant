@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Agent-Class: wakfu2.RuntimeAgentV6
-Premain-Class: wakfu2.RuntimeAgentV6
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-Created-By: 21.0.10 (Microsoft)
-

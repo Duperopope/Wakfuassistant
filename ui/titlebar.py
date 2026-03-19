@@ -14,7 +14,7 @@ from ui.theme import (
 
 HEIGHT = 40
 _ICON_DIR    = Path(__file__).resolve().parent / "assets" / "titlebar"
-_HEADER_PNG  = Path(__file__).resolve().parent / "assets" / "wakfu_theme" / "extracted" / "HeaderLarge.png"
+_HEADER_PNG  = Path(__file__).resolve().parent / "assets" / "HeaderLarge.png"
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 _CLASS_ICON_CACHE_DIR = _PROJECT_ROOT / "data" / "ankama_cdn" / "class_icons"
 _ZAAP_WAKFU_ICON = Path.home() / "AppData" / "Roaming" / "zaap" / "repositories" / "production" / "wakfu" / "main" / "data" / "icon.png"
