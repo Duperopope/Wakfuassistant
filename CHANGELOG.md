@@ -2,7 +2,7 @@
 
 2026-03-19 - Stabilisation des tests et corrections diverses
 - Fix: stabilisation des tests et corrections des chemins et encodages (health_check, tests de base).
-- Tests: correction et stabilisation des tests pour test_game_database.py (upsert_recipe) et pour le journal permanant.
+- Tests: ajout tests pour item_icons (_clean_type, _normalize accents) et correction tests existants.
 - Docs: mise à jour de docs/Codebase et consolidation des notes de changements.
 
 2026-03-19 - Stabilisation des tests et correction de la generation deterministe des IDs de recettes
