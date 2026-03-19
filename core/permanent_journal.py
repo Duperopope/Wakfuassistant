@@ -1166,8 +1166,8 @@ def rebuild_all_events() -> dict[str, int]:
     count_kamas = sum(1 for e in all_entries if e.get("type") in ("kamas_gain", "kamas_loss"))
 
     try:
-        with (_ALL_EVENTS_LOG.open("w", encoding="utf-8") as jfh,
-              _ALL_EVENTS_READABLE.open("w", encoding="utf-8") as lfh):
+        with (_ALL_EVENTS_LOG.open("w", encoding="utf-8", newline="") as jfh,
+              _ALL_EVENTS_READABLE.open("w", encoding="utf-8", newline="") as lfh):
             for entry in all_entries:
                 jfh.write(json.dumps(entry, ensure_ascii=False) + "\n")
                 lfh.write(_format_log_line(entry) + "\n")
@@ -1244,8 +1244,8 @@ def sync_permanent_journal() -> dict[str, int]:
     _sync_pending: list = [None]
 
     try:
-        with (_ALL_EVENTS_LOG.open("a", encoding="utf-8") as jfh,
-              _ALL_EVENTS_READABLE.open("a", encoding="utf-8") as lfh):
+        with (_ALL_EVENTS_LOG.open("a", encoding="utf-8", newline="") as jfh,
+              _ALL_EVENTS_READABLE.open("a", encoding="utf-8", newline="") as lfh):
             for source in sources_list:
                 source_key = str(source)
                 all_src = all_sources_state.get(source_key)

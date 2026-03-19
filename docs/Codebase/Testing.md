@@ -1,22 +1,19 @@
-Testing Guide for WakfuAssistant
+Codebase Testing
+==============
 
-Prerequisites:
-- Python 3.10+ (prefer Python 3.10.x as in CI)
-- Virtual environment activated
+Goals for Phase 1 tests:
+- Ensure core functionality is exercised by automated tests (pytest).
+- Provide a health_check.py to verify environment readiness after changes.
+- Keep tests fast, deterministic and isolated (temporary DB paths per test).
 
-Running tests:
-- Install dependencies: pytest, etc. (as defined in project)
-- Run all tests: pytest -q
-- Run a single test module: pytest tests/test_game_database.py -q
+Test conventions:
+- Use temporary file paths for JSON databases in tests (as seen in tests/test_*.py).
+- Avoid external side effects; tests should be hermetic.
+- When tests fail, the repository should be easily diagnosable via health_check and logs.
 
-Health check:
-- Run: python health_check.py
-- Exit code 0 means all checks pass; any failure should be resolved before merging.
+How to run tests locally:
+- Execute: python -m pytest -q
+- To run a single test module: python -m pytest tests/test_<module>.py
+- Health check: python health_check.py
 
-Test strategy:
-- Ensure tests cover core features (database upsert/delete, item settings, etc.)
-- Keep tests deterministic; avoid relying on system state
-- Add new tests for new features
-
-Documentation:
-- Update docs/Codebase/Testing.md when you add new tests or change testing strategy
+Docs section is intentionally lightweight and focuses on reproducible test results and project hygiene.
