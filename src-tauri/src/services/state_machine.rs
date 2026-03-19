@@ -1,5 +1,5 @@
 use serde::Serialize;
-use tracing::info;
+use tracing::{info, trace, debug};
 
 use crate::models::game_event::GameEvent;
 
@@ -72,6 +72,7 @@ pub struct StateMachine {
 
 impl StateMachine {
     pub fn new() -> Self {
+        debug!(category = "FSM", "StateMachine::new ▶ état initial: Offline");
         Self {
             state: GameState::Offline,
             last_server: None,
@@ -80,11 +81,13 @@ impl StateMachine {
     }
 
     pub fn state(&self) -> &GameState {
+        trace!(category = "FSM", state = ?self.state, "state ▶");
         &self.state
     }
 
     /// Traite un GameEvent et retourne une transition si l'état change.
     pub fn process(&mut self, event: &GameEvent) -> Option<StateTransition> {
+        debug!(category = "FSM", event = ?event, current_state = ?self.state, "process ▶");
         let new_state = match (&self.state, event) {
             // === Vers LOADING ===
             (_, GameEvent::ServerConnected { server }) => {
@@ -193,13 +196,16 @@ impl StateMachine {
                     to: new.clone(),
                 };
                 info!(
-                    from = ?self.state,
-                    to = ?new,
-                    "Transition d'état"
+                    category = "FSM",
+                    from = ?transition.from,
+                    to = ?transition.to,
+                    "⟶ Transition"
                 );
                 self.state = new;
                 return Some(transition);
             }
+        } else {
+            trace!(category = "FSM", event = ?event, state = ?self.state, "process — pas de transition");
         }
 
         None

@@ -2,55 +2,65 @@ import type { Component } from "solid-js";
 import { createSignal } from "solid-js";
 import { loadSettings, saveSettings } from "../../lib/settings";
 import { invoke } from "@tauri-apps/api/core";
+import { setEnabled, L } from "../../lib/logger";
 
 const OptionsTab: Component = () => {
   const [theme, setTheme] = createSignal<"dark" | "light">("dark");
   const [language, setLanguage] = createSignal<"fr" | "en">("fr");
   const [opacity, setOpacity] = createSignal(0.9);
+  const [verboseLogs, setVerboseLogs] = createSignal(false);
   const [isSaving, setIsSaving] = createSignal(false);
   const [statusMessage, setStatusMessage] = createSignal("");
 
   // Charger les settings au montage
   const loadSettingsOnMount = async () => {
+    L.settings.debug('OptionsTab.loadSettings', 'chargement settings');
     try {
       const settings = await loadSettings();
       setTheme(settings.theme);
       setLanguage(settings.language);
       setOpacity(settings.overlayOpacity);
+      setVerboseLogs(settings.verboseLogs ?? false);
+      L.settings.debug('OptionsTab.loadSettings', 'settings chargés',
+        { theme: settings.theme, language: settings.language, opacity: settings.overlayOpacity, verbose: settings.verboseLogs });
     } catch (e) {
-      console.error("[OptionsTab] Erreur loadSettings:", e);
+      L.settings.error('OptionsTab.loadSettings', 'Erreur loadSettings', e);
     }
   };
   loadSettingsOnMount();
 
   const saveCurrentSettings = async () => {
+    L.settings.info('OptionsTab.saveSettings', 'sauvegarde manuelle',
+      { theme: theme(), language: language(), opacity: opacity(), verbose: verboseLogs() });
     setIsSaving(true);
     try {
-      await saveSettings({
-        bayHeight: 48,
-        clickThroughHotkey: "F12",
-        theme: theme(),
-        language: language(),
-        overlayOpacity: opacity(),
-      });
-      setStatusMessage("Paramètres sauvegardés ✓");
+      const current = await loadSettings();
+      current.theme = theme();
+      current.language = language();
+      current.overlayOpacity = opacity();
+      current.verboseLogs = verboseLogs();
+      await saveSettings(current);
+      setStatusMessage("Paramètres sauvegardés \u2713");
       setTimeout(() => setStatusMessage(""), 3000);
+      L.settings.info('OptionsTab.saveSettings', 'settings sauvegardés');
     } catch (e) {
-      console.error("[OptionsTab] Erreur saveSettings:", e);
-      setStatusMessage("Erreur sauvegarde ✗");
+      L.settings.error('OptionsTab.saveSettings', 'Erreur saveSettings', e);
+      setStatusMessage("Erreur sauvegarde \u2717");
     } finally {
       setIsSaving(false);
     }
   };
 
   const refreshCdnCache = async () => {
+    L.ipc.info('OptionsTab.refreshCdn', 'refresh CDN cache');
     setIsSaving(true);
     try {
       const msg = await invoke<string>("refresh_cdn_cache");
       setStatusMessage(msg);
       setTimeout(() => setStatusMessage(""), 4000);
+      L.ipc.info('OptionsTab.refreshCdn', 'CDN rafraîchi', { msg });
     } catch (e) {
-      console.error("[OptionsTab] Erreur refresh_cdn_cache:", e);
+      L.ipc.error('OptionsTab.refreshCdn', 'Erreur refresh_cdn_cache', e);
       setStatusMessage("Erreur rafraîchissement ✗");
     } finally {
       setIsSaving(false);
@@ -138,6 +148,29 @@ const OptionsTab: Component = () => {
             accentColor: "var(--color-kamas)",
           }}
         />
+      </div>
+
+      {/* Logs détaillés */}
+      <div class="flex items-center justify-between">
+        <label class="text-text-muted">Logs détaillés</label>
+        <button
+          onClick={() => {
+            const next = !verboseLogs();
+            L.settings.info('OptionsTab.verboseToggle', `verbose logs: ${verboseLogs()} → ${next}`);
+            setVerboseLogs(next);
+            setEnabled(next);
+            invoke('set_verbose_logging', { enabled: next }).catch(
+              (e) => L.settings.error('OptionsTab.verboseToggle', 'invoke set_verbose_logging échoué', e)
+            );
+          }}
+          class={`relative w-10 h-5 rounded-full transition-colors ${
+            verboseLogs() ? 'bg-kamas' : 'bg-overlay-surface'
+          }`}
+        >
+          <span class={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+            verboseLogs() ? 'left-5' : 'left-0.5'
+          }`} />
+        </button>
       </div>
 
       {/* Séparateur */}

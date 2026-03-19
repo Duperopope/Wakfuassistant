@@ -1,7 +1,6 @@
 import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import { setClickThrough, isClickThrough } from "./overlayTracker";
-
-console.log("[Shortcuts] Module initialisé");
+import { L } from "./logger";
 
 /**
  * Enregistre les raccourcis globaux
@@ -14,14 +13,14 @@ export async function registerShortcuts(): Promise<void> {
 
     await register("F12", async () => {
       const current = isClickThrough();
-      await setClickThrough(!current);
-      const newState = !current;
-      console.log(`[Shortcuts] F12 pressed → click-through toggled to ${newState}`);
+      const enabled = !current;
+      await setClickThrough(enabled);
+      L.shortcuts.debug('registerShortcuts', 'toggle click-through', { enabled });
     });
 
-    console.log("[Shortcuts] ✓ F12 registered");
+    L.shortcuts.info('registerShortcuts', 'F12 enregistré');
   } catch (e) {
-    console.error("[Shortcuts] Erreur register F12:", e);
+    L.shortcuts.error('registerShortcuts', 'Erreur register F12', e);
     throw e;
   }
 }
@@ -32,11 +31,9 @@ export async function registerShortcuts(): Promise<void> {
 export async function unregisterShortcuts(): Promise<void> {
   try {
     await unregister("F12");
-    console.log("[Shortcuts] ✓ F12 unregistered");
+    L.shortcuts.info('unregisterShortcuts', 'raccourcis supprimés');
   } catch (e) {
-    console.error("[Shortcuts] Erreur unregister F12:", e);
+    L.shortcuts.error('unregisterShortcuts', 'Erreur unregister F12', e);
     throw e;
   }
 }
-
-console.log("[Shortcuts] Module chargé");

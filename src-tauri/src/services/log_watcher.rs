@@ -7,7 +7,7 @@ use std::time::Duration;
 use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
 use tauri::ipc::Channel;
-use tracing::info;
+use tracing::{debug, info, trace};
 
 use crate::models::game_event::{GameEvent, LogSource};
 use crate::services::log_parser::LogParser;
@@ -49,11 +49,13 @@ impl LogFileReader {
             "Lecteur incrémental initialisé"
         );
 
-        Self {
+        let reader = Self {
             path,
             cursor,
             source,
-        }
+        };
+        trace!(category = "WATCHER", source = ?reader.source, cursor = reader.cursor, "LogFileReader::new ◀");
+        reader
     }
 
     /// Lit les nouvelles lignes depuis la dernière position.
@@ -98,6 +100,7 @@ impl LogFileReader {
         }
 
         self.cursor = reader.stream_position().unwrap_or(file_size);
+        trace!(category = "WATCHER", source = ?self.source, count = new_lines.len(), "read_new_lines ◀");
         new_lines
     }
 
@@ -144,6 +147,7 @@ impl PipelineState {
     /// Lit les nouvelles lignes de tous les fichiers, parse, et retourne les événements.
     pub fn poll(&mut self) -> Vec<GameStreamEvent> {
         let mut stream_events = Vec::new();
+        trace!(category = "WATCHER", "poll ▶");
 
         // Vérifier si les fichiers sont apparus (joueur vient de lancer Wakfu)
         self.check_file_creation();
@@ -169,6 +173,7 @@ impl PipelineState {
             }
         }
 
+        trace!(category = "WATCHER", count = stream_events.len(), "poll ◀");
         stream_events
     }
 
@@ -219,6 +224,7 @@ pub fn start_pipeline(
     log_dir: PathBuf,
     channel: Channel<GameStreamEvent>,
 ) -> Result<Arc<Mutex<PipelineState>>, Box<dyn std::error::Error>> {
+    debug!(category = "WATCHER", dir = %log_dir.display(), "start_pipeline ▶");
     let state = Arc::new(Mutex::new(PipelineState::new(&log_dir)));
 
     // Émettre le statut initial des fichiers

@@ -27,6 +27,16 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        .setup(|app| {
+            // Installer le WndProc subclass pour click-through partiel (bouton œil reste actif)
+            #[cfg(windows)]
+            if let Some(window) = app.get_webview_window("main") {
+                if let Ok(hwnd) = window.hwnd() {
+                    services::win32_overlay::install_nchittest_subclass(hwnd.0 as isize);
+                }
+            }
+            Ok(())
+        })
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // Une instance existe déjà → on la remet au premier plan
             if let Some(window) = app.get_webview_window("main") {
@@ -48,9 +58,13 @@ pub fn run() {
             commands::overlay_commands::get_wakfu_window_info,
             commands::overlay_commands::toggle_click_through,
             commands::overlay_commands::set_overlay_always_on_top,
+            commands::overlay_commands::reorder_above_wakfu,
+            commands::overlay_commands::update_interactive_zone,
             commands::cdn_commands::get_cdn_version,
             commands::cdn_commands::refresh_cdn_cache,
             commands::cdn_commands::get_item_name,
+            commands::log_commands::set_verbose_logging,
+            commands::log_commands::bridge_log,
         ])
         .run(tauri::generate_context!())
         .expect("Erreur au lancement de Wakfu Overlay");

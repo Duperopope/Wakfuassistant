@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use tracing::debug;
+use tracing::{debug, trace};
 
 use crate::models::game_event::{GameEvent, KamasSource, LogSource, XpSource};
 
@@ -548,6 +548,7 @@ pub struct LogParser {
 
 impl LogParser {
     pub fn new() -> Self {
+        tracing::debug!(category = "PARSER", "LogParser::new ▶");
         Self {
             total_lines: 0,
             matched_lines: 0,
@@ -559,6 +560,8 @@ impl LogParser {
     pub fn parse_line(&mut self, line: &str, source: LogSource) -> GameEvent {
         self.total_lines += 1;
         let trimmed = line.trim();
+
+        trace!(category = "PARSER", source = ?source, total = self.total_lines, line = trimmed, "parse_line ▶");
 
         if trimmed.is_empty() {
             return GameEvent::Unrecognized {
@@ -581,9 +584,10 @@ impl LogParser {
                 if let Some(event) = (pattern.extract)(&caps) {
                     self.matched_lines += 1;
                     debug!(
+                        category = "PARSER",
                         pattern = pattern.name,
                         version = pattern.version,
-                        "Ligne matchée"
+                        "✓ match → {:?}", event
                     );
                     return event;
                 }
@@ -591,6 +595,7 @@ impl LogParser {
         }
 
         // Pas de warn ici — beaucoup de lignes sont du bruit technique normal
+        trace!(category = "PARSER", line = %trimmed, "✗ aucun match");
         GameEvent::Unrecognized {
             raw_line: trimmed.to_string(),
         }
@@ -599,6 +604,7 @@ impl LogParser {
     /// Parse un batch de lignes (utilisé par les commandes de rescan)
     #[allow(dead_code)]
     pub fn parse_batch(&mut self, lines: &[String], source: LogSource) -> Vec<GameEvent> {
+        debug!(category = "PARSER", count = lines.len(), source = ?source, "parse_batch ▶");
         lines
             .iter()
             .map(|l| self.parse_line(l, source.clone()))
@@ -607,6 +613,7 @@ impl LogParser {
 
     /// Retourne les métriques de santé
     pub fn health(&self) -> ParserHealth {
+        trace!(category = "PARSER", total = self.total_lines, matched = self.matched_lines, "health ▶");
         let unmatched = self.total_lines - self.matched_lines;
         let rate = if self.total_lines > 0 {
             self.matched_lines as f64 / self.total_lines as f64

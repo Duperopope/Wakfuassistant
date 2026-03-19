@@ -1,6 +1,7 @@
 import { createStore, produce } from "solid-js/store";
 import { createSignal } from "solid-js";
 // onMount/onCleanup non utilisés ici — initPipeline() est appelé depuis App.tsx
+import { L } from "../lib/logger";
 import {
   startPipeline,
   getSessionStats,
@@ -52,21 +53,25 @@ function handleStreamEvent(event: GameStreamEvent): void {
   switch (event.event) {
     case "sessionUpdate":
       // Merge partiel — seules les props qui changent déclenchent un re-render
+      L.store.debug('handleStreamEvent', 'sessionUpdate', event.data);
       setSession(produce((s) => {
         Object.assign(s, event.data);
       }));
       break;
 
     case "stateChange":
+      L.store.debug('handleStreamEvent', 'stateChange', event.data);
       setGameState(event.data.details);
       break;
 
     case "parserHealth":
+      L.store.debug('handleStreamEvent', 'parserHealth', event.data);
       setParserHealth(event.data);
       break;
 
     case "gameEvent":
       // Garder les 50 derniers événements pour le feed temps réel
+      L.store.debug('handleStreamEvent', 'gameEvent', event.data);
       setRecentEvents((prev) => [event.data, ...prev].slice(0, 50));
       break;
   }
@@ -96,9 +101,9 @@ export async function initPipeline(): Promise<void> {
     await startPipeline(handleStreamEvent);
     setPipelineActive(true);
 
-    console.log("[Pipeline] Démarré avec succès");
+    L.store.info('initPipeline', 'pipeline démarré');
   } catch (err) {
-    console.error("[Pipeline] Erreur d'initialisation:", err);
+    L.pipeline.error('initPipeline', 'Erreur d\'initialisation', err);
   }
 }
 
