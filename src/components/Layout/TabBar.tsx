@@ -1,4 +1,5 @@
-import { Component, For, createSignal } from "solid-js";
+import type { Component } from "solid-js";
+import { For, createSignal } from "solid-js";
 
 export type TabId = "character" | "combat" | "professions" | "economy" | "options";
 

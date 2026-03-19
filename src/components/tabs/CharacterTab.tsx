@@ -1,4 +1,5 @@
-import { Component, Show, For } from "solid-js";
+import type { Component } from "solid-js";
+import { Show, For } from "solid-js";
 import { session, recentEvents, gameState, parserHealth } from "../../stores/sessionStore";
 import type { GameEventPayload } from "../../lib/tauri";
 

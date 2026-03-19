@@ -1,4 +1,5 @@
-import { Component, onMount, Switch, Match } from "solid-js";
+import type { Component } from "solid-js";
+import { onMount, Switch, Match } from "solid-js";
 import Titlebar from "./components/Layout/Titlebar";
 import TabBar, { activeTab } from "./components/Layout/TabBar";
 import CharacterTab from "./components/tabs/CharacterTab";

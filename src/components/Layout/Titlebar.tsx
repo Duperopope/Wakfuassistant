@@ -1,6 +1,6 @@
-import { Component } from "solid-js";
+import type { Component } from "solid-js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { gameState, pipelineActive } from "../../stores/sessionStore";
+import { gameState } from "../../stores/sessionStore";
 
 const Titlebar: Component = () => {
   const appWindow = getCurrentWindow();

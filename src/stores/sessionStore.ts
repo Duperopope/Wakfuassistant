@@ -1,5 +1,6 @@
 import { createStore, produce } from "solid-js/store";
 import { createSignal } from "solid-js";
+// onMount/onCleanup non utilisés ici — initPipeline() est appelé depuis App.tsx
 import {
   startPipeline,
   getSessionStats,
