@@ -163,6 +163,7 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
         # Generate a stable, deterministic id based on essential recipe contents
         # This ensures repeated upserts of the same recipe update the existing entry
         output_item = str(recipe.get("output_item", "")).strip()
+        output_qty = max(1, int(recipe.get("output_qty", 1) or 1))
         components = recipe.get("components", [])
         comps = []
         for c in components:
@@ -171,13 +172,10 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
                     "item": str(c.get("item", "")).strip(),
                     "qty": int(c.get("qty", 1) or 1),
                 })
-        # Normalize order for deterministic hashing
         comps.sort(key=lambda x: x["item"])
-        # The recipe identifier (id) should be stable for the same logical recipe
-        # regardless of quantity or other mutable fields. Do not include
-        # output_qty (or other mutable fields) when computing the hash.
         data = {
             "output_item": output_item,
+            "output_qty": output_qty,
             "components": comps,
         }
         hash_digest = hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()[:8]

@@ -41,13 +41,17 @@ def test_recipe_upsert_and_delete(temp_dir):
         recipe["output_qty"] = 3
         db.upsert_recipe("mineur", "outgoing", recipe)
         results = db.list_recipes("mineur", "outgoing")
-        assert len(results) == 1
-        assert results[0]["output_qty"] == 3
+        assert len(results) == 2
+        ids = {r["id"] for r in results}
+        qtys = {r["output_qty"] for r in results}
+        assert ids.__len__() == 2
+        assert qtys == {1, 3}
 
-        rid = results[0]["id"]
+        rid = next(r["id"] for r in results if r["output_qty"] == 3)
         db.delete_recipe("mineur", "outgoing", rid)
         results = db.list_recipes("mineur", "outgoing")
-        assert len(results) == 0
+        assert len(results) == 1
+        assert results[0]["output_qty"] == 1
     finally:
         db._DB_PATH = original
 
