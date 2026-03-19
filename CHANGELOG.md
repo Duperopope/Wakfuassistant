@@ -1,5 +1,15 @@
 # CHANGELOG
 
+2026-03-19 - Stabilisation des tests et corrections diverses
+- Fix: stabilisation des tests et corrections des chemins et encodages (health_check, tests de base).
+- Tests: correction et stabilisation des tests pour test_game_database.py (upsert_recipe) et pour le journal permanant.
+- Docs: mise à jour de docs/Codebase et consolidation des notes de changements.
+
+2026-03-19 - Stabilisation des tests et correction de la generation deterministe des IDs de recettes
+- Fix: Génération deterministe des IDs de recettes: hash basé sur le contenu essentiel (output_item + components)
+- Tests: Ajout et exécution locale des tests unitaires pour core/game_database afin d'éviter duplications à l'upsert
+- Docs: Mise à jour docs/Codebase et CHANGELOG
+
 2026-03-19 - Stabilisation des tests et correction des recettes
 - Fix: Assure la mise à jour unique des recettes via upsert_recipe sans duplication lors de changements mineurs (ID déterministe)
 - Tests: documentation des tests unitaires et résultats attendus
