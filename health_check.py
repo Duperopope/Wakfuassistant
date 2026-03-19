@@ -2,6 +2,10 @@ import sys
 import os
 import json
 import glob
+import io
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 REQUIRED_IMPORTS = [
     "PyQt5", "win32gui"
@@ -15,7 +19,8 @@ CONFIG_FILES = [
     "data/config.json"
 ]
 
-ALL_EVENTS_PATH = "all_events.jsonl"
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+_ALL_EVENTS_PATH = os.path.join(_PROJECT_ROOT, "logs", "permanent", "all_events.jsonl")
 PY_VERSION_MIN = (3, 10)
 
 RESULTS = []
@@ -57,17 +62,17 @@ def check_config_json():
     return ok
 
 def check_all_events_jsonl():
-    if not os.path.isfile(ALL_EVENTS_PATH):
-        RESULTS.append((f"{ALL_EVENTS_PATH} absent (ok si non utilisé)", True))
+    if not os.path.isfile(_ALL_EVENTS_PATH):
+        RESULTS.append(("[Optionnel] all_events.jsonl absent du journal permanent", True))
         return
     try:
-        with open(ALL_EVENTS_PATH, encoding="utf-8") as f:
+        with open(_ALL_EVENTS_PATH, encoding="utf-8") as f:
             lines = f.readlines()
             json.loads(lines[0])
             json.loads(lines[-1])
-        RESULTS.append((f"{ALL_EVENTS_PATH} valide (données JSONL)", True))
+        RESULTS.append((f"[Optionnel] Journal permanent des evenements valide", True))
     except Exception:
-        RESULTS.append((f"{ALL_EVENTS_PATH} invalide", False))
+        RESULTS.append((f"[Optionnel] Journal permanent des evenements invalide", False))
 
 def check_py_syntax():
     all_ok = True

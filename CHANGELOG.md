@@ -1,5 +1,9 @@
 # CHANGELOG
 
+2026-03-19 - Correction health_check.py
+- Fix: Ajout support UTF-8 pour stdout (encodage Windows)
+- Fix: Correction du chemin vers all_events.jsonl (logs/permanent/)
+
 2026-03-19 - Correction bug upsert_recipe (doublons)
 - Fix: `upsert_recipe` générait un nouvel ID à chaque modification de `output_qty`, créant des doublons au lieu de mettre à jour. L'ID est maintenant basé uniquement sur `output_item` et `components_len` (stable), pas sur `output_qty` (modifiable).
 
