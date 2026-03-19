@@ -41,9 +41,7 @@ struct LogFileReader {
 impl LogFileReader {
     fn new(path: PathBuf, source: LogSource) -> Self {
         // Démarrer à la fin du fichier pour ne pas re-parser l'historique
-        let cursor = std::fs::metadata(&path)
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let cursor = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
 
         info!(
             path = %path.display(),

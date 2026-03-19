@@ -18,8 +18,9 @@ pub fn start_log_pipeline(
     on_event: Channel<GameStreamEvent>,
     state: State<'_, AppPipelineState>,
 ) -> Result<(), String> {
-    let log_dir = paths::wakfu_log_dir()
-        .ok_or_else(|| "Répertoire des logs Wakfu introuvable. Lancez Wakfu au moins une fois.".to_string())?;
+    let log_dir = paths::wakfu_log_dir().ok_or_else(|| {
+        "Répertoire des logs Wakfu introuvable. Lancez Wakfu au moins une fois.".to_string()
+    })?;
 
     let pipeline = crate::services::log_watcher::start_pipeline(log_dir, on_event)
         .map_err(|e| format!("Erreur démarrage pipeline: {e}"))?;

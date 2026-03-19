@@ -1,5 +1,166 @@
 # CHANGELOG
 
+## [Chantier 7 — Build & Distribution] - 2026-03-19
+
+### Configuration
+- `tauri.conf.json` :
+  - `productName` → "Wakfu Overlay v2"
+  - `identifier` → "com.wakfu-overlay.v2"
+  - Bundle target : NSIS (Windows installer)
+  - NSIS options :
+    - `installMode: "currentUser"` (installation pour l'utilisateur courant)
+    - Multi-langue : English + French
+    - Sélecteur langue au démarrage
+    - Raccourcis : Start Menu + Desktop
+  - CSP : permet connexions vers `https://wakfu.cdn.ankama.com`
+
+### Build
+- Commande : `npm run tauri build`
+- Output : `target/release/bundle/nsis/Wakfu Overlay v2_2.0.0_x64-setup.exe` (~10-15 MB)
+- Executables : stripped, optimisés pour Windows 10+
+- Distribution : standalone installer, auto-update capable via Tauri
+
+---
+
+## [Chantier 6 — Onglets UI] - 2026-03-19
+
+### Ajouté
+- `src/components/tabs/CombatTab.tsx` : affichage statistiques combats
+  - Barre de progression du taux de victoire (%)
+  - Compteurs : victoires, défaites, total combats
+  - Données temps réel depuis `sessionStore.combatCount`, `victoryCount`
+- `src/components/tabs/ProfessionsTab.tsx` : placeholder pour Phase 4
+  - Message explicatif, icône métier ⛏
+- `src/components/tabs/EconomyTab.tsx` : détails économie session
+  - Gains/dépenses kamas avec couleurs
+  - Delta net (vert/rouge)
+  - Ratio dépenses
+  - Balance actuelle
+- `src/components/tabs/OptionsTab.tsx` : panneau configuration complet
+  - Sélecteur langue (fr/en)
+  - Sélecteur thème (dark/light)
+  - Slider opacité (0.5–1.0)
+  - Bouton sauvegarder → `saveSettings()`
+  - Bouton rafraîchir CDN → `invoke("refresh_cdn_cache")`
+  - Affichage status message avec timing
+  - Raccourci et version affichés
+
+### Modifié
+- `App.tsx` : imports 4 nouveaux composants, Switch/Match utilise vrais composants au lieu PlaceholderTab
+
+---
+
+## [Phase 3b — Overlay Win32] - 2026-03-19
+
+### Ajouté
+- `src-tauri/src/services/win32_overlay.rs` : détection fenêtre Wakfu via `FindWindowW`, récupération position/taille/état (minimisé, visible)
+- `src-tauri/src/commands/overlay_commands.rs` : 3 commandes IPC :
+  - `get_wakfu_window_info()` : retourne `WakfuWindowInfo` (position, taille, minimisé, visible, titre)
+  - `toggle_click_through(enabled: bool)` : basculer click-through via `window.set_ignore_cursor_events()`
+  - `set_overlay_always_on_top(enabled: bool)` : always-on-top via `window.set_always_on_top()`
+- `src/lib/overlayTracker.ts` : boucle de suivi 1 Hz :
+  - Détecte si Wakfu est visible/active
+  - Repositionne overlay à proximité (coin supérieur droit de Wakfu)
+  - Cache overlay si Wakfu minimisée/introuvable
+  - Optimisation : skip repositionnement si position identique
+- Intégration dans `App.tsx` : `startOverlayTracker()` à `onMount`, `stopOverlayTracker()` à `onCleanup`
+- Permissions Tauri ajoutées : `allow-show`, `allow-hide`, `allow-set-always-on-top`
+- Configuration overlay : `visible: false`, `resizable: false`, `skipTaskbar: true`, fenêtre 400x300
+
+### Modifié
+- `tauri.conf.json` : config overlay (height 300, visible false, skipTaskbar true, resizable false)
+- `vite.config.ts` : `strictPort: false` pour éviter conflit de port
+- `capabilities/default.json` : ajout permissions pour show/hide/always-on-top
+
+### Détails technique
+- Win32 API via crate `windows 0.61` : `FindWindowW`, `GetWindowRect`, `IsIconic`, `IsWindowVisible`
+- Stub non-Windows : retourne `WakfuWindowInfo::default()`
+- Frontend : Tauri IPC async avec `invoke()`, polling via `setInterval`
+
+---
+
+## [Chantier 2 — CDN Cache] - 2026-03-19
+
+### Ajouté
+- Migration SQLite `002_cdn_cache.sql` :
+  - Table `cdn_metadata` : key/value + timestamp (pour versionner le cache)
+  - Table `items_cache` : id, name_fr, name_en, level, item_type_id, rarity + indices pour recherche
+- `src-tauri/src/services/cdn_cache.rs` :
+  - `fetch_game_version()` : GET `config.json`, parse version
+  - `fetch_and_cache_items(version, db)` : GET `items.json`, parse, insérer en transaction
+  - `get_item_name(db, item_id, lang)` : lookup item par ID
+  - Détection : rechargement uniquement si version a changé
+- `src-tauri/src/commands/cdn_commands.rs` : 3 commandes IPC :
+  - `get_cdn_version()` : retourne version actuelle du CDN
+  - `refresh_cdn_cache()` : rafraîchit le cache (download + insert)
+  - `get_item_name(item_id, lang)` : lookup item name par ID et langue
+
+### Détails
+- URL CDN : `https://wakfu.cdn.ankama.com/gamedata/config.json` et `/{version}/items.json`
+- Parsing : serde_json, extraction `name.fr` / `name.en`
+- Transaction SQL : atomicité du remplissage de la table
+- Caching : metadata stocke la version, évite re-DL inutile
+- Fallback : si item non trouvé, retourne "Item#<id>"
+
+---
+
+## [Chantier 5 — Persistent Store] - 2026-03-19
+
+### Ajouté
+- `src/lib/settings.ts` : interface `UserSettings` avec champs :
+  - `bayHeight` : hauteur bay par défaut 48px
+  - `clickThroughHotkey` : touche par défaut "F12"
+  - `theme` : "dark" | "light" (défaut dark)
+  - `language` : "fr" | "en" (défaut fr)
+  - `overlayOpacity` : 0.5–1.0 (défaut 0.9)
+- Fonctions publiques :
+  - `loadSettings()` : charge depuis store ou retourne defaults
+  - `saveSettings(settings)` : persiste dans store (appelle `save()`)
+  - `getDefaultSettings()` : retourne defaults
+- Plugin Tauri : `tauri-plugin-store` v2.4.2
+- Store utilisé : `settings.json` dans AppData
+- Permissions : `store:default` dans `capabilities/default.json`
+
+### Détails
+- Lazy initialization : le store se crée au premier `load()`
+- `...defaults, ...saved` : fusion pour backcompat (nouvelles clés reçoivent les defaults)
+
+---
+
+## [Chantier 4 — System Tray] - 2026-03-19
+
+### Ajouté
+- `src/lib/tray.ts` : setup system tray via `TrayIcon` + `Menu`
+  - Menu items :
+    - Afficher/Masquer : bascule `window.isVisible()`
+    - Toggle Click-Through (F12) : même action que le raccourci
+    - Quitter : `exit(0)` via `@tauri-apps/plugin-process`
+  - Tooltip : "Wakfu Overlay v2"
+  - Menu on left-click : `false` (droit click)
+- Plugins Tauri : `tauri-plugin-process` v2.3.1 (pour `exit()`)
+- Permissions : `process:allow-exit` dans `capabilities/default.json`
+
+### Modifié
+- `App.tsx` : appel `setupTray()` en `onMount`, `closeTray()` en `onCleanup`
+- Plugin process enregistré automatiquement dans backend
+
+---
+
+## [Chantier 3 — Raccourci Global F12] - 2026-03-19
+
+### Ajouté
+- `src/lib/shortcuts.ts` : registre F12 via `@tauri-apps/plugin-global-shortcut`
+  - F12 bascule `isClickThrough` (curseur passe/ne passe pas à travers overlay)
+  - Logging console détaillé
+- Plugin Tauri installé : `tauri-plugin-global-shortcut` v2.3.1
+- Permissions dans `capabilities/default.json` : `global-shortcut:allow-register`, `allow-unregister`, `allow-is-registered`
+
+### Modifié
+- `App.tsx` : appel `registerShortcuts()` en `onMount`, `unregisterShortcuts()` en `onCleanup`
+- Plugin enregistré dans Rust backend via `pub fn run()` (auto-ajouté par `npm run tauri add`)
+
+---
+
 ## [Phase 3a — Widget System] - 2026-03-19
 
 ### Ajouté

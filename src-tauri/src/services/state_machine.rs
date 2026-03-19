@@ -37,10 +37,21 @@ use crate::models::game_event::GameEvent;
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum GameState {
     Offline,
-    Loading { server: Option<String> },
-    InGame { server: String, character: String },
-    InCombat { server: String, character: String, fight_id: Option<String> },
-    Disconnected { reason: String },
+    Loading {
+        server: Option<String>,
+    },
+    InGame {
+        server: String,
+        character: String,
+    },
+    InCombat {
+        server: String,
+        character: String,
+        fight_id: Option<String>,
+    },
+    Disconnected {
+        reason: String,
+    },
 }
 
 /// Événement de transition émis par le FSM vers le frontend.
@@ -84,10 +95,7 @@ impl StateMachine {
             }
 
             // === Vers IN_GAME ===
-            (
-                GameState::Loading { server },
-                GameEvent::CharacterSelected { name, .. },
-            ) => {
+            (GameState::Loading { server }, GameEvent::CharacterSelected { name, .. }) => {
                 let srv = server
                     .as_ref()
                     .or(self.last_server.as_ref())
@@ -256,7 +264,9 @@ mod tests {
 
         // Start combat
         let t = fsm.process(&GameEvent::CombatStarted {
-            monster_group: Some("fight=1600047387 L'Immortel breed=4 id=3111456 ai=false".to_string()),
+            monster_group: Some(
+                "fight=1600047387 L'Immortel breed=4 id=3111456 ai=false".to_string(),
+            ),
         });
         assert!(t.is_some());
         assert!(matches!(fsm.state(), GameState::InCombat { .. }));

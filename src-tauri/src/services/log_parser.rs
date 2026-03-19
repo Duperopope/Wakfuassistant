@@ -38,23 +38,18 @@ static RE_KAMAS_GAINED: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Vous avez gagn[ée] ([\d\s\u{00a0}\u{202f}]+) [Kk]amas?").unwrap()
 });
 
-static RE_KAMAS_SPENT: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"Vous avez perdu ([\d\s\u{00a0}\u{202f}]+) [Kk]amas?").unwrap()
-});
+static RE_KAMAS_SPENT: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Vous avez perdu ([\d\s\u{00a0}\u{202f}]+) [Kk]amas?").unwrap());
 
-static RE_ITEM_GAINED: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"Vous avez ramasss?[ée] (\d+)x?\s+(.+?)\s*\.").unwrap()
-});
+static RE_ITEM_GAINED: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Vous avez ramasss?[ée] (\d+)x?\s+(.+?)\s*\.").unwrap());
 
-static RE_ITEM_LOST: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"Vous avez perdu (\d+)x?\s+(.+?)\s*\.").unwrap()
-});
+static RE_ITEM_LOST: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Vous avez perdu (\d+)x?\s+(.+?)\s*\.").unwrap());
 
 static RE_HDV_SOLD_OFFLINE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"Vous avez vendu (\d+) objets? pour un prix total de ([\d\s\u{00a0}\u{202f}]+)§",
-    )
-    .unwrap()
+    Regex::new(r"Vous avez vendu (\d+) objets? pour un prix total de ([\d\s\u{00a0}\u{202f}]+)§")
+        .unwrap()
 });
 
 // =============================================================================
@@ -79,9 +74,8 @@ static RE_DAMAGE: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
-static RE_KO: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"\[Information \(combat\)\] (.+?) est KO\s*!").unwrap()
-});
+static RE_KO: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\[Information \(combat\)\] (.+?) est KO\s*!").unwrap());
 
 static RE_FIGHTER: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -135,13 +129,11 @@ static RE_CONNECTION_LOST: LazyLock<Regex> =
 // PATTERNS — Quêtes
 // =============================================================================
 
-static RE_QUEST_COMPLETED: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"Vous avez r[ée]ussi la qu[êe]te (.+?)\.").unwrap()
-});
+static RE_QUEST_COMPLETED: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Vous avez r[ée]ussi la qu[êe]te (.+?)\.").unwrap());
 
-static RE_QUEST_FAILED: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"Qu[êe]te [ée]chou[ée]e:\s*"(.+?)""#).unwrap()
-});
+static RE_QUEST_FAILED: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"Qu[êe]te [ée]chou[ée]e:\s*"(.+?)""#).unwrap());
 
 // =============================================================================
 // REGISTRE CENTRAL — ordre = priorité de matching
@@ -525,19 +517,13 @@ static PATTERNS: LazyLock<Vec<PatternEntry>> = LazyLock::new(|| {
 
 /// Parse un nombre avec espaces/NBSP comme séparateurs de milliers → u64
 fn parse_num(s: &str) -> Option<u64> {
-    let cleaned: String = s
-        .chars()
-        .filter(|c| c.is_ascii_digit())
-        .collect();
+    let cleaned: String = s.chars().filter(|c| c.is_ascii_digit()).collect();
     cleaned.parse().ok()
 }
 
 /// Parse un nombre avec espaces/NBSP comme séparateurs de milliers → i64
 fn parse_num_i64(s: &str) -> Option<i64> {
-    let cleaned: String = s
-        .chars()
-        .filter(|c| c.is_ascii_digit())
-        .collect();
+    let cleaned: String = s.chars().filter(|c| c.is_ascii_digit()).collect();
     cleaned.parse().ok()
 }
 
@@ -613,7 +599,10 @@ impl LogParser {
     /// Parse un batch de lignes (utilisé par les commandes de rescan)
     #[allow(dead_code)]
     pub fn parse_batch(&mut self, lines: &[String], source: LogSource) -> Vec<GameEvent> {
-        lines.iter().map(|l| self.parse_line(l, source.clone())).collect()
+        lines
+            .iter()
+            .map(|l| self.parse_line(l, source.clone()))
+            .collect()
     }
 
     /// Retourne les métriques de santé
@@ -703,7 +692,9 @@ mod tests {
                     assert!(
                         result.is_some(),
                         "Pattern '{}' v{} matche mais extract retourne None pour: {}",
-                        pattern.name, pattern.version, example
+                        pattern.name,
+                        pattern.version,
+                        example
                     );
                 }
             }
@@ -803,10 +794,7 @@ mod tests {
     fn combat_patterns_ignored_in_chat_log() {
         let mut parser = LogParser::new();
         // Combat patterns should not match in chat log
-        let event = parser.parse_line(
-            "14:15:49,123 - CREATION DU COMBAT",
-            LogSource::WakfuChat,
-        );
+        let event = parser.parse_line("14:15:49,123 - CREATION DU COMBAT", LogSource::WakfuChat);
         assert!(matches!(event, GameEvent::Unrecognized { .. }));
     }
 
@@ -817,10 +805,7 @@ mod tests {
             "14:15:49,123 - Vous avez gagné 100 kamas.",
             LogSource::WakfuChat,
         );
-        parser.parse_line(
-            "14:15:50,000 - some random noise",
-            LogSource::WakfuChat,
-        );
+        parser.parse_line("14:15:50,000 - some random noise", LogSource::WakfuChat);
         let health = parser.health();
         assert_eq!(health.total_lines, 2);
         assert_eq!(health.matched_lines, 1);

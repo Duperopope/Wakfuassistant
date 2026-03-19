@@ -11,7 +11,7 @@ export default defineConfig({
   // Tauri attend que le dev server tourne sur ce port
   server: {
     port: 1420,
-    strictPort: true,
+    strictPort: false,
   },
 
   build: {

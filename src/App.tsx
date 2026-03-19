@@ -1,19 +1,18 @@
 import type { Component } from "solid-js";
-import { onMount, Show, Switch, Match } from "solid-js";
+import { onMount, onCleanup, Show, Switch, Match } from "solid-js";
 import Titlebar from "./components/Layout/Titlebar";
 import WidgetBay, { activeTab, collapsed, hoveredTab } from "./components/Layout/WidgetBay";
 import type { TabId } from "./components/Layout/WidgetBay";
 import CharacterTab from "./components/tabs/CharacterTab";
+import CombatTab from "./components/tabs/CombatTab";
+import ProfessionsTab from "./components/tabs/ProfessionsTab";
+import EconomyTab from "./components/tabs/EconomyTab";
+import OptionsTab from "./components/tabs/OptionsTab";
 import { initPipeline } from "./stores/sessionStore";
 import { session } from "./stores/sessionStore";
-
-function PlaceholderTab(props: { name: string }) {
-  return (
-    <div class="flex items-center justify-center h-full text-text-muted text-xs">
-      <p>Onglet {props.name} — Phase 4</p>
-    </div>
-  );
-}
+import { startOverlayTracker, stopOverlayTracker } from "./lib/overlayTracker";
+import { registerShortcuts, unregisterShortcuts } from "./lib/shortcuts";
+import { setupTray, closeTray } from "./lib/tray";
 
 function fmt(n: number): string {
   return new Intl.NumberFormat("fr-FR").format(n);
@@ -74,8 +73,27 @@ function TabTooltip(props: { tab: TabId }) {
 }
 
 const App: Component = () => {
-  onMount(() => {
+  onMount(async () => {
     initPipeline();
+    startOverlayTracker().catch((e) =>
+      console.error("[App] Erreur startOverlayTracker:", e)
+    );
+    registerShortcuts().catch((e) =>
+      console.error("[App] Erreur registerShortcuts:", e)
+    );
+    setupTray().catch((e) =>
+      console.error("[App] Erreur setupTray:", e)
+    );
+  });
+
+  onCleanup(async () => {
+    stopOverlayTracker();
+    unregisterShortcuts().catch((e) =>
+      console.error("[App] Erreur unregisterShortcuts:", e)
+    );
+    closeTray().catch((e) =>
+      console.error("[App] Erreur closeTray:", e)
+    );
   });
 
   return (
@@ -88,16 +106,16 @@ const App: Component = () => {
               <CharacterTab />
             </Match>
             <Match when={activeTab() === "combat"}>
-              <PlaceholderTab name="Combat" />
+              <CombatTab />
             </Match>
             <Match when={activeTab() === "professions"}>
-              <PlaceholderTab name="Métiers" />
+              <ProfessionsTab />
             </Match>
             <Match when={activeTab() === "economy"}>
-              <PlaceholderTab name="Économie" />
+              <EconomyTab />
             </Match>
             <Match when={activeTab() === "options"}>
-              <PlaceholderTab name="Options" />
+              <OptionsTab />
             </Match>
           </Switch>
 

@@ -30,6 +30,7 @@ pub fn init_database(db_path: &Path) -> Result<Connection, rusqlite::Error> {
 
 fn run_migrations(conn: &Connection) -> Result<(), rusqlite::Error> {
     conn.execute_batch(include_str!("../migrations/001_initial.sql"))?;
+    conn.execute_batch(include_str!("../migrations/002_cdn_cache.sql"))?;
     info!("Migrations SQLite appliquées");
     Ok(())
 }

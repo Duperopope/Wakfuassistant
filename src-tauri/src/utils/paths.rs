@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use tracing::{info, debug};
+use tracing::{debug, info};
 
 /// Résout le répertoire des logs Wakfu.
 ///
@@ -10,7 +10,11 @@ use tracing::{info, debug};
 pub fn wakfu_log_dir() -> Option<PathBuf> {
     // 1. Chemin standard Zaap
     if let Some(appdata) = dirs::config_dir() {
-        let zaap_logs = appdata.join("zaap").join("gamesLogs").join("wakfu").join("logs");
+        let zaap_logs = appdata
+            .join("zaap")
+            .join("gamesLogs")
+            .join("wakfu")
+            .join("logs");
         if zaap_logs.exists() {
             info!(path = %zaap_logs.display(), "Logs Wakfu trouvés (Zaap standard)");
             return Some(zaap_logs);
@@ -18,9 +22,15 @@ pub fn wakfu_log_dir() -> Option<PathBuf> {
 
         // 2. Fallback : repositories.json de Zaap (installation custom ou Zaapi)
         for repos_path in [
-            appdata.join("zaap").join("repositories").join("repositories.json"),
+            appdata
+                .join("zaap")
+                .join("repositories")
+                .join("repositories.json"),
             appdata.join("zaap").join("repositories.json"),
-            appdata.join("Zaapi").join("repositories").join("repositories.json"),
+            appdata
+                .join("Zaapi")
+                .join("repositories")
+                .join("repositories.json"),
         ] {
             if let Some(path) = resolve_from_repositories_json(&repos_path) {
                 return Some(path);

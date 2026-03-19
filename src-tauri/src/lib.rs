@@ -26,6 +26,9 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(AppPipelineState(Arc::new(Mutex::new(None))))
         .invoke_handler(tauri::generate_handler![
             commands::session::get_session_stats,
@@ -33,6 +36,12 @@ pub fn run() {
             commands::pipeline::get_parser_health,
             commands::pipeline::get_game_state,
             commands::pipeline::force_log_rescan,
+            commands::overlay_commands::get_wakfu_window_info,
+            commands::overlay_commands::toggle_click_through,
+            commands::overlay_commands::set_overlay_always_on_top,
+            commands::cdn_commands::get_cdn_version,
+            commands::cdn_commands::refresh_cdn_cache,
+            commands::cdn_commands::get_item_name,
         ])
         .run(tauri::generate_context!())
         .expect("Erreur au lancement de Wakfu Overlay");
