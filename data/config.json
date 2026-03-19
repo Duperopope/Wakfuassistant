@@ -1,6 +1,6 @@
 {
   "character": "L'Immortel",
-  "character_class": "xelor",
+  "character_class": "sram",
   "server": "Ogrest",
   "account": "Kairozadyk",
   "base_kamas": 724018,
@@ -42,7 +42,7 @@
     "Divinité Rolex": "xelor",
     "Laronu": "sacrier",
     "Passe Par La": "elio",
-    "Divinité Du Sacrifice": "xelor",
+    "Divinité Du Sacrifice": "sacrier",
     "Fée Aspirine": "sacrier"
   },
   "perm_log_offset": 5214611,
@@ -63,7 +63,7 @@
     "L'Immortel": {
       "hp_percent": 100,
       "hp_truth_ts": "2026-03-17 18:23:45.334",
-      "level": 1,
+      "level": 181,
       "xp_gained": 694933543,
       "xp_to_next": 181565710,
       "xp_truth_ts": "2026-03-17 18:27:53.936"
