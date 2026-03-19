@@ -1,44 +1,28 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
+# Rust
+target/
+Cargo.lock
 
-# Environnement virtuel
-.venv/
+# Node
+node_modules/
+dist/
 
-# === LOGS BRUTS — jamais versionnes ===
-logs/*
-!logs/realtime/
-
-# === REALTIME — uniquement snapshots structures ===
-logs/realtime/*
-!logs/realtime/*.json
-!logs/realtime/*.jsonl
-
-# Exception utile pour partage de contexte IA
-!logs/permanent/
-logs/permanent/*
-!logs/permanent/all_events.jsonl
-
-# Bases de donnees binaires (SQLite) — locales uniquement
-*.db
-*.sqlite
-*.db-shm
-*.db-wal
-*.sqlite-shm
-*.sqlite-wal
-
-# Backups
-*.bak
-*.bak-*
-
-# Claude Code
-.claude/
+# Tauri
+src-tauri/target/
 
 # OS
 Thumbs.db
 .DS_Store
 
-# OpenClaw state (contient tokens auth)
-.openclaw/
-.clawhub/
+# IDE
+.vscode/
+.idea/
+
+# Env
+.env
+.env.*
+
+# Claude Code
+.claude/
+
+# Logs runtime
+*.log
