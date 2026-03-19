@@ -1,19 +1,31 @@
-Codebase Testing
-==============
+Phase 1 Testing Guide
 
-Goals for Phase 1 tests:
-- Ensure core functionality is exercised by automated tests (pytest).
-- Provide a health_check.py to verify environment readiness after changes.
-- Keep tests fast, deterministic and isolated (temporary DB paths per test).
+- Objective: Provide a practical, repeatable testing workflow for core features (notably core/game_database.py).
+- Scope: Unit tests for data layer, integration hooks, and basic health checks.
 
-Test conventions:
-- Use temporary file paths for JSON databases in tests (as seen in tests/test_*.py).
-- Avoid external side effects; tests should be hermetic.
-- When tests fail, the repository should be easily diagnosable via health_check and logs.
+Setup
+- Python 3.10+ (as per health_check.py requirements)
+- Virtual environment: create and activate
+- Install dependencies if any (pytest is used locally by this repo)
 
-How to run tests locally:
-- Execute: python -m pytest -q
-- To run a single test module: python -m pytest tests/test_<module>.py
-- Health check: python health_check.py
+How to run tests
+- Run: pytest -q
+- Expected results: tests pass; exit code 0
+- If tests fail, inspect logs in memory/2026-03-19.md (and current memory files) for regression trace
 
-Docs section is intentionally lightweight and focuses on reproducible test results and project hygiene.
+Interpreting results
+- PASS: individual test names -> their expected behavior is verified
+- FAIL: a test failed -> examine stack trace, identify root cause (logic, edge case, or data file issues)
+- SKIP: intentionally skipped tests (may indicate environment limitations)
+
+Common fixes workflow
+- Reproduce failure locally
+- Inspect core files touched by failing test (e.g., core/game_database.py)
+- Implement minimal, targeted fix
+- Re-run tests; confirm pass
+- Update CHANGELOG.md with a short justification
+- Update docs/Codebase/Overview.md if necessary
+
+Notes
+- Tests for deterministic IDs in recipe upserts rely on stable hashing of essential contents; avoid including mutable fields (like output_qty) in the hash basis.
+- Ensure tests clean up any temporary DB files used during tests.
