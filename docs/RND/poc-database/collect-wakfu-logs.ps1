@@ -13,6 +13,28 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Resolve-SqlitePath {
+    param([string]$PreferredPath)
+
+    if (Test-Path -Path $PreferredPath -PathType Leaf) {
+        return $PreferredPath
+    }
+
+    $globalSqlite = Get-Command sqlite3 -ErrorAction SilentlyContinue
+    if ($null -ne $globalSqlite -and -not [string]::IsNullOrWhiteSpace($globalSqlite.Source)) {
+        if ([System.IO.Path]::IsPathRooted($globalSqlite.Source)) {
+            return $globalSqlite.Source
+        }
+    }
+
+    $whereResult = & where.exe sqlite3 2>$null
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($whereResult)) {
+        return ($whereResult | Select-Object -First 1)
+    }
+
+    return $null
+}
+
 function Escape-SqlLiteral {
     param([string]$Value)
 
@@ -45,10 +67,10 @@ function Normalize-IntegerString {
     param([string]$Value)
 
     if ([string]::IsNullOrWhiteSpace($Value)) {
-        return 0
+        return [int64]0
     }
 
-    $normalized = [regex]::Replace($Value, "[\s\u00A0\u202F]", "")
+    $normalized = [regex]::Replace($Value, "[\s\u00A0\u202F']", "")
     return [int64]$normalized
 }
 
@@ -58,23 +80,19 @@ function Parse-EventFromLine {
     $eventType = "unrecognized"
     $data = @{}
 
-    if ($Line -match "(?i)Vous avez gagn(?:e|é)\s+([0-9\s\u00A0\u202F]+)\s+kama(?:s)?\.") {
+    if ($Line -match "(?i)Vous avez gagn\S*\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
         $eventType = "kamas_gained"
         $data = @{ amount = (Normalize-IntegerString -Value $Matches[1]) }
     }
-    elseif ($Line -match "(?i)Vous avez perdu\s+([0-9\s\u00A0\u202F]+)\s+kama(?:s)?\.") {
+    elseif ($Line -match "(?i)Vous avez perdu\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
         $eventType = "kamas_spent"
         $data = @{ amount = (Normalize-IntegerString -Value $Matches[1]) }
     }
     elseif ($Line -match "(?i)^\[FIGHT\]\s+End fight with id\s+(\d+)") {
         $eventType = "combat_ended"
-        $data = @{
-            fight_id = [int64]$Matches[1]
-            victory = $true
-            note = "heuristique_poc"
-        }
+        $data = @{ fight_id = [int64]$Matches[1]; victory = $true; note = "heuristique_poc" }
     }
-    elseif ($Line -match "(?i):\s*\+([0-9\s\u00A0\u202F]+)\s+points d'XP\.") {
+    elseif ($Line -match "(?i):\s*\+([0-9\s\u00A0\u202F']+)\s+points d'XP\.") {
         $eventType = "xp_gained"
         $data = @{ amount = (Normalize-IntegerString -Value $Matches[1]) }
     }
@@ -82,15 +100,15 @@ function Parse-EventFromLine {
         $eventType = "market_opened"
         $data = @{ board_id = [int64]$Matches[1] }
     }
-    elseif ($Line -match "(?i)On arrête l'occupation MARKET sur la board \[bAL id=(\d+)\]") {
+    elseif ($Line -match "(?i)On arr.te l'occupation MARKET sur la board \[bAL id=(\d+)\]") {
         $eventType = "market_closed"
         $data = @{ board_id = [int64]$Matches[1] }
     }
-    elseif ($Line -match '(?i)Quête échouée:\s*"([^"]+)"') {
+    elseif ($Line -match '(?i)Qu.te .chou.e:\s*"([^"]+)"') {
         $eventType = "quest_failed"
         $data = @{ quest_name = $Matches[1] }
     }
-    elseif ($Line -match "(?i)Vous avez réussi la quête\s+(.+?)\.") {
+    elseif ($Line -match "(?i)Vous avez r.ussi la qu.te\s+(.+?)\.") {
         $eventType = "quest_succeeded"
         $data = @{ quest_name = $Matches[1] }
     }
@@ -109,18 +127,21 @@ function Invoke-Sqlite {
         [switch]$UseSeparator
     )
 
-    $args = @("-noheader")
+    $sqliteArgs = @("-noheader")
     if ($UseSeparator) {
-        $args += @("-separator", "|")
+        $sqliteArgs += @("-separator", "|")
     }
-    $args += @($LocalDbPath, $Sql)
 
-    $result = & $LocalSqlitePath @args
+    $result = $Sql | & $LocalSqlitePath @sqliteArgs $LocalDbPath
     if ($LASTEXITCODE -ne 0) {
         throw "Echec SQLite sur requete."
     }
 
-    return $result
+    if ($null -eq $result) {
+        return @()
+    }
+
+    return @($result)
 }
 
 function Initialize-Database {
@@ -182,45 +203,42 @@ function Build-ParsedRows {
         return @()
     }
 
-    # Le parallelisme apporte un vrai gain sur les gros rattrapages de logs.
-    if ($ParallelWorkers -gt 1 -and $LineObjects.Count -ge 200) {
+    $supportsParallel = $PSVersionTable.PSVersion.Major -ge 7
+    if ($supportsParallel -and $ParallelWorkers -gt 1 -and $LineObjects.Count -ge 200) {
         $rows = $LineObjects | ForEach-Object -Parallel {
             $line = [string]$_.raw_line
             $eventType = "unrecognized"
             $data = @{}
 
-            if ($line -match "(?i)Vous avez gagn(?:e|é)\s+([0-9\s\u00A0\u202F]+)\s+kama(?:s)?\.") {
+            if ($line -match "(?i)Vous avez gagn\S*\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
                 $eventType = "kamas_gained"
-                $amountText = [regex]::Replace($Matches[1], "[\s\u00A0\u202F]", "")
-                $data = @{ amount = [int64]$amountText }
+                $data = @{ amount = [int64]([regex]::Replace($Matches[1], "[\s\u00A0\u202F']", "")) }
             }
-            elseif ($line -match "(?i)Vous avez perdu\s+([0-9\s\u00A0\u202F]+)\s+kama(?:s)?\.") {
+            elseif ($line -match "(?i)Vous avez perdu\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
                 $eventType = "kamas_spent"
-                $amountText = [regex]::Replace($Matches[1], "[\s\u00A0\u202F]", "")
-                $data = @{ amount = [int64]$amountText }
+                $data = @{ amount = [int64]([regex]::Replace($Matches[1], "[\s\u00A0\u202F']", "")) }
             }
             elseif ($line -match "(?i)^\[FIGHT\]\s+End fight with id\s+(\d+)") {
                 $eventType = "combat_ended"
                 $data = @{ fight_id = [int64]$Matches[1]; victory = $true; note = "heuristique_poc" }
             }
-            elseif ($line -match "(?i):\s*\+([0-9\s\u00A0\u202F]+)\s+points d'XP\.") {
+            elseif ($line -match "(?i):\s*\+([0-9\s\u00A0\u202F']+)\s+points d'XP\.") {
                 $eventType = "xp_gained"
-                $amountText = [regex]::Replace($Matches[1], "[\s\u00A0\u202F]", "")
-                $data = @{ amount = [int64]$amountText }
+                $data = @{ amount = [int64]([regex]::Replace($Matches[1], "[\s\u00A0\u202F']", "")) }
             }
             elseif ($line -match "(?i)Lancement de l'occupation MARKET sur la board \[bAL id=(\d+)\]") {
                 $eventType = "market_opened"
                 $data = @{ board_id = [int64]$Matches[1] }
             }
-            elseif ($line -match "(?i)On arrête l'occupation MARKET sur la board \[bAL id=(\d+)\]") {
+            elseif ($line -match "(?i)On arr.te l'occupation MARKET sur la board \[bAL id=(\d+)\]") {
                 $eventType = "market_closed"
                 $data = @{ board_id = [int64]$Matches[1] }
             }
-            elseif ($line -match '(?i)Quête échouée:\s*"([^"]+)"') {
+            elseif ($line -match '(?i)Qu.te .chou.e:\s*"([^"]+)"') {
                 $eventType = "quest_failed"
                 $data = @{ quest_name = $Matches[1] }
             }
-            elseif ($line -match "(?i)Vous avez réussi la quête\s+(.+?)\.") {
+            elseif ($line -match "(?i)Vous avez r.ussi la qu.te\s+(.+?)\.") {
                 $eventType = "quest_succeeded"
                 $data = @{ quest_name = $Matches[1] }
             }
@@ -298,10 +316,11 @@ function Ingest-File {
 
     $lineObjects = New-Object System.Collections.Generic.List[object]
     for ($i = $lastLineNo; $i -lt $lineCount; $i++) {
+        $line = [string]$lines[$i]
         $lineObjects.Add([pscustomobject]@{
             line_no = $i + 1
-            raw_line = [string]$lines[$i]
-            source_timestamp_text = (Get-SourceTimestampText -Line ([string]$lines[$i]) )
+            raw_line = $line
+            source_timestamp_text = (Get-SourceTimestampText -Line $line)
         })
     }
 
@@ -314,6 +333,7 @@ function Ingest-File {
     $batchSql.Add("BEGIN IMMEDIATE TRANSACTION;")
 
     $sourceFileSql = Escape-SqlLiteral -Value $FilePath
+
     foreach ($row in $parsedRows) {
         $rawLineSql = Escape-SqlLiteral -Value $row.raw_line
         $ingestedAtSql = Escape-SqlLiteral -Value (New-IsoNow)
@@ -327,7 +347,19 @@ function Ingest-File {
         }
 
         $batchSql.Add("INSERT OR IGNORE INTO raw_log_lines (source_file, generation, source_line_no, source_timestamp_text, ingested_at, raw_line) VALUES ('$sourceFileSql', $generation, $($row.line_no), $sourceTimestampSql, '$ingestedAtSql', '$rawLineSql');")
-        $batchSql.Add("INSERT INTO parsed_events (raw_line_id, event_type, data_json, parsed_at) VALUES (last_insert_rowid(), '$eventTypeSql', '$dataJsonSql', '$parsedAtSql');")
+        $batchSql.Add(@"
+INSERT INTO parsed_events (raw_line_id, event_type, data_json, parsed_at)
+SELECT r.id, '$eventTypeSql', '$dataJsonSql', '$parsedAtSql'
+FROM raw_log_lines r
+WHERE r.source_file = '$sourceFileSql'
+  AND r.generation = $generation
+  AND r.source_line_no = $($row.line_no)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM parsed_events p
+      WHERE p.raw_line_id = r.id
+  );
+"@)
 
         if ($row.event_type -eq "unrecognized") {
             $unrecognized++
@@ -357,12 +389,14 @@ function Ingest-File {
 function Invoke-CollectionForFiles {
     param(
         [string[]]$FullPaths,
-        [int]$ParallelWorkers
+        [int]$ParallelWorkers,
+        [string]$LocalSqlitePath,
+        [string]$LocalDbPath
     )
 
     $results = @()
     foreach ($path in $FullPaths) {
-        $results += Ingest-File -LocalSqlitePath $SqlitePath -LocalDbPath $DbPath -FilePath $path -ParallelWorkers $ParallelWorkers
+        $results += Ingest-File -LocalSqlitePath $LocalSqlitePath -LocalDbPath $LocalDbPath -FilePath $path -ParallelWorkers $ParallelWorkers
     }
 
     $passInserted = ($results | Measure-Object -Property inserted -Sum).Sum
@@ -390,10 +424,13 @@ function Invoke-CollectionForFiles {
     Write-Host "Taux reconnaissance passe: $rate%"
 }
 
-if (-not (Test-Path -Path $SqlitePath -PathType Leaf)) {
-    Write-Host "ERREUR: sqlite3.exe est introuvable: $SqlitePath" -ForegroundColor Red
+$resolvedSqlitePath = Resolve-SqlitePath -PreferredPath $SqlitePath
+if ([string]::IsNullOrWhiteSpace($resolvedSqlitePath)) {
+    Write-Host "ERREUR: sqlite3 est introuvable (ni local, ni global)." -ForegroundColor Red
+    Write-Host "Place sqlite3.exe ici: $SqlitePath"
     exit 1
 }
+$SqlitePath = $resolvedSqlitePath
 
 if (-not (Test-Path -Path $LogsRoot -PathType Container)) {
     Write-Host "ERREUR: dossier de logs Wakfu introuvable: $LogsRoot" -ForegroundColor Red
@@ -409,7 +446,7 @@ foreach ($name in $LogFiles) {
 }
 
 if ($Mode -eq "once") {
-    Invoke-CollectionForFiles -FullPaths $trackedFullPaths -ParallelWorkers $WorkerCount
+    Invoke-CollectionForFiles -FullPaths $trackedFullPaths -ParallelWorkers $WorkerCount -LocalSqlitePath $SqlitePath -LocalDbPath $DbPath
     exit 0
 }
 
@@ -418,8 +455,7 @@ Write-Host "Fichiers suivis: $($LogFiles -join ', ')"
 Write-Host "Debounce: $DebounceMs ms"
 Write-Host "Workers parsing: $WorkerCount"
 
-# Bootstrap initial pour partir a l'etat courant sans attente d'evenement.
-Invoke-CollectionForFiles -FullPaths $trackedFullPaths -ParallelWorkers $WorkerCount
+Invoke-CollectionForFiles -FullPaths $trackedFullPaths -ParallelWorkers $WorkerCount -LocalSqlitePath $SqlitePath -LocalDbPath $DbPath
 
 $watcher = New-Object System.IO.FileSystemWatcher
 $watcher.Path = $LogsRoot
@@ -432,11 +468,12 @@ $pending = [System.Collections.Concurrent.ConcurrentDictionary[string, datetime]
 $trackedPaths = @($trackedFullPaths)
 
 $action = {
-    param($Sender, $EventArgs)
+    param($senderObj, $eventData)
 
     $localTrackedPaths = $using:trackedPaths
     $localPending = $using:pending
-    $fullPath = $EventArgs.FullPath
+    $fullPath = $eventData.FullPath
+
     if ($localTrackedPaths -contains $fullPath) {
         $now = Get-Date
         $null = $localPending.AddOrUpdate($fullPath, $now, { param($k, $v) $now })
@@ -466,7 +503,7 @@ try {
         }
 
         if ($ready.Count -gt 0) {
-            Invoke-CollectionForFiles -FullPaths $ready.ToArray() -ParallelWorkers $WorkerCount
+            Invoke-CollectionForFiles -FullPaths $ready.ToArray() -ParallelWorkers $WorkerCount -LocalSqlitePath $SqlitePath -LocalDbPath $DbPath
         }
     }
 }
