@@ -3,6 +3,9 @@ mod models;
 mod services;
 mod utils;
 
+use std::sync::{Arc, Mutex};
+
+use commands::pipeline::AppPipelineState;
 use tracing::info;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -23,8 +26,13 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        .manage(AppPipelineState(Arc::new(Mutex::new(None))))
         .invoke_handler(tauri::generate_handler![
             commands::session::get_session_stats,
+            commands::pipeline::start_log_pipeline,
+            commands::pipeline::get_parser_health,
+            commands::pipeline::get_game_state,
+            commands::pipeline::force_log_rescan,
         ])
         .run(tauri::generate_context!())
         .expect("Erreur au lancement de Wakfu Overlay");

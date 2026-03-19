@@ -102,7 +102,7 @@ pub struct TimestampedEvent {
     pub synced: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum LogSource {
     WakfuMain,
     WakfuChat,
