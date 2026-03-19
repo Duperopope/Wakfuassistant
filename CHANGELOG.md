@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## [PoC Database — Correctifs] - 2026-03-19
+
+### Corrigé
+- `collect-wakfu-logs.ps1` : détection sqlite3 globale (PATH) si absent en local
+- `collect-wakfu-logs.ps1` : apostrophe manquante dans regex séparateurs numériques (`1'234 kamas`)
+- `collect-wakfu-logs.ps1` : `$args` renommé `$sqliteArgs` (conflit variable automatique PowerShell)
+- `collect-wakfu-logs.ps1` : SQL passé via stdin plutôt qu'en argument (robustesse multi-lignes)
+- `collect-wakfu-logs.ps1` : `INSERT parsed_events` utilisait `last_insert_rowid()` cassé sur `INSERT OR IGNORE` — remplacé par SELECT subquery avec NOT EXISTS
+- `collect-wakfu-logs.ps1` : guard PSVersion >= 7 avant `ForEach-Object -Parallel`
+- `query-permanent.ps1` + `query-check.ps1` : même correction sqlite3 PATH que le script collect
+- `schema-permanent.sql` : ajout `UNIQUE(raw_line_id)` sur `parsed_events` (protection DB-level en plus du NOT EXISTS)
+
+### Ajouté
+- `xp-time-to-level.ps1` : estimateur ETA level-up en temps réel sur wakfu.log
+- `.gitignore` : exclusion des fichiers `*.db` générés dans le dossier PoC
+
+---
+
 ## [Chantier 7 — Build & Distribution] - 2026-03-19
 
 ### Configuration

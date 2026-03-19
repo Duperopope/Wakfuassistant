@@ -6,10 +6,35 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-if (-not (Test-Path -Path $SqlitePath -PathType Leaf)) {
-    Write-Host "ERREUR: sqlite3.exe est introuvable: $SqlitePath" -ForegroundColor Red
+function Resolve-SqlitePath {
+    param([string]$PreferredPath)
+
+    if (Test-Path -Path $PreferredPath -PathType Leaf) {
+        return $PreferredPath
+    }
+
+    $globalSqlite = Get-Command sqlite3 -ErrorAction SilentlyContinue
+    if ($null -ne $globalSqlite -and -not [string]::IsNullOrWhiteSpace($globalSqlite.Source)) {
+        if ([System.IO.Path]::IsPathRooted($globalSqlite.Source)) {
+            return $globalSqlite.Source
+        }
+    }
+
+    $whereResult = & where.exe sqlite3 2>$null
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($whereResult)) {
+        return ($whereResult | Select-Object -First 1)
+    }
+
+    return $null
+}
+
+$resolvedSqlitePath = Resolve-SqlitePath -PreferredPath $SqlitePath
+if ([string]::IsNullOrWhiteSpace($resolvedSqlitePath)) {
+    Write-Host "ERREUR: sqlite3 est introuvable (ni local, ni global)." -ForegroundColor Red
+    Write-Host "Place sqlite3.exe ici: $SqlitePath"
     exit 1
 }
+$SqlitePath = $resolvedSqlitePath
 
 if (-not (Test-Path -Path $DbPath -PathType Leaf)) {
     Write-Host "ERREUR: base introuvable: $DbPath" -ForegroundColor Red

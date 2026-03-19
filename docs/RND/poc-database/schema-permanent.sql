@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_raw_source_timestamp ON raw_log_lines(source_time
 
 CREATE TABLE IF NOT EXISTS parsed_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    raw_line_id INTEGER NOT NULL,
+    raw_line_id INTEGER NOT NULL UNIQUE,
     event_type TEXT NOT NULL,
     data_json TEXT NOT NULL DEFAULT '{}',
     parsed_at TEXT NOT NULL,

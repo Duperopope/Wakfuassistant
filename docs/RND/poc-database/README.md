@@ -12,12 +12,12 @@ Il est volontairement simple et autonome (PowerShell + sqlite3.exe).
 - `parse-logs.ps1` : lit un fichier log, detecte 4 types d'evenements, insere en base
 - `query-check.ps1` : execute les requetes de controle
 - `sample-logs.txt` : echantillon de lignes plausibles pour test rapide
-- `wakfu_poc.db` : base generee a l'execution
-- `sqlite3.exe` : binaire a deposer manuellement dans ce dossier
+- `wakfu_poc.db` : base generee a l'execution (non versionne)
+- `sqlite3.exe` : binaire optionnel — si absent, le script cherche sqlite3 dans le PATH
 
 ## 3 etapes pour lancer
 
-1. Telecharger `sqlite3.exe` (version Windows) puis le placer dans ce dossier.
+1. Avoir `sqlite3` accessible : soit dans ce dossier (`sqlite3.exe`), soit dans le PATH system.
 2. Lancer le parsing :
 
 ```powershell
@@ -60,10 +60,11 @@ Fichiers ajoutes :
 - `schema-permanent.sql` : schema des tables de collecte (`raw_log_lines`, `parsed_events`, `ingest_state`)
 - `collect-wakfu-logs.ps1` : collecte incrementale depuis `%APPDATA%/zaap/gamesLogs/wakfu/logs/`
 - `query-permanent.ps1` : controles et stats de la base permanente
+- `xp-time-to-level.ps1` : estimateur ETA level-up en temps reel (lecture live du log)
 
 ### Lancer la collecte reelle
 
-1. Placer `sqlite3.exe` dans ce dossier.
+1. Avoir `sqlite3` accessible (dossier local ou PATH). Les scripts detectent automatiquement.
 2. Lancer une passe unique :
 
 ```powershell
