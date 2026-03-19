@@ -173,9 +173,11 @@ def upsert_recipe(profession: str, recipe_type: str, recipe: dict):
                 })
         # Normalize order for deterministic hashing
         comps.sort(key=lambda x: x["item"])
+        # The recipe identifier (id) should be stable for the same logical recipe
+        # regardless of quantity or other mutable fields. Do not include
+        # output_qty (or other mutable fields) when computing the hash.
         data = {
             "output_item": output_item,
-            "output_qty": int(recipe.get("output_qty", 1) or 1),
             "components": comps,
         }
         hash_digest = hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()[:8]
