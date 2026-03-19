@@ -26,7 +26,7 @@ _LEGACY_CHAT_LOG    = _PERM_DIR / "chat_events.log"
 _LEGACY_JOURNAL_LOG = _PERM_DIR / "journal_events.log"
 
 # Incrémenter pour forcer un rebuild au prochain démarrage
-_JOURNAL_VERSION = 7  # item_gained (ramassé) ajouté
+_JOURNAL_VERSION = 8  # item_lost flush fix + quest regex fix
 
 _APPDATA_WAKFU_DIR     = Path(os.environ.get("APPDATA", "")) / "zaap" / "gamesLogs" / "wakfu" / "logs"
 _RAW_WAKFU_CHAT_LOG    = _APPDATA_WAKFU_DIR / "wakfu_chat.log"
@@ -73,7 +73,7 @@ _MARKET_SOLD_ITEM_RE = re.compile(
     re.IGNORECASE,
 )
 # Quête réussie / échouée
-_QUEST_DONE_RE  = re.compile(r"\[Information \(jeu\)\]\s+Quête accomplie\s*:\s*(.+)", re.IGNORECASE)
+_QUEST_DONE_RE  = re.compile(r"\[Information \(jeu\)\]\s+Vous avez réussi la quête\s+(.+?)\.?\s*$", re.IGNORECASE)
 _QUEST_FAIL_RE  = re.compile(r"\[Information \(jeu\)\]\s+Quête échouée\s*:\s*(.+)",  re.IGNORECASE)
 # Connexion / déconnexion
 _LOGIN_RE  = re.compile(r"\[Information \(jeu\)\]\s+Vous êtes maintenant connecté", re.IGNORECASE)
@@ -727,17 +727,19 @@ _KAMAS_TYPES = frozenset({"kamas_gain", "kamas_loss"})
 
 
 def _market_detect(event_type: str, event_data: dict, client_clock: str,
-                   pending: list) -> tuple[str | None, dict | None, bool]:
+                   pending: list) -> tuple[str | None, dict | None, bool, dict | None]:
     """
     Détecte les dépôts marché : item_lost suivi de kamas_loss à la même seconde.
     pending = [dict | None]  (boîte mutable pour l'état entre appels)
-    Retourne (event_type, event_data, should_emit).
+    Retourne (event_type, event_data, should_emit, flushed_item_lost_or_None).
+    When flushed is not None, caller must emit it as an item_lost event.
     """
     sec = client_clock[:8]  # HH:MM:SS
 
     if event_type == "item_lost":
+        flushed = pending[0]  # flush any previous pending item_lost
         pending[0] = {"item": event_data["item"], "qty": event_data["qty"], "sec": sec}
-        return None, None, False  # ne pas émettre item_lost seul
+        return None, None, False, flushed
 
     if event_type == "kamas_loss" and pending[0] is not None:
         p = pending[0]
@@ -749,13 +751,15 @@ def _market_detect(event_type: str, event_data: dict, client_clock: str,
                 "item": p["item"],
                 "qty":  p["qty"],
                 "tax":  event_data["amount"],
-            }, True  # will emit market_deposit; caller also emits kamas_loss
+            }, True, None
         else:
+            flushed = pending[0]
             pending[0] = None
-    elif pending[0] is not None:
-        pending[0] = None
+            return event_type, event_data, True, flushed
 
-    return event_type, event_data, True
+    flushed = pending[0]
+    pending[0] = None
+    return event_type, event_data, True, flushed
 
 
 def _emit_event_entry(
@@ -923,13 +927,38 @@ def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
 
         # Market deposit detection
         if event_type == "item_lost":
-            md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _pending_item)
-            continue  # never emit item_lost standalone
+            md_type, md_data, _, flushed = _market_detect(event_type, event_data, client_clock, _pending_item)
+            if flushed is not None:
+                fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                if fp_fl not in fps_set:
+                    fps_set.add(fp_fl)
+                    fps_list.append(fp_fl)
+                    entries.append({
+                        "ts_local":    ts_local_str,
+                        "ts_client":   client_clock,
+                        "source_file": path.name,
+                        "type":        "item_lost",
+                        "data":        fl_data,
+                    })
+            continue
 
         if event_type == "kamas_loss" and _pending_item[0] is not None:
-            md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _pending_item)
+            md_type, md_data, _, flushed = _market_detect(event_type, event_data, client_clock, _pending_item)
+            if flushed is not None:
+                fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                if fp_fl not in fps_set:
+                    fps_set.add(fp_fl)
+                    fps_list.append(fp_fl)
+                    entries.append({
+                        "ts_local":    ts_local_str,
+                        "ts_client":   client_clock,
+                        "source_file": path.name,
+                        "type":        "item_lost",
+                        "data":        fl_data,
+                    })
             if md_type == "market_deposit":
-                # Emit market_deposit for analytics
                 fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
                 if fp_md not in fps_set:
                     fps_set.add(fp_md)
@@ -943,7 +972,20 @@ def _parse_raw_source(path: Path, fps_set: set[str], fps_list: list[str],
                     })
                 # Then fall through to also emit kamas_loss for balance
         elif _pending_item[0] is not None:
+            flushed = _pending_item[0]
             _pending_item[0] = None
+            fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+            fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+            if fp_fl not in fps_set:
+                fps_set.add(fp_fl)
+                fps_list.append(fp_fl)
+                entries.append({
+                    "ts_local":    ts_local_str,
+                    "ts_client":   client_clock,
+                    "source_file": path.name,
+                    "type":        "item_lost",
+                    "data":        fl_data,
+                })
 
         fp = _make_fingerprint(event_type, event_data, client_clock)
         if fp in fps_set:
@@ -1167,11 +1209,39 @@ def rebuild_all_events() -> dict[str, int]:
 
             # Market deposit detection
             if event_type == "item_lost":
-                _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                _, _, _, flushed = _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                if flushed is not None:
+                    fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                    fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                    if fp_fl not in fps_set:
+                        fps_set.add(fp_fl)
+                        fps_list.append(fp_fl)
+                        all_entries.append({
+                            "ts_local":      ts_local_str,
+                            "ts_client":     client_clock,
+                            "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                            "source_file":   source.name,
+                            "type":          "item_lost",
+                            "data":          fl_data,
+                        })
                 continue
 
             if event_type == "kamas_loss" and _rebuild_pending[0] is not None:
-                md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                md_type, md_data, _, flushed = _market_detect(event_type, event_data, client_clock, _rebuild_pending)
+                if flushed is not None:
+                    fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                    fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                    if fp_fl not in fps_set:
+                        fps_set.add(fp_fl)
+                        fps_list.append(fp_fl)
+                        all_entries.append({
+                            "ts_local":      ts_local_str,
+                            "ts_client":     client_clock,
+                            "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                            "source_file":   source.name,
+                            "type":          "item_lost",
+                            "data":          fl_data,
+                        })
                 if md_type == "market_deposit":
                     fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
                     if fp_md not in fps_set:
@@ -1186,7 +1256,21 @@ def rebuild_all_events() -> dict[str, int]:
                             "data":          md_data,
                         })
             elif _rebuild_pending[0] is not None:
+                flushed = _rebuild_pending[0]
                 _rebuild_pending[0] = None
+                fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                if fp_fl not in fps_set:
+                    fps_set.add(fp_fl)
+                    fps_list.append(fp_fl)
+                    all_entries.append({
+                        "ts_local":      ts_local_str,
+                        "ts_client":     client_clock,
+                        "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                        "source_file":   source.name,
+                        "type":          "item_lost",
+                        "data":          fl_data,
+                    })
 
             fp = _make_fingerprint(event_type, event_data, client_clock)
             if fp in fps_set:
@@ -1361,11 +1445,45 @@ def sync_permanent_journal() -> dict[str, int]:
 
                     # Market deposit detection
                     if event_type == "item_lost":
-                        _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        _, _, _, flushed = _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        if flushed is not None:
+                            fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                            fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                            if fp_fl not in all_fps_set:
+                                entry_fl: dict = {
+                                    "ts_local":      ts_local_str,
+                                    "ts_client":     client_clock,
+                                    "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                                    "source_file":   source.name,
+                                    "type":          "item_lost",
+                                    "data":          fl_data,
+                                }
+                                jfh.write(json.dumps(entry_fl, ensure_ascii=False) + "\n")
+                                lfh.write(_format_log_line(entry_fl) + "\n")
+                                count_all += 1
+                                all_fps_set.add(fp_fl)
+                                all_fps_list.append(fp_fl)
                         continue
 
                     if event_type == "kamas_loss" and _sync_pending[0] is not None:
-                        md_type, md_data, _ = _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        md_type, md_data, _, flushed = _market_detect(event_type, event_data, client_clock, _sync_pending)
+                        if flushed is not None:
+                            fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                            fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                            if fp_fl not in all_fps_set:
+                                entry_fl: dict = {
+                                    "ts_local":      ts_local_str,
+                                    "ts_client":     client_clock,
+                                    "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                                    "source_file":   source.name,
+                                    "type":          "item_lost",
+                                    "data":          fl_data,
+                                }
+                                jfh.write(json.dumps(entry_fl, ensure_ascii=False) + "\n")
+                                lfh.write(_format_log_line(entry_fl) + "\n")
+                                count_all += 1
+                                all_fps_set.add(fp_fl)
+                                all_fps_list.append(fp_fl)
                         if md_type == "market_deposit":
                             fp_md = _make_fingerprint("market_deposit", md_data, client_clock)
                             if fp_md not in all_fps_set:
@@ -1383,7 +1501,24 @@ def sync_permanent_journal() -> dict[str, int]:
                                 all_fps_set.add(fp_md)
                                 all_fps_list.append(fp_md)
                     elif _sync_pending[0] is not None:
+                        flushed = _sync_pending[0]
                         _sync_pending[0] = None
+                        fl_data = {"qty": flushed["qty"], "item": flushed["item"]}
+                        fp_fl = _make_fingerprint("item_lost", fl_data, client_clock)
+                        if fp_fl not in all_fps_set:
+                            entry_fl: dict = {
+                                "ts_local":      ts_local_str,
+                                "ts_client":     client_clock,
+                                "ntp_offset_ms": round(float(offset_ms), 3) if offset_ms is not None else None,
+                                "source_file":   source.name,
+                                "type":          "item_lost",
+                                "data":          fl_data,
+                            }
+                            jfh.write(json.dumps(entry_fl, ensure_ascii=False) + "\n")
+                            lfh.write(_format_log_line(entry_fl) + "\n")
+                            count_all += 1
+                            all_fps_set.add(fp_fl)
+                            all_fps_list.append(fp_fl)
 
                     fp = _make_fingerprint(event_type, event_data, client_clock)
                     if fp in all_fps_set:
