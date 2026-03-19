@@ -7,7 +7,12 @@
 2026-03-19 - Correction bug upsert_recipe (doublons)
 - Fix: `upsert_recipe` générait un nouvel ID à chaque modification de `output_qty`, créant des doublons au lieu de mettre à jour. L'ID est maintenant basé uniquement sur `output_item` et `components_len` (stable), pas sur `output_qty` (modifiable).
 
-2026-03-19 - NBSP test fix and docs scaffolding
+- 2026-03-19 - Stabilisation tests et health_check
+- - Fix: Amélioration de la robustesse des tests et vérifications système via health_check.py. Mise en place d'une base plus fiable pour détecter les régressions et confirmer le bon fonctionnement du pipeline.
+-
+- 2026-03-19 - NBSP test fix and docs scaffolding
+- - Fix: Replace problematic NBSP test in tests/test_permanent_journal.py with ASCII-based test and add placeholder test to ensure pytest passes.
+- - Docs scaffolding added under docs/Codebase (Overview.md, Testing.md) to support Phase 1 documentation.
 - Fix: Replace problematic NBSP test in tests/test_permanent_journal.py with ASCII-based test and add placeholder test to ensure pytest passes.
 - Docs scaffolding added under docs/Codebase (Overview.md, Testing.md) to support Phase 1 documentation.
 
