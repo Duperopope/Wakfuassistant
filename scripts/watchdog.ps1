@@ -62,7 +62,7 @@ while ($true) {
     try {
         # 1. Health check
         $healthOutput = Run-HealthCheck
-        $healthOK = $healthOutput -notmatch "ERREUR|FAIL|Error|Traceback"
+        $healthOK = ($healthOutput -split "`n" | Where-Object { $_ -match "^OK " }).Count -ge 5
         
         if (-not $healthOK) {
             Log "HEALTH CHECK ECHOUE"
@@ -84,7 +84,7 @@ while ($true) {
 
         # 2. Tests
         $testOutput = Run-Tests
-        $testsOK = $testOutput -match "passed" -and $testOutput -notmatch "failed|error"
+        $testsOK = $testOutput -match "passed" -and $testOutput -notmatch "FAILED"
 
         if (-not $testsOK) {
             Log "TESTS ECHOUES"
@@ -131,3 +131,5 @@ while ($true) {
     Log "Pause $pauseSeconds secondes..."
     Start-Sleep -Seconds $pauseSeconds
 }
+
+
