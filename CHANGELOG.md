@@ -1,5 +1,9 @@
 # CHANGELOG
 
+2026-03-19 - Documentation Phase 1: Ajout docs/Codebase/Overview.md et Testing.md
+- Docs: ajout de Overview.md pour donner une vue d'ensemble du codebase
+- Tests: préparation et scaffolding des tests unitaires pour core/game_database
+
 2026-03-19 - Stabilisation des tests et corrections diverses
 - Fix: stabilisation des tests et corrections des chemins et encodages (health_check, tests de base).
 - Tests: ajout tests pour item_icons (_clean_type, _normalize accents) et correction tests existants.
