@@ -41,6 +41,7 @@ def test_recipe_upsert_and_delete(temp_dir):
         recipe["output_qty"] = 3
         db.upsert_recipe("mineur", "outgoing", recipe)
         results = db.list_recipes("mineur", "outgoing")
+        # Avec hash sans output_qty, on doit obtenir une seule entrée mise à jour
         assert len(results) == 1
         assert results[0]["output_qty"] == 3
 
