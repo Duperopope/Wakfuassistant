@@ -1,9 +1,0 @@
-{
-  "classes_scanned": 74239,
-  "kama_candidates": {"c3": "webShopMoneyPriceBackgroundColor=10101000 (score=27)", "c4": "webShopMoneyPriceColor=10101000 (score=27)", "c5": "txSmallKama=1 (score=15)", "c6": "txKamaUpDown=1 (score=15)", "c7": "KAMA_STONE_PURCHASE_LEVEL_MIN=0 (score=-100)", "c0": "class com.ankama.zaap.ZaapService$userInfo_get_args=3667 (score=45)", "c1": "BOOSTER_KAMAS_BONUS=50 (score=45)", "c2": "BASE_KAMAS_RATIO=1 (score=30)"},
-  "kamas_total": 3667,
-  "maps_seen": 1451,
-  "source": "runtime-agent-v2",
-  "status": "ok",
-  "updated_at": 1773659598
-}

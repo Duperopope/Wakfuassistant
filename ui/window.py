@@ -992,13 +992,13 @@ class OverlayWindow(QWidget):
         self._t0 = QDateTime.currentDateTime()
         self._refresh_title_info()
 
-        t = QTimer(self)
-        t.timeout.connect(self._tick)
-        t.start(1000)
+        self._tick_timer = QTimer(self)
+        self._tick_timer.timeout.connect(self._tick)
+        self._tick_timer.start(1000)
 
-        zorder_t = QTimer(self)
-        zorder_t.timeout.connect(self._reorder_above_wakfu)
-        zorder_t.start(150)
+        self._zorder_timer = QTimer(self)
+        self._zorder_timer.timeout.connect(self._reorder_above_wakfu)
+        self._zorder_timer.start(150)
 
         self._class_sync_timer = QTimer(self)
         self._class_sync_timer.timeout.connect(self._sync_class_from_wakfu_log)

@@ -42,6 +42,14 @@ def _write_db(data: dict):
 
 
 def get_item_settings(name: str) -> dict:
+    """Retourne les paramètres d'un item (qty_override, ah_price).
+    
+    Args:
+        Nom de l'item.
+    
+    Returns:
+        Dict avec 'qty_override' et/ou 'ah_price' si définis, sinon dict vide.
+    """
     key = str(name or "").strip()
     if not key:
         return {}
@@ -52,6 +60,13 @@ def get_item_settings(name: str) -> dict:
 
 
 def set_item_settings(name: str, qty_override: int | None = None, ah_price: int | None = None):
+    """Définit les paramètres d'un item dans la base de jeu.
+    
+    Args:
+        name: Nom de l'item.
+        qty_override: Quantité override pour lescrafts (optionnel).
+        ah_price: Prix HDV estimé (optionnel).
+    """
     key = str(name or "").strip()
     if not key:
         return
@@ -70,6 +85,12 @@ def set_item_settings(name: str, qty_override: int | None = None, ah_price: int 
 
 
 def rename_item(old_name: str, new_name: str):
+    """Renomme un item dans la base (utile pour les renommages ANKAMA).
+    
+    Args:
+        old_name: Ancien nom de l'item.
+        new_name: Nouveau nom de l'item.
+    """
     old_key = str(old_name or "").strip()
     new_key = str(new_name or "").strip()
     if not old_key or not new_key or old_key == new_key:
@@ -88,6 +109,14 @@ def rename_item(old_name: str, new_name: str):
 
 
 def get_profession_state(name: str) -> dict:
+    """Retourne l'état de suivi d'un métier (niveau, XP restante).
+    
+    Args:
+        name: Nom du métier.
+    
+    Returns:
+        Dict avec 'level' (défaut 1) et 'xp_remaining' (défaut 0).
+    """
     key = str(name or "").strip().lower()
     if not key:
         return {"level": 1, "xp_remaining": 0}
@@ -103,13 +132,20 @@ def get_profession_state(name: str) -> dict:
 
 
 def set_profession_state(name: str, level: int, xp_remaining: int):
+    """Enregistre le niveau et l'XP restante d'un métier.
+    
+    Args:
+        name: Nom du métier.
+        level: Niveau du métier (min 1).
+        xp_remaining: XP restante avant prochain niveau.
+    """
     key = str(name or "").strip().lower()
     if not key:
         return
     with _lock:
         db = _read_db()
-        profs = db.setdefault("professions", {})
-        profs[key] = {
+        professions = db.setdefault("professions", {})
+        professions[key] = {
             "level": max(1, int(level)),
             "xp_remaining": max(0, int(xp_remaining)),
         }
@@ -117,6 +153,15 @@ def set_profession_state(name: str, level: int, xp_remaining: int):
 
 
 def list_recipes(profession: str, recipe_type: str) -> list[dict]:
+    """Liste les recettes d'un métier et type (incoming/outgoing).
+    
+    Args:
+        profession: Nom du métier.
+        recipe_type: 'incoming' (récolte) ou 'outgoing' (craft).
+    
+    Returns:
+        Liste de dicts avec id, item_id, output_item, output_qty, components.
+    """
     pkey = str(profession or "").strip().lower()
     rkey = "incoming" if str(recipe_type or "").strip().lower() == "incoming" else "outgoing"
     if not pkey:
