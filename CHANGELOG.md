@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Phase 3a — Widget System] - 2026-03-19
+
+### Ajouté
+- `WidgetBay` : footer modulaire remplaçant TabBar, avec handle de redimensionnement (3 snap points : 48/112/176px)
+- 6 widgets live : KamasBalance, KamasSession, CombatStats, XpGained, ParserHealth, CharacterInfo
+- `widgetStore.ts` : registre de layout widgets, signal baySnap (snap points)
+- `WidgetFrame` : composant wrapper standard pour tous les widgets (h-14, label + valeur)
+- Tooltip contextuel au survol des onglets (données live depuis sessionStore)
+- Ancrage bas de fenêtre : expand/collapse et cycle de snap préservent la position du bas
+- `Dynamic` (solid-js/web) pour résoudre les widgets via registre ID → composant
+
+---
+
 ## v2.0.0 — Refonte complète (2026-03-19)
 
 ### Transition v1 → v2

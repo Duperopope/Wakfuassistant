@@ -320,7 +320,59 @@ Le prototype Python/PyQt5 (archivé sous le tag `v1.0-final`) a validé le conce
 
 ---
 
-## 10. Conventions
+## 10. Mode miniature et widgets modulaires
+
+### 10.1 Architecture implémentée
+
+L'overlay supporte deux modes d'affichage via le composant `WidgetBay` :
+
+| Mode | Hauteur | Description |
+|---|---|---|
+| **Complet** | 600 px | Titlebar + contenu onglet + WidgetBay |
+| **Miniature** | baySnap px | WidgetBay seul (collapse via bouton ▼ dans la tab strip) |
+
+La baie de widgets remplace l'ancienne `TabBar`. Elle intègre navigation, widgets live et contrôle de hauteur dans un seul composant.
+
+### 10.2 Structure réelle du WidgetBay
+
+```
+[WidgetBay]               src/components/Layout/WidgetBay.tsx
+  [Handle resize]         h-1.5, clic = cycle snap (48 → 112 → 176 → 48)
+  [Widget Row 1]          visible si baySnap >= 112px
+  [Widget Row 2]          visible si baySnap >= 176px
+  [Tab strip]             h-[48px] toujours visible, 5 onglets + bouton collapse
+```
+
+Constantes (définies dans `widgetStore.ts`) :
+- `TAB_STRIP_H = 48` — hauteur fixe de la barre d'onglets
+- `WIDGET_ROW_H = 64` — hauteur d'une ligne de widgets (h-14=56px + pb-2=8px)
+- `BAY_SNAPS = [48, 112, 176]` — points d'ancrage en pixels
+
+### 10.3 Fichiers implémentés
+
+| Fichier | Rôle |
+|---|---|
+| `src/stores/widgetStore.ts` | Signaux `baySnap`, `widgetRows` ; constantes snap ; type `WidgetId` |
+| `src/components/Layout/WidgetBay.tsx` | Composant principal : handle, lignes de widgets, tab strip, collapse |
+| `src/components/widgets/WidgetFrame.tsx` | Wrapper standard pour tous les widgets (h-14, label + valeur) |
+| `src/components/widgets/KamasBalance.tsx` | Balance kamas actuelle |
+| `src/components/widgets/KamasSession.tsx` | Delta kamas de session (+/-) |
+| `src/components/widgets/CombatStats.tsx` | Victoires/total + taux |
+| `src/components/widgets/XpGained.tsx` | XP total de session |
+| `src/components/widgets/ParserHealth.tsx` | Taux de reconnaissance du parser |
+| `src/components/widgets/CharacterInfo.tsx` | Nom personnage + serveur |
+
+### 10.4 WIDGET_REGISTRY et résolution dynamique
+
+Les widgets sont résolus via un registre `Record<WidgetId, Component>` dans `WidgetBay.tsx`. Le composant `Dynamic` de `solid-js/web` permet le rendu sans switch/match. Le layout est configurable via `widgetRows` (tableau de `WidgetSlot[][]` avec `cols: 1|2|3|4`).
+
+### 10.5 Ancrage bas de fenêtre
+
+L'expand/collapse et le cycle de snap préservent la position du bas de la fenêtre via `outerPosition()` + `scaleFactor()` + `setPosition()` / `setSize()` de l'API Tauri window.
+
+---
+
+## 11. Conventions
 
 - **Code** : anglais
 - **UI et documentation** : français

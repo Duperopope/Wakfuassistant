@@ -54,30 +54,19 @@ const Titlebar: Component = () => {
         </span>
       </div>
 
-      {/* Boutons fenêtre */}
-      <div class="flex items-center gap-0.5 shrink-0">
-        <button
-          onClick={() => appWindow.minimize()}
-          class="w-7 h-7 flex items-center justify-center rounded hover:bg-overlay-border/30 text-text-muted hover:text-text-primary transition-colors"
-          title="Réduire"
-        >
-          <svg width="10" height="1" viewBox="0 0 10 1">
-            <rect fill="currentColor" width="10" height="1" />
-          </svg>
-        </button>
-        <button
-          onClick={() => appWindow.close()}
-          class="w-7 h-7 flex items-center justify-center rounded hover:bg-defeat-red/80 text-text-muted hover:text-white transition-colors"
-          title="Fermer"
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10">
-            <path
-              fill="currentColor"
-              d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4z"
-            />
-          </svg>
-        </button>
-      </div>
+      {/* Bouton fermer */}
+      <button
+        onClick={() => appWindow.close()}
+        class="w-7 h-7 flex items-center justify-center rounded hover:bg-defeat-red/80 text-text-muted hover:text-white transition-colors"
+        title="Fermer"
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10">
+          <path
+            fill="currentColor"
+            d="M1 0L0 1l4 4-4 4 1 1 4-4 4 4 1-1-4-4 4-4-1-1-4 4z"
+          />
+        </svg>
+      </button>
     </div>
   );
 };
