@@ -14,3 +14,4 @@ Structure hints:
 - CHANGELOG.md - changelog with concise French entries
 
 This file is intended as a quick map for developers and for onboarding new contributors in Phase 1.
+Phase 1 highlights: deterministic data handling (recipes), health checks, and hermetic tests with temporary JSON DBs.
