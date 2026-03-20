@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 # ════════════════════════════════════════════════════════════════════════════
 # UTILITAIRES
 # ════════════════════════════════════════════════════════════════════════════
-function Normalize-Int {
+function ConvertTo-NormalizedInt {
     param([string]$v)
     return [int64]([regex]::Replace($v, "[\s\u00A0\u202F']", ""))
 }
@@ -103,9 +103,9 @@ function Parse-XpLine {
     if (-not ($Line -match $pat)) { return $null }
     # Sauvegarder les groupes AVANT tout autre -match (PowerShell écrase $Matches)
     $entity    = $Matches[1].Trim()
-    $xpGained  = Normalize-Int $Matches[2]
+    $xpGained  = ConvertTo-NormalizedInt $Matches[2]
     $levelUp   = $Matches[3].Trim() -ne ""
-    $remaining = Normalize-Int $Matches[4]
+    $remaining = ConvertTo-NormalizedInt $Matches[4]
     $type      = if ($Line -match "\[Information \(jeu\)\]") { "xp_job" } else { "xp_character" }
     return @{ type=$type; entity=$entity; xp_gained=$xpGained; remaining=$remaining; level_up=$levelUp }
 }
@@ -113,10 +113,10 @@ function Parse-XpLine {
 function Parse-KamasLine {
     param([string]$Line)
     if ($Line -match "(?i)Vous avez gagn\S*\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
-        return @{ type = "kamas_gained"; amount = Normalize-Int $Matches[1] }
+        return @{ type = "kamas_gained"; amount = ConvertTo-NormalizedInt $Matches[1] }
     }
     if ($Line -match "(?i)Vous avez perdu\s+([0-9\s\u00A0\u202F']+)\s+kama(?:s)?\.") {
-        return @{ type = "kamas_spent"; amount = Normalize-Int $Matches[1] }
+        return @{ type = "kamas_spent"; amount = ConvertTo-NormalizedInt $Matches[1] }
     }
     return $null
 }

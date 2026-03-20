@@ -1,8 +1,9 @@
 param(
-    [string]$PrefsRoot  = (Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\preferences"),
-    [string]$LogsRoot   = (Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\logs"),
-    [string]$DbPath     = (Join-Path $PSScriptRoot "monitor_session.db"),
-    [string]$SchemaPath = (Join-Path $PSScriptRoot "schema-session.sql"),
+    [string]$PrefsRoot     = (Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\preferences"),
+    [string]$LogsRoot      = (Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\logs"),
+    [string]$DbPath        = (Join-Path $PSScriptRoot "monitor_session.db"),
+    [string]$SchemaPath    = (Join-Path $PSScriptRoot "schema-session.sql"),
+    [string]$CharacterName = "L'Immortel",
     [int]$PollMs = 500,
     [switch]$ShowAll
 )
@@ -25,7 +26,7 @@ function Normalize-Int {
     return [int64]([regex]::Replace($v, "[\s\u00A0\u202F']", ""))
 }
 function Format-Big { param([int64]$n); return "{0:N0}" -f $n }
-function Now-Iso    { return (Get-Date).ToString("o") }
+function Get-IsoDate { return (Get-Date).ToString("o") }
 
 function Format-Elapsed {
     param([datetime]$since)
@@ -144,7 +145,7 @@ function Get-WorldName {
 function Upsert-World {
     param([int]$WorldId, [string]$Name)
     $n   = Sql-Escape $Name
-    $now = Now-Iso
+    $now = Get-IsoDate
     Exec-Sqlite @"
 INSERT INTO worlds (world_id, name, first_seen, last_seen)
 VALUES ($WorldId, '$n', '$now', '$now')
@@ -157,7 +158,7 @@ ON CONFLICT(world_id) DO UPDATE SET
 
 function Touch-World {
     param([int]$WorldId)
-    $now = Now-Iso
+    $now = Get-IsoDate
     Exec-Sqlite @"
 INSERT INTO worlds (world_id, name, first_seen, last_seen)
 VALUES ($WorldId, NULL, '$now', '$now')
@@ -172,7 +173,7 @@ function Write-Session {
     param([string]$Id, [string]$CharName, [int]$CharLevel, [int64]$CharXpInLevel,
           [int64]$KamasStart, [string]$ClientStartTs, [string]$IngameSinceTs)
     $cn  = Sql-Escape $CharName
-    $now = Now-Iso
+    $now = Get-IsoDate
     $cst = if ($null -ne $ClientStartTs)  { "'$(Sql-Escape $ClientStartTs)'" } else { "NULL" }
     $igs = if ($null -ne $IngameSinceTs)  { "'$(Sql-Escape $IngameSinceTs)'" } else { "NULL" }
     $lvl = if ($CharLevel -gt 0) { $CharLevel } else { "NULL" }
@@ -185,7 +186,7 @@ function Write-ZoneVisit {
     param([string]$SessionId, [int]$WorldId, [object]$PosX, [object]$PosY, [string]$SourceTs)
     $px  = if ($null -ne $PosX) { $PosX } else { "NULL" }
     $py  = if ($null -ne $PosY) { $PosY } else { "NULL" }
-    $now = Now-Iso
+    $now = Get-IsoDate
     $sts = if ($null -ne $SourceTs) { "'$(Sql-Escape $SourceTs)'" } else { "NULL" }
     Exec-Sqlite "INSERT INTO zone_visits (session_id,world_id,pos_x,pos_y,visited_at,source_ts) VALUES ('$(Sql-Escape $SessionId)',$WorldId,$px,$py,'$now',$sts);" | Out-Null
 }
@@ -195,7 +196,7 @@ function Write-XpEvent {
           [int64]$XpGained, [int64]$XpRemaining, [bool]$LevelUp, [object]$WorldId)
     $en  = Sql-Escape $EntityName
     $et  = Sql-Escape $EntityType
-    $now = Now-Iso
+    $now = Get-IsoDate
     $sts = "'$(Sql-Escape $SourceTs)'"
     $lu  = if ($LevelUp) { 1 } else { 0 }
     $wid = if ($null -ne $WorldId) { $WorldId } else { "NULL" }
@@ -206,13 +207,13 @@ function Write-XpCurve {
     param([string]$EntityName, [string]$EntityType, [int]$Level, [int64]$TotalXp)
     $en  = Sql-Escape $EntityName
     $et  = Sql-Escape $EntityType
-    $now = Now-Iso
+    $now = Get-IsoDate
     Exec-Sqlite "INSERT OR REPLACE INTO xp_curve (entity_name,entity_type,level,total_xp,recorded_at) VALUES ('$en','$et',$Level,$TotalXp,'$now');" | Out-Null
 }
 
 function Write-KamasEvent {
     param([string]$SessionId, [string]$SourceTs, [int64]$Delta, [object]$Balance, [object]$WorldId)
-    $now = Now-Iso
+    $now = Get-IsoDate
     $sts = "'$(Sql-Escape $SourceTs)'"
     $bal = if ($null -ne $Balance -and $Balance -ge 0) { $Balance } else { "NULL" }
     $wid = if ($null -ne $WorldId) { $WorldId } else { "NULL" }
@@ -222,7 +223,7 @@ function Write-KamasEvent {
 function Write-Challenge {
     param([string]$SessionId, [string]$SourceTs, [string]$Name, [string]$Result, [object]$WorldId)
     $n   = Sql-Escape $Name
-    $now = Now-Iso
+    $now = Get-IsoDate
     $sts = "'$(Sql-Escape $SourceTs)'"
     $wid = if ($null -ne $WorldId) { $WorldId } else { "NULL" }
     Exec-Sqlite "INSERT INTO challenges (session_id,recorded_at,source_ts,name,result,world_id) VALUES ('$(Sql-Escape $SessionId)','$now',$sts,'$n','$(Sql-Escape $Result)',$wid);" | Out-Null
@@ -232,7 +233,7 @@ function Write-ProximityMsg {
     param([string]$SessionId, [string]$SourceTs, [string]$SpeakerName, [string]$Message, [object]$WorldId)
     $sp  = Sql-Escape $SpeakerName
     $msg = Sql-Escape $Message
-    $now = Now-Iso
+    $now = Get-IsoDate
     $sts = "'$(Sql-Escape $SourceTs)'"
     $wid = if ($null -ne $WorldId) { $WorldId } else { "NULL" }
     Exec-Sqlite "INSERT INTO proximity_messages (session_id,world_id,speaker_name,message,recorded_at,source_ts) VALUES ('$(Sql-Escape $SessionId)',$wid,'$sp','$msg','$now',$sts);" | Out-Null
@@ -241,7 +242,7 @@ function Write-ProximityMsg {
 function Write-JobLevel {
     param([string]$EntityName, [int]$Level, [object]$XpInLevel)
     $en  = Sql-Escape $EntityName
-    $now = Now-Iso
+    $now = Get-IsoDate
     $xpl = if ($null -ne $XpInLevel -and $XpInLevel -ge 0) { $XpInLevel } else { "NULL" }
     Exec-Sqlite "INSERT OR REPLACE INTO job_levels (entity_name,level,xp_in_level,updated_at) VALUES ('$en',$Level,$xpl,'$now');" | Out-Null
 }
@@ -257,7 +258,9 @@ function Parse-XpLine {
     $xpGained  = Normalize-Int $Matches[2]
     $levelUp   = $Matches[3].Trim() -ne ""
     $remaining = Normalize-Int $Matches[4]
-    $type      = if ($Line -match "\[Information \(jeu\)\]") { "xp_job" } else { "xp_character" }
+    # Discriminer par l'entité : seul le personnage principal est xp_character.
+    # [Information (combat)] peut contenir du XP métier (ex: Trappeur en combat).
+    $type      = if ($entity -eq $CharacterName) { "xp_character" } else { "xp_job" }
     return @{ type=$type; entity=$entity; xp_gained=$xpGained; remaining=$remaining; level_up=$levelUp }
 }
 
