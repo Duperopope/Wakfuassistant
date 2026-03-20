@@ -1,0 +1,9 @@
+DEBUG 20:37:56,366 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coe@2732e61c{mcA=6531403, bap=-12, baq=28, ban=-57, bay=3, lVj=MOUNT, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:37:56,366 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 20:37:56,415 [AWT-EventQueue-0] (SR:436) - Invalid start cell (-13, 27, -60) for pathfind search : not a suitable position for the mover. 
+ INFO 20:37:56,468 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+

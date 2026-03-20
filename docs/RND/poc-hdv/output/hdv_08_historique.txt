@@ -1,0 +1,118 @@
+ INFO 20:38:56,478 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 20:38:56,773 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coe@58ef572{mcA=1003461, bap=-6, baq=25, ban=-60, bay=7, lVj=RUN, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:56,773 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:58,294 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coe@1c46c029{mcA=1003461, bap=-5, baq=25, ban=-60, bay=1, lVj=RUN, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:58,294 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:58,365 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message Ok@605725d5{aYS=Nibti, aYT=[FR], aYU=FR, aYV=6609031, aYW=true, aYX=Vos petites morales a 2 balles la, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:58,365 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 20:38:58,394 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message cmG
+java.lang.RuntimeException: Generated message class "mz" missing method "getPagination".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularMessageFieldAccessor.<init>(GeneratedMessageV3.java:2974)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1970)
+	at mz.internalGetFieldAccessorTable(SourceFile:296)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: mz.getPagination()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 59 more
+DEBUG 20:38:58,394 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cmG@2403bdd3{maP=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:58,394 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 20:38:58,424 [AWT-EventQueue-0] (aPh:174) - [Proximité] Nibti : Vos petites morales a 2 balles la
+DEBUG 20:38:58,425 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at ccD.b(SourceFile:457)
+	at ayE.b(SourceFile:67)
+	at ccR.b(SourceFile:38)
+	at ayE.b(SourceFile:67)
+	at aAM.bGy(SourceFile:56)
+	at aAD.f(SourceFile:77)
+	at aAD.e(SourceFile:70)
+	at aAD.a(SourceFile:53)
+	at aAD.run(SourceFile:40)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 20:38:59,458 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coR@2519d7e0{mdu=false, mdv=[coS@1ccd1bb5], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:59,458 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:59,464 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csa@6da25fb1{htO=-1811995159141512, mgJ=[2, 2, 0, 0, 0, 11, 3, 0, 0, 0, 24, 2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 4, 111, 0, 0, 0, 0, 0, 0, 0, 37, -1, -60, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, -122, -8, 9, 66, 97, 97, 104, 108, 114, 111, 111, 103, 0, 0, 0, 0, 0, 0, 82, -126, 0, 0, 7, -1, 0, 0], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:59,465 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:59,465 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message crW@58cf5e6e{mgF={-1811995159141512}, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:59,465 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:59,664 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message conn@33823440{aDh=6326008, mcO=[12, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -99, 7, 49, 15, -120, 0, 0, 7, 0, 0, 0, 0, 0, 0, 82, -126, 0, 16, 0, -95, 0, 7, 0, 62, 0, 10, 0, 21, 77, 97, 107, 101, 32, 83, 117, 102, 111, 32, 71, 114, 101, 97, 116, 32, 65, 103, 97, 105, 110], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:59,664 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:59,664 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:59,664 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message conn@47e69136{aDh=6326008, mcO=[12, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -99, 7, 49, 15, -120, 0, 0, 7, 0, 0, 0, 0, 0, 0, 82, -126, 0, 16, 0, -95, 0, 7, 0, 62, 0, 10, 0, 21, 77, 97, 107, 101, 32, 83, 117, 102, 111, 32, 71, 114, 101, 97, 116, 32, 65, 103, 97, 105, 110], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:59,664 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].

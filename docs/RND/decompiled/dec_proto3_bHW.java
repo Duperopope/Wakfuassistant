@@ -1,0 +1,125 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  lombok.Generated
+ *  org.apache.commons.lang3.ArrayUtils
+ *  org.jetbrains.annotations.NotNull
+ *  org.jetbrains.annotations.Nullable
+ */
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+import lombok.Generated;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public final class bHW
+extends bHY {
+    private static final float kdc = 0.4f;
+    public static final String kdd = "sellTime";
+    public static final String kde = "type";
+    public static final String kdf = "styleForType";
+    public static final String kdg = "isExpired";
+    @NotNull
+    private final mt kdh;
+    private final ffV kdi;
+    private final Date kdj;
+
+    public bHW(mt mt2, long l) {
+        this.kdh = mt2;
+        this.kdi = fgA.w(mt2.aaA().aem().gY(1).aer());
+        this.kdj = bHW.a(mt2, l);
+    }
+
+    private static Date a(mt mt2, long l) {
+        Uw uw = new Uw(UE.bjV().bjc());
+        long l2 = l - mt2.Fa();
+        return uw.b(new Uz(l2 / 1000L)).bjC();
+    }
+
+    @Override
+    @Nullable
+    public Object eu(String string) {
+        switch (string) {
+            case "formattedPrice": {
+                if (this.dip()) {
+                    return new aHV().cew().af(super.eu("formattedPrice")).cex().ceL();
+                }
+                return super.eu("formattedPrice");
+            }
+            case "sellTime": {
+                Locale locale = aUM.cWf().aUXX().aUJ();
+                DateFormat dateFormat = DateFormat.getDateInstance(1, locale);
+                dateFormat.setTimeZone(Uw.bvG);
+                return dateFormat.format(this.kdj);
+            }
+            case "type": {
+                return aUM.cWf().c("market.history.element.type." + this.kdh.alG().ordinal(), new Object[0]);
+            }
+            case "styleForType": {
+                return this.getStyle();
+            }
+            case "isExpired": {
+                return this.dip();
+            }
+        }
+        return super.eu(string);
+    }
+
+    private boolean dip() {
+        return this.kdh.alG() == mx.Lc || this.kdh.alG() == mx.Le;
+    }
+
+    public String getStyle() {
+        switch (this.kdh.alG()) {
+            case Lc: 
+            case Le: {
+                return "textTagRed";
+            }
+            case Ld: 
+            case Lf: {
+                return "textTagGreen";
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String[] bxk() {
+        return (String[])ArrayUtils.addAll((Object[])super.bxk(), (Object[])new String[]{kdd, kde, kdf, kdg});
+    }
+
+    @Override
+    public long Lx() {
+        return this.kdh.Lx();
+    }
+
+    @Override
+    public long akd() {
+        return this.kdh.alI();
+    }
+
+    @Override
+    public int oP() {
+        return this.kdh.alK();
+    }
+
+    @NotNull
+    @Generated
+    public mt dXe() {
+        return this.kdh;
+    }
+
+    @Override
+    @Generated
+    public ffV getItem() {
+        return this.kdi;
+    }
+
+    @Generated
+    public Date dXf() {
+        return this.kdj;
+    }
+}

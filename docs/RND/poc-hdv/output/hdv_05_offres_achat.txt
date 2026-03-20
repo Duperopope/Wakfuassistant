@@ -1,0 +1,8 @@
+ WARN 20:38:25,170 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/miscellaneous/itemTypes/254.tga
+DEBUG 20:38:25,803 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 20:38:26,476 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+

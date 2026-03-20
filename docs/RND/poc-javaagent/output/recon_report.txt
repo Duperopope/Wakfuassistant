@@ -1,0 +1,80 @@
+
+=== DOSSIERS TROUVES ===
+C:\Users\Smedj\AppData\Local\Ankama
+C:\Users\Smedj\AppData\Roaming\zaap
+
+=== FICHIERS DE CONFIG ===
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\zaap-start.bat
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\config.properties
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\zaap\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\gamesLogs\wakfu\themes\config.properties
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\dofus\beta\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\dofus\dofus3\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\dofus\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\flyn\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\krosfighter\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\krosmaga\beta\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\krosmaga\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\maliki\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\onemoregate\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\retro\beta\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\retro\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\savara\demo\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\savara\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\supernanoblaster\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\wakfu\beta\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\wakfu\main\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\waven\beta\settings.json
+C:\Users\Smedj\AppData\Roaming\zaap\repositories\production\waven\main\settings.json
+
+=== JAVA VERSION (C:\Users\Smedj\AppData\Local\Ankama\Wakfu\jre\bin\java.exe) ===
+openjdk version "21.0.9" 2025-10-21 LTS
+OpenJDK Runtime Environment Temurin-21.0.9+10 (build 21.0.9+10-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.9+10 (build 21.0.9+10-LTS, mixed mode, sharing)
+
+
+=== JRE TROUVES ===
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\jre\bin\java.exe
+
+=== JARS PRINCIPAUX ===
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\gui_jar\gui.jar (571.01 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\maps\gfx.jar (388.37 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\npcs\npcs.jar (375.89 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\equipments\equipments.jar (174.67 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\players\players.jar (119.05 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\particles\particles.jar (118.83 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\videos\videos.jar (83.46 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\interactives\interactives.jar (72.27 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\pets\pets.jar (67.5 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\hm\hm.jar (61.5 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\resources\resources.jar (52.02 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\lib\wakfu-client.jar (31.21 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\gui\gui.jar (23.23 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\lib\fastutil-8.5.18.jar (22.86 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\bdata\68.jar (17.99 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\animations\dynamics\dynamics.jar (16.87 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\scripts\scripts.jar (13.55 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\i18n\i18n_fr.jar (5.43 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\i18n\i18n_pt.jar (5.32 MB)
+C:\Users\Smedj\AppData\Local\Ankama\Wakfu\contents\i18n\i18n_es.jar (5.31 MB)
+
+=== PROCESSUS WAKFU (PID 4188) ===
+"G:\ankama\Ankama Launcher.exe" --type=gpu-process --field-trial-handle=1580,1002851523987496665,1385256546026794735,131072 --disable-features=PlzServiceWorker,SpareRendererForSitePerProcess,WinRetrieveSuggestionsOnlyOnDemand --enable-gpu-rasterization --user-data-dir="C:\Users\Smedj\AppData\Roaming\Ankama Launcher" --gpu-preferences=UAAAAAAAAADgAAAYAAAAAAAAAAAAAAAAAABgAAAQAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEgAAAAAAAAASAAAAAAAAAAYAAAAAgAAABAAAAAAAAAAGAAAAAAAAAAQAAAAAAAAAAAAAAANAAAAEAAAAAAAAAABAAAADQAAAAgAAAAAAAAACAAAAAAAAAA= --mojo-platform-channel-handle=1592 /prefetch:2
+
+=== PROCESSUS WAKFU (PID 5224) ===
+"G:\ankama\Ankama Launcher.exe" --type=renderer --user-data-dir="C:\Users\Smedj\AppData\Roaming\zaap" --standard-schemes --secure-schemes --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=sentry-ipc --service-worker-schemes --streaming-schemes --app-user-model-id="Ankama Launcher" --app-path="G:\ankama\resources\app.asar" --no-sandbox --no-zygote --force-device-scale-factor=1 --field-trial-handle=1580,1002851523987496665,1385256546026794735,131072 --disable-features=PlzServiceWorker,SpareRendererForSitePerProcess,WinRetrieveSuggestionsOnlyOnDemand --lang=fr --device-scale-factor=1 --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=4 --mojo-platform-channel-handle=2392 /prefetch:1
+
+=== PROCESSUS WAKFU (PID 8672) ===
+"G:\ankama\Ankama Launcher.exe" --type=renderer --user-data-dir="C:\Users\Smedj\AppData\Roaming\zaap" --standard-schemes --secure-schemes --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=sentry-ipc --service-worker-schemes --streaming-schemes --app-user-model-id="Ankama Launcher" --app-path="G:\ankama\resources\app.asar" --no-sandbox --no-zygote --force-device-scale-factor=1 --field-trial-handle=1580,1002851523987496665,1385256546026794735,131072 --disable-features=PlzServiceWorker,SpareRendererForSitePerProcess,WinRetrieveSuggestionsOnlyOnDemand --lang=fr --device-scale-factor=1 --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --mojo-platform-channel-handle=2404 /prefetch:1
+
+=== PROCESSUS WAKFU (PID 15028) ===
+"G:\ankama\Ankama Launcher.exe" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle=1580,1002851523987496665,1385256546026794735,131072 --disable-features=PlzServiceWorker,SpareRendererForSitePerProcess,WinRetrieveSuggestionsOnlyOnDemand --lang=fr --service-sandbox-type=none --user-data-dir="C:\Users\Smedj\AppData\Roaming\Ankama Launcher" --standard-schemes --secure-schemes --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=sentry-ipc --service-worker-schemes --streaming-schemes --mojo-platform-channel-handle=1784 /prefetch:8
+
+=== PROCESSUS WAKFU (PID 22120) ===
+"G:\ankama\Ankama Launcher.exe" 
+
+=== PROCESSUS WAKFU (PID 18688) ===
+"jre/bin/java.exe"  -Xms2G -Xmx4G -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -Djava.net.preferIPv4Stack=true -Dsun.awt.noerasebackground=true -Dsun.java2d.noddraw=true -Djogl.disable.openglarbcontext -Dlog4j.configuration=file:///C:/Users/Smedj/AppData/Roaming/zaap/gamesLogs/wakfu/log4j-spy.properties --add-opens=java.desktop/sun.awt=ALL-UNNAMED -Dsun.java2d.uiScale.enabled=true -Djava.library.path=natives/ @classpath com.ankamagames.wakfu.client.WakfuClient --partner=default --install-folder .  
+
+=== JAVA_TOOL_OPTIONS ===
+Methode d'injection sans modification de fichiers: set JAVA_TOOL_OPTIONS=-javaagent:path\to\agent.jar

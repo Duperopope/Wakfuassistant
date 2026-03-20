@@ -1,0 +1,38 @@
+DEBUG 20:38:48,643 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message ctu@2947944a{meu=751732, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:48,643 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:48,643 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cmb@755e5c6c{jZV=26991, maH=OK, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:48,643 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 20:38:48,716 [AWT-EventQueue-0] (aPh:174) - [Information (jeu)] Vous avez gagné 26 991 kamas.
+DEBUG 20:38:48,744 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cmq@69bcf39a{jZU=0, jZV=0, maE=65, jZX=0, maH=OK, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:48,744 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:48,744 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cmk@22db94d3{jZr=0, jZs=0, jZt=2, jZu=0, jZv=0, maH=OK, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:48,744 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 20:38:50,840 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message Ok@256101d8{aYS=Kaneen, aYT=[FR], aYU=FR, aYV=6624968, aYW=true, aYX=belle observation, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 20:38:50,840 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 20:38:50,984 [AWT-EventQueue-0] (aPh:174) - [Proximité] Kaneen : belle observation
+DEBUG 20:38:50,984 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at ccD.b(SourceFile:457)
+	at ayE.b(SourceFile:67)
+	at ccR.b(SourceFile:38)
+	at ayE.b(SourceFile:67)
+	at aAM.bGy(SourceFile:56)
+	at aAD.f(SourceFile:77)
+	at aAD.e(SourceFile:70)
+	at aAD.a(SourceFile:53)
+	at aAD.run(SourceFile:40)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
