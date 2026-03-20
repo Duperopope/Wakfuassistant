@@ -38,6 +38,70 @@ HH:MM:SS,mmm - [Information (combat)] L'Immortel : +XXXXX points d'XP.  Prochain
 
 ---
 
+## SCÉNARIO 1.5 — Courbe XP personnage (suivi temps réel + historique)
+
+**Ce qu'on teste :** suivi complet de la progression XP d'un personnage — ETA, dates de level-up, XP par niveau, ratio entre niveaux.
+
+**Action dans le jeu :** Lancer le script AVANT les combats. Le personnage doit être connecté (fenêtre "NomPerso - WAKFU" visible).
+
+**Script à lancer :**
+```powershell
+pwsh -File "h:\Code\Wakfuassistant\docs\RND\poc-conceptscripts\xp-curve.ps1"
+```
+
+**Ce que le script demande au démarrage :**
+```
+Niveau actuel de Goldens : 12
+XP totale du niveau actuel (la barre complete, ex: 11951) : 11951
+XP deja accumulee dans ce niveau (ex: 2000) : 2293
+```
+- **Niveau actuel** : visible dans la fiche personnage en jeu
+- **XP totale du niveau** : la barre complète (CSV automatique pour niveaux ≤190, sinon saisie)
+- **XP déjà accumulée** : combien tu as déjà fait dans ce niveau
+
+**Ce que tu dois voir au démarrage :**
+```
+Personnage detecte depuis la fenetre : Goldens
+Perso : Goldens  |  Niv : 12  |  Avant logs : 6  |  Level-ups : 6
+
+  Niv   Passe a            Duree          XP niveau        Source
+  8     20/03/26 02:33:34  ---            2 442            [CSV]
+  9     20/03/26 02:33:55  0m21s          5 056            [CSV]
+  ...
+  12    en cours           ---            11 951           [CSV]
+
+En attente de combats...
+```
+
+**Ce que tu dois voir à chaque level-up :**
+```
+  NIVEAU 13  [02:34:12]  ETA suivant : 00:08:33  |  Niv 14 total : 14 290 XP [CSV]
+
+  Niv   Passe a            Duree          XP niveau        Source
+  ...
+  13    20/03/26 02:34:12  0m37s          11 951           [EXACT]
+  14    en cours           ---            14 290           [CSV]
+```
+
+**Résultat validé — session 2026-03-20 :**
+```
+03:34:33  +30 046     XP  Reste:10 832       ETA:---  →  Niv 15 total: 31 220 XP [a verifier]
+03:35:09  +5 384      XP  Reste:5 448        ETA:00:00:36
+```
+
+**Questions :**
+- Le personnage est-il bien détecté depuis la fenêtre ?
+- L'historique des level-ups est-il cohérent avec ce que tu sais de ta progression ?
+- L'ETA s'affiche-t-il après le 2e combat ?
+- Les valeurs `[CSV]` correspondent-elles à ce que le jeu affiche ?
+- Pour niveaux 191–230 : le script demande-t-il confirmation ?
+- Pour niveaux 231+ : le script déclenche-t-il la saisie au passage de niveau ?
+
+**Fichier source :** `poc-conceptscripts/xp-curve.ps1`
+**Données de référence :** `poc-database/courbexp230.csv` (niveaux 1–190 confirmés, 191–230 à valider)
+
+---
+
 ## SCÉNARIO 2 — XP de métier
 
 **Ce qu'on teste :** est-ce que le parser distingue XP métier de XP personnage ?
