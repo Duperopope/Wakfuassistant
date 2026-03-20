@@ -4,11 +4,8 @@
 Les scripts de test unitaires vérifient que les regex matchent des lignes **inventées**.
 Ce guide vérifie qu'elles matchent des lignes **réelles** sorties du jeu.
 
-**Procédure pour chaque scénario :**
-1. Lance la commande de surveillance dans un terminal PowerShell
-2. Fais l'action dans le jeu
-3. Observe ce qui s'affiche dans le terminal
-4. Réponds : ✅ vu et correct / ❌ rien / ⚠️ vu mais faux
+**Chaque scénario nommé comme validé sera fourni avec les lignes réelles correspondantes en powershell à adapter au code cible:**
+
 
 ---
 
