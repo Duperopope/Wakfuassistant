@@ -473,7 +473,8 @@ function Get-BgState {
 function Get-LocationLabel {
     param($State)
     $wId   = $State.worldId
-    $wName = if ($script:worldNames.ContainsKey([int]$wId)) { $script:worldNames[[int]$wId] } else { "monde $wId" }
+    $wInt  = 0; $isInt = [int]::TryParse($wId, [ref]$wInt)
+    $wName = if ($isInt -and $script:worldNames.ContainsKey($wInt)) { $script:worldNames[$wInt] } else { "monde $wId" }
     $pos   = $State.pos
     if ($State.zone -eq "havresac") { return "Havre-Sac" }
     if ($wId -eq "?") { return "???" }
