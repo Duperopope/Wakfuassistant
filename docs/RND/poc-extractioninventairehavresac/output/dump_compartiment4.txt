@@ -1,0 +1,1721 @@
+=== COMPARTIMENT #1 (109 bytes) ===
+f1 bytes [30] {
+  f1 varint = 0
+  f2 bytes [26] {
+    f1 bytes [12] {
+      f1 varint = 1468669294429602781
+      f2 varint = 7
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [7] {
+  f1 varint = 1
+  f2 bytes [3] {
+    f53 varint = 20
+  }
+}
+f1 bytes [7] {
+  f1 varint = 2
+  f2 bytes [3] {
+    f53 varint = 35
+  }
+}
+f1 bytes [7] {
+  f1 varint = 3
+  f2 bytes [3] {
+    f53 varint = 65
+  }
+}
+f1 bytes [7] {
+  f1 varint = 4
+  f2 bytes [3] {
+    f53 varint = 80
+  }
+}
+f1 bytes [7] {
+  f1 varint = 5
+  f2 bytes [3] {
+    f53 varint = 125
+  }
+}
+f1 bytes [7] {
+  f1 varint = 6
+  f2 bytes [3] {
+    f53 varint = 50
+  }
+}
+f1 bytes [7] {
+  f1 varint = 7
+  f2 bytes [3] {
+    f53 varint = 95
+  }
+}
+f1 bytes [7] {
+  f1 varint = 8
+  f2 bytes [3] {
+    f53 varint = 110
+  }
+}
+f2 varint = 6212522
+
+=== COMPARTIMENT #2 (121 bytes) ===
+f1 bytes [114] {
+  f1 varint = 0
+  f2 bytes [110] {
+    f1 bytes [12] {
+      f1 varint = 1470076891930034303
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076891477049445
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795416315789410
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076891745485407
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076892483682697
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795416433229825
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795416584224825
+      f2 varint = 22
+    }
+    f53 varint = -1
+  }
+}
+f2 varint = 6625040
+
+=== COMPARTIMENT #3 (1397 bytes) ===
+f1 bytes [157] {
+  f1 varint = 0
+  f2 bytes [152] {
+    f1 bytes [12] {
+      f1 varint = 1469794946285306304
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1468669294463156441
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866413
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [105] {
+  f1 varint = 1
+  f2 bytes [101] {
+    f1 bytes [12] {
+      f1 varint = 1469794915432005758
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228620
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228710
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228627
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228709
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 20
+  }
+}
+f1 bytes [119] {
+  f1 varint = 2
+  f2 bytes [115] {
+    f1 bytes [12] {
+      f1 varint = 1469794915432005758
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228620
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228710
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871693660513
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228627
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228709
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 35
+  }
+}
+f1 bytes [119] {
+  f1 varint = 3
+  f2 bytes [115] {
+    f1 bytes [12] {
+      f1 varint = 1470357867482579091
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794915415228620
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357867499356166
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357867566465486
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357867314806945
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357902328856943
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357867801346081
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 50
+  }
+}
+f1 bytes [119] {
+  f1 varint = 4
+  f2 bytes [115] {
+    f1 bytes [12] {
+      f1 varint = 1470357871341338632
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871643328909
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871643328696
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871660106297
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871592997160
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871207121221
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357871274229847
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 65
+  }
+}
+f1 bytes [49] {
+  f1 varint = 5
+  f2 bytes [45] {
+    f1 bytes [12] {
+      f1 varint = 1470357873522377015
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795138837414025
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 80
+  }
+}
+f1 bytes [49] {
+  f1 varint = 6
+  f2 bytes [45] {
+    f1 bytes [12] {
+      f1 varint = 1470357882649182380
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357876592607615
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 95
+  }
+}
+f1 bytes [49] {
+  f1 varint = 7
+  f2 bytes [45] {
+    f1 bytes [12] {
+      f1 varint = 1470357882649182375
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795089294295564
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 110
+  }
+}
+f1 bytes [134] {
+  f1 varint = 8
+  f2 bytes [129] {
+    f1 bytes [12] {
+      f1 varint = 1469794946285306304
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866413
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 125
+  }
+}
+f1 bytes [135] {
+  f1 varint = 9
+  f2 bytes [130] {
+    f1 bytes [12] {
+      f1 varint = 1469794946285306304
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866413
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794914878357632
+      f2 varint = 22
+    }
+    f53 varint = 140
+  }
+}
+f1 bytes [114] {
+  f1 varint = 10
+  f2 bytes [110] {
+    f1 bytes [12] {
+      f1 varint = 1469794946285306304
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [100] {
+  f1 varint = 11
+  f2 bytes [96] {
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [114] {
+  f1 varint = 12
+  f2 bytes [110] {
+    f1 bytes [12] {
+      f1 varint = 1469794946285306304
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167866249
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946151088733
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865828
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946285306222
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946167865624
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1469794946402746493
+      f2 varint = 15
+    }
+    f53 varint = -1
+  }
+}
+f2 varint = 3134552
+
+=== COMPARTIMENT #4 (3863 bytes) ===
+f1 bytes [213] {
+  f1 varint = 0
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998495858744
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996650365657
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357941587542159
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [119] {
+  f1 varint = 1
+  f2 bytes [115] {
+    f1 bytes [12] {
+      f1 varint = 1470358021799412398
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189194
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358024785756770
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189214
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358036294926915
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412269
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 125
+  }
+}
+f1 bytes [213] {
+  f1 varint = 2
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470358021816189038
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358090988651135
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066259034544
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [204] {
+  f1 varint = 3
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1469795071275565584
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358072047174105
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936120
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021967183934
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358043844674093
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816188956
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412349
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358022017515634
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936100
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412416
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412404
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358090988651135
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 20
+  }
+}
+f1 bytes [204] {
+  f1 varint = 4
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1469795071275565584
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358072047174105
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936120
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021967183934
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358043844674093
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816188956
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412349
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358022017515634
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936100
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412416
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412404
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795163147600381
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 35
+  }
+}
+f1 bytes [204] {
+  f1 varint = 5
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1469795071275565584
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358089713582110
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936120
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358187524751581
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358043844674093
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816188953
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358089713582797
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358022017515634
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189142
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412345
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412404
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412304
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 50
+  }
+}
+f1 bytes [204] {
+  f1 varint = 6
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1470358105182175256
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358087683539409
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412365
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358086811123915
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358087733870813
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358088136524250
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358089713582797
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358086962118768
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358086962119014
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358087180222534
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412388
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795071409782811
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 65
+  }
+}
+f1 bytes [204] {
+  f1 varint = 7
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1470358128770941076
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358079143936114
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816188999
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189051
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412346
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358088136524250
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189212
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358092397936685
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189091
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189030
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358022218842548
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189005
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 80
+  }
+}
+f1 bytes [204] {
+  f1 varint = 8
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1470358128770941076
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076659313934407
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358077080338634
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358077197779112
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412346
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358077533323895
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358075738161533
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358092095947190
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358073506791553
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189001
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358075134182017
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189005
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 95
+  }
+}
+f1 bytes [204] {
+  f1 varint = 9
+  f2 bytes [199] {
+    f1 bytes [12] {
+      f1 varint = 1470358132042498497
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076658928058490
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189216
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358077197779112
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470076659011944456
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358077533323895
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358075738161533
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358092095947190
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412340
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189032
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358075134182017
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021799412269
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 110
+  }
+}
+f1 bytes [163] {
+  f1 varint = 10
+  f2 bytes [158] {
+    f1 bytes [12] {
+      f1 varint = 1468950738636898637
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1468950738636898635
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358128368287946
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1468950738754339192
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358128368287936
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1468950738704007453
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358128368287948
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1468950738636898641
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358128368287944
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = 140
+  }
+}
+f1 bytes [205] {
+  f1 varint = 11
+  f2 bytes [200] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998495858744
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996650365657
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357941587542159
+      f2 varint = 24
+    }
+    f53 varint = 155
+  }
+}
+f1 bytes [205] {
+  f1 varint = 12
+  f2 bytes [200] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998495858744
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996650365657
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357941587542159
+      f2 varint = 24
+    }
+    f53 varint = 170
+  }
+}
+f1 bytes [213] {
+  f1 varint = 13
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1469795163147600381
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066309366156
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [213] {
+  f1 varint = 14
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358219418239282
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066275811556
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [199] {
+  f1 varint = 15
+  f2 bytes [194] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066292588548
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [213] {
+  f1 varint = 16
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122496262179
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066275811892
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [213] {
+  f1 varint = 17
+  f2 bytes [208] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122462708341
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358122496262471
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358066292588785
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470358021816189240
+      f2 varint = 24
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [205] {
+  f1 varint = 18
+  f2 bytes [200] {
+    f1 bytes [12] {
+      f1 varint = 1470357998193869132
+      f2 varint = 0
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998344864033
+      f2 varint = 3
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996885246438
+      f2 varint = 4
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998411972623
+      f2 varint = 5
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998126760625
+      f2 varint = 7
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357998495858744
+      f2 varint = 8
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997942211275
+      f2 varint = 10
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997908656690
+      f2 varint = 12
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997438895017
+      f2 varint = 13
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997724106856
+      f2 varint = 15
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357997371785862
+      f2 varint = 16
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996650365657
+      f2 varint = 17
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357996700696719
+      f2 varint = 22
+    }
+    f1 bytes [12] {
+      f1 varint = 1470357941587542159
+      f2 varint = 24
+    }
+    f53 varint = 185
+  }
+}
+f2 varint = 3111456
+
+=== COMPARTIMENT #5 (91 bytes) ===
+f1 bytes [30] {
+  f1 varint = 0
+  f2 bytes [26] {
+    f1 bytes [12] {
+      f1 varint = 1468669294446379650
+      f2 varint = 7
+    }
+    f53 varint = -1
+  }
+}
+f1 bytes [7] {
+  f1 varint = 1
+  f2 bytes [3] {
+    f53 varint = 20
+  }
+}
+f1 bytes [7] {
+  f1 varint = 2
+  f2 bytes [3] {
+    f53 varint = 35
+  }
+}
+f1 bytes [7] {
+  f1 varint = 3
+  f2 bytes [3] {
+    f53 varint = 50
+  }
+}
+f1 bytes [7] {
+  f1 varint = 4
+  f2 bytes [3] {
+    f53 varint = 65
+  }
+}
+f1 bytes [7] {
+  f1 varint = 5
+  f2 bytes [3] {
+    f53 varint = 80
+  }
+}
+f1 bytes [7] {
+  f1 varint = 6
+  f2 bytes [3] {
+    f53 varint = 95
+  }
+}
+f2 varint = 3148287
+

@@ -1,0 +1,1706 @@
+DEBUG 18:40:19,508 [AWT-EventQueue-0] (bnv:184) - DimensionalBag.initializeToEnter()
+DEBUG 18:40:19,551 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=2} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:19,551 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:19,634 [AWT-EventQueue-0] (cdV:1092) - PERSONAL_SPACE_ENTER_RESULT_MESSAGE (success=true)
+ INFO 18:40:19,642 [AWT-EventQueue-0] (aPh:174) - [Information (jeu)] Vous avez vendu 2 objets pour un prix total de 61§ pendant votre absence.
+DEBUG 18:40:19,667 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgy.eu(SourceFile:530)
+	at bhJ.eu(SourceFile:1361)
+	at bgT.eu(SourceFile:1451)
+	at fSf.b(SourceFile:431)
+	at fSf.a(SourceFile:399)
+	at fCv.oz(SourceFile:360)
+	at fCv.setItem(SourceFile:309)
+	at fCv.setItem(SourceFile:300)
+	at fCv.setItemValue(SourceFile:380)
+	at fCv.setContent(SourceFile:294)
+	at fDf.ebw(SourceFile:588)
+	at fDf.setContent(SourceFile:302)
+	at fAY.setContent(SourceFile:32)
+	at fHi.setIterableProperty(SourceFile:769)
+	at fAY.setContentProperty(SourceFile:24)
+	at fDf.setContentProperty(SourceFile:950)
+	at fAY.setPropertyAttribute(SourceFile:17)
+	at fAZ.setPropertyAttribute(SourceFile:225)
+	at fDf.setPropertyAttribute(SourceFile:942)
+	at fHi.setPropertyAttribute(SourceFile:336)
+	at fSf.d(SourceFile:557)
+	at fSf.gFB(SourceFile:359)
+	at fSe.gFv(SourceFile:87)
+	at fyw.a(SourceFile:1312)
+	at fHV.abP(SourceFile:491)
+	at fHV.qy(SourceFile:346)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:19,668 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgy.eu(SourceFile:530)
+	at bhJ.eu(SourceFile:1361)
+	at bgT.eu(SourceFile:1451)
+	at fSf.b(SourceFile:431)
+	at fSf.a(SourceFile:399)
+	at fCv.oz(SourceFile:360)
+	at fCv.setItem(SourceFile:309)
+	at fCv.setItem(SourceFile:300)
+	at fCv.setItemValue(SourceFile:380)
+	at fCv.setContent(SourceFile:294)
+	at fDf.ebw(SourceFile:588)
+	at fDf.setContent(SourceFile:302)
+	at fAY.setContent(SourceFile:32)
+	at fHi.setIterableProperty(SourceFile:769)
+	at fAY.setContentProperty(SourceFile:24)
+	at fDf.setContentProperty(SourceFile:950)
+	at fAY.setPropertyAttribute(SourceFile:17)
+	at fAZ.setPropertyAttribute(SourceFile:225)
+	at fDf.setPropertyAttribute(SourceFile:942)
+	at fHi.setPropertyAttribute(SourceFile:336)
+	at fSf.d(SourceFile:557)
+	at fSf.gFB(SourceFile:359)
+	at fSe.gFv(SourceFile:87)
+	at fyw.a(SourceFile:1312)
+	at fHV.abP(SourceFile:491)
+	at fHV.qy(SourceFile:346)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:19,668 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgy.eu(SourceFile:530)
+	at bhJ.eu(SourceFile:1361)
+	at bgT.eu(SourceFile:1451)
+	at fSf.b(SourceFile:431)
+	at fSf.a(SourceFile:399)
+	at fCv.oz(SourceFile:360)
+	at fCv.setItem(SourceFile:309)
+	at fCv.setItem(SourceFile:300)
+	at fCv.setItemValue(SourceFile:380)
+	at fCv.setContent(SourceFile:294)
+	at fDf.ebw(SourceFile:588)
+	at fDf.setContent(SourceFile:302)
+	at fAY.setContent(SourceFile:32)
+	at fHi.setIterableProperty(SourceFile:769)
+	at fAY.setContentProperty(SourceFile:24)
+	at fDf.setContentProperty(SourceFile:950)
+	at fAY.setPropertyAttribute(SourceFile:17)
+	at fAZ.setPropertyAttribute(SourceFile:225)
+	at fDf.setPropertyAttribute(SourceFile:942)
+	at fHi.setPropertyAttribute(SourceFile:336)
+	at fSf.d(SourceFile:557)
+	at fSf.gFB(SourceFile:359)
+	at fSe.gFv(SourceFile:87)
+	at fyw.a(SourceFile:1312)
+	at fHV.abP(SourceFile:491)
+	at fHV.qy(SourceFile:346)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:19,669 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgy.eu(SourceFile:530)
+	at bhJ.eu(SourceFile:1361)
+	at bgT.eu(SourceFile:1451)
+	at fSf.b(SourceFile:431)
+	at fSf.a(SourceFile:399)
+	at fCv.oz(SourceFile:360)
+	at fCv.setItem(SourceFile:309)
+	at fCv.setItem(SourceFile:300)
+	at fCv.setItemValue(SourceFile:380)
+	at fCv.setContent(SourceFile:294)
+	at fDf.ebw(SourceFile:588)
+	at fDf.setContent(SourceFile:302)
+	at fAY.setContent(SourceFile:32)
+	at fHi.setIterableProperty(SourceFile:769)
+	at fAY.setContentProperty(SourceFile:24)
+	at fDf.setContentProperty(SourceFile:950)
+	at fAY.setPropertyAttribute(SourceFile:17)
+	at fAZ.setPropertyAttribute(SourceFile:225)
+	at fDf.setPropertyAttribute(SourceFile:942)
+	at fHi.setPropertyAttribute(SourceFile:336)
+	at fSf.d(SourceFile:557)
+	at fSf.gFB(SourceFile:359)
+	at fSe.gFv(SourceFile:87)
+	at fyw.a(SourceFile:1312)
+	at fHV.abP(SourceFile:491)
+	at fHV.qy(SourceFile:346)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:19,670 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgy.eu(SourceFile:530)
+	at bhJ.eu(SourceFile:1361)
+	at bgT.eu(SourceFile:1451)
+	at fSf.b(SourceFile:431)
+	at fSf.a(SourceFile:399)
+	at fCv.oz(SourceFile:360)
+	at fCv.setItem(SourceFile:309)
+	at fCv.setItem(SourceFile:300)
+	at fCv.setItemValue(SourceFile:380)
+	at fCv.setContent(SourceFile:294)
+	at fDf.ebw(SourceFile:588)
+	at fDf.setContent(SourceFile:302)
+	at fAY.setContent(SourceFile:32)
+	at fHi.setIterableProperty(SourceFile:769)
+	at fAY.setContentProperty(SourceFile:24)
+	at fDf.setContentProperty(SourceFile:950)
+	at fAY.setPropertyAttribute(SourceFile:17)
+	at fAZ.setPropertyAttribute(SourceFile:225)
+	at fDf.setPropertyAttribute(SourceFile:942)
+	at fHi.setPropertyAttribute(SourceFile:336)
+	at fSf.d(SourceFile:557)
+	at fSf.gFB(SourceFile:359)
+	at fSe.gFv(SourceFile:87)
+	at fyw.a(SourceFile:1312)
+	at fHV.abP(SourceFile:491)
+	at fHV.qy(SourceFile:346)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:19,800 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@6afd3f78{aYS=Azamateria, aYT=[FR, EN], aYU=FR, aYV=6593565, aYW=true, aYX=genre d'application capable de lire quelque chose sur le serveur en temps réelle pour que le gars sache ou aller et à quelle second il va spawn, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:19,801 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:40:19,827 [AWT-EventQueue-0] (aPh:174) - [Guilde] Azamateria : genre d'application capable de lire quelque chose sur le serveur en temps réelle pour que le gars sache ou aller et à quelle second il va spawn
+DEBUG 18:40:19,831 [SoundManager] (aHu:869) - voices in use : 12/255
+DEBUG 18:40:20,361 [SoundManager] (aHu:869) - voices in use : 10/255
+DEBUG 18:40:20,493 [SoundManager] (aHu:869) - voices in use : 8/255
+DEBUG 18:40:20,506 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= -3, 2
+DEBUG 18:40:20,507 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= -4, 4
+DEBUG 18:40:20,507 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= -4.0, 4.0
+DEBUG 18:40:20,559 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:20,828 [SoundManager] (aHu:869) - voices in use : 6/255
+ INFO 18:40:20,915 [inter-chat-2-1] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x0e2ff041, L:/192.168.1.69:54500 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 34B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 22 00 7b 22 73 75 63 63 65 73 73 22 3a |...".{"success":|
+|00000010| 66 61 6c 73 65 2c 22 65 72 72 43 6f 64 65 22 3a |false,"errCode":|
+|00000020| 39 7d                                           |9}              |
++--------+-------------------------------------------------+----------------+
+ERROR 18:40:20,916 [inter-chat-2-1] (aXh:65) - [CHAT] Authentication failed error code=9
+DEBUG 18:40:20,923 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@5e36df5c{aYS=Meccano, aYT=[FR, EN], aYU=FR, aYV=3033302, aYW=true, aYX=le pb, c'est que c'est improuvable ça, sauf par Ankama, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:20,923 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:40:20,938 [AWT-EventQueue-0] (aPh:174) - [Guilde] Meccano : le pb, c'est que c'est improuvable ça, sauf par Ankama
+ WARN 18:40:20,945 [inter-chat-2-1] (aXa:52) - [CHAT] Connection lost, reconnection in 3324ms
+DEBUG 18:40:21,583 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:21,811 [SoundManager] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:21,811 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:21,822 [SoundManager] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:21,902 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= -2, 2
+DEBUG 18:40:21,902 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= -4, 4
+DEBUG 18:40:21,902 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= -4.0, 4.0
+DEBUG 18:40:22,048 [SoundManager] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:22,048 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:22,058 [SoundManager] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:22,164 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:22,164 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:22,174 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:22,200 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= -1, 2
+DEBUG 18:40:22,200 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= -4, 4
+DEBUG 18:40:22,200 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= -4.0, 4.0
+DEBUG 18:40:22,431 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:22,500 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 0, 2
+DEBUG 18:40:22,500 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, 4
+DEBUG 18:40:22,500 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, 4.0
+DEBUG 18:40:22,530 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coj@2be5efa2{iIn=0, iIo=2, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message cvn
+java.lang.RuntimeException: Generated message class "ze" missing method "setX".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2181)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at zc.internalGetFieldAccessorTable(SourceFile:166)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: ze.setX(int)
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cvn@2e7bab0d{mjY=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message cvn
+java.lang.RuntimeException: Generated message class "ze" missing method "setX".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2181)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at zc.internalGetFieldAccessorTable(SourceFile:166)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: ze.setX(int)
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cvn@4146ce6f{mjY=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:22,531 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:22,532 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message cvn
+java.lang.RuntimeException: Generated message class "ze" missing method "setX".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2181)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at zc.internalGetFieldAccessorTable(SourceFile:166)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: ze.setX(int)
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:22,532 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cvn@7dcbb930{mjY=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:22,532 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:22,655 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:22,655 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:22,666 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:22,783 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:23,056 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:23,056 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:23,066 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:23,176 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 1, 2
+DEBUG 18:40:23,177 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, 4
+DEBUG 18:40:23,177 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, 4.0
+DEBUG 18:40:23,277 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:23,373 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=1} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:23,373 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:23,373 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=1} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:23,374 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:23,424 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:23,424 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:23,436 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:23,541 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 1, 1
+DEBUG 18:40:23,541 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, 4
+DEBUG 18:40:23,541 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, 4.0
+DEBUG 18:40:23,658 [AWT-EventQueue-0] (aHu:858) - voices in use : 8/255
+DEBUG 18:40:23,669 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:23,861 [AWT-EventQueue-0] (aHu:858) - voices in use : 8/255
+DEBUG 18:40:23,862 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 1, 0
+DEBUG 18:40:23,862 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, 4
+DEBUG 18:40:23,862 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, 4.0
+DEBUG 18:40:24,021 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:24,042 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:24,052 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:24,054 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:24,065 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:24,065 [SoundManager] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:24,131 [AWT-EventQueue-0] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:24,134 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coj@8fbb8a1{iIn=1, iIo=-1, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:24,135 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:24,180 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 1, -1
+DEBUG 18:40:24,180 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, -4
+DEBUG 18:40:24,180 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, -4.0
+ INFO 18:40:24,270 [inter-chat-2-1] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x0e2ff041, L:/192.168.1.69:54500 ! R:zaap-chat.ankama.com/54.155.183.142:6337] INACTIVE
+ INFO 18:40:24,271 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5] CONNECT: zaap-chat.ankama.com/54.155.183.142:6337
+ INFO 18:40:24,301 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] ACTIVE
+ INFO 18:40:24,302 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 01                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:40:24,359 [inter-chat-2-2] (io.netty.handler.ssl.SslHandler:1832) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] HANDSHAKEN: protocol:TLSv1.2 cipher suite:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+ INFO 18:40:24,388 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 02                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:40:24,402 [SoundManager] (aHu:869) - voices in use : 6/255
+ INFO 18:40:24,441 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 159B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 9f 00 7b 22 74 6f 6b 65 6e 22 3a 22 61 |.....{"token":"a|
+|00000010| 65 34 32 37 31 30 62 2d 31 61 37 35 2d 34 64 63 |e42710b-1a75-4dc|
+|00000020| 65 2d 62 37 62 61 2d 34 61 36 35 64 66 61 65 33 |e-b7ba-4a65dfae3|
+|00000030| 65 64 38 22 2c 22 63 6c 69 65 6e 74 54 79 70 65 |ed8","clientType|
+|00000040| 22 3a 32 2c 22 6f 73 54 79 70 65 22 3a 33 2c 22 |":2,"osType":3,"|
+|00000050| 64 65 76 69 63 65 54 79 70 65 22 3a 33 2c 22 64 |deviceType":3,"d|
+|00000060| 65 76 69 63 65 49 64 22 3a 22 43 69 70 68 65 72 |eviceId":"Cipher|
+|00000070| 40 42 34 3a 32 45 3a 39 39 3a 43 44 3a 46 43 3a |@B4:2E:99:CD:FC:|
+|00000080| 42 41 22 2c 22 63 75 73 74 6f 6d 41 70 70 6c 69 |BA","customAppli|
+|00000090| 63 61 74 69 6f 6e 44 61 74 61 22 3a 22 22 7d    |cationData":""} |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:40:24,507 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 1, -2
+DEBUG 18:40:24,507 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, -4
+DEBUG 18:40:24,507 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, -4.0
+ INFO 18:40:24,554 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 21B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 15 00 7b 22 73 75 63 63 65 73 73 22 3a |.....{"success":|
+|00000010| 74 72 75 65 7d                                  |true}           |
++--------+-------------------------------------------------+----------------+
+ INFO 18:40:24,587 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 33B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 21 00 0a 1a 08 87 fa ff df 05 12 12 08 |...!............|
+|00000010| d4 b0 f9 e5 f8 ff ff ff ff 01 12 05 08 a8 ab b0 |................|
+|00000020| 40                                              |@               |
++--------+-------------------------------------------------+----------------+
+ INFO 18:40:24,589 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 37B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 25 00 0a 1e 08 86 fa ff df 05 12 16 08 |...%............|
+|00000010| 8e 82 83 dd ff ff ff ff ff 01 12 09 08 a8 ab b0 |................|
+|00000020| 40 12 02 08 03                                  |@....           |
++--------+-------------------------------------------------+----------------+
+ INFO 18:40:24,590 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 62B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 19 00 1a 12 08 92 ae d9 b7 fb ff ff ff |................|
+|00000010| ff 01 12 05 08 a8 ab b0 40 00 00 00 25 00 1a 1e |........@...%...|
+|00000020| 08 86 d3 e5 ed 05 12 16 08 a8 ab b0 40 12 0f 08 |............@...|
+|00000030| 66 12 0b 49 4e 5f 4c 41 55 4e 43 48 45 52       |f..IN_LAUNCHER  |
++--------+-------------------------------------------------+----------------+
+ INFO 18:40:24,614 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 79B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 4f 00 12 48 08 87 fa ff df 05 10 01 1a |...O..H.........|
+|00000010| 3e 08 d2 a0 a1 db fb ff ff ff ff 01 12 31 0a 19 |>............1..|
+|00000020| 0a 17 08 9e f6 9e 56 12 0a 50 69 6e 61 2d 6b 6f |......V..Pina-ko|
+|00000030| 61 6c 61 1a 04 36 32 33 34 0a 14 0a 12 08 98 b4 |ala..6234.......|
+|00000040| ae 53 12 05 48 61 64 61 61 1a 04 39 30 38 30    |.S..Hadaa..9080 |
++--------+-------------------------------------------------+----------------+
+ INFO 18:40:24,616 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] READ: 56B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 0f 00 12 08 08 86 fa ff df 05 10 01 00 |................|
+|00000010| 00 00 29 00 1a 22 08 86 d3 e5 ed 05 12 1a 08 a8 |..).."..........|
+|00000020| ab b0 40 12 02 08 03 12 0f 08 66 12 0b 49 4e 5f |..@.......f..IN_|
+|00000030| 4c 41 55 4e 43 48 45 52                         |LAUNCHER        |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:40:24,657 [SoundManager] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:24,657 [SoundManager] (aHu:869) - voices in use : 6/255
+ WARN 18:40:24,660 [AWT-EventQueue-0] (cZA:221) - la propriété alphaCorner n'existe pas.
+ WARN 18:40:24,660 [AWT-EventQueue-0] (cZA:221) - la propriété addLabel n'existe pas.
+DEBUG 18:40:24,662 [AWT-EventQueue-0] (aHu:858) - voices in use : 8/255
+DEBUG 18:40:24,663 [AWT-EventQueue-0] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:24,663 [AWT-EventQueue-0] (aHu:858) - voices in use : 12/255
+DEBUG 18:40:24,663 [AWT-EventQueue-0] (aHu:858) - voices in use : 14/255
+DEBUG 18:40:24,668 [SoundManager] (aHu:869) - voices in use : 13/255
+DEBUG 18:40:24,668 [SoundManager] (aHu:858) - voices in use : 14/255
+DEBUG 18:40:24,742 [SoundManager] (aHu:869) - voices in use : 13/255
+DEBUG 18:40:24,951 [AWT-EventQueue-0] (caZ:181) - [weight]OrigPos= 0, -3
+DEBUG 18:40:24,951 [AWT-EventQueue-0] (caZ:182) - [weight]CenterPos= 4, -4
+DEBUG 18:40:24,951 [AWT-EventQueue-0] (caZ:192) - [weight]Pos= 4.0, -4.0
+DEBUG 18:40:24,967 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@285992b7{aYS=Muzak, aYT=[FR, EN, ES], aYU=FR, aYV=6593459, aYW=true, aYX=un récap de la conv aza stp, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:24,967 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:40:25,064 [AWT-EventQueue-0] (aPh:174) - [Guilde] Muzak : un récap de la conv aza stp
+DEBUG 18:40:25,151 [SoundManager] (aHu:869) - voices in use : 11/255
+DEBUG 18:40:25,151 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,151 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:25,151 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:25,155 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgT.dnf(SourceFile:1523)
+	at cTs.a(SourceFile:96)
+	at cVO.a(SourceFile:886)
+	at ayE.a(SourceFile:193)
+	at cVO.eUN(SourceFile:753)
+	at cRW.a(SourceFile:18)
+	at cSb.a(SourceFile:477)
+	at ayE.a(SourceFile:193)
+	at bkd.bIH(SourceFile:55)
+	at bxd.b(SourceFile:34)
+	at Ni.a(SourceFile:86)
+	at bCA.a(SourceFile:397)
+	at cPM.a(SourceFile:180)
+	at cPM.d(SourceFile:173)
+	at cQF.pathEnded(SourceFile:173)
+	at adS.bvu(SourceFile:301)
+	at adS.a(SourceFile:170)
+	at adN.b(SourceFile:252)
+	at java.base/java.lang.Iterable.forEach(Unknown Source)
+	at adN.a(SourceFile:252)
+	at adN.a(SourceFile:22)
+	at aaj.qY(SourceFile:342)
+	at aaj.qy(SourceFile:322)
+	at aam.qy(SourceFile:130)
+	at afF.qy(SourceFile:87)
+	at aIs.qy(SourceFile:141)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:25,155 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at blI.<init>(SourceFile:41)
+	at blH.<init>(SourceFile:27)
+	at cTs.a(SourceFile:105)
+	at cVO.a(SourceFile:886)
+	at ayE.a(SourceFile:193)
+	at cVO.eUN(SourceFile:753)
+	at cRW.a(SourceFile:18)
+	at cSb.a(SourceFile:477)
+	at ayE.a(SourceFile:193)
+	at bkd.bIH(SourceFile:55)
+	at bxd.b(SourceFile:34)
+	at Ni.a(SourceFile:86)
+	at bCA.a(SourceFile:397)
+	at cPM.a(SourceFile:180)
+	at cPM.d(SourceFile:173)
+	at cQF.pathEnded(SourceFile:173)
+	at adS.bvu(SourceFile:301)
+	at adS.a(SourceFile:170)
+	at adN.b(SourceFile:252)
+	at java.base/java.lang.Iterable.forEach(Unknown Source)
+	at adN.a(SourceFile:252)
+	at adN.a(SourceFile:22)
+	at aaj.qY(SourceFile:342)
+	at aaj.qy(SourceFile:322)
+	at aam.qy(SourceFile:130)
+	at afF.qy(SourceFile:87)
+	at aIs.qy(SourceFile:141)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:25,156 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgT.dnf(SourceFile:1523)
+	at cTs.ePK(SourceFile:248)
+	at cTs.a(SourceFile:112)
+	at cVO.a(SourceFile:886)
+	at ayE.a(SourceFile:193)
+	at cVO.eUN(SourceFile:753)
+	at cRW.a(SourceFile:18)
+	at cSb.a(SourceFile:477)
+	at ayE.a(SourceFile:193)
+	at bkd.bIH(SourceFile:55)
+	at bxd.b(SourceFile:34)
+	at Ni.a(SourceFile:86)
+	at bCA.a(SourceFile:397)
+	at cPM.a(SourceFile:180)
+	at cPM.d(SourceFile:173)
+	at cQF.pathEnded(SourceFile:173)
+	at adS.bvu(SourceFile:301)
+	at adS.a(SourceFile:170)
+	at adN.b(SourceFile:252)
+	at java.base/java.lang.Iterable.forEach(Unknown Source)
+	at adN.a(SourceFile:252)
+	at adN.a(SourceFile:22)
+	at aaj.qY(SourceFile:342)
+	at aaj.qy(SourceFile:322)
+	at aam.qy(SourceFile:130)
+	at afF.qy(SourceFile:87)
+	at aIs.qy(SourceFile:141)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:25,185 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at bgT.dnf(SourceFile:1523)
+	at cTs.ePH(SourceFile:194)
+	at cTs.a(SourceFile:116)
+	at cVO.a(SourceFile:886)
+	at ayE.a(SourceFile:193)
+	at cVO.eUN(SourceFile:753)
+	at cRW.a(SourceFile:18)
+	at cSb.a(SourceFile:477)
+	at ayE.a(SourceFile:193)
+	at bkd.bIH(SourceFile:55)
+	at bxd.b(SourceFile:34)
+	at Ni.a(SourceFile:86)
+	at bCA.a(SourceFile:397)
+	at cPM.a(SourceFile:180)
+	at cPM.d(SourceFile:173)
+	at cQF.pathEnded(SourceFile:173)
+	at adS.bvu(SourceFile:301)
+	at adS.a(SourceFile:170)
+	at adN.b(SourceFile:252)
+	at java.base/java.lang.Iterable.forEach(Unknown Source)
+	at adN.a(SourceFile:252)
+	at adN.a(SourceFile:22)
+	at aaj.qY(SourceFile:342)
+	at aaj.qy(SourceFile:322)
+	at aam.qy(SourceFile:130)
+	at afF.qy(SourceFile:87)
+	at aIs.qy(SourceFile:141)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:25,186 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at blI.<init>(SourceFile:41)
+	at blH.<init>(SourceFile:27)
+	at bwa.aj(SourceFile:41)
+	at cVO.a(SourceFile:891)
+	at ayE.a(SourceFile:193)
+	at cVO.eUN(SourceFile:753)
+	at cRW.a(SourceFile:18)
+	at cSb.a(SourceFile:477)
+	at ayE.a(SourceFile:193)
+	at bkd.bIH(SourceFile:55)
+	at bxd.b(SourceFile:34)
+	at Ni.a(SourceFile:86)
+	at bCA.a(SourceFile:397)
+	at cPM.a(SourceFile:180)
+	at cPM.d(SourceFile:173)
+	at cQF.pathEnded(SourceFile:173)
+	at adS.bvu(SourceFile:301)
+	at adS.a(SourceFile:170)
+	at adN.b(SourceFile:252)
+	at java.base/java.lang.Iterable.forEach(Unknown Source)
+	at adN.a(SourceFile:252)
+	at adN.a(SourceFile:22)
+	at aaj.qY(SourceFile:342)
+	at aaj.qy(SourceFile:322)
+	at aam.qy(SourceFile:130)
+	at afF.qy(SourceFile:87)
+	at aIs.qy(SourceFile:141)
+	at axM.b(SourceFile:455)
+	at axM.display(SourceFile:367)
+	at jogamp.opengl.GLDrawableHelper.displayImpl(GLDrawableHelper.java:692)
+	at jogamp.opengl.GLDrawableHelper.display(GLDrawableHelper.java:674)
+	at com.jogamp.opengl.awt.GLCanvas$10.run(GLCanvas.java:1435)
+	at jogamp.opengl.GLDrawableHelper.invokeGLImpl(GLDrawableHelper.java:1293)
+	at jogamp.opengl.GLDrawableHelper.invokeGL(GLDrawableHelper.java:1147)
+	at com.jogamp.opengl.awt.GLCanvas$11.run(GLCanvas.java:1449)
+	at java.desktop/java.awt.event.InvocationEvent.dispatch(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:25,197 [AWT-EventQueue-0] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:25,208 [AWT-EventQueue-0] (aHu:858) - voices in use : 8/255
+ WARN 18:40:25,212 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/icons/items/64/2182175.tga
+DEBUG 18:40:25,214 [SoundManager] (aHu:858) - voices in use : 9/255
+DEBUG 18:40:25,214 [SoundManager] (aHu:869) - voices in use : 8/255
+DEBUG 18:40:25,239 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coM@2518ab00{aZQ=3111456, bmk=NORTH_EAST, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:25,239 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:25,239 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csa@145bc921{htO=13261, mgJ=[1, 2, 0, 0, 0, 6, 2, 0, 2, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:25,239 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:25,241 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cud@3af88986{huL=31, ayE=[], huJ=3111456, mbb=1, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:25,241 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:25,252 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csJ
+java.lang.RuntimeException: Generated message class "lT" missing method "getCompartmentsList".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$RepeatedFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2413)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$RepeatedFieldAccessor.<init>(GeneratedMessageV3.java:2486)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$RepeatedMessageFieldAccessor.<init>(GeneratedMessageV3.java:3019)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1958)
+	at lT.internalGetFieldAccessorTable(SourceFile:134)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: lT.getCompartmentsList()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 59 more
+DEBUG 18:40:25,253 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csJ@4a2e2fe1{mhx=SUCCESS, mhE=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:25,253 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:25,277 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:25,319 [SoundManager] (aHu:858) - voices in use : 8/255
+DEBUG 18:40:25,332 [SoundManager] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:25,332 [SoundManager] (aHu:869) - voices in use : 8/255
+DEBUG 18:40:25,355 [SoundManager] (aHu:858) - voices in use : 10/255
+ERROR 18:40:25,358 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csF
+java.lang.RuntimeException: Generated message class "lX" missing method "getCompartmentId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularStringFieldAccessor.<init>(GeneratedMessageV3.java:2930)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1978)
+	at lX.internalGetFieldAccessorTable(SourceFile:1083)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: lX.getCompartmentId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 59 more
+DEBUG 18:40:25,358 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csF@6cc6060a{mhx=SUCCESS, mhC=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:25,358 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:25,464 [AWT-EventQueue-0] (aHu:858) - voices in use : 11/255
+DEBUG 18:40:25,621 [SoundManager] (aHu:869) - voices in use : 10/255
+DEBUG 18:40:25,635 [AWT-EventQueue-0] (aHu:858) - voices in use : 11/255
+DEBUG 18:40:25,653 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,741 [SoundManager] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:25,741 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,751 [SoundManager] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:25,793 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,870 [SoundManager] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:25,870 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,881 [SoundManager] (aHu:858) - voices in use : 10/255
+DEBUG 18:40:25,924 [SoundManager] (aHu:869) - voices in use : 9/255
+DEBUG 18:40:25,987 [SoundManager] (aHu:869) - voices in use : 8/255
+DEBUG 18:40:26,135 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:26,755 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:26,893 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:27,239 [AWT-EventQueue-0] (aHu:858) - voices in use : 5/255
+ERROR 18:40:27,312 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csF
+java.lang.RuntimeException: Generated message class "lX" missing method "getCompartmentId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularStringFieldAccessor.<init>(GeneratedMessageV3.java:2930)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1978)
+	at lX.internalGetFieldAccessorTable(SourceFile:1083)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: lX.getCompartmentId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 59 more
+DEBUG 18:40:27,312 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csF@2d145bec{mhx=SUCCESS, mhC=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:27,312 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:27,514 [SoundManager] (aHu:869) - voices in use : 4/255
+ WARN 18:40:27,847 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/miscellaneous/itemTypes/110.tga
+DEBUG 18:40:27,956 [SoundManager] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:27,956 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:27,968 [SoundManager] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:28,074 [AWT-EventQueue-0] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:28,161 [AWT-EventQueue-0] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:28,161 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at blI.<init>(SourceFile:41)
+	at blH.<init>(SourceFile:27)
+	at bwa.aj(SourceFile:41)
+	at cDb.onItemDoubleClick(SourceFile:326)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at fIp.a(SourceFile:171)
+	at fIp.gBz(SourceFile:90)
+	at fIo.O(SourceFile:37)
+	at fIo.run(SourceFile:53)
+	at fHv.N(SourceFile:1292)
+	at fHv.c(SourceFile:1033)
+	at fHv.c(SourceFile:1055)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.h(SourceFile:1125)
+	at fEs.h(SourceFile:1885)
+	at fCv.n(SourceFile:248)
+	at fCw.run(SourceFile:113)
+	at fHv.N(SourceFile:1292)
+	at fHv.c(SourceFile:1033)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1055)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.h(SourceFile:1125)
+	at fEs.h(SourceFile:1885)
+	at fHz.c(SourceFile:145)
+	at fHz.a(SourceFile:90)
+	at fBJ.b(SourceFile:429)
+	at fHV.b(SourceFile:441)
+	at axM.mousePressed(SourceFile:646)
+	at java.desktop/java.awt.Component.processMouseEvent(Unknown Source)
+	at java.desktop/java.awt.Component.processEvent(Unknown Source)
+	at java.desktop/java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.Component.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue$5.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$5.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:28,227 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csf@138b3e09{mgO={1470358382660551103=AddItemOperation{m_refId=2037, m_qty=1, m_bind=null, m_bagId=27497136409018909, m_posInBag=4, m_insideMove=false, m_multiElementsEffects=null, m_mergedSetInfo=null}}, mgP=true, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:28,227 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:28,229 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csE
+java.lang.RuntimeException: Generated message class "kW" missing method "getUniqueId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at kW.internalGetFieldAccessorTable(SourceFile:357)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: kW.getUniqueId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:28,229 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csE@32046ca{mhx=SUCCESS, lZM=a8c00d40-b46e-4980-8d0f-cfd5789ad295, mhz=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:28,229 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:28,281 [AWT-EventQueue-0] (aHu:858) - voices in use : 8/255
+ INFO 18:40:28,282 [AWT-EventQueue-0] (aPh:174) - [Information (jeu)] Vous avez ramassé 1x Epée du Tofu .
+DEBUG 18:40:28,363 [SoundManager] (aHu:869) - voices in use : 7/255
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message conn@4b878342{aDh=3111456, mcO=[27, 1, 0, 5, 85, 3, 105, 3, 55, 1, 118, 3, 117, 3], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message conn@6670974f{aDh=3111456, mcO=[27, 1, 0, 4, 85, 3, 105, 3, 118, 3, 117, 3], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message coy@1a86f23b{mda=[8, -94, -72, -22, -112, 1, 16, -94, -72, -22, -112, 1, 24, -5, -1, -1, -1, -1, -1, -1, -1, -1, 1, 32, -127, -128, -116, 44, 42, 6, 8, 0, 16, 0, 24, 0, 48, -96, -12, -67, 1, 56, -96, -12, -67, 1, 66, 39, 80, -127, -128, -116, 44, 104, -94, -72, -22, -112, 1, -120, 1, 0, -112, 1, 0, -104, 1, 0, -88, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -80, 1, -112, 78, -112, 3, 0, 72, 1, 80, -128, -128, -112, 44, 90, 35, 8, 0, 16, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 26, 15, 8, 0, 16, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 24, 0, 32, -112, 78, 40, 1, 106, 25, 8, 1, 16, 0, 32, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 40, 1, 48, 0, 56, 0, 64, 0, 72, 0], handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:28,382 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:28,437 [SoundManager] (aHu:869) - voices in use : 6/255
+ WARN 18:40:28,782 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/miscellaneous/itemTypes/737.tga
+ WARN 18:40:28,782 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/miscellaneous/itemTypes/551.tga
+DEBUG 18:40:28,944 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:29,028 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:29,209 [AWT-EventQueue-0] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:29,289 [AWT-EventQueue-0] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:29,321 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cso@146312e2{duS=1470358382660551103, bol=-1, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:29,321 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:29,337 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csC
+java.lang.RuntimeException: Generated message class "kW" missing method "getUniqueId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at kW.internalGetFieldAccessorTable(SourceFile:357)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: kW.getUniqueId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:29,337 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csC@5b710606{mhx=SUCCESS, mhy=a8c00d40-b46e-4980-8d0f-cfd5789ad295, mhz=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:29,337 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:29,392 [AWT-EventQueue-0] (aHu:858) - voices in use : 7/255
+DEBUG 18:40:29,494 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:29,568 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:29,968 [SoundManager] (aHu:869) - voices in use : 4/255
+ WARN 18:40:30,259 [AWT-EventQueue-0] (aUC:482) - Impossible de trouver l'icone d'URL jar:file:./contents/gui_jar/gui.jar!/miscellaneous/itemTypes/112.tga
+DEBUG 18:40:30,474 [AWT-EventQueue-0] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:30,557 [AWT-EventQueue-0] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:30,558 [AWT-EventQueue-0] (bgT:2149) - [PROPERTY] Failed to load default name
+Fu: Il n'existe pas de propriété: nameForced
+	at Ft.bS(SourceFile:48)
+	at bgT.getName(SourceFile:2144)
+	at blI.<init>(SourceFile:41)
+	at blH.<init>(SourceFile:27)
+	at bwa.aj(SourceFile:41)
+	at cDb.onItemDoubleClick(SourceFile:326)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at fIp.a(SourceFile:171)
+	at fIp.gBz(SourceFile:90)
+	at fIo.O(SourceFile:37)
+	at fIo.run(SourceFile:53)
+	at fHv.N(SourceFile:1292)
+	at fHv.c(SourceFile:1033)
+	at fHv.c(SourceFile:1055)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.h(SourceFile:1125)
+	at fEs.h(SourceFile:1885)
+	at fCv.n(SourceFile:248)
+	at fCw.run(SourceFile:113)
+	at fHv.N(SourceFile:1292)
+	at fHv.c(SourceFile:1033)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1057)
+	at fHv.c(SourceFile:1055)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.c(SourceFile:1051)
+	at fHv.h(SourceFile:1125)
+	at fEs.h(SourceFile:1885)
+	at fHz.c(SourceFile:145)
+	at fHz.a(SourceFile:90)
+	at fBJ.b(SourceFile:429)
+	at fHV.b(SourceFile:441)
+	at axM.mousePressed(SourceFile:646)
+	at java.desktop/java.awt.Component.processMouseEvent(Unknown Source)
+	at java.desktop/java.awt.Component.processEvent(Unknown Source)
+	at java.desktop/java.awt.Component.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.Component.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$4.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue$5.run(Unknown Source)
+	at java.desktop/java.awt.EventQueue$5.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(Unknown Source)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(Unknown Source)
+	at java.desktop/java.awt.EventDispatchThread.run(Unknown Source)
+DEBUG 18:40:30,640 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csf@53e3514e{mgO={1470358382660551107=AddItemOperation{m_refId=9430, m_qty=1, m_bind=null, m_bagId=27497136409018909, m_posInBag=4, m_insideMove=false, m_multiElementsEffects=null, m_mergedSetInfo=null}}, mgP=true, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:30,640 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:30,640 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csE
+java.lang.RuntimeException: Generated message class "kW" missing method "getUniqueId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at kW.internalGetFieldAccessorTable(SourceFile:357)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: kW.getUniqueId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:30,641 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csE@712c02{mhx=SUCCESS, lZM=a8c00d40-b46e-4980-8d0f-cfd5789ad295, mhz=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:30,641 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:30,702 [AWT-EventQueue-0] (aHu:858) - voices in use : 7/255
+ INFO 18:40:30,702 [AWT-EventQueue-0] (aPh:174) - [Information (jeu)] Vous avez ramassé 1x Dague de Boisaille .
+DEBUG 18:40:30,750 [SoundManager] (aHu:869) - voices in use : 6/255
+DEBUG 18:40:30,834 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:31,451 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:31,495 [AWT-EventQueue-0] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:31,551 [AWT-EventQueue-0] (aHu:858) - voices in use : 6/255
+DEBUG 18:40:31,633 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message cso@2a5f5cc{duS=1470358382660551107, bol=-1, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:31,633 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ERROR 18:40:31,649 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (aAM:155) - Error while doing toString on message csC
+java.lang.RuntimeException: Generated message class "kW" missing method "getUniqueId".
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1847)
+	at com.google.protobuf.GeneratedMessageV3.access$1000(GeneratedMessageV3.java:79)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor$ReflectionInvoker.<init>(GeneratedMessageV3.java:2178)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable$SingularFieldAccessor.<init>(GeneratedMessageV3.java:2252)
+	at com.google.protobuf.GeneratedMessageV3$FieldAccessorTable.ensureFieldAccessorsInitialized(GeneratedMessageV3.java:1982)
+	at kW.internalGetFieldAccessorTable(SourceFile:357)
+	at com.google.protobuf.GeneratedMessageV3.getDescriptorForType(GeneratedMessageV3.java:133)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:364)
+	at com.google.protobuf.TextFormat$Printer.print(TextFormat.java:354)
+	at com.google.protobuf.TextFormat$Printer.printToString(TextFormat.java:619)
+	at com.google.protobuf.AbstractMessage.toString(AbstractMessage.java:111)
+	at java.base/java.lang.String.valueOf(Unknown Source)
+	at java.base/java.lang.StringBuilder.append(Unknown Source)
+	at aAM.s(SourceFile:143)
+	at aAM.toString(SourceFile:109)
+	at org.slf4j.helpers.MessageFormatter.safeObjectAppend(MessageFormatter.java:291)
+	at org.slf4j.helpers.MessageFormatter.deeplyAppendParameter(MessageFormatter.java:263)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:225)
+	at org.slf4j.helpers.MessageFormatter.arrayFormat(MessageFormatter.java:160)
+	at org.slf4j.helpers.MessageFormatter.format(MessageFormatter.java:124)
+	at io.netty.util.internal.logging.LocationAwareSlf4JLogger.debug(LocationAwareSlf4JLogger.java:108)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1182)
+	at io.netty.channel.DefaultChannelPipeline.onUnhandledInboundMessage(DefaultChannelPipeline.java:1196)
+	at io.netty.channel.DefaultChannelPipeline$TailContext.channelRead(DefaultChannelPipeline.java:1296)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at aDj.a(SourceFile:49)
+	at aDj.channelRead0(SourceFile:24)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:327)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:299)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1373)
+	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1236)
+	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1285)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:510)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:449)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:279)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:722)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:584)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:496)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.NoSuchMethodException: kW.getUniqueId()
+	at java.base/java.lang.Class.getMethod(Unknown Source)
+	at com.google.protobuf.GeneratedMessageV3.getMethodOrDie(GeneratedMessageV3.java:1844)
+	... 58 more
+DEBUG 18:40:31,650 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message csC@bbdc8a6{mhx=SUCCESS, mhy=a8c00d40-b46e-4980-8d0f-cfd5789ad295, mhz=ERRORhandler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:31,650 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:40:31,766 [SoundManager] (aHu:869) - voices in use : 5/255
+DEBUG 18:40:31,829 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:31,870 [AWT-EventQueue-0] (aHu:858) - voices in use : 5/255
+DEBUG 18:40:32,028 [SoundManager] (aHu:869) - voices in use : 4/255
+DEBUG 18:40:48,614 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=2} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:40:48,614 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:40:54,591 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:41:00,859 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=2} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:00,859 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:24,593 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:41:26,049 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@5050d4c1{aYS=Azamateria, aYT=[FR, EN], aYU=FR, aYV=6593565, aYW=true, aYX=en gros, le gars utilise une application tierce pour lire une info renvoyer par les serveurs, sa lui permet de savoir quand et/où l'archi va spawn, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:26,049 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:26,053 [AWT-EventQueue-0] (aPh:174) - [Guilde] Azamateria : en gros, le gars utilise une application tierce pour lire une info renvoyer par les serveurs, sa lui permet de savoir quand et/où l'archi va spawn
+DEBUG 18:41:26,620 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NM@303617a2{aYR=8, aYS=Seta Moatusa, aYT=[FR], aYU=FR, aYV=102083587, aYW=false, aYX=2 Places <O7;68>modu s10, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:26,620 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:26,686 [AWT-EventQueue-0] (aPh:174) - [Recrutement (FR)] Seta Moatusa : 2 Places Le Hammamamoule modu s10
+DEBUG 18:41:34,584 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NM@7f26abf7{aYR=4, aYS=Seta Moatusa, aYT=[FR], aYU=FR, aYV=102083587, aYW=false, aYX=2 Places <O7;68>modu s10, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:34,584 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:34,612 [AWT-EventQueue-0] (aPh:174) - [Communauté (FR)] Seta Moatusa : 2 Places Le Hammamamoule modu s10
+DEBUG 18:41:36,858 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NM@29868e0e{aYR=8, aYS=Sauceburgouzz, aYT=[FR, EN], aYU=FR, aYV=186933396, aYW=false, aYX=recrute support pour dj potofeu stele s4, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:36,858 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:36,939 [AWT-EventQueue-0] (aPh:174) - [Recrutement (FR)] Sauceburgouzz : recrute support pour dj potofeu stele s4
+DEBUG 18:41:43,814 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=1} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:43,814 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:41:44,000 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=2} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:44,000 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:41:48,036 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@72e454cd{aYS=Muzak, aYT=[FR, EN, ES], aYU=FR, aYV=6593459, aYW=true, aYX=pas mal, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:41:48,036 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:41:48,116 [AWT-EventQueue-0] (aPh:174) - [Guilde] Muzak : pas mal
+ INFO 18:41:54,594 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:42:00,767 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NS@726fc634{aYS=Muzak, aYT=[FR, EN, ES], aYU=FR, aYV=6593459, aYW=true, aYX=ankama peut même pas le prouver vue que c des loser, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:42:00,767 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:42:00,870 [AWT-EventQueue-0] (aPh:174) - [Guilde] Muzak : ankama peut même pas le prouver vue que c des loser
+DEBUG 18:42:23,532 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NM@385cb29d{aYR=8, aYS=Sachaloi, aYT=[FR], aYU=FR, aYV=138842029, aYW=false, aYX=2 places dj Corbeau noir s3 mp moi :), handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:42:23,532 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:42:23,608 [AWT-EventQueue-0] (aPh:174) - [Recrutement (FR)] Sachaloi : 2 places dj Corbeau noir s3 mp moi :)
+ INFO 18:42:24,596 [inter-chat-2-2] (io.netty.util.internal.logging.AbstractInternalLogger:148) - [id: 0x63e795d5, L:/192.168.1.69:54504 - R:zaap-chat.ankama.com/54.155.183.142:6337] WRITE: 5B
+         +-------------------------------------------------+
+         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |
++--------+-------------------------------------------------+----------------+
+|00000000| 00 00 00 05 03                                  |.....           |
++--------+-------------------------------------------------+----------------+
+DEBUG 18:42:26,397 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=1} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:42:26,397 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:42:26,568 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message GuildChangeMessage{m_changes=2} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:42:26,568 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+DEBUG 18:42:26,716 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1182) - Discarded inbound message NM@25b7ad66{aYR=3, aYS=Chepeneitorr, aYT=[EN, ES], aYU=ES, aYV=35314636, aYW=false, aYX=<O6;29847>4.5mk WTB !!, handler=ccj@69499e9f} that reached at the tail of the pipeline. Please check your pipeline configuration.
+DEBUG 18:42:26,716 [Net-Cnx-wakfu-ogrest.ankama-games.com:5556>0] (io.netty.channel.DefaultChannelPipeline:1198) - Discarded message pipeline : [SslHandler#0, aDb#0, aDg#0, aDh#0, aDi#0, aUu#0, DefaultChannelPipeline$TailContext#0]. Channel : [id: 0x4bfeb3ed, L:/192.168.1.69:54499 - R:wakfu-ogrest.ankama-games.com/34.255.42.158:5556].
+ INFO 18:42:26,750 [AWT-EventQueue-0] (aPh:174) - [Commerce] Chepeneitorr : Pierre d'aventure 4.5mk WTB !!
