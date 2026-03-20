@@ -256,6 +256,38 @@ $character = ($proc.MainWindowTitle -replace "\s*-\s*WAKFU$","").Trim()
 
 ---
 
+### 1.6 Récupération du contexte utilisateur — Vue d'ensemble
+
+Pour les scripts et l'overlay, trois informations contextuelles sont nécessaires. Voici où les récupérer et leur fiabilité comparative :
+
+| Information | Source | Disponibilité | Fiabilité |
+|-------------|--------|---------------|-----------|
+| **Compte Ankama** | Dossier `clientConfig/{LOGIN}/` (§1.1) | Toujours, même jeu fermé | Très haute |
+| **Serveur actif** | `wakfu.log` pattern `wakfu-{serveur}.ankama-games.com:5556` (§2.2.C) | Dès connexion au serveur | Très haute |
+| **Personnage actif** | Titre de fenêtre `NomPerso - WAKFU` (§1.5) | Uniquement si jeu ouvert et perso connecté | Très haute |
+| **Tous persos/serveurs** | Sous-dossiers `clientConfig/{LOGIN}/{SERVEUR}/{PERSO}/` (§1.1) | Toujours, histo complet | Haute (inclut persos supprimés) |
+
+**Récupération PowerShell (les trois en une fois) :**
+```powershell
+# Serveur depuis wakfu.log
+$logsDir = Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\logs"
+$serverLine = Get-Content (Join-Path $logsDir "wakfu.log") -ErrorAction SilentlyContinue |
+    Where-Object { $_ -match "wakfu-\w+\.ankama-games\.com:5556" } | Select-Object -Last 1
+$serveur = if ($serverLine -and $serverLine -match "wakfu-(\w+)\.ankama-games\.com:5556") { $Matches[1] } else { "inconnu" }
+
+# Personnage depuis titre de fenêtre
+$proc = Get-Process | Where-Object { $_.MainWindowTitle -match "- WAKFU$" } | Select-Object -First 1
+$character = if ($proc) { ($proc.MainWindowTitle -replace "\s*-\s*WAKFU$","").Trim() } else { $null }
+
+# Compte depuis clientConfig
+$clientConfig = Join-Path $env:APPDATA "zaap\gamesLogs\wakfu\preferences\clientConfig"
+$compte = (Get-ChildItem $clientConfig -Directory | Where-Object { $_.Name -notin "null","[Google]" } | Select-Object -First 1).Name
+```
+
+**Note XP métier :** L'XP de métier est **partagée entre tous les personnages d'un même serveur**. Pour le tracking de métiers, le serveur est l'identifiant pivot — pas le personnage actif. Voir §2.3 et `poc-conceptscripts/metier-curve.ps1`.
+
+---
+
 ## 2. wakfu.log — Log principal
 
 ### 2.1 Généralités
@@ -663,6 +695,36 @@ Ordre constant : message d'XP du familier, puis perte de l'item nourriture.
 ```
 [Information (jeu)] {METIER} : +N points d'XP. Prochain niveau dans : M.
 ```
+
+**Discrimination :** Entity ≠ nom du personnage actif → XP métier. Même règle que XP personnage (voir §2.3).
+
+**Portée serveur :** L'XP métier est commune à **tous les personnages du même serveur**. Un Trappeur niveau 50 sur Ogrest = le même Trappeur quel que soit le personnage qui joue.
+
+**Courbe XP métier — Formule :**
+
+Formule linéaire universelle (confirmée niveaux 0–170 sur wakfu.wiki.gg) :
+```
+XP_pour_ce_niveau[N] = 150 × N + 75
+```
+Exemples : niveau 1 = 75 XP, niveau 2 = 225 XP, niveau 10 = 1 425 XP, niveau 100 = 15 075 XP.
+
+**Référence CSV :** `docs/RND/poc-database/courbemetiers175.csv`
+- Colonnes : `Niveau_Metier, XP_pour_ce_niveau, XP_cumulee, Source`
+- Convention identique à `courbexp230.csv` : `XP_pour_ce_niveau[N]` = XP pour passer du niveau N-1 au niveau N
+- Pour un joueur AU niveau X, la barre affiche `XP_pour_ce_niveau[X+1]`
+
+**Niveaux max par type de métier (source : notes CSV + wikis) :**
+
+| Niveau max | Métiers concernés |
+|------------|-------------------|
+| 165 | Récolte, Ébéniste, Boulanger, Cuisinier |
+| 170 | Armurier, Bijoutier, Maître d'Armes, Maroquinier, Tailleur |
+
+**Statut des données CSV :**
+- Niveaux 0–170 : ✅ Confirmés (formule linéaire validée)
+- Niveaux 171+ : ❓ Inconnu — crowdsourcé si des métiers dépassent 170
+
+**Script de suivi :** `poc-conceptscripts/metier-curve.ps1` — analogue à `xp-curve.ps1`, suit tous les métiers simultanément, historique par serveur.
 
 #### Apprentissage de cosmétiques, meubles, vitrines
 
@@ -1389,6 +1451,42 @@ dynamiquement le chemin du jeu sur une machine inconnue.
 | Protecteurs → mapping zone capitale | `Update de chaos du protecteur {ID}` | Faible (IDs observés : 348/349/354=Sufokia) |
 | Board IDs HDV Bonta, Brakmar, Astrub, Kelba, Srambad | `bAL id=N` + localisation | Faible (nécessite visites) |
 | Détection ouverture havre sac échouée (zone interdite) | `PERSONAL_SPACE` + `[Messages d'erreur]` | Faible |
+
+---
+
+## 10. Base de données permanente — `wakfu_permanent.db`
+
+> *Ajouté 2026-03-20 session 3*
+
+**Principe directeur :** Ce logiciel est une **time machine Wakfu**. Tout ce qu'on log est gardé pour toujours. Aucun script ne doit redemander une information que la DB connaît déjà.
+
+**DB :** `poc-database/wakfu_permanent.db` (SQLite, WAL mode)
+
+**Schemas appliqués (non-destructifs, CREATE IF NOT EXISTS) :**
+
+| Fichier | Tables | Rôle |
+|---------|--------|------|
+| `schema-permanent.sql` | `ingest_state`, `raw_log_lines`, `parsed_events` | Ingestion brute des logs (append-only) |
+| `schema-data.sql` | `job_levels`, `character_levels`, `xp_events`, `xp_curve_observed`, `captchat_events` | Données structurées (mises à jour en live) |
+
+**Tables clés — `schema-data.sql` :**
+
+| Table | PK | Rôle |
+|-------|----|------|
+| `job_levels` | `(server, job_name)` | Niveau actuel de chaque métier par serveur — mis à jour à chaque level-up |
+| `character_levels` | `(server, character_name)` | Niveau actuel de chaque personnage par serveur |
+| `xp_events` | `id` + UNIQUE `(server, source_ts, entity_name, xp_gained, xp_remaining)` | Chaque gain d'XP (personnage ou métier) stocké pour toujours |
+| `xp_curve_observed` | `(curve_type, level)` | Valeur XP exacte observée à chaque level-up (crowdsourcée) |
+| `captchat_events` | `id` | Apparitions du Capt'chat antibot, avec nombre de récoltes au moment de la détection |
+
+**Helpers partagés :** `poc-conceptscripts/db-helpers.ps1` — fonctions `Invoke-Sql`, `Get-JobLevel`, `Set-JobLevel`, `Add-XpEvent`, etc. Dot-sourcé par tous les scripts.
+
+**Règle d'or — zéro Read-Host si la DB sait :**
+1. **Niveau métier** : lu depuis `job_levels` → demandé UNE SEULE FOIS si inconnu → stocké immédiatement
+2. **Niveau personnage** : lu depuis `character_levels` → même principe
+3. **Serveur** : auto-détecté depuis `wakfu.log` (§2.2.C)
+4. **Personnage** : auto-détecté depuis le titre de fenêtre (§1.5)
+5. **Historique XP** : scanné depuis les logs → stocké en DB → relu depuis la DB aux runs suivants
 
 ---
 

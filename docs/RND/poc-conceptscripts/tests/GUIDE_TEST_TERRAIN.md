@@ -49,15 +49,13 @@ HH:MM:SS,mmm - [Information (combat)] L'Immortel : +XXXXX points d'XP.  Prochain
 pwsh -File "h:\Code\Wakfuassistant\docs\RND\poc-conceptscripts\xp-curve.ps1"
 ```
 
-**Ce que le script demande au démarrage :**
+**Ce que le script demande au démarrage (première fois UNIQUEMENT) :**
 ```
-Niveau actuel de Goldens : 12
-XP totale du niveau actuel (la barre complete, ex: 11951) : 11951
-XP deja accumulee dans ce niveau (ex: 2000) : 2293
+Niveau actuel de Goldens (premiere et derniere fois) : 12
 ```
-- **Niveau actuel** : visible dans la fiche personnage en jeu
-- **XP totale du niveau** : la barre complète (CSV automatique pour niveaux ≤190, sinon saisie)
-- **XP déjà accumulée** : combien tu as déjà fait dans ce niveau
+- Demandé **une seule fois** — stocké dans `wakfu_permanent.db` table `character_levels`
+- Au prochain lancement : aucune question, tout est lu depuis la DB
+- Le niveau est mis à jour automatiquement à chaque level-up
 
 **Ce que tu dois voir au démarrage :**
 ```
@@ -99,6 +97,92 @@ En attente de combats...
 
 **Fichier source :** `poc-conceptscripts/xp-curve.ps1`
 **Données de référence :** `poc-database/courbexp230.csv` (niveaux 1–190 confirmés, 191–230 à valider)
+
+---
+
+## SCÉNARIO 2.5 — Courbe XP métier (suivi temps réel + historique)
+
+**Ce qu'on teste :** suivi complet de la progression XP de chaque métier — ETA, dates de level-up, XP par niveau, multiple métiers simultanés. L'XP métier est partagée entre tous les personnages du serveur.
+
+**Action dans le jeu :** Lancer le script AVANT de récolter/crafiter. Le personnage doit être connecté (fenêtre "NomPerso - WAKFU" visible).
+
+**Script à lancer :**
+```powershell
+pwsh -File "h:\Code\Wakfuassistant\docs\RND\poc-conceptscripts\metier-curve.ps1"
+```
+
+**Ce que le script affiche au démarrage :**
+
+*Premier lancement (niveau inconnu en DB) :*
+```
+Serveur : ogrest  |  Personnage actif : Goldens
+  (L'XP metier est partagee entre tous les personnages du serveur)
+  Scan historique → DB...
+  127 evenements XP metier stockes en DB.
+Niveau actuel de Herboriste (premiere et derniere fois) : 42
+```
+
+*Lancements suivants (niveau connu en DB) :*
+```
+Serveur : ogrest  |  Personnage actif : Goldens
+  (L'XP metier est partagee entre tous les personnages du serveur)
+  Scan historique → DB...
+  0 evenements XP metier stockes en DB.
+```
+Aucune question — tout est lu depuis `wakfu_permanent.db`.
+
+**Ce que tu dois voir ensuite :**
+```
+Serveur : ogrest  |  Personnage actif : Goldens
+  [CSV] confirme  [EXACT] calcule en live  [SAISI] entre manuellement
+
+  Herboriste  |  Niv : 42  |  Avant logs : 38  |  Level-ups : 4
+  --- Herboriste ---
+  Niv   Passe a            Duree          XP niveau        Source
+  39    19/03/26 22:14:10  ---            6 075            [CSV]
+  40    19/03/26 22:31:04  16m54s         6 225            [CSV]
+  ...
+  42    en cours           ---            6 525            [CSV]
+
+En attente de gains XP metier...
+```
+
+**Ce que tu dois voir à chaque level-up :**
+```
+  Herboriste NIVEAU 43  [14:22:05]  ETA suivant : 00:12:30  |  Niv 44 total : 6 675 XP [CSV]
+
+  --- Herboriste ---
+  Niv   Passe a            Duree          XP niveau        Source
+  ...
+  43    20/03/26 14:22:05  0m37s          6 525            [EXACT]
+  44    en cours           ---            6 675            [CSV]
+
+14:22:05  [Herboriste     ]  +6 525     XP  Reste:6 675       ETA:00:12:30
+```
+
+**Si un métier jamais vu en historique gagne de l'XP en live :**
+```
+  Nouveau metier detecte : Bucheron
+  Niveau actuel de Bucheron : 7
+14:25:10  [Bucheron       ]  +825       XP  Reste:1 350       ETA:---
+```
+
+**Questions :**
+- Le serveur est-il détecté automatiquement ?
+- Le personnage actif est-il correct ?
+- Au 2e lancement, le script pose-t-il ZÉRO question (niveau lu depuis DB) ?
+- Les métiers historiques sont-ils listés avec les bons niveaux ?
+- L'ETA apparaît-il après le 2e gain d'XP du même métier ?
+- Si tu joues plusieurs métiers en une session, les deux s'affichent-ils séparément ?
+- Le compteur récoltes/h fonctionne-t-il pour les métiers de récolte ?
+- Le résumé toutes les 50 récoltes s'affiche-t-il avec la box ?
+- Le Capt'chat est-il détecté quand il apparaît ? Le taux estimé est-il plausible ?
+- Les compagnons (Chevalier d'Astrub, etc.) sont-ils bien EXCLUS ?
+
+**Fichier source :** `poc-conceptscripts/metier-curve.ps1`
+**Helpers :** `poc-conceptscripts/db-helpers.ps1`
+**DB :** `poc-database/wakfu_permanent.db` (schema: `schema-data.sql`)
+**Données de référence :** `poc-database/courbemetiers175.csv` (niveaux 0–170 confirmés)
 
 ---
 
