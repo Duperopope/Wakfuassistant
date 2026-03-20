@@ -281,6 +281,38 @@ function Add-CaptchatEvent {
     Invoke-Sql -Sql "INSERT INTO captchat_events (server,character_name,detected_at,total_harvests_at,source_line) VALUES ('$s','$c','$now',$TotalHarvests,'$sl');"
 }
 
+function Set-MapLocation {
+    param(
+        [int]$WorldId,
+        [string]$RegionName     = '',
+        [string]$MapNameFR      = '',
+        [string]$MapNameEN      = '',
+        [string]$LeaderName     = '',
+        [int]$MapLvlMin         = 0,
+        [int]$MapLvlMax         = 0,
+        [int]$RegionLvlMin      = 0,
+        [int]$RegionLvlMax      = 0,
+        [string]$JobRequirements = '',
+        [string]$Character      = ''
+    )
+    $now  = Escape-Sql (New-IsoNow)
+    $reg  = Escape-Sql $RegionName; $fr = Escape-Sql $MapNameFR; $en = Escape-Sql $MapNameEN
+    $lead = Escape-Sql $LeaderName; $jobs = Escape-Sql $JobRequirements; $chr = Escape-Sql $Character
+    Invoke-Sql -Sql "INSERT INTO map_locations (world_id,region_name,map_name_fr,map_name_en,leader_name,map_lvl_min,map_lvl_max,region_lvl_min,region_lvl_max,job_requirements,observed_at,observed_by) VALUES ($WorldId,'$reg','$fr','$en','$lead',$MapLvlMin,$MapLvlMax,$RegionLvlMin,$RegionLvlMax,'$jobs','$now','$chr') ON CONFLICT(world_id,region_name) DO UPDATE SET map_name_fr='$fr',map_name_en='$en',leader_name='$lead',map_lvl_min=$MapLvlMin,map_lvl_max=$MapLvlMax,region_lvl_min=$RegionLvlMin,region_lvl_max=$RegionLvlMax,job_requirements='$jobs',observed_at='$now',observed_by='$chr';"
+}
+
+function Get-MapWorldNames {
+    # Retourne un hashtable worldId(int) → map_name_fr pour toutes les maps connues
+    $rows = @(Invoke-Sql -Rows -Sql "SELECT world_id, map_name_fr FROM map_locations WHERE map_name_fr IS NOT NULL AND map_name_fr != '' GROUP BY world_id;")
+    $result = @{}
+    foreach ($r in $rows) {
+        if ([string]::IsNullOrWhiteSpace($r)) { continue }
+        $p = $r -split '\|'
+        if ($p.Count -ge 2 -and $p[0] -match '^\d+$') { $result[[int]$p[0]] = $p[1] }
+    }
+    return $result
+}
+
 function Get-CaptchatCount {
     param([string]$Server)
     $row = @(Invoke-Sql -Rows -Sql "SELECT COUNT(*) FROM captchat_events WHERE server='$(Escape-Sql $Server)';")

@@ -68,6 +68,33 @@ matching en DB. La valeur est toujours un entier positif en fin de commande.
 - Le nom du personnage est normalisé pour la clé DB mais le display original est conservé.
 - Ces données sont stockées dans `sync_data` et utilisables par tous les scripts.
 
+### Cartographie
+
+| Commande | Effet |
+|----------|-------|
+| `/positionsync:<champs>` | Enregistre les informations de la map/région courante |
+
+Format des champs (séparés par `,`, espaces remplacés par `%%`) :
+
+```
+/positionsync:Map[FR]:Sufokia,Map[EN]:unknown,Region:Dune%%Kane,Leadername:Hugo%%Surlo,Maplvl:51-125,RegionLVL:51-65,Joblvl:Forestier35,Herboriste35,Paysan30-35
+```
+
+| Champ | Valeur possible | Description |
+|-------|-----------------|-------------|
+| `Map[FR]:Nom` | texte | Nom de la carte en français |
+| `Map[EN]:Nom` | texte ou `unknown` | Nom de la carte en anglais |
+| `NoRegion` | — | La carte n'a pas de régions |
+| `Region:Nom` | texte (espaces → `%%`) | Nom de la région courante |
+| `Leadername:Nom` | texte ou `None` | Leader de la région |
+| `Maplvl:X-Y` | entiers | Niveau des monstres de la carte |
+| `RegionLVL:X-Y` ou `None` | entiers | Niveau des monstres dans la région |
+| `Joblvl:Metier35,...` | liste ou `None` | Niveau métier requis (récolte) |
+
+- Le `worldId` est lu automatiquement depuis l'état du background watcher.
+- Stocké dans `map_locations` (clé : `world_id + region_name`).
+- Met à jour le nom de la map en mémoire → `>> Localisation` affiche le nom FR dès la sync.
+
 ---
 
 ## Auto-détection (pas de commande nécessaire)
@@ -84,7 +111,7 @@ Ces données sont captées automatiquement depuis les logs, sans intervention du
 ```
 [Information (combat)] L'Immortel : +25 451 667 points d'XP. Prochain niveau dans : 773 445 465.
 ```
-→ Stocké dans `xp_events` (entity_type=character). Si accompagné d'un ramassé Sioupère = quête environnementale.
+→ Stocké dans `xp_events` (entity_type=character). Si accompagné d'un ramassé dans la même seconde = récompense de quête (journalière ou environnementale).
 
 ### Items ramassés
 ```
@@ -134,3 +161,4 @@ Toutes les données convergent vers `wakfu_permanent.db` (SQLite, WAL mode).
 | `item_prices` | Historique des prix observés (HDV + manuel) |
 | `xp_curve_observed` | Courbe XP observée à chaque level-up |
 | `captchat_events` | Apparitions Capt'chat avec contexte |
+| `map_locations` | Cartographie des maps et régions (worldId, niveaux, métiers) |

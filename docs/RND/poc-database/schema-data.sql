@@ -100,6 +100,25 @@ CREATE TABLE IF NOT EXISTS item_prices (
 CREATE INDEX IF NOT EXISTS idx_prices_item   ON item_prices(item_key);
 CREATE INDEX IF NOT EXISTS idx_prices_server ON item_prices(server);
 
+-- ── Cartographie (maps et régions) ───────────────────────────
+-- Une entrée par (world_id, region_name). Mise à jour à chaque /positionsync.
+-- region_name = '' quand la carte n'a pas de régions.
+CREATE TABLE IF NOT EXISTS map_locations (
+    world_id        INTEGER NOT NULL,
+    region_name     TEXT    NOT NULL DEFAULT '',   -- '' = pas de région
+    map_name_fr     TEXT,
+    map_name_en     TEXT,
+    leader_name     TEXT,
+    map_lvl_min     INTEGER,
+    map_lvl_max     INTEGER,
+    region_lvl_min  INTEGER,
+    region_lvl_max  INTEGER,
+    job_requirements TEXT,   -- ex: "Forestier:35,Herboriste:35,Paysan:30-35"
+    observed_at     TEXT    NOT NULL,
+    observed_by     TEXT,
+    PRIMARY KEY (world_id, region_name)
+);
+
 -- ── Donnees synchronisees (universel, via commandes chat in-game) ─────
 -- Systeme de correction universel : le joueur tape /sync<category><key><value>
 -- dans le chat Wakfu, le script capte "Commande inconnue" et stocke la valeur.

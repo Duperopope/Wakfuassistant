@@ -44,8 +44,10 @@ $patRamasse = "(?i)Vous avez ramass[eé]\s+(\d+)x?\s+(.+?)\s*\."
 $patPerdu   = "(?i)Vous avez perdu\s+(\d+)x?\s+(.+?)\s*\."
 $patJoue    = "(?i)Vous avez jou[eé]\s+(.+?)\s+sur ce personnage"
 $patKamas   = "(?i)Vous avez (gagn[eé]|perdu)\s+([\d\s]+)\s+kamas?\."
-$patPos     = "(?i)Vous vous trouvez en \((-?\d+),\s*(-?\d+),\s*(-?\d+)\) de l.instance (\d+)"
-$patCmd     = "(?i)Commande inconnue\s*:\s*/sync(characterxptarget|characterxpcurrent|characterxplvl|itemprice|item|job)(.+?)(\d+)\s*$"
+$patQuete       = "(?i)Vous avez r[eé]ussi la qu[eê]te\s+(.+?)\s*\.?\s*$"
+$patPos         = "(?i)Vous vous trouvez en \((-?\d+),\s*(-?\d+),\s*(-?\d+)\) de l.instance (\d+)"
+$patCmd         = "(?i)Commande inconnue\s*:\s*/sync(characterxptarget|characterxpcurrent|characterxplvl|itemprice|item|job)(.+?)(\d+)\s*$"
+$patPositionSync = "(?i)Commande inconnue\s*:\s*/positionsync:(.+)$"
 
 # Lookup metiers : nom normalise → nom reel
 $metierLookup = @{}
@@ -174,6 +176,23 @@ if ($null -ne $oldestLogDate) {
 # Lire les niveaux stockes en DB
 $knownLevels = Get-AllJobLevels -Server $serveur
 
+# Si aucun métier n'est connu en DB pour ce serveur → initialisation complète
+if ($knownLevels.Count -eq 0) {
+    Write-Host ""
+    Write-Host "  Nouveau serveur : aucun niveau de métier en DB." -ForegroundColor Yellow
+    Write-Host "  Entrez 0 pour ignorer un métier (niveau inconnu / non pratiqué)." -ForegroundColor DarkGray
+    Write-Host ""
+    foreach ($job in $metiersConnus) {
+        $rawInput = Read-Host "  Niveau actuel de $job"
+        $lvl      = 0; [int]::TryParse($rawInput.Trim(), [ref]$lvl) | Out-Null
+        if ($lvl -gt 0) {
+            Set-JobLevel -Server $serveur -JobName $job -Level $lvl
+            $knownLevels[$job] = $lvl
+        }
+    }
+    Write-Host ""
+}
+
 # Pour chaque metier connu avec des level-ups en DB, recalculer le niveau
 $jobState = @{}
 
@@ -190,8 +209,8 @@ foreach ($job in $metiersConnus) {
     if ($null -ne $dbLevel) {
         $niveauActuel = $dbLevel
     } elseif ($totalGains -gt 0) {
-        # Pas de niveau en DB mais des level-ups : on demande UNE SEULE FOIS
-        $niveauActuel = [int](Read-Host "Niveau actuel de $job (premiere et derniere fois)")
+        # Level-ups en logs mais pas de niveau en DB (serveur partiellement connu)
+        $niveauActuel = [int](Read-Host "  Niveau actuel de $job")
         Set-JobLevel -Server $serveur -JobName $job -Level $niveauActuel
     } else {
         continue
@@ -240,6 +259,12 @@ foreach ($v in $dbHarvestStats.Values) { $dbTotalHarvests += $v.count }
 
 # Charger les syncs items existants
 $itemSync = Get-AllSyncData -Server $serveur -Category "item"
+
+# Enrichir $worldNames avec les maps connues en DB
+$dbMapNames = Get-MapWorldNames
+foreach ($wIdInt in $dbMapNames.Keys) {
+    if (-not $worldNames.ContainsKey($wIdInt)) { $worldNames[$wIdInt] = $dbMapNames[$wIdInt] }
+}
 
 # Session counters (en memoire, pour le taux /h de cette session)
 $sessionStart      = Get-Date
@@ -484,6 +509,7 @@ function Get-LocationLabel {
 $pendingItem     = $null  # item ramasse en attente d'association avec un metier
 $pendingKamas    = $null  # kamas en attente de correlation HDV (meme seconde)
 $pendingLostItem = $null  # item perdu en attente de correlation HDV (vente/listing)
+$pendingQuete    = $null  # nom de la quete journaliere (réussie juste avant le ramassé)
 $lastLocLabel    = ""     # dernier affichage de localisation
 
 try {
@@ -606,6 +632,14 @@ Get-Content (Join-Path $logsDir "wakfu_chat.log") -Wait -Tail 0 | ForEach-Object
     }
 
     # ══════════════════════════════════════════════════════════
+    # "Vous avez réussi la quête X" → quête journalière Almanax
+    # ══════════════════════════════════════════════════════════
+    if ($_ -match $patQuete) {
+        $script:pendingQuete = $Matches[1].Trim()
+        return
+    }
+
+    # ══════════════════════════════════════════════════════════
     # "Vous avez ramassé" → stocker en attente de confirmation
     # L'increment sync_data se fait UNIQUEMENT sur confirmation :
     #   - XP metier apres (recolte ext.) → confirme dans le handler XP
@@ -690,7 +724,8 @@ Get-Content (Join-Path $logsDir "wakfu_chat.log") -Wait -Tail 0 | ForEach-Object
             Write-Host ("{0}  {1}{2}x {3}  [{4}]" -f $rTs, $confTag, $rQty, $rName, $jobLabel) -ForegroundColor $color
         }
 
-        $script:pendingItem = @{ qty=$rQty; name=$rName; key=$rKey }
+        $script:pendingItem  = @{ qty=$rQty; name=$rName; key=$rKey; quete=$script:pendingQuete }
+        $script:pendingQuete = $null
         return
     }
 
@@ -738,6 +773,82 @@ Get-Content (Join-Path $logsDir "wakfu_chat.log") -Wait -Tail 0 | ForEach-Object
     }
 
     # ══════════════════════════════════════════════════════════
+    # /positionsync:... → cartographie d'une map/région
+    # Format: Map[FR]:Nom,Map[EN]:Nom,Region:Nom%%Avec%%Espaces,
+    #         Leadername:Nom,Maplvl:51-125,RegionLVL:51-65,
+    #         Joblvl:Forestier35,Herboriste35,Paysan30-35
+    # ══════════════════════════════════════════════════════════
+    if ($_ -match $patPositionSync) {
+        $tokens = ($Matches[1]) -split ","
+        $mapFR = $null; $mapEN = $null; $region = $null; $leader = $null
+        $mapLvlMin = 0; $mapLvlMax = 0; $regionLvlMin = 0; $regionLvlMax = 0
+        $jobReqs = @(); $inJoblvl = $false
+
+        foreach ($tok in $tokens) {
+            $t = $tok.Trim()
+            if ($inJoblvl) {
+                # Chaque token suivant est un metier : Forestier35 ou Paysan30-35
+                if ($t -match "^(.+?)(\d+)-(\d+)$") {
+                    $jobReqs += "$($Matches[1]):$($Matches[2])-$($Matches[3])"
+                } elseif ($t -match "^(.+?)(\d+)$") {
+                    $jobReqs += "$($Matches[1]):$($Matches[2])"
+                }
+                continue
+            }
+            if ($t -match "(?i)^Map\[FR\]:(.+)$")        { $mapFR = $Matches[1].Replace("%%"," "); continue }
+            if ($t -match "(?i)^Map\[EN\]:(.+)$")        { $mapEN = $Matches[1].Replace("%%"," "); continue }
+            if ($t -match "(?i)^NoRegion$")              { $region = $null; continue }
+            if ($t -match "(?i)^Region:(.+)$")           { $region = $Matches[1].Replace("%%"," "); continue }
+            if ($t -match "(?i)^Leadername:None$")       { $leader = $null; continue }
+            if ($t -match "(?i)^Leadername:(.+)$")       { $leader = $Matches[1].Replace("%%"," "); continue }
+            if ($t -match "(?i)^Maplvl:(\d+)-(\d+)$")   { $mapLvlMin=[int]$Matches[1]; $mapLvlMax=[int]$Matches[2]; continue }
+            if ($t -match "(?i)^RegionLVL:None$")        { $regionLvlMin=0; $regionLvlMax=0; continue }
+            if ($t -match "(?i)^RegionLVL:(\d+)-(\d+)$"){ $regionLvlMin=[int]$Matches[1]; $regionLvlMax=[int]$Matches[2]; continue }
+            if ($t -match "(?i)^Joblvl:None$")           { $inJoblvl = $true; continue }
+            if ($t -match "(?i)^Joblvl:(.+)$")          {
+                $inJoblvl = $true
+                $firstJob = $Matches[1]
+                if ($firstJob -match "^(.+?)(\d+)-(\d+)$") { $jobReqs += "$($Matches[1]):$($Matches[2])-$($Matches[3])" }
+                elseif ($firstJob -match "^(.+?)(\d+)$")   { $jobReqs += "$($Matches[1]):$($Matches[2])" }
+                continue
+            }
+        }
+
+        # Récupérer le worldId depuis le background state
+        $bgSt   = Get-BgState
+        $wId    = $bgSt.worldId
+        $wIdInt = 0; $null = [int]::TryParse($wId, [ref]$wIdInt)
+
+        $regionKey  = if ($null -ne $region) { $region } else { "" }
+        $leaderStr  = if ($null -ne $leader) { $leader } else { "" }
+        $jobReqStr  = $jobReqs -join ","
+
+        Set-MapLocation -WorldId $wIdInt -RegionName $regionKey -MapNameFR $mapFR -MapNameEN $mapEN `
+            -LeaderName $leaderStr -MapLvlMin $mapLvlMin -MapLvlMax $mapLvlMax `
+            -RegionLvlMin $regionLvlMin -RegionLvlMax $regionLvlMax `
+            -JobRequirements $jobReqStr -Character $character
+
+        # Mettre à jour $worldNames en mémoire
+        if ($wIdInt -gt 0 -and $null -ne $mapFR) { $worldNames[$wIdInt] = $mapFR }
+
+        # Affichage
+        $bw = 56
+        $regionStr = if ($null -ne $region) { " / $region" } else { "" }
+        $lvlStr    = if ($mapLvlMax -gt 0) { "  [Niv $mapLvlMin-$mapLvlMax]" } else { "" }
+        Write-Host ""
+        Write-Host ("  ┌" + ("─" * $bw) + "┐") -ForegroundColor DarkCyan
+        Write-Host ("  │" + "  MAP : $mapFR$regionStr$lvlStr  [monde $wId]".PadRight($bw) + "│") -ForegroundColor DarkCyan
+        if ($null -ne $leader) {
+            Write-Host ("  │" + "  Leader : $leader".PadRight($bw) + "│") -ForegroundColor DarkGray
+        }
+        if ($jobReqs.Count -gt 0) {
+            Write-Host ("  │" + "  Jobs   : $($jobReqs -join ', ')".PadRight($bw) + "│") -ForegroundColor DarkGray
+        }
+        Write-Host ("  └" + ("─" * $bw) + "┘") -ForegroundColor DarkCyan
+        return
+    }
+
+    # ══════════════════════════════════════════════════════════
     # /pos → position du joueur (commande manuelle dans le chat)
     # ══════════════════════════════════════════════════════════
     if ($_ -match $patPos) {
@@ -780,7 +891,7 @@ Get-Content (Join-Path $logsDir "wakfu_chat.log") -Wait -Tail 0 | ForEach-Object
         if ($null -ne $script:pendingItem) {
             $pi = $script:pendingItem
             $script:pendingItem = $null
-            # Quete enviro = acquisition confirmee → incrementer sync_data
+            # Acquisition confirmée → incrementer sync_data
             Add-SyncDelta -Server $serveur -Category "item" -Key $pi.key -KeyDisplay $pi.name -Delta $pi.qty
             $existing = $itemSync[$pi.key]
             if ($null -ne $existing) {
@@ -788,10 +899,11 @@ Get-Content (Join-Path $logsDir "wakfu_chat.log") -Wait -Tail 0 | ForEach-Object
             } else {
                 $itemSync[$pi.key] = @{ display=$pi.name; value=$pi.qty; source='auto' }
             }
-            Write-Host ("{0}  {1} : +{2:N0} XP perso  Reste:{3:N0}  (quete environnementale → {4}x {5})" -f `
-                $ts, $entity, $xpGained, $remaining, $pi.qty, $pi.name) -ForegroundColor Magenta
+            $qLabel = if ($null -ne $pi.quete) { "quête journalière ($($pi.quete))" } else { "quête enviro" }
+            Write-Host ("{0}  {1} : +{2:N0} XP  Reste:{3:N0}  ({4} → {5}x {6})" -f `
+                $ts, $entity, $xpGained, $remaining, $qLabel, $pi.qty, $pi.name) -ForegroundColor Magenta
         } else {
-            Write-Host ("{0}  {1} : +{2:N0} XP perso  Reste:{3:N0}" -f $ts, $entity, $xpGained, $remaining) -ForegroundColor Magenta
+            Write-Host ("{0}  {1} : +{2:N0} XP  Reste:{3:N0}" -f $ts, $entity, $xpGained, $remaining) -ForegroundColor Magenta
         }
 
         # Level-up personnage
