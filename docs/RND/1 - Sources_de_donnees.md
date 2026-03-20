@@ -237,6 +237,25 @@ achievements pliés/dépliés). Peu d'informations exploitables directement.
 
 ---
 
+### 1.5 Titre de fenêtre — Détection du personnage actif
+
+Le processus Wakfu expose le nom du personnage connecté dans son titre de fenêtre Windows :
+```
+NomDuPersonnage - WAKFU
+```
+
+**Méthode PowerShell :**
+```powershell
+$proc = Get-Process | Where-Object { $_.MainWindowTitle -match "- WAKFU$" } | Select-Object -First 1
+$character = ($proc.MainWindowTitle -replace "\s*-\s*WAKFU$","").Trim()
+```
+
+**Fiabilité :** Haute. Mis à jour dès que le personnage est en jeu. Permet l'auto-détection sans saisie utilisateur ni lecture de fichier de préférences.
+
+**Complémentarité avec `accountPreferences` (§1.3) :** Le fichier de préférences donne le dernier personnage joué (même si le jeu est fermé) ; le titre de fenêtre donne le personnage actuellement en jeu (temps réel, uniquement si le jeu est ouvert).
+
+---
+
 ## 2. wakfu.log — Log principal
 
 ### 2.1 Généralités
@@ -254,7 +273,7 @@ achievements pliés/dépliés). Peu d'informations exploitables directement.
   INFO 10:41:40,601 [AWT-EventQueue-0] (ccv:362) - Authentication token received from dispatch server : 166c4a79...
   ```
 - **Limitation :** Les heures sont sans date. Si la session dure plusieurs jours, les
-  heures cyclent. Pour dater absolument, croiser avec la date de modification du fichier.
+  heures cyclent. Pour dater absolument, utiliser les ancres de date présentes dans les logs (voir §2.14) — la date de modification du fichier est un dernier recours imprécis.
 
 ---
 
@@ -485,22 +504,37 @@ NetInFight Removed
 [Information (jeu)]    {METIER} : +{XP} points d'XP.  Prochain niveau dans : {RESTANT}.
 ```
 
-- `[Information (combat)]` → XP de **personnage** (combat, quêtes, zones)
-- `[Information (jeu)]` → XP de **métier** (récolte, artisanat)
-- Le nom de l'entité (personnage ou métier) est dans la même position regex dans les deux cas
+- ⚠️ **La source tag ne discrimine PAS le type d'XP** — correction 2026-03-20
+- `[Information (combat)]` peut contenir XP **personnage ET métier** (ex : Trappeur utilisant des pièges en combat → sa ligne XP apparaît avec `[Information (combat)]`, pas `[Information (jeu)]`)
+- `[Information (jeu)]` contient XP métier uniquement
+- **Discriminant réel : le nom de l'entité** — si entity = nom du personnage actif → `xp_character` ; sinon → `xp_job`
+- Le nom du personnage actif se récupère depuis le titre de fenêtre (voir §1.5)
 - `[Information (jeu)]` apparaît dans **wakfu.log ET wakfu_chat.log** → ne lire que `wakfu_chat.log` pour éviter les doublons (voir §3)
-- `[Information (combat)]` apparaît uniquement dans **wakfu.log**
+- `[Information (combat)]` apparaît dans **wakfu.log ET wakfu_chat.log** (confirmé 2026-03-20 : 2 420 occurrences dans `wakfu_chat.log`)
 
 **Level-up :** détectable par ` +1 niveau.` (ou `+N niveaux.`) entre le gain XP et "Prochain niveau dans" :
 ```
 [Information (combat)] L'Immortel : +13 114 689 points d'XP. +1 niveau.  Prochain niveau dans : 1 365 544 387.
 ```
 
-**Formule courbe XP par niveau :**
+**Courbe XP par niveau — Formule et référence :**
+
+Formule carryover (exacte, sans saisie répétée) :
 ```
-total_xp_niveau = xpInLevel_au_startup + xp_gained_premier_event + remaining_premier_event
+carryover      = xp_gained - (total_xp_niveau_courant - xp_deja_accumulee)
+total_xp_suivant = remaining_after_levelup + carryover
 ```
-Une seule saisie au démarrage (`xpInLevel`) suffit pour calibrer ; ensuite `Prochain niveau dans` est dans chaque ligne — pas besoin de le demander au joueur.
+Une seule saisie au démarrage suffit (`total_xp_niveau_courant` + `xp_deja_accumulee`).
+Ensuite chaque level-up calcule exactement le niveau suivant sans nouvelle question.
+
+**Référence CSV :** `docs/RND/poc-database/courbexp230.csv` contient les valeurs confirmées niveaux 1–190 (source Methodwakfu 2025-11-24) et calculées jusqu'au niveau 230.
+Convention CSV : `XP_pour_ce_niveau[N]` = XP nécessaire pour passer du niveau N-1 au niveau N.
+Pour un joueur AU niveau X, la barre affiche `XP_pour_ce_niveau[X+1]`.
+
+**Statut des données :**
+- Niveaux 1–190 : ✅ Confirmés
+- Niveaux 191–230 : ⚠️ Calculés (à confirmer par joueurs 190+)
+- Niveaux 231+ : ❓ Inconnu — crowdsourcé à la montée de niveau
 
 ```python
 _RE_XP = re.compile(
@@ -1007,6 +1041,52 @@ _RE_CHALLENGE_FAILED  = re.compile(r'\[Information \(jeu\)\] Le challenge "(.+?)
 `1252 → 1089 → 436 → 437 → 440 → 437 → 436 → 1089 → 1135`
 
 **Stratégie de nommage :** À chaque nouveau worldId détecté, demander une seule fois au joueur de nommer la zone. Persister dans une DB locale. Une fois nommé, jamais redemandé.
+
+---
+
+### 2.14 Ancres de date dans `wakfu_chat.log`
+
+Le jeu annonce les transitions jour/nuit avec la **date réelle** entre parenthèses :
+```
+HH:MM:SS,mmm - [Information (jeu)] Il fait nuit, nous sommes le 20 Martalo 977 (20/3/26) et il est 01:47.
+HH:MM:SS,mmm - [Information (jeu)] Le jour se lève, nous sommes le 17 Martalo 977 (17/3/26) et il est 00:34.
+HH:MM:SS,mmm - [Information (jeu)] Il fait jour, nous sommes le 18 Martalo 977 (18/3/26) et il est 10:37.
+HH:MM:SS,mmm - [Information (jeu)] La nuit prend fin, nous sommes le 17 Martalo 977 (17/3/26) et il est 14:24.
+```
+
+**Format de la date embarquée :** `(DD/M/YY)` — jour et mois sans zéro, année sur 2 chiffres.
+
+**Fréquence :** Plusieurs fois par heure de jeu (cycle jour/nuit toutes ~20 min de jeu).
+Présentes dans toutes les sessions actives. Suffisant pour dater tous les événements sans ambiguïté.
+
+**Utilisation pour dater les logs historiques :**
+La dernière ancre de date avant un événement donne sa date réelle. Si l'heure du log recule entre deux lignes consécutives → passage minuit → incrémenter la date d'un jour.
+
+```python
+_RE_DATE_ANCHOR = re.compile(
+    r'\((\d{1,2})/(\d{1,2})/(\d{2})\)'  # (DD/M/YY) ou (D/M/YY)
+)
+# Exemple : "(20/3/26)" → jour=20, mois=3, année=2026
+```
+
+**Calendrier Wakfu ↔ mois réels :**
+
+| Mois réel | Mois Wakfu | Protecteur |
+|-----------|------------|------------|
+| Janvier | Javian | Jiva |
+| Février | Flovor | Silvosse |
+| Mars | Martalo | Ulgurde |
+| Avril | Aperirel | Silouate |
+| Mai | Maisial | Rosal |
+| Juin | Juinssidor | Sumens |
+| Juillet | Joullier | Hécate |
+| Août | Fraouctor | Pouchecot |
+| Septembre | Septange | Raval |
+| Octobre | Octolliard | Maïmane |
+| Novembre | Novamaire | Brumaire |
+| Décembre | Descendre | Djaul |
+
+**Année en jeu :** année réelle − 1049 (ex : 2026 → 977 en Wakfu). La date réelle en parenthèses rend cette conversion inutile en pratique.
 
 ---
 
