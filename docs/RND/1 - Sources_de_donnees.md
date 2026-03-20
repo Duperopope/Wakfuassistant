@@ -2,7 +2,7 @@
 ## Inventaire complet des traces exploitables
 
 *Document de référence — WakfuAssistant*
-*Dernière mise à jour : 2026-03-18*
+*Dernière mise à jour : 2026-03-20*
 
 ---
 
@@ -335,6 +335,34 @@ choisie avec une forte probabilité, mais pas de confirmation explicite dans les
 | `Déserialisation des achievements : size=2397` | Achievements du personnage chargés |
 | `Received FriendListMessage` | Liste d'amis reçue |
 | `Le joueur {NOM} ({GRADE}) est connecté sur le serveur {SERVEUR}.` | Commande /whois en jeu |
+| `on quitte le monde {N}` | Changement de zone : le joueur **quitte** le monde N (direction : vers zone suivante) |
+| `bZJ initialisé, centré sur (X,Y)` | Position de la carte initialisée dans le monde courant |
+| `Update de chaos du protecteur {ID}, chaos = {bool}` | Mise à jour du protecteur de nation — IDs spécifiques à chaque capitale |
+
+**Timing de session — Confirmé expérimentalement (session 2026-03-20) :**
+- `wakfu.log` est **réinitialisé à chaque lancement du client** → le premier timestamp du fichier = heure de lancement du client Wakfu (JVM démarrée).
+- Le premier `[Information (jeu)]` ou `[Information (combat)]` dans `wakfu.log` = heure effective d'entrée en jeu avec le personnage.
+- `on remet la frame world` et `Received FriendListMessage` peuvent être absents des logs courts (milieu de session, fichier tronqué).
+
+**Changements de zone — Séquence observée :**
+```
+INFO 00:50:38,802 - on quitte le monde 1252
+INFO 00:50:38,860 - bZJ initialisé, centré sur (0,0)
+INFO 00:50:42,452 - on quitte le monde 1089
+INFO 00:50:46,274 - on quitte le monde 436
+INFO 00:50:46,292 - bZJ initialisé, centré sur (6,-6)
+```
+La sémantique confirmée : `on quitte le monde N` signifie **le joueur était en N et s'en va** (pas qu'il arrive en N).
+`bZJ initialisé` suit généralement le `quitte le monde` mais peut être absent (zones sans carte).
+
+**Protecteurs — Correspondance zone :**
+- Protecteurs 348, 349, 354 → Sufokia (monde 1135) — confirmé par corrélation avec arrivée dans la zone.
+
+```python
+_RE_ZONE_LEAVE = re.compile(r'on quitte le monde (\d+)')
+_RE_ZONE_POS   = re.compile(r'bZJ initialisé, centré sur \((-?\d+),(-?\d+)\)')
+_RE_PROTECTOR  = re.compile(r'Update de chaos du protecteur (\d+), chaos = (\w+)')
+```
 
 **Note sur `tp {ID}` :** apparaît dans certains contextes (spawn après création, retour après mort, téléportations serveur). N'est **pas garanti** à chaque connexion — dépend du scénario de spawn. Voir §2.7 pour la stratégie complète de mapping ID↔Nom.
 
@@ -450,14 +478,36 @@ Resynchronisation de la position d'un fighter dans notre combat. FightID = {ID},
 NetInFight Removed
 ```
 
-**XP gagnée en combat :**
+**XP gagnée — Discrimination personnage vs métier (confirmé 2026-03-20) :**
+
 ```
 [Information (combat)] {NOM} : +{XP} points d'XP.  Prochain niveau dans : {RESTANT}.
+[Information (jeu)]    {METIER} : +{XP} points d'XP.  Prochain niveau dans : {RESTANT}.
 ```
+
+- `[Information (combat)]` → XP de **personnage** (combat, quêtes, zones)
+- `[Information (jeu)]` → XP de **métier** (récolte, artisanat)
+- Le nom de l'entité (personnage ou métier) est dans la même position regex dans les deux cas
+- `[Information (jeu)]` apparaît dans **wakfu.log ET wakfu_chat.log** → ne lire que `wakfu_chat.log` pour éviter les doublons (voir §3)
+- `[Information (combat)]` apparaît uniquement dans **wakfu.log**
+
+**Level-up :** détectable par ` +1 niveau.` (ou `+N niveaux.`) entre le gain XP et "Prochain niveau dans" :
+```
+[Information (combat)] L'Immortel : +13 114 689 points d'XP. +1 niveau.  Prochain niveau dans : 1 365 544 387.
+```
+
+**Formule courbe XP par niveau :**
+```
+total_xp_niveau = xpInLevel_au_startup + xp_gained_premier_event + remaining_premier_event
+```
+Une seule saisie au démarrage (`xpInLevel`) suffit pour calibrer ; ensuite `Prochain niveau dans` est dans chaque ligne — pas besoin de le demander au joueur.
+
 ```python
-_RE_XP_COMBAT = re.compile(
-    r'\[Information \(combat\)\] (.+?) : \+([0-9\s\u00a0\u202f]+) points d\'XP\.\s+Prochain niveau dans : ([0-9\s\u00a0\u202f]+)\.'
+_RE_XP = re.compile(
+    r'\[Information \((?:combat|jeu)\)\]\s+(.+?)\s*:\s*\+([0-9\s\u00a0\u202f\']+)\s+points d\'XP\.'
+    r'\s*((?:\+\d+\s+niveau[x]?\.\s*)?)Prochain niveau dans\s*:\s*([0-9\s\u00a0\u202f\']+)\.'
 )
+# group(1)=entité, group(2)=XP gagnée, group(3)=level-up si non vide, group(4)=XP restante
 ```
 
 ---
@@ -913,6 +963,53 @@ réussis ne génèrent aucun log** — opération silencieuse.
 
 ---
 
+### 2.11 Challenges — Système de défis combat
+
+> *Ajouté après session 2026-03-20*
+
+Les challenges sont des objectifs bonus apparus pendant un combat. Ils sont **uniquement présents dans `wakfu_chat.log`** (pas de section séparée dans `wakfu.log`).
+
+**Patterns confirmés :**
+```
+[Information (jeu)] Le challenge "Nomade" est réussi.
+[Information (jeu)] Le challenge "Déclin" a échoué.
+```
+
+**Règle importante :** L'XP bonus des challenges réussis est **incluse dans la ligne XP de combat suivante** — impossible de l'isoler. Il n'existe pas de ligne séparée "vous avez gagné N XP de challenge".
+
+```python
+_RE_CHALLENGE_SUCCESS = re.compile(r'\[Information \(jeu\)\] Le challenge "(.+?)" est réussi\.')
+_RE_CHALLENGE_FAILED  = re.compile(r'\[Information \(jeu\)\] Le challenge "(.+?)" a échoué\.')
+```
+
+**Attention aux accents :** Le nom du challenge peut contenir des caractères accentués. S'assurer que le fichier est lu en UTF-8.
+
+---
+
+### 2.12 Mapping worldId — Zones connues
+
+> *Construit progressivement par corrélation entre `on quitte le monde N` et les contextes observés*
+
+| worldId | Nom | Source de confirmation |
+|---------|-----|----------------------|
+| 9 | Havre-sac personnel | `PERSONAL_SPACE_ENTER_RESULT_MESSAGE` |
+| 527 | Zone farm (herborisme, non nommée précisément) | Observations farming + captcha Capt'chat |
+| 862 | Combat Capt'chat (antibot) | `breed : 5314` dans monde 862 |
+| 1089 | Bibliothèque de téléportation | `Vous venez d'utiliser : Biblio-téléport` |
+| 1135 | Sufokia | Protecteurs 348/349/354 à l'arrivée |
+| 1136 | HDV Sufokia | `[bAL id=31546/31547]` |
+| 436 | **Inconnu** | Observé session 2026-03-20 (traversée) |
+| 437 | **Inconnu** | Observé session 2026-03-20 (traversée) |
+| 440 | **Inconnu** | Observé session 2026-03-20 (traversée) |
+| 1252 | **Inconnu** | Zone de départ session 2026-03-20 |
+
+**Séquence de navigation observée** (2026-03-20, biblio-téléport vers Sufokia) :
+`1252 → 1089 → 436 → 437 → 440 → 437 → 436 → 1089 → 1135`
+
+**Stratégie de nommage :** À chaque nouveau worldId détecté, demander une seule fois au joueur de nommer la zone. Persister dans une DB locale. Une fois nommé, jamais redemandé.
+
+---
+
 ## 3. wakfu_chat.log — Log chat dédié
 
 ### 3.1 Généralités
@@ -937,6 +1034,11 @@ Cette distinction est vérifiée expérimentalement.
 **Avantage sur wakfu.log :** Plus léger, plus facile à parser en temps réel, pas
 de bruit des événements système.
 
+**⚠️ Règle critique de source unique (confirmé 2026-03-20) :**
+Les événements `[Information (jeu)]` (XP métier, kamas, items ramassés, challenges) apparaissent dans **les deux fichiers** — `wakfu.log` ET `wakfu_chat.log`. Lire les deux pour ces événements provoque des **doublons**. Règle :
+- `wakfu_chat.log` → source unique pour tous les événements `[Information (jeu)]` et canaux de chat
+- `wakfu.log` → source unique pour `[Information (combat)]`, changements de zone, marqueurs de connexion
+
 ### 3.2 Exemples de contenu
 
 ```
@@ -949,6 +1051,20 @@ de bruit des événements système.
 **Recommandation :** Utiliser `wakfu_chat.log` comme source primaire pour le parsing
 des canaux de chat et des événements `[Information (jeu)]` en temps réel. `wakfu.log`
 reste nécessaire pour les marqueurs de connexion/état et **tous les événements de combat**.
+
+**[Proximité] — Stratégie de détection du clan master (maître de clan) :**
+
+Aucun log direct ne mentionne "maître de clan" ou "clan master". Stratégie retenue par corrélation :
+- Le **maître de clan** est un NPC qui parle automatiquement en canal `[Proximité]` à l'arrivée dans sa zone
+- Le **premier message `[Proximité]` après un `on quitte le monde N`** dans `wakfu.log` a une haute probabilité d'être le NPC clan master de la zone N
+- À confirmer avec plusieurs sessions dans des zones connues (Sufokia, Bonta, Brakmar, etc.)
+
+```python
+_RE_PROXIMITY = re.compile(r'\[Proximité\] (.+?) : (.+)')
+# group(1) = nom du locuteur, group(2) = message
+```
+
+**⚠️ Distinction NPC vs joueur en [Proximité] :** Aucun discriminant syntaxique identifié dans les logs pour l'instant. Les NPC et les joueurs utilisent le même format. L'heuristique "premier message après changement de zone" reste la meilleure approche connue.
 
 ---
 
@@ -1044,8 +1160,16 @@ dynamiquement le chemin du jeu sur une machine inconnue.
 | Nom du serveur (persisté) | `_last_server` depuis session précédente | ✅ Haute |
 | Sorts lancés | `[Information (combat)] NOM lance le sort SORT` (wakfu.log uniquement) | ✅ Très haute |
 | Dégâts (par élément) | `CIBLE: -N PV (ELEMENT)` | ✅ Très haute |
-| XP gagnée en combat | `+N points d'XP. Prochain niveau dans : M.` dans `[Information (combat)]` | ✅ Très haute |
-| XP métier | `{Profession} : +N points d'XP.` dans `[Information (jeu)]` | ✅ Très haute |
+| Heure lancement client | Premier timestamp de `wakfu.log` (fichier réinitialisé à chaque lancement) | ✅ Très haute |
+| Heure entrée en jeu | Premier `[Information (jeu/combat)]` dans `wakfu.log` | ✅ Très haute |
+| Zone courante | `on quitte le monde {N}` dans `wakfu.log` | ✅ Très haute |
+| Position carte | `bZJ initialisé, centré sur (X,Y)` dans `wakfu.log` | ✅ Très haute |
+| XP personnage gagnée | `+N points d'XP.` dans `[Information (combat)]` (wakfu.log uniquement) | ✅ Très haute |
+| XP métier gagnée | `+N points d'XP.` dans `[Information (jeu)]` (wakfu_chat.log, pas double) | ✅ Très haute |
+| Level-up personnage/métier | ` +N niveau.` dans la ligne XP | ✅ Très haute |
+| XP restante avant niveau | `Prochain niveau dans : X` dans chaque ligne XP | ✅ Très haute |
+| Challenges combat | `Le challenge "X" est réussi/a échoué` dans `[Information (jeu)]` | ✅ Très haute |
+| Clan master potentiel | Premier `[Proximité]` après `on quitte le monde` (heuristique) | ⚠️ À confirmer |
 | Items ramassés | `Vous avez ramassé Nx ITEM .` | ✅ Très haute |
 | Kamas perdus | `Vous avez perdu N kamas.` | ✅ Très haute |
 | Kamas gagnés | `Vous avez gagné N kamas.` | ✅ Très haute |
@@ -1131,6 +1255,10 @@ dynamiquement le chemin du jeu sur une machine inconnue.
 5. **ChatLog vs MainLog** : `wakfu_chat.log` est plus propre pour le chat et les
    événements `[Information (jeu)]`, mais ne contient **ni** les marqueurs de connexion
    **ni** les événements `[Information (combat)]`. Les deux doivent être lus en parallèle.
+   **⚠️ Risque de doublons :** Les événements `[Information (jeu)]` apparaissent dans les
+   deux fichiers. Ne jamais traiter les deux pour le même type d'événement — utiliser
+   `wakfu_chat.log` comme source unique pour `[Information (jeu)]` et `wakfu.log` pour
+   `[Information (combat)]` et les marqueurs système.
 
 6. **Personnages sans `clientConfig`** : Un personnage créé mais jamais joué depuis
    l'installation de l'overlay n'aura pas de dossier `clientConfig`.
@@ -1153,7 +1281,7 @@ dynamiquement le chemin du jeu sur une machine inconnue.
 
 ## 9. Opportunités non encore exploitées
 
-> *Mis à jour après Journaux d'écoute 1 et 2*
+> *Mis à jour après Journaux d'écoute 1, 2 et session 2026-03-20*
 
 | Feature potentielle | Source | Complexité |
 |--------------------|----|------------|
@@ -1175,6 +1303,12 @@ dynamiquement le chemin du jeu sur une machine inconnue.
 | Tracking apprentissages cosmétiques/meubles | `appris l'apparence {item}` | Faible |
 | Détection ouverture havre sac échouée (zone interdite) | `PERSONAL_SPACE` + `[Messages d'erreur]` | Faible |
 | Identification HDV par ville via board ID | `bAL id=N` → mapping villes | Moyenne (nécessite collecte IDs) |
+| Identification worldIds inconnus (436, 437, 440, 1252) | `on quitte le monde N` + contexte joueur | Faible (nécessite session active) |
+| Confirmation clan master via [Proximité] | Premier msg [Proximité] post zone change | Faible (heuristique à valider) |
+| Topologie de navigation (graphe des zones) | Séquences `on quitte le monde N` | Moyenne (accumulation sessions) |
+| Protecteurs → mapping zone capitale | `Update de chaos du protecteur {ID}` | Faible (IDs observés : 348/349/354=Sufokia) |
+| Board IDs HDV Bonta, Brakmar, Astrub, Kelba, Srambad | `bAL id=N` + localisation | Faible (nécessite visites) |
+| Détection ouverture havre sac échouée (zone interdite) | `PERSONAL_SPACE` + `[Messages d'erreur]` | Faible |
 
 ---
 
