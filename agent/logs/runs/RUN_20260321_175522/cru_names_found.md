@@ -206,14 +206,13 @@ Positions L'Immortel (43):
        after:  00 00 0C FF 00 00 00 00 00 2F D4 58 00 00 01 9C A5 76 46 F0
 
 === DECOMPILE Yd ===
-Yd (1219 chars):
+Yd (1211 chars):
 Picked up JAVA_TOOL_OPTIONS: -javaagent:H:\Code\Wakfuassistant\agent\wakfu-spy-agent.jar --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
 /*
  * Decompiled with CFR 0.152.
  * 
  * Could not load the following classes:
  *  YY
- *  Yb
  *  gnu.trove.map.hash.TIntObjectHashMap
  */
 import gnu.trove.map.hash.TIntObjectHashMap;

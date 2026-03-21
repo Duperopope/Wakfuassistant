@@ -4,7 +4,6 @@ Picked up JAVA_TOOL_OPTIONS: -javaagent:H:\Code\Wakfuassistant\agent\wakfu-spy-a
  * 
  * Could not load the following classes:
  *  YY
- *  Yb
  *  gnu.trove.map.hash.TIntObjectHashMap
  */
 import gnu.trove.map.hash.TIntObjectHashMap;
