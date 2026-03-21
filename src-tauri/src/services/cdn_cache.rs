@@ -362,3 +362,53 @@ pub fn get_item_name(db: &Connection, item_id: i64, lang: &str) -> Result<String
 
     Ok(name)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_cdn_recipe_json() {
+        let json = r#"[{"id":1160,"category":76,"level":45,"xpRatio":600},{"id":2004,"category":80,"level":10,"xpRatio":200}]"#;
+        let recipes: Vec<CdnRecipe> = serde_json::from_str(json).unwrap();
+        assert_eq!(recipes.len(), 2);
+        assert_eq!(recipes[0].id, 1160);
+        assert_eq!(recipes[0].category, 76);
+    }
+
+    #[test]
+    fn test_parse_cdn_recipe_ingredient_json() {
+        let json = r#"[{"recipeId":1160,"itemId":5439,"quantity":3,"ingredientOrder":0}]"#;
+        let ingredients: Vec<CdnRecipeIngredient> = serde_json::from_str(json).unwrap();
+        assert_eq!(ingredients.len(), 1);
+        assert_eq!(ingredients[0].recipe_id, 1160);
+        assert_eq!(ingredients[0].item_id, 5439);
+        assert_eq!(ingredients[0].quantity, 3);
+    }
+
+    #[test]
+    fn test_parse_cdn_recipe_result_json() {
+        let json = r#"[{"recipeId":1160,"itemId":9001,"quantity":1}]"#;
+        let results: Vec<CdnRecipeResult> = serde_json::from_str(json).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].recipe_id, 1160);
+        assert_eq!(results[0].item_id, 9001);
+    }
+
+    #[test]
+    fn test_parse_cdn_item_json() {
+        let json = r#"[{"id":5439,"name":{"fr":"Bois de Frêne","en":"Ash Wood"},"level":10,"itemTypeId":2,"rarity":0}]"#;
+        let items: Vec<CdnItem> = serde_json::from_str(json).unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].id, 5439);
+    }
+
+    #[test]
+    fn test_get_item_name_fallback() {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.execute_batch(include_str!("../migrations/001_initial.sql")).unwrap();
+        db.execute_batch(include_str!("../migrations/002_cdn_cache.sql")).unwrap();
+        let name = get_item_name(&db, 99999, "fr").unwrap();
+        assert_eq!(name, "Item#99999");
+    }
+}
