@@ -202,3 +202,11 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Header: 4x int32 BE (version, count, ...)
 - stateIds trouves en int16 BE: 2636(Plastron Tourmente), 5078(Fracass'carapace), 6815(Wakfu Berserk II), 8367(Arrogance)
 - Nouvelle approche: parser le format custom pour extraire tous les stateIds par joueur
+
+## CRU STRUCTURE BINAIRE (2026-03-21 19:06)
+- Header: int32[4] = version(1), itemCount(15), unknown(70), unknown(4736)
+- Noms de persos repetes ~3x par item (proprietaire, createur, ?)
+- Blocs: 31B=item simple, 67B=item+1effet, 103B=item+2effets
+- Formula: 31 + 36*n bytes (n=nombre effets)
+- stateIds en int16 BE dans le payload
+- Sublims confirmees: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
