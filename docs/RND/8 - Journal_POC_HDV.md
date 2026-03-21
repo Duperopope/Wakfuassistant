@@ -1,5 +1,33 @@
 # Journal POC - Hotel des Ventes (HDV)
 
+## Addendum 2026-03-21 - Confirmation/Infirmation (source de verite)
+
+Confirmations:
+- Le POC HDV est valide sur l'objectif: extraction des offres et analyse prix via pipeline automatique.
+- La base persistante `logs/hdv_market.db` est operationnelle et dedoublonnee.
+- Les identifiants utilises en analyse:
+	- `item_ref_id` = objet
+	- `offer_uid` = offre
+
+Infirmations / elements depasses:
+- L'analyse basee uniquement sur anciens tags Netty textuels (`coy`, `f10`, etc.) n'est plus la voie principale pour la production de signaux.
+- Le champ prix anciennement suppose dans certains messages Netty historiques n'est pas la reference retenue.
+
+Reference technique actuelle:
+- Ventes HDV: protobuf `msgId=12294`
+- Achats HDV: protobuf `msgId=13653`
+- Sync: `docs/RND/poc-hdv/sync_hdv_to_sqlite.ps1`
+- Requetes: `market_latest` dans `logs/hdv_market.db`
+
+Etat observe recemment:
+- Opportunites globales (sans filtre type objet): presentes.
+- Opportunites strictement ressources/recoltes: 0 sur le snapshot courant (a re-evaluer apres nouvelle capture).
+
+Fichiers de sortie utiles:
+- `logs/top10_buy_over_sell.csv`
+- `logs/top10_buy_over_sell_resources.csv`
+- `logs/market_latest_named_preview.csv`
+
 **Date**: 2026-03-20 20:31
 **Statut**: POC VALIDE - Lecture des offres et transactions confirmee
 

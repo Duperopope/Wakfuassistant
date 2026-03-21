@@ -1,5 +1,36 @@
 # 6 — Commandes /sync in-game
 
+## Addendum 2026-03-21 - Clarification du role des /sync
+
+Etat confirme:
+- Les commandes `/sync...` restent utiles pour calibration manuelle (inventaire, metiers, personnage, cartographie).
+- Elles ne sont pas la source principale des prix HDV globaux.
+
+Source de verite HDV (prix marche) actuelle:
+- Capture proto HDV en jeu
+- Decode/sync vers `logs/hdv_market.db`
+- Requetes SQL sur `market_latest`
+
+Commandes de reproduction completes (hors `/sync`) pour HDV:
+
+```powershell
+# 1) Capturer en jeu (ouvrir HDV, parcourir pages)
+docs\RND\poc-hdv\agent\launch_hdv_v2.bat
+
+# 2) Synchroniser en SQLite
+powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\sync_hdv_to_sqlite.ps1"
+
+# 3) Export lisible
+powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\export_hdv_readable.ps1" -ResolveItemNames
+
+# 4) Top ressources/recoltes seulement
+powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\top_buy_over_sell_resources.ps1" -Top 10 -PreLimit 50000
+```
+
+Conclusion:
+- `/sync...` = calibration utilisateur et donnees manuelles.
+- Pipeline HDV proto/SQLite = donnees de marche automatiques.
+
 ## Principe
 
 Le joueur tape une commande `/sync...` dans le chat Wakfu. Le jeu ne la reconnaît pas et

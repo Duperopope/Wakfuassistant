@@ -1,5 +1,19 @@
 # Journal POC - Extraction Inventaire Havre-Sac
 
+## Addendum 2026-03-21 - Confirmation/Infirmation
+
+Confirmations:
+- Le POC coffre/havre-sac reste valide sur son scope (mouvements, mapping progressif uid->refId, entree/sortie espace perso).
+- La limitation depot sans `refId` reste vraie.
+
+Clarification de scope:
+- Ce POC est distinct du pipeline HDV prix marche.
+- Le pipeline HDV actif utilise `market_v3_proto.log` + `sync_hdv_to_sqlite.ps1` + `hdv_market.db`.
+
+Decision:
+- Conserver ce document comme reference inventaire/coffre.
+- Ne pas melanger ses hypotheses avec la logique arbitrage HDV.
+
 **Date**: 2026-03-20 20:08
 **Statut**: POC VALIDE
 **Dossier**: docs/RND/poc-extractioninventairehavresac/

@@ -9,6 +9,19 @@
 - *Corroboration et infirmation des données du Journal 1*
 - *Tout pattern encore inconnu*
 
+## Addendum 2026-03-21 - Confirmation/Infirmation
+
+Confirmations:
+- Les patterns textuels achat/vente personnels dans le chat/log sont reels (actions du joueur).
+- Les sessions MARKET observees dans les logs confirment l'entree/sortie d'interface.
+
+Infirmation partielle:
+- Les doubles espaces dans `[Commerce]` peuvent servir d'indice de lien cliquable, mais ce n'est pas une preuve assez robuste pour exploitation automatique stricte.
+
+Decision actuelle:
+- Ce journal est conserve pour l'analyse comportementale et UI.
+- Le calcul prix/marge HDV se fait exclusivement via protobuf (`msgId=12294` ventes, `msgId=13653` achats) synchronise en SQLite.
+
 ---
 
 ## Observations

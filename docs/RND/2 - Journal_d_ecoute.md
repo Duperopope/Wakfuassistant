@@ -5,6 +5,21 @@
 *Observateur : Claude (WakfuAssistant R&D)*
 *Méthode : polling wakfu.log + wakfu_chat.log, ligne de base à 9393 lignes*
 
+## Addendum 2026-03-21 - Confirmation/Infirmation
+
+Confirmations:
+- Les patterns collecte (`On demarre l'occupation de collecte` / `Fin de l'occupation`) sont valides.
+- Les patterns quetes (reussite/echec) sont valides.
+- Les transitions monde (`on quitte le monde {id}`) sont valides pour tracer la navigation.
+
+A nuancer / non prioritaire pour le pipeline prix HDV:
+- Les lignes `[NATION] Trying to remove ...` restent du bruit non exploitable pour l'economie HDV.
+- Les deductions prix HDV ne doivent pas se faire ici (texte), mais via proto decode + SQLite.
+
+Decision actuelle:
+- Ce journal reste utile pour telemetrie gameplay.
+- Pour prix HDV et arbitrage: pipeline dedie `market_v3_proto.log -> hdv_market.db`.
+
 ---
 
 ## Contexte de départ (14:12)

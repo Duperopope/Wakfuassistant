@@ -1,5 +1,26 @@
 # Journal POC — 2026-03-20
 
+## Addendum 2026-03-21 - Etat actuel du POC
+
+Evolution majeure depuis cette session:
+- Le pipeline HDV cible est stabilise autour de `market_v3_proto.log` + decode protobuf + persistance SQLite.
+- Base persistante validee: `logs/hdv_market.db`.
+- Exports lisibles en clair valides: `logs/market_latest_preview.csv`, `logs/market_latest_preview.md`, `logs/market_latest_named_preview.csv`.
+
+Observations confirmees:
+- Ingestion dedoublonnee operationnelle (historique + latest).
+- Separation achats/ventes fiable via `msgId`.
+- Mapping objet: `item_ref_id`; identifiant offre: `offer_uid`.
+
+Observations infirmees ou depassees:
+- Les workflows uniquement textuels/chat pour econometrie fine HDV sont depasses par le decode protobuf structure.
+
+Reproduction rapide (etat 2026-03-21):
+1. Capture en jeu via `docs/RND/poc-hdv/agent/launch_hdv_v2.bat`
+2. Sync DB via `docs/RND/poc-hdv/sync_hdv_to_sqlite.ps1`
+3. Export lisible via `docs/RND/poc-hdv/export_hdv_readable.ps1 -ResolveItemNames`
+4. Filtre ressources uniquement via `docs/RND/poc-hdv/top_buy_over_sell_resources.ps1`
+
 *Session de développement et validation du pipeline de détection temps réel.*
 *Heure approximative : 00h12 → ~02h30*
 

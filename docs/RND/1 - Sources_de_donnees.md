@@ -4,6 +4,24 @@
 *Document de référence — WakfuAssistant*
 *Dernière mise à jour : 2026-03-20*
 
+## Addendum 2026-03-21 - Etat confirme/infirme
+
+Ce qui est confirme depuis les tests POC HDV:
+- Source de verite HDV actuelle: `logs/market_v3_proto.log` (payloads proto) puis sync vers `logs/hdv_market.db`.
+- Stockage persistant valide: tables `market_observations` (historique dedoublonne) et `market_latest` (etat courant par offre).
+- Les chemins AppData et la structure `zaap/gamesLogs/wakfu/` restent valides.
+- `offer_uid` (gros identifiant) != objet. L'objet est `item_ref_id`.
+
+Ce qui est infirme ou a degrader en fiabilite:
+- Toute inference HDV basee uniquement sur texte chat/log (sans proto) n'est pas suffisante pour un prix de marche global fiable.
+- Les heuristiques non structurees (par ex. interpretation textuelle sans `msgId`/payload) ne doivent plus etre utilisees comme source principale.
+
+Source de verite operationnelle (a privilegier):
+- Capture: `docs/RND/poc-hdv/agent/launch_hdv_v2.bat`
+- Sync: `docs/RND/poc-hdv/sync_hdv_to_sqlite.ps1`
+- Export lisible: `docs/RND/poc-hdv/export_hdv_readable.ps1`
+- Guide non-codeur: `docs/RND/poc-hdv/GUIDE_REPRO_HDV_NON_CODEUR.md`
+
 ---
 
 ## Vue d'ensemble

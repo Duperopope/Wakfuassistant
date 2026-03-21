@@ -8,6 +8,17 @@
 - *Havre-sac d'autres joueurs : différence de signal ?*
 - *Toute observation annexe*
 
+## Addendum 2026-03-21 - Confirmation/Infirmation
+
+Confirmations:
+- Les signaux `PERSONAL_SPACE_ENTER_RESULT_MESSAGE` et `PERSONAL_SPACE_LEAVE_RESULT_MESSAGE` sont fiables.
+- Le monde `9` correspond bien a l'espace personnel (havre-sac).
+- Les erreurs d'ouverture havre-sac selon contexte (zone interdite / deplacement) sont correctement observees.
+
+A noter pour le scope actuel:
+- Ces signaux restent utiles pour telemetrie de session, mais ne pilotent pas la logique prix HDV.
+- Pour HDV, la source de verite est maintenant le decode protobuf + base SQLite.
+
 ---
 
 ## Observations
