@@ -133,3 +133,8 @@ Les 9 valeurs F3 uniques = 9 types d'effets differents
 - effect.definition.params[0] = stateId (ex: 5082=Robuste)
 - params = [stateId, 0, rang, 0, -1, 0]
 - F3 (Qs) dans protobuf = probablement effectId
+
+## F3 != effectId CDN (confirme)
+- 575 effectIds CDN (plage 65964-408301)
+- 9 F3 values (45980-271019): aucun match
+- F3 = ID registre runtime (bgJ.bac().oy())
