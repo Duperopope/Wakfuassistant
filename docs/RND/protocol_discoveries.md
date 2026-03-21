@@ -224,3 +224,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Les itemIds (3329, 4738, etc.) sont vrais et verifiables dans le CDN
 - NECESSITE: decompiler cru.class pour connaitre le vrai format
 - FAUX POSITIFS PROBABLES: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
+
+## CRU = WRAPPER OPAQUE (2026-03-21 19:10)
+- cru.class contient UN seul champ: byte[] mgi
+- ezW() retourne mgi (le blob binaire brut)
+- Les 'itemIds' 3329,4738,etc ne sont PAS des CDN item IDs (instances uniques)
+- Le vrai decodage est dans le handler qui appelle cru.ezW()
+- Besoin: trouver qui deserialise mgi et extraire la structure
