@@ -818,4 +818,83 @@ mod tests {
         assert_eq!(health.matched_lines, 1);
         assert!((health.match_rate - 0.5).abs() < 0.01);
     }
+
+    #[test]
+    fn test_parse_kamas_spent() {
+        let mut parser = LogParser::new();
+        let event = parser.parse_line(
+            "14:15:49,123 - [Information (jeu)] Vous avez perdu 15 kamas.",
+            LogSource::WakfuChat,
+        );
+        match event {
+            GameEvent::KamasSpent { amount, .. } => assert_eq!(amount, 15),
+            other => panic!("Expected KamasSpent, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_item_lost() {
+        let mut parser = LogParser::new();
+        let event = parser.parse_line(
+            "14:15:49,123 - [Information (jeu)] Vous avez perdu 11x Transmutation Raffinée .",
+            LogSource::WakfuChat,
+        );
+        match event {
+            GameEvent::HarvestCompleted {
+                resource, quantity, ..
+            } => {
+                assert!(resource.contains("-Transmutation Raffinée"), "resource={resource}");
+                assert_eq!(quantity, 11);
+            }
+            other => panic!("Expected HarvestCompleted, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_profession_xp() {
+        let mut parser = LogParser::new();
+        let event = parser.parse_line(
+            "14:15:49,123 - Herboriste : +47 points d'XP.  Prochain niveau dans : 1 253.",
+            LogSource::WakfuChat,
+        );
+        match event {
+            GameEvent::HarvestCompleted {
+                profession, quantity, ..
+            } => {
+                assert!(profession.contains("Herboriste"), "profession={profession}");
+                assert_eq!(quantity, 47);
+            }
+            other => panic!("Expected HarvestCompleted, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_quest_completed() {
+        let mut parser = LogParser::new();
+        let event = parser.parse_line(
+            "14:15:49,123 - Vous avez réussi la quête Ninefi.",
+            LogSource::WakfuChat,
+        );
+        match event {
+            GameEvent::XpGained { source, .. } => {
+                assert!(matches!(source, XpSource::Quest));
+            }
+            other => panic!("Expected XpGained(Quest), got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_disconnect_connection_lost() {
+        let mut parser = LogParser::new();
+        let event = parser.parse_line(
+            "INFO 14:19:42,000 [thread] (cls:0) - Connexion avec le serveur perdue",
+            LogSource::WakfuMain,
+        );
+        match event {
+            GameEvent::Disconnected { reason } => {
+                assert_eq!(reason, Some("ConnectionLost".to_string()));
+            }
+            other => panic!("Expected Disconnected(ConnectionLost), got {:?}", other),
+        }
+    }
 }
