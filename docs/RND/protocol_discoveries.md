@@ -217,3 +217,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - flag byte a offset -1 avant nameLen (0x10, 0x28, 0x38 = rang ou type)
 - itemId dans les 2 bytes apres [00 00] post-nom
 - Sublimations confirmees dans CRU: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
+
+## CORRECTION CRU (2026-03-21 19:09)
+- Les 'stateIds' trouves precedemment sont probablement des TIMESTAMPS tronques
+- Les bytes avant le nom font partie d'un int64 timestamp (pattern 00 01 9C xx xx xx xx)
+- Les itemIds (3329, 4738, etc.) sont vrais et verifiables dans le CDN
+- NECESSITE: decompiler cru.class pour connaitre le vrai format
+- FAUX POSITIFS PROBABLES: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
