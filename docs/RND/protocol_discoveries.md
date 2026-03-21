@@ -94,3 +94,9 @@
 - Nos donnees: F8 contenait F11=1411, F14=1
   F11 wire=88 -> readInt32 -> mj via tL()?
   F14 wire=112 -> readInt32
+
+## VERITE: QD.dr(byte[])
+1. iM iM2 = iM.bf(byArray) -> parse protobuf
+2. this.d(iM2) -> appelle d(iM) avec le message parse
+3. return iM2
+-> La logique est dans QD.d(iM) ou une override dans eRO
