@@ -1,0 +1,16 @@
+{
+  "item_id": 14484,
+  "item_name": "Catapulco",
+  "found_in_files": [
+    {
+      "file": "13.jar",
+      "offset": "0x21480",
+      "raw_bytes": "00fd0a000094380000000000",
+      "monster_id": 2813,
+      "monster_name": "Archaologue Bonta",
+      "item_id": 14484,
+      "item_name": "Catapulco"
+    }
+  ],
+  "conclusion": "Item 14484 (Catapulco) is dropped by: Archaologue Bonta"
+}
