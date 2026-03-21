@@ -28,7 +28,7 @@ Flux secondaire NON connecté au pipeline Rust : Client Wakfu JVM → Agent Byte
 
 Deux migrations appliquées via database.rs run_migrations() avec include_str!. Tables migration 001 : migrations, game_sessions (id TEXT PK, character_name, server_name, started_at, ended_at, total_kamas_gained/spent, total_xp_gained, total_combats, total_victories), game_events (id AUTOINCREMENT, session_id FK, timestamp, event_type, event_data JSON, log_source, synced), economy_snapshots (id, session_id, timestamp, kamas_balance, delta, source), profession_progress (id, character_name, profession_name, current_level, total_xp, last_updated, UNIQUE character+profession), cdn_items_cache (item_id PK, data TEXT, cached_at, cdn_version). Tables migration 002 : cdn_metadata (key TEXT PK, value TEXT, updated_at), items_cache (id PK, name_fr, name_en, level, item_type_id, rarity). Pragmas : journal_mode=WAL, synchronous=NORMAL, cache_size=-20000, foreign_keys=ON, busy_timeout=5000, temp_store=MEMORY.
 
-Tables MANQUANTES à créer : recipes_cache, recipe_ingredients_cache, recipe_results_cache (priorité 1), hdv_offers, hdv_price_history, craft_costs (priorité 2+).
+Tables migration 003 : recipes_cache (id PK, recipe_id, category, level, xp_ratio, cached_at), recipe_ingredients_cache (id, recipe_id, item_id, quantity, ingredient_order), recipe_results_cache (id, recipe_id, item_id, quantity) avec index. Tables MANQUANTES à créer : hdv_offers, hdv_price_history, craft_costs (priorité 1+).
 
 ## 6. CDN Ankama source de données publique
 
@@ -64,7 +64,7 @@ item_ref_id = identité objet (ex 26599 = Amulette du Bouftou). offer_uid = iden
 
 ## 9. Trous identifiés
 
-1. CDN recettes non intégrées (cdn_cache.rs, database.rs) → impossible calculer coûts craft. 2. Pas de pont Agent Java → Rust, aucun watcher pour market_v3_proto.log → deux systèmes déconnectés. 3. Pas de tables HDV dans Tauri DB → pas de données marché dans overlay. 4. Modèle châsses/enchantements/sublimations absent → valorisation HDV fausse pour équipements. 5. EconomyTab squelette, ProfessionsTab vide → UI inutilisable économie/métiers. 6. Tests insuffisants : 16 tests Rust, 0 test CDN, 0 test DB, 0 test frontend. 7. Fichiers décrits dans ARCHITECTURE.md absents du repo : combat.rs, economy.rs, professions.rs, settings.rs, community_sync.rs, persistence.rs, models session/combat/profession/economy, stores combatStore/economyStore/settingsStore, lib/events.ts, types/index.ts.
+1. CDN recettes RÉSOLU : recipes, recipeIngredients, recipeResults intégrés dans cdn_cache.rs + migration 003. 2. Pas de pont Agent Java → Rust, aucun watcher pour market_v3_proto.log → deux systèmes déconnectés. 3. Pas de tables HDV dans Tauri DB → pas de données marché dans overlay. 4. Modèle châsses/enchantements/sublimations absent → valorisation HDV fausse pour équipements. 5. EconomyTab squelette, ProfessionsTab vide → UI inutilisable économie/métiers. 6. Tests PARTIELLEMENT RÉSOLU : 26 tests Rust (dont 5 CDN recettes + 5 log_parser supplémentaires), 0 test DB, 0 test frontend. 7. Fichiers décrits dans ARCHITECTURE.md absents du repo : combat.rs, economy.rs, professions.rs, settings.rs, community_sync.rs, persistence.rs, models session/combat/profession/economy, stores combatStore/economyStore/settingsStore, lib/events.ts, types/index.ts.
 
 ## 10. Protocoles obligatoires
 

@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [Chantier A — CDN Recettes + Tests + Documentation] - 2026-03-21
+
+### Ajouté
+- Migration 003_recipes_cache.sql : tables recipes_cache, recipe_ingredients_cache, recipe_results_cache avec index
+- cdn_cache.rs : fonctions fetch_and_cache_recipes, fetch_and_cache_recipe_ingredients, fetch_and_cache_recipe_results
+- cdn_commands.rs : commandes Tauri refresh_recipes_cache et get_recipe_by_item_id
+- cdn_cache.rs : 5 tests unitaires parsing JSON recettes/ingrédients/résultats
+- log_parser.rs : 5 tests supplémentaires
+- docs/RND/LOG_FORMATS.md : documentation 20 patterns regex
+- docs/RND/poc-database/read_overlay_db.ps1 : script lecture SQLite overlay
+
+### Corrigé
+- log_parser.rs : typo RE_ITEM_GAINED ramasss → ramass
+
+### Modifié
+- database.rs : ajout migration 003
+- lib.rs : enregistrement 2 nouvelles commandes Tauri
+
+### Tests
+- Total : 26 tests Rust tous verts
+
+---
+
 ## [PoC Database — Correctifs] - 2026-03-19
 
 ### Corrigé
