@@ -63,6 +63,8 @@ pub fn run() {
             commands::cdn_commands::get_cdn_version,
             commands::cdn_commands::refresh_cdn_cache,
             commands::cdn_commands::get_item_name,
+            commands::cdn_commands::refresh_recipes_cache,
+            commands::cdn_commands::get_recipe_by_item_id,
             commands::log_commands::set_verbose_logging,
             commands::log_commands::bridge_log,
         ])
