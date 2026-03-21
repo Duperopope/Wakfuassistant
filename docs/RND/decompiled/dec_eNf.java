@@ -1,4 +1,4 @@
-Picked up JAVA_TOOL_OPTIONS: 
+Picked up JAVA_TOOL_OPTIONS: -javaagent:H:\Code\Wakfuassistant\agent\wakfu-spy-agent.jar --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
 /*
  * Decompiled with CFR 0.152.
  * 
@@ -148,6 +148,7 @@ Picked up JAVA_TOOL_OPTIONS:
  *  eRK
  *  eRL
  *  eRM
+ *  eRO
  *  eRb
  *  eRd
  *  eRe
@@ -157,6 +158,7 @@ Picked up JAVA_TOOL_OPTIONS:
  *  eRi
  *  eRm
  *  eRn
+ *  eRo
  *  eRq
  *  eRt
  *  eRv

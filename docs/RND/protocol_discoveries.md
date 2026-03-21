@@ -164,3 +164,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Le stateId est resolu client-side via bgJ.bac().oy(F3)
 - Source: bdata/ (data.bdat + indexes.bdat + JARs)
 - Alternative: decompiler bgJ pour comprendre le registre
+
+## BDATA STRUCTURE (2026-03-21 18:56)
+- bgJ extends bYT, appelle bgG.dlO() (vrai registre)
+- bgG = registre d'effets principal via TLongObjectProcedure
+- JARs bdata contiennent chacun un .bin (68.bin=18MB, 35.bin=1.6MB)
+- indexes.bdat = index cle-valeur (id, is_challenge, etc.)
+- data.bdat = format texte avec separateurs | et ~
