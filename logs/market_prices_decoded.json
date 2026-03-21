@@ -1,0 +1,20 @@
+[
+  {
+    "remainingQty": 0,
+    "uid": -1,
+    "seller": "?",
+    "unitPrice": 0,
+    "timestamp": "00:31:35.356",
+    "initialQty": 0,
+    "sellDurationId": 0
+  },
+  {
+    "remainingQty": 0,
+    "uid": -1,
+    "seller": "?",
+    "unitPrice": 0,
+    "timestamp": "00:46:12.476",
+    "initialQty": 0,
+    "sellDurationId": 0
+  }
+]

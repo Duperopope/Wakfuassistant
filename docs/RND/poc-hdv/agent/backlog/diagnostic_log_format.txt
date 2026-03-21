@@ -1,0 +1,21 @@
+# Diagnostic du format de log
+# Date: 2026-03-21 01:04
+# Fichier: H:\Code\Wakfuassistant\logs\market_v22_all.log
+# Taille: 3209.9 KB
+# Lignes: 9763
+# Ligne max: 57712 chars
+# Plus long HEX: 55532 chars
+
+## 5 premières lignes:
+=== MARKET PRICE AGENT V2.2 STARTED === 2026-03-21 00:31:13
+Mode: FULL CAPTURE - tous les messages Netty
+Hook installe sur aDj.channelRead0 - capture de TOUS les messages
+00:31:24.603|Nm|fields=1|aYi=byte[4]|PAYLOAD_FIELD=aYi|SIZE=4|HEX=56C24DB6
+00:31:24.726|No|fields=2|aYj=true|aYk=byte[7]|PAYLOAD_FIELD=aYk|SIZE=7|HEX=01005B02022D31
+
+## 5 dernières lignes:
+01:04:14.270|coe|fields=6|mcA=6619203|bap=-12|baq=28|ban=-57|bay=4|lVj=MOUNT|
+01:04:15.506|NS|fields=0|
+01:04:18.106|coe|fields=6|mcA=3013061|bap=-12|baq=27|ban=-57|bay=4|lVj=MOUNT|
+01:04:18.853|coe|fields=6|mcA=6623133|bap=-8|baq=26|ban=-60|bay=1|lVj=MOUNT|
+01:04:21.386|coe|fields=6|mcA=6435016|bap=-7|baq=20|ban=-60|bay=6|lVj=MOUNT|

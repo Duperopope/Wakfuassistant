@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Premain-Class: com.wakfu.agent.MarketPriceAgentV3
+Agent-Class: com.wakfu.agent.MarketPriceAgentV3
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
+

@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'net.bytebuddy:byte-buddy:1.14.18'
+    implementation 'net.bytebuddy:byte-buddy-agent:1.14.18'
+}
+
+jar {
+    archiveFileName = 'market-price-agent-v3.jar'
+
+    manifest {
+        attributes(
+            'Premain-Class': 'com.wakfu.agent.MarketPriceAgentV3',
+            'Agent-Class': 'com.wakfu.agent.MarketPriceAgentV3',
+            'Can-Redefine-Classes': 'true',
+            'Can-Retransform-Classes': 'true'
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
