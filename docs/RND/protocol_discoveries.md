@@ -186,3 +186,12 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Exemple: Robuste effectId=241072, params=[5082,0,1,0,-1,0] -> stateId=5082
 - F3 dans CWJ304 = effectId runtime (pas le CDN effectDefinition.id)
 - Mapping effect_to_state_mapping.json cree
+
+## PIVOT STRATEGIE (2026-03-21 19:01)
+- F3 (CWJ304) = ID runtime interne, INTROUVABLE dans le CDN
+- 0/9 match direct, 0/9 match arithmetique
+- CDN effectIds range: 65964-408301 (575 uniques)
+- F3 range: 45980-271019 (9 uniques) - overlap de range mais pas de match
+- ABANDON de la piste CWJ pour les sublimations
+- NOUVELLE APPROCHE: decoder CRU (items equipes) et coR/coS (offres HDV)
+- Les instances d'items contiennent directement leurs effets avec stateId
