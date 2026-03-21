@@ -138,3 +138,6 @@ Les 9 valeurs F3 uniques = 9 types d'effets differents
 - 575 effectIds CDN (plage 65964-408301)
 - 9 F3 values (45980-271019): aucun match
 - F3 = ID registre runtime (bgJ.bac().oy())
+
+## DECOUVERTE: F8.F11 (ii) = candidat stateId
+F14=1 toujours, F11 varie par F3
