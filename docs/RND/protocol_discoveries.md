@@ -152,3 +152,15 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Le stateId n'est PAS dans le message reseau
 - Il faut extraire le mapping F3->stateId depuis bdata
 - OU chercher un autre endpoint CDN qui contient ce mapping
+
+## CDN EFFECTS: BLOQUES (403)
+- Tous les fichiers d'effets CDN renvoient 403
+- effects.json, runningEffects.json, genericEffects.json: INACCESSIBLES
+- Le mapping effectId -> stateId n'est PAS disponible via CDN
+
+## CONCLUSION: SOURCE DES DONNEES
+- F3 (CWJ304) = effectId interne runtime (pas CDN)
+- F11 (sous-message ii) = contexte, pas stateId
+- Le stateId est resolu client-side via bgJ.bac().oy(F3)
+- Source: bdata/ (data.bdat + indexes.bdat + JARs)
+- Alternative: decompiler bgJ pour comprendre le registre
