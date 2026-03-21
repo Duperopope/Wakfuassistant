@@ -231,3 +231,11 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Les 'itemIds' 3329,4738,etc ne sont PAS des CDN item IDs (instances uniques)
 - Le vrai decodage est dans le handler qui appelle cru.ezW()
 - Besoin: trouver qui deserialise mgi et extraire la structure
+
+## CRU MESSAGE ID = 13668 (2026-03-21 19:12)
+- cru.d() retourne 13668 (identifiant de message reseau)
+- cru extends Nr extends Nn (message brut, byte array)
+- dn(byte[]) stocke directement le payload dans mgi
+- ezW() retourne le blob mgi
+- 13668 PAS dans cdV.java (40 cases) -> handler dans un autre fichier
+- Recherche en cours du handler qui deserialise mgi
