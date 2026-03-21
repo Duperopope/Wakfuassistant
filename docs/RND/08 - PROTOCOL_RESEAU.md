@@ -182,8 +182,48 @@
 - Yb: retour de Yd.a()
 - cfG, cjE, clL: petites classes avec refs itemReferenceId/equipmentSlot
 
-## CLASSES ITEM DECOMPILEES (2026-03-21 19:32)
-- bhi: item client-side (ne devrait pas etre serialise), champ rr ifW
-- Yd: abstract, a(int,ByteBuffer) = serialiseur items
-- Yb: retour de Yd.a()
-- cfG, cjE, clL: petites classes avec refs itemReferenceId/equipmentSlot
+---
+
+## ENCHANTEMENTS ET SUBLIMATIONS SUR ITEMS IDENTIFIES (2026-03-21)
+
+### SOURCE 1 — HDV : coy (ProtoMarketOffer) — CONFIRME
+Classe Java : `mE` (ProtoMarketOffer protobuf). Les champs suivants sont DEJA dans les bytes capturés :
+
+| Champ proto | Field# | Tag hex | Type | Methode Java | Signification |
+|---|---|---|---|---|---|
+| slot_color_ids | 12 | 0x60 (varint) / 0x62 (packed) | repeated int32 | amL() | Couleurs des emplacements sublimation |
+| slot_fixed_order | 13 | 0x68 | bool | amO() | Ordre des slots fixe (oui/non) |
+| sublimation_id | 14 | 0x70 | int32 | amQ() | ID sublimation de base (ref CDN parchemin) |
+| special_sublimation_id | 15 | 0x78 | int32 | amS() | ID sublimation speciale |
+
+View model `bHZ` (offre HDV) expose : `hasShardSlots`, `hasBasicSublimation`, `hasSpecialSublimation`, `basicSublimationName`, `formattedSpecialSublimationName`.
+- `amP()` = has_sublimation_id set, `amR()` = has_special_sublimation_id set
+- `dXg()` = has shard slots (cpA() > 0 && amM() != 0)
+
+**Action requise** : modifier le script `sync_hdv_to_sqlite.ps1` pour parser ces 4 champs depuis le HEX coy.
+
+### FAUSSE PISTE — Rareté dans coy
+La rareté n'est PAS dans `mE`/`ProtoMarketOffer`. Elle est une propriété fixe de la définition d'item (`fhC.dwg()` → enum `fgj`).
+La rareté est dérivable depuis `cdn_items.json` via `item_ref_id`. Elle est filtrable dans la recherche HDV (`m_itemRarities` dans `fiU` = ClientSearchParameters) mais absente du payload de l'offre individuelle.
+**Conclusion** : rareté par offre = inutile, rareté par item_ref_id = cdn_items.json.
+
+### SOURCE 2 — Items portes par joueurs : cru (ID 13668)
+Classe Java : `cru.mgi` = byte[] blob. Serialise via `uY` struct :
+- `ZC` = uid (long), `aaQ` = refId (int), `aaa` = qty (short)
+- `aeH` = `vp` → `afm` (yd = shard/enchantment data = `fhI`)
+- `aeJ` = `uZ` → `aeN` (binding info `fgR`)
+
+Classe `ffV` (item client) : `jRV` (fhI) = sublimations/enchantments appliques, `jQZ` (fhC) = def item ref, `dwg()` = rareté.
+Format binaire `cru` non encore decode. CRU tentative precedente : version=1, count=15.
+
+### SOURCE 3 — cqv (ID 13419, ~1498B, parent cqf) — PROBABLE INSPECTION ITEM
+Payload binaire non-protobuf. Format ressemble a des blocs stats RunningEffect.
+Classe `aNn` (implementant `aqz`) = serialiseur item complet avec :
+- `eol` (byte, via `aTf()`) = probable rareté de l'item identifié (crQ())
+- `eok` (aNw[]) = slots d'enchantement (crP())
+- `eoq` (aNs[]), `eor` (aNu[]), `eos` (aNt[]), `eot` (aNv[]) = tableaux de sous-objets (sublimations appliquees ?)
+- `eoA` (int[]) = IDs effets supplementaires (csg())
+Deserialisation via `aqH` reader : `bGI()` = readInt, `bGG()` = readShort, `bGH()` = readFloat, `bGM()` = readIntArray, `aTf()` = readByte.
+
+**cqv = message inspection item detaille** : envoye quand un joueur inspecte un item identifie (lien chat ou equipe).
+**A verifier** : capturer un cqv en cliquant sur un item enchante en jeu et comparer.

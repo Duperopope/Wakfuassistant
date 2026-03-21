@@ -66,3 +66,6 @@
 | Modèle châsses | Absent du pipeline Rust | 🟡 Moyen | CONTEXT_BRIEFING section 9 |
 | Tables HDV Tauri DB | Pas encore créées | 🟡 Moyen | CONTEXT_BRIEFING section 9 |
 | Dépôts coffre refId | Les dépôts ne portent pas le refId | 🟡 Moyen | POC_INVENTAIRE.md |
+| Enchant+Sublim HDV | slot_color_ids/sublimation_id/special_sublimation_id PRÉSENTS dans coy protobuf (champs 12/14/15) mais non extraits par sync script | 🟠 Résolvable | PROTOCOL_RESEAU.md section 2026-03-21 |
+| Rareté HDV | Rareté absente du payload coy — propriété fixe de l'item_ref_id, dérivable depuis cdn_items.json | ✅ Résolu (pas de problème) | PROTOCOL_RESEAU.md |
+| cqv (inspection item) | Format binaire non encore décodé — probable détail item identifié avec RunningEffects | 🟡 Moyen | PROTOCOL_RESEAU.md section 2026-03-21 |
