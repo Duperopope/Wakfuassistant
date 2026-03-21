@@ -175,3 +175,9 @@
 - Format: Java standard BE (readInt/readShort/readLong/readUTF)
 - sipush 13668 = 0 hits -> constante encodee via ldc/constant pool
 - 18979 classes, handler introuvable par scan bytecode
+
+## CLASSES ITEM DECOMPILEES (2026-03-21 19:32)
+- bhi: item client-side (ne devrait pas etre serialise), champ rr ifW
+- Yd: abstract, a(int,ByteBuffer) = serialiseur items
+- Yb: retour de Yd.a()
+- cfG, cjE, clL: petites classes avec refs itemReferenceId/equipmentSlot
