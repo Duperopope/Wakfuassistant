@@ -8,6 +8,12 @@ Objectif:
 - Les lire en clair facilement dans VS Code.
 - Sortir rapidement des opportunites achat > vente.
 
+Note importante sur les fichiers de sortie:
+- `logs/hdv_market.db` et les logs proto sont les sources persistantes.
+- Les exports lisibles (`market_latest_preview*`, `top10_buy_over_sell*`) sont des artefacts derives.
+- Ils peuvent exister temporairement dans `logs/`, puis etre archives dans `logs/runs/<RUN_ID>/artifacts/` lors de l'initialisation d'un nouveau run.
+- Si un export n'est plus en racine `logs/`, il faut soit consulter le dernier run archive, soit le regenerer.
+
 ---
 
 ## 0) Reponse rapide sur les identifiants (important)

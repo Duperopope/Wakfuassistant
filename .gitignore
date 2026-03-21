@@ -29,3 +29,13 @@ Thumbs.db
 
 # POC databases générées
 docs/RND/poc-database/*.db
+
+# Generated HDV artifacts
+logs/hdv_market.db
+logs/market_latest_preview.csv
+logs/market_latest_preview.md
+logs/market_latest_named_preview.csv
+logs/top10_buy_over_sell.csv
+logs/top10_buy_over_sell_resources.csv
+logs/top10_buy_over_sell_resources_v2.csv
+logs/runs/
