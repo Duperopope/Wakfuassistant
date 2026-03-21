@@ -10,6 +10,47 @@ Objectif:
 
 ---
 
+## 0) Reponse rapide sur les identifiants (important)
+
+- `item_ref_id` = identifiant de l'objet (ce que tu veux pour reconnaitre l'item).
+- `offer_uid` = identifiant unique de l'offre dans le HDV (pas l'objet).
+
+Exemple:
+- `56227059278285599` est un `offer_uid`, pas un `item_ref_id`.
+
+---
+
+## 0bis) Stack technique (version IA/LLM)
+
+Pipeline logique:
+1. Source runtime: Wakfu + agent Java (`-javaagent`) intercepte les messages reseau HDV.
+2. Logs bruts:
+  - `logs/market_v3.log` (texte)
+  - `logs/market_v3_proto.log` (payloads proto hex)
+3. Parsing metier (PowerShell):
+  - decode/protobuf (msgId `12294` vente, `13653` achat)
+  - extraction champs: `item_ref_id`, `offer_uid`, `unit_price`, `quantity`, `actor_name`, `source_ts`
+4. Persistance SQLite (`logs/hdv_market.db`):
+  - `market_observations`: historique dedoublonne (hash ligne)
+  - `market_latest`: etat courant upsert par cle `(side,item_ref_id,offer_uid)`
+5. Restitution lisible:
+  - `logs/market_latest_preview.csv`
+  - `logs/market_latest_preview.md`
+  - `logs/market_latest_named_preview.csv` (avec nom d'objet)
+
+Contrat de donnees principal (`market_latest`):
+- `side`: `buy` ou `sell`
+- `item_ref_id`: id objet
+- `offer_uid`: id offre
+- `actor_name`: vendeur/acheteur
+- `unit_price`: prix unitaire
+- `quantity`: quantite
+- `source_msg_id`: id proto
+- `source_ts`: timestamp de trame
+- `updated_at`: timestamp sync
+
+---
+
 ## 1) Ce que fait le systeme (version simple)
 
 1. Un agent Java intercepte les messages reseau HDV quand tu utilises l'hotel des ventes en jeu.
@@ -91,6 +132,22 @@ Fichiers generes:
 - `logs/market_latest_preview.csv` (grand volume, ideal filtres)
 - `logs/market_latest_preview.md` (lecture rapide dans VS Code)
 
+### Etape E - Export avec vrais noms d'objets (CDN Ankama)
+
+Commande:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\export_hdv_readable.ps1" -ResolveItemNames
+```
+
+Fichier genere:
+- `logs/market_latest_named_preview.csv`
+
+Notes:
+- Le script telecharge la base des items depuis le CDN Ankama.
+- Un cache local est conserve dans `logs/item_name_cache.json`.
+- Si internet est indisponible, le script reutilise le cache.
+
 ---
 
 ## 4) Lire les donnees facilement dans VS Code
@@ -167,9 +224,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\sync_hdv_t
 powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\export_hdv_readable.ps1"
 ```
 
+2bis. Export lisible + noms d'objets:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "docs\RND\poc-hdv\export_hdv_readable.ps1" -ResolveItemNames
+```
+
 3. Ouvrir les resultats:
 - `logs/market_latest_preview.md`
 - `logs/market_latest_preview.csv`
+- `logs/market_latest_named_preview.csv`
 
 ---
 
