@@ -1,5 +1,5 @@
 # CARTOGRAPHIE PROTOCOLE WAKFU
-# Generee le 2026-03-21 19:26
+# Generee le 2026-03-21 19:27
 # Projet: H:\Code\Wakfuassistant
 # GitHub: https://github.com/Duperopope/Wakfuassistant
 
@@ -169,3 +169,9 @@
 - Decompiled: H:\Code\Wakfuassistant\docs\RND\decompiled\
 - Data: H:\Code\Wakfuassistant\docs\RND\data\
 - Runs: H:\Code\Wakfuassistant\agent\logs\runs\RUN_20260321_175522\
+
+## CRU PARSE TENTATIVE (2026-03-21 19:28)
+- version=1, count=15 (15 entries = 15 items equipes?)
+- Format: Java standard BE (readInt/readShort/readLong/readUTF)
+- sipush 13668 = 0 hits -> constante encodee via ldc/constant pool
+- 18979 classes, handler introuvable par scan bytecode
