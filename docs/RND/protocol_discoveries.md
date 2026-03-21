@@ -100,3 +100,36 @@
 2. this.d(iM2) -> appelle d(iM) avec le message parse
 3. return iM2
 -> La logique est dans QD.d(iM) ou une override dans eRO
+
+## VERITE: QD.d(iM) - deserialisation complete
+Mapping iM protobuf -> champs QD/eRO:
+- F1 LV() -> di(long) = set unique id
+- F2 Qq() -> bgL = second id
+- F3 Qs() -> bgJ.bac().oy(F3) = LOOKUP EFFET GENERIQUE
+  Si null: 'generic effect unknown: F3'
+  Resultat stocke dans bgC
+- F4 getValue() -> aQL = VALEUR de l'effet
+- F5 Qt() -> bgG position (x,y,z)
+- F6 Qw() -> dk(long) = source entity id
+- F7 Qy() -> dj(long) = target entity id
+- F8 ii via QD()/QF() -> f(int,long)
+- F9/F10: via QC()/QD()/QE()/QF()
+
+## CONCLUSION PARTIELLE
+F3 (Qs) = ID effet generique (97794, 45980, etc.)
+Ce n'est PAS le stateId CDN directement
+C'est un ID dans le registre bgJ.bac().oy()
+Le mapping ID_effet -> stateId est charge au runtime
+Les 9 valeurs F3 uniques = 9 types d'effets differents
+
+## Valeurs F3 connues pour mfZ=304
+97794, 45980, 111781, 111783, 144984, 144985, 269995, 270833, 271019
+
+## Recherche F3 dans CDN effects: en cours
+
+## VERITE: Structure effet CDN
+- effect.definition.id = effectId unique (ex: 241072)
+- effect.definition.actionId = 304 (sublimation)
+- effect.definition.params[0] = stateId (ex: 5082=Robuste)
+- params = [stateId, 0, rang, 0, -1, 0]
+- F3 (Qs) dans protobuf = probablement effectId
