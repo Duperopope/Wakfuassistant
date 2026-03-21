@@ -1,0 +1,99 @@
+<commandList>
+
+	<!-- Technical - Help !-->
+	<command cmdPattern="(?:/h|/help|/\?)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.HelpCommand" name="/help" help="Help"/>
+	<command cmdPattern="(?:/ping)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.PingCommand" name="/ping" help="Ping"/>
+	<command cmdPattern="(?:/position|/pos)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.PositionCommand" name="/pos" help="Position"/>
+	<command cmdPattern="(?:/whois)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.WhoisCommand" name="/whois" help="Whois"/>
+	<command cmdPattern="(?:/console)" argsPattern="" class="com.ankamagames.wakfu.client.console.command.debug.ConsoleCommand" name="/console" help="Console"/>
+
+	<!-- Misc commands !-->
+	<command cmdPattern="(?:/time)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.TimeCommand" name="/time" help="Time"/>
+	<command cmdPattern="(?:/played)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.PlayedCommand" name="/played" help="Show played time"/>
+	<command cmdPattern="(?:/xp)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.XpCommand" name="/played" help="Show percent of xp gained"/>
+	<command cmdPattern="(?:/clear)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.ClearChatCommand" name="/clear" help="Clear all chat views"/>
+	<command cmdPattern="(?:/autojoin)" argsPattern="(on|off)"
+			 class="com.ankamagames.wakfu.client.chat.console.command.AutoJoinCommand" name="/autojoin"
+			 help="Enable/Disable party fight autojoin"
+			/>
+	<command cmdPattern="(?:/rand|/random)" argsPattern="(.*)" class="com.ankamagames.wakfu.client.chat.console.command.RandCommand" name="/rand"
+			 help="Roll some dices" />
+
+
+	<!--Action commands-->
+	<command cmdPattern="(?:/pause)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.ChatPauseCommand" name="/pause" help="Pause in chat"/>
+	<command cmdPattern="(?:/sit)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.SitCommand" name="/sit" help="Sit"/>
+	<command cmdPattern="(?:/suicide)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.SuicideCommand" name="/suicide" help="Suicide"/>
+	<command cmdPattern="(?:/dnd|/npd)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.DoNotDisturbCommand" name="/dnd|/npd" help="Do Not Disturb"/>
+	<command cmdPattern="(?:/away|/afk|/abs)" argsPattern="(.*)" class="com.ankamagames.wakfu.client.chat.console.command.AwayCommand" name="/away|/afk|/abs" allowNoArg="true" help="Away"/>
+	<!--<command cmdPattern="(?:/hi)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.HiCommand" name="/hi" help="hi"/>-->
+	<!--<command cmdPattern="(?:/clap)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.ClapCommand" name="/clap" help="clap"/>-->
+	<!--<command cmdPattern="(?:/victory)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.VictoryCommand" name="/victory" help="Victory"/>-->
+	<!--<command cmdPattern="(?:/defeat)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.DefeatCommand" name="/defeat" help="Defeat"/>-->
+	<!--<command cmdPattern="(?:/drink)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.DrinkCommand" name="/drink" help="Drink"/>-->
+
+	<!-- messages !-->
+	<command channelName="local" cmdPattern="(?:/l|/L|/local)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.VicinityMessageCommand" name="/local" help="send message to local (public) channel"/>
+	<command channelName="whisp" cmdPattern="(?:/w|/W|/whisp)" argsPattern="(&quot;[^&quot;]*&quot;|[^&quot;][\p{L}'-]*[^&quot;])\s+(.*)(^(.*)$)*" autoCompletion="true" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.PrivateMessageCommand" name="/whisp" help="Whisp"/>
+	<command channelName="party" cmdPattern="(?:/p|/P|/party)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.PartyMessageCommand" name="/party" help="Send message to party"/>
+	<command channelName="admin" cmdPattern="(?:/a|/A|/admin)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.AdminMessageCommand" name="/admin" help="Send message to admin pipe"/>
+	<command channelName="guild" cmdPattern="(?:/g|/G|/guild)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.GuildMessageCommand" name="/guild" help="Send message to guild"/>
+	<command channelName="trade" cmdPattern="(?:/m|/M|/trade)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.TradeMessageCommand" name="/trade" help="Send message to trade pipe"/>
+	<command channelName="battleground" cmdPattern="(?:/b|/B)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.BattlegroundMessageCommand" name="/battleground" help="Send message to battleground pipe"/>
+	<command channelName="intergame" cmdPattern="(?:/d|/D)" argsPattern="(&quot;[^&quot;]*&quot;|[^&quot;][\p{L}\d'#-]*[^&quot;])\s+(.*)(^(.*)$)*"  autoCompletion="true" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.IntergameMessageCommand" name="/intergame" help="Send message to intergame pipe"/>
+	<command channelName="politic" cmdPattern="(?:/f|/F)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.PoliticMessageCommand" name="/faction" help="Send message to politic pipe"/>
+	<command channelName="public politic" cmdPattern="(?:/f #|/F #)" argsPattern="(.*)"
+			 class="com.ankamagames.wakfu.client.chat.console.command.PoliticMessageCommand" allowNoArg="true" name="/faction" help="Send message to public politic pipe"/>
+
+	<command channelName="defaultCommunity" cmdPattern="(?:/c|/C)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.CommunityMessageCommand" name="/community" help="Send message to the default client community pipe"/>
+	<command channelName="frCommunity" cmdPattern="(?:/cfr|/[cC][fF][rR])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.CommunityMessageCommand" name="/frcommunity" help="Send message to the french-speaking community pipe"/>
+	<command channelName="enCommunity" cmdPattern="(?:/cen|/[cC][eE][nN])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.CommunityMessageCommand" name="/encommunity" help="Send message to the english-speaking community pipe"/>
+	<command channelName="esCommunity" cmdPattern="(?:/ces|/[cC][eE][sS])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.CommunityMessageCommand" name="/escommunity" help="Send message to the spanish-speaking community pipe"/>
+	<command channelName="ptCommunity" cmdPattern="(?:/cpt|/[cC][pP][tT])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.CommunityMessageCommand" name="/ptcommunity" help="Send message to the portuguese-speaking community pipe"/>
+
+	<command channelName="defaultRecruitment" cmdPattern="(?:/r|/R)" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RecruitmentMessageCommand" name="/recruitment" help="Send message to the default client recruitment pipe"/>
+	<command channelName="frRecruitment" cmdPattern="(?:/rfr|/[rR][fF][rR])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RecruitmentMessageCommand" name="/frrecruitment" help="Send message to the french-speaking recruitment pipe"/>
+	<command channelName="enRecruitment" cmdPattern="(?:/ren|/[rR][eE][nN])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RecruitmentMessageCommand" name="/enrecruitment" help="Send message to the english-speaking recruitment pipe"/>
+	<command channelName="esRecruitment" cmdPattern="(?:/res|/[rR][eE][sS])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RecruitmentMessageCommand" name="/esrecruitment" help="Send message to the spanish-speaking recruitment pipe"/>
+	<command channelName="ptRecruitment" cmdPattern="(?:/rpt|/[rR][pP][tT])" argsPattern="(.*)" allowNoArg="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RecruitmentMessageCommand" name="/ptrecruitment" help="Send message to the portuguese-speaking recruitment pipe"/>
+
+	<!-- Friends !-->
+	<command cmdPattern="(?:/af|/addfriend)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.AddFriendCommand" name="/addfriend" help="Add Friend"/>
+	<command cmdPattern="(?:/rf|/removefriend)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RemoveFriendCommand" name="/removefriend" help="Remove Friend"/>
+	<command cmdPattern="(?:/lf|/listfriends)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.ListFriendsCommand" name="/lf" help="Friend List"/>
+
+	<!-- Ignore Lists !-->
+	<command cmdPattern="(?:/ai|/addignore)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.AddIgnoreCommand" name="/addignore" help="Add Ignore"/>
+	<command cmdPattern="(?:/ri|/removeignore)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.RemoveIgnoreCommand" name="/removeignore" help="Remove Ignore"/>
+	<command cmdPattern="(?:/li|/listignores)" argsPattern="" class="com.ankamagames.wakfu.client.chat.console.command.ListIgnoresCommand" name="/li" help="Ignore List"/>
+
+	<!-- Party commands !-->
+	<command cmdPattern="(?:/i|/invite)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.PartyInvitationCommand" name="/invite" help="Invite to Party"/>
+	<command cmdPattern="(?:/fol|/follow)" argsPattern="(.*)" autoCompletion="true"
+			 class="com.ankamagames.wakfu.client.chat.console.command.FollowPlayerCommand" name="/follow" help="Follow a player"/>
+</commandList>

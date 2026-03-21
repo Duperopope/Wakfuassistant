@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (c) 2012. Ankama.com Tous droits réservés.
+  -->
+
+<actions>
+	<action type="setProperty" name="displayTerritories" value="false" version="11"/>
+	<action type="removeProperty" name="charactersList" version="12"/>
+	<action type="removeProperty" name="inlineChat" version="13"/>
+	<action type="removeProperty" name="LODLevel" version="14"/>
+	<action type="removeProperty" name="FightLODLevel" version="14"/>
+	<action type="removeProperty" name="tipsActivated" version="15"/>
+	<action type="removeProperty" name="UIScale" version="16"/>
+	<action type="removeProperty" name="chatTextFontSize" version="16"/>
+	<action type="removeProperty" name="chatFade" version="16"/>
+	<action type="removeProperty" name="titleColorDisplay" version="17" store="DEFAULT_PREFERENCE_STORE"/>
+	<action type="removePropertyPattern" pattern="[^.]*\.[^.]*\.x" version="18" store="CHARACTER_PREFERENCE_STORE"/>
+	<action type="removePropertyPattern" pattern="[^.]*\.[^.]*\.y" version="18" store="CHARACTER_PREFERENCE_STORE"/>
+	<action type="removePropertyPattern" pattern="[^.]*\.[^.]*\.width" version="18" store="CHARACTER_PREFERENCE_STORE"/>
+	<action type="removePropertyPattern" pattern="[^.]*\.[^.]*\.height" version="18" store="CHARACTER_PREFERENCE_STORE"/>
+	<action type="removePropertyPattern" pattern="stickData[^.]*" version="18" store="CHARACTER_PREFERENCE_STORE"/>
+	<action type="renameProperty" name="displayParallax" newName="semiTacticalDisplayParallax" version="19"/>
+	<action type="renameProperty" name="displayExternalCells" newName="semiTacticalDisplayExternalCells" version="19"/>
+	<action type="removeProperty" name="spellBarCompactMode" version="20"/>
+	<action type="removeProperty" name="lastServerId" version="21"/>
+	<action type="removeProperty" name="displayServersWithoutCharacters" version="22"/>
+	<action type="removeProperty" name="displayUnavailableServers" version="22"/>
+</actions>

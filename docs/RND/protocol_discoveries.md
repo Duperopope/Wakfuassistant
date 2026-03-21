@@ -239,3 +239,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - ezW() retourne le blob mgi
 - 13668 PAS dans cdV.java (40 cases) -> handler dans un autre fichier
 - Recherche en cours du handler qui deserialise mgi
+
+## HANDLERS RESEAU (2026-03-21 19:20)
+- cdV.java: 40 cases (combat, effets, monde)
+- cdl.java: 24 cases (inventaire: csn=12125, csB, csm, cso, csr, css...)
+- MANQUANT: cru(13668), coR(13928) = handlers HDV/equipement non trouves
+- coS = offre HDV: mdw(byte type), mdx(long id/Sn), mdy(byte[] payload/aKU)
+- Tous les messages cr* extends Nr (blob brut)
