@@ -210,3 +210,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Formula: 31 + 36*n bytes (n=nombre effets)
 - stateIds en int16 BE dans le payload
 - Sublims confirmees: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
+
+## CRU FORMAT DECODE COMPLET (2026-03-21 19:07)
+- Chaque entry: [stateId:int16BE] [flag:1B] [nameLen:1B] [name:UTF8] [00 00] [itemId:int16BE] [padding] [regionId] [timestamp]
+- stateId a offset -3 avant nameLen
+- flag byte a offset -1 avant nameLen (0x10, 0x28, 0x38 = rang ou type)
+- itemId dans les 2 bytes apres [00 00] post-nom
+- Sublimations confirmees dans CRU: Wakfu Berserk II(6815), Arrogance(8367), Fracass'carapace(5078)
