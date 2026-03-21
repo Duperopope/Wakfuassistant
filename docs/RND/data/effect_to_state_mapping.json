@@ -1,0 +1,5177 @@
+[
+  {
+    "EffectId": 65964,
+    "StateId": 1284,
+    "Rang": 0,
+    "ItemId": 12197,
+    "ItemType": 103,
+    "ItemTitle": "Makabrano Ksion",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 67259,
+    "StateId": 1348,
+    "Rang": 1,
+    "ItemId": 13574,
+    "ItemType": 103,
+    "ItemTitle": "Ilalano",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 68727,
+    "StateId": 1354,
+    "Rang": 1,
+    "ItemId": 13946,
+    "ItemType": 134,
+    "ItemTitle": "Masque de l'amour",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 241072,
+    "StateId": 5082,
+    "Rang": 1,
+    "ItemId": 14186,
+    "ItemType": 812,
+    "ItemTitle": "Robuste",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 71359,
+    "StateId": 1478,
+    "Rang": 1,
+    "ItemId": 14499,
+    "ItemType": 647,
+    "ItemTitle": "Costume de Sorcière",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 71363,
+    "StateId": 1480,
+    "Rang": 1,
+    "ItemId": 14501,
+    "ItemType": 647,
+    "ItemTitle": "Costume de Jacko",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 71367,
+    "StateId": 1482,
+    "Rang": 1,
+    "ItemId": 14503,
+    "ItemType": 647,
+    "ItemTitle": "Costume de Goule",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 80578,
+    "StateId": 1583,
+    "Rang": 1,
+    "ItemId": 15001,
+    "ItemType": 119,
+    "ItemTitle": "Les Viddhartatanes",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 80579,
+    "StateId": 1583,
+    "Rang": 1,
+    "ItemId": 15002,
+    "ItemType": 119,
+    "ItemTitle": "Bottes de Jokers",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 80583,
+    "StateId": 1583,
+    "Rang": 1,
+    "ItemId": 15003,
+    "ItemType": 119,
+    "ItemTitle": "Bottes d'Orky",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 80593,
+    "StateId": 1583,
+    "Rang": 1,
+    "ItemId": 15004,
+    "ItemType": 119,
+    "ItemTitle": "Bottes régressantes",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137686,
+    "StateId": 1608,
+    "Rang": 1,
+    "ItemId": 15257,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Iop",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137688,
+    "StateId": 1609,
+    "Rang": 1,
+    "ItemId": 15258,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Crâ",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137683,
+    "StateId": 1610,
+    "Rang": 1,
+    "ItemId": 15260,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Sacrieur",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137692,
+    "StateId": 1611,
+    "Rang": 1,
+    "ItemId": 15261,
+    "ItemType": 646,
+    "ItemTitle": "Emblème d'Ecaflip",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137691,
+    "StateId": 1612,
+    "Rang": 1,
+    "ItemId": 15262,
+    "ItemType": 646,
+    "ItemTitle": "Emblème d'Eniripsa",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137682,
+    "StateId": 1613,
+    "Rang": 1,
+    "ItemId": 15263,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Sadida",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137679,
+    "StateId": 1614,
+    "Rang": 1,
+    "ItemId": 15264,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Xelor",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137690,
+    "StateId": 1615,
+    "Rang": 1,
+    "ItemId": 15265,
+    "ItemType": 646,
+    "ItemTitle": "Emblème d'Enutrof",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137684,
+    "StateId": 1616,
+    "Rang": 1,
+    "ItemId": 15266,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Roublard",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137685,
+    "StateId": 1617,
+    "Rang": 1,
+    "ItemId": 15267,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Pandawa",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137687,
+    "StateId": 1618,
+    "Rang": 1,
+    "ItemId": 15268,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Féca",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137689,
+    "StateId": 1619,
+    "Rang": 1,
+    "ItemId": 15269,
+    "ItemType": 646,
+    "ItemTitle": "Emblème d'Osamodas",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137680,
+    "StateId": 1620,
+    "Rang": 1,
+    "ItemId": 15270,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Steamer",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137681,
+    "StateId": 1621,
+    "Rang": 1,
+    "ItemId": 15271,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Sram",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 95928,
+    "StateId": 1973,
+    "Rang": 1,
+    "ItemId": 17074,
+    "ItemType": 647,
+    "ItemTitle": "Costume de Wabbit",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 127339,
+    "StateId": 2064,
+    "Rang": 1,
+    "ItemId": 17498,
+    "ItemType": 646,
+    "ItemTitle": "Insigne des Mérydes",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233623,
+    "StateId": 4960,
+    "Rang": 1,
+    "ItemId": 17657,
+    "ItemType": 223,
+    "ItemTitle": "Claymore de Fhenris",
+    "EffectGroup": "useEffects"
+  },
+  {
+    "EffectId": 233624,
+    "StateId": 4960,
+    "Rang": 1,
+    "ItemId": 17657,
+    "ItemType": 223,
+    "ItemTitle": "Claymore de Fhenris",
+    "EffectGroup": "useEffects"
+  },
+  {
+    "EffectId": 128134,
+    "StateId": 2570,
+    "Rang": 10,
+    "ItemId": 18088,
+    "ItemType": 132,
+    "ItemTitle": "Peau d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233549,
+    "StateId": 2514,
+    "Rang": 20,
+    "ItemId": 18089,
+    "ItemType": 132,
+    "ItemTitle": "Cape Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128149,
+    "StateId": 2572,
+    "Rang": 3,
+    "ItemId": 18090,
+    "ItemType": 136,
+    "ItemTitle": "Torse d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128150,
+    "StateId": 2513,
+    "Rang": 3,
+    "ItemId": 18090,
+    "ItemType": 136,
+    "ItemTitle": "Torse d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 136627,
+    "StateId": 2636,
+    "Rang": 10,
+    "ItemId": 18091,
+    "ItemType": 136,
+    "ItemTitle": "Plastron Tourmenté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233573,
+    "StateId": 2514,
+    "Rang": 12,
+    "ItemId": 18094,
+    "ItemType": 133,
+    "ItemTitle": "Lien d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233444,
+    "StateId": 2571,
+    "Rang": 20,
+    "ItemId": 18095,
+    "ItemType": 133,
+    "ItemTitle": "Ceinture Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233445,
+    "StateId": 2515,
+    "Rang": 12,
+    "ItemId": 18095,
+    "ItemType": 133,
+    "ItemTitle": "Ceinture Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128135,
+    "StateId": 2512,
+    "Rang": 20,
+    "ItemId": 18098,
+    "ItemType": 138,
+    "ItemTitle": "Pics d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233486,
+    "StateId": 2505,
+    "Rang": 30,
+    "ItemId": 18099,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128155,
+    "StateId": 2570,
+    "Rang": 20,
+    "ItemId": 18220,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128156,
+    "StateId": 2413,
+    "Rang": 12,
+    "ItemId": 18220,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233511,
+    "StateId": 2505,
+    "Rang": 25,
+    "ItemId": 18221,
+    "ItemType": 134,
+    "ItemTitle": "Vision d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128159,
+    "StateId": 2512,
+    "Rang": 35,
+    "ItemId": 18222,
+    "ItemType": 134,
+    "ItemTitle": "Casque Tourmenté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 137678,
+    "StateId": 3233,
+    "Rang": 1,
+    "ItemId": 18432,
+    "ItemType": 646,
+    "ItemTitle": "Emblème du Zobal",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128166,
+    "StateId": 2573,
+    "Rang": 2,
+    "ItemId": 18458,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128167,
+    "StateId": 2411,
+    "Rang": 2,
+    "ItemId": 18458,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128168,
+    "StateId": 2574,
+    "Rang": 4,
+    "ItemId": 18458,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233431,
+    "StateId": 2512,
+    "Rang": 30,
+    "ItemId": 18459,
+    "ItemType": 134,
+    "ItemTitle": "Casque de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 181071,
+    "StateId": 2514,
+    "Rang": 24,
+    "ItemId": 18460,
+    "ItemType": 132,
+    "ItemTitle": "Capuche de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233459,
+    "StateId": 2505,
+    "Rang": 30,
+    "ItemId": 18461,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128164,
+    "StateId": 2571,
+    "Rang": 15,
+    "ItemId": 18462,
+    "ItemType": 119,
+    "ItemTitle": "Sabots de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 128165,
+    "StateId": 2515,
+    "Rang": 9,
+    "ItemId": 18462,
+    "ItemType": 119,
+    "ItemTitle": "Sabots de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 114956,
+    "StateId": 2848,
+    "Rang": 1,
+    "ItemId": 18608,
+    "ItemType": 647,
+    "ItemTitle": "Costume du Waterfestival",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 115907,
+    "StateId": 2931,
+    "Rang": 1,
+    "ItemId": 18615,
+    "ItemType": 647,
+    "ItemTitle": "Costume de Passage",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 115910,
+    "StateId": 2932,
+    "Rang": 1,
+    "ItemId": 18616,
+    "ItemType": 647,
+    "ItemTitle": "Costume d'Adale",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 149228,
+    "StateId": 3416,
+    "Rang": 1,
+    "ItemId": 19146,
+    "ItemType": 115,
+    "ItemTitle": "Aiguille d'Outre-Temps",
+    "EffectGroup": "useEffects"
+  },
+  {
+    "EffectId": 149229,
+    "StateId": 3416,
+    "Rang": 1,
+    "ItemId": 19146,
+    "ItemType": 115,
+    "ItemTitle": "Aiguille d'Outre-Temps",
+    "EffectGroup": "useEffects"
+  },
+  {
+    "EffectId": 187534,
+    "StateId": 4570,
+    "Rang": 1,
+    "ItemId": 20720,
+    "ItemType": 646,
+    "ItemTitle": "Dofus Prismatique",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212752,
+    "StateId": 2512,
+    "Rang": 30,
+    "ItemId": 23209,
+    "ItemType": 134,
+    "ItemTitle": "Casque de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233594,
+    "StateId": 2571,
+    "Rang": 15,
+    "ItemId": 23210,
+    "ItemType": 119,
+    "ItemTitle": "Sabots de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233595,
+    "StateId": 2515,
+    "Rang": 9,
+    "ItemId": 23210,
+    "ItemType": 119,
+    "ItemTitle": "Sabots de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212770,
+    "StateId": 2573,
+    "Rang": 2,
+    "ItemId": 23211,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212771,
+    "StateId": 2411,
+    "Rang": 2,
+    "ItemId": 23211,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212772,
+    "StateId": 2574,
+    "Rang": 4,
+    "ItemId": 23211,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212780,
+    "StateId": 2573,
+    "Rang": 2,
+    "ItemId": 23212,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212781,
+    "StateId": 2411,
+    "Rang": 2,
+    "ItemId": 23212,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212782,
+    "StateId": 2574,
+    "Rang": 4,
+    "ItemId": 23212,
+    "ItemType": 136,
+    "ItemTitle": "Carapace de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233499,
+    "StateId": 2505,
+    "Rang": 35,
+    "ItemId": 23213,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212804,
+    "StateId": 2505,
+    "Rang": 25,
+    "ItemId": 23214,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212814,
+    "StateId": 2636,
+    "Rang": 10,
+    "ItemId": 23215,
+    "ItemType": 136,
+    "ItemTitle": "Plastron Tourmenté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212834,
+    "StateId": 2505,
+    "Rang": 35,
+    "ItemId": 23217,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233471,
+    "StateId": 2505,
+    "Rang": 30,
+    "ItemId": 23218,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes de Victus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212854,
+    "StateId": 2570,
+    "Rang": 20,
+    "ItemId": 23219,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212855,
+    "StateId": 2413,
+    "Rang": 12,
+    "ItemId": 23219,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Tourmentées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212865,
+    "StateId": 2514,
+    "Rang": 16,
+    "ItemId": 23220,
+    "ItemType": 132,
+    "ItemTitle": "Cape Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212874,
+    "StateId": 2512,
+    "Rang": 35,
+    "ItemId": 23221,
+    "ItemType": 134,
+    "ItemTitle": "Casque Tourmenté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212883,
+    "StateId": 2571,
+    "Rang": 20,
+    "ItemId": 23222,
+    "ItemType": 133,
+    "ItemTitle": "Ceinture Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212884,
+    "StateId": 2515,
+    "Rang": 12,
+    "ItemId": 23222,
+    "ItemType": 133,
+    "ItemTitle": "Ceinture Tourmentée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212903,
+    "StateId": 2514,
+    "Rang": 16,
+    "ItemId": 23224,
+    "ItemType": 133,
+    "ItemTitle": "Lien d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233616,
+    "StateId": 2512,
+    "Rang": 20,
+    "ItemId": 23228,
+    "ItemType": 138,
+    "ItemTitle": "Pics d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212950,
+    "StateId": 2572,
+    "Rang": 3,
+    "ItemId": 23230,
+    "ItemType": 136,
+    "ItemTitle": "Torse d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212951,
+    "StateId": 2513,
+    "Rang": 3,
+    "ItemId": 23230,
+    "ItemType": 136,
+    "ItemTitle": "Torse d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 212961,
+    "StateId": 2505,
+    "Rang": 30,
+    "ItemId": 23231,
+    "ItemType": 134,
+    "ItemTitle": "Vision d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 233522,
+    "StateId": 2505,
+    "Rang": 20,
+    "ItemId": 23232,
+    "ItemType": 134,
+    "ItemTitle": "Vision d'Ocushus",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 240718,
+    "StateId": 2505,
+    "Rang": 35,
+    "ItemId": 23977,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Oubliées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 240717,
+    "StateId": 2505,
+    "Rang": 40,
+    "ItemId": 23978,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Oubliées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 240715,
+    "StateId": 2514,
+    "Rang": 60,
+    "ItemId": 23991,
+    "ItemType": 132,
+    "ItemTitle": "Cape Oubliée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 240716,
+    "StateId": 2514,
+    "Rang": 80,
+    "ItemId": 23992,
+    "ItemType": 132,
+    "ItemTitle": "Cape Oubliée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238133,
+    "StateId": 5073,
+    "Rang": 1,
+    "ItemId": 24130,
+    "ItemType": 812,
+    "ItemTitle": "Inflexibilité",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238142,
+    "StateId": 5074,
+    "Rang": 1,
+    "ItemId": 24131,
+    "ItemType": 812,
+    "ItemTitle": "Constance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238143,
+    "StateId": 5077,
+    "Rang": 1,
+    "ItemId": 24132,
+    "ItemType": 812,
+    "ItemTitle": "Dénouement",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238144,
+    "StateId": 5076,
+    "Rang": 1,
+    "ItemId": 24133,
+    "ItemType": 812,
+    "ItemTitle": "Précision chirurgicale",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238145,
+    "StateId": 5075,
+    "Rang": 1,
+    "ItemId": 24134,
+    "ItemType": 812,
+    "ItemTitle": "Mesure",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238146,
+    "StateId": 5078,
+    "Rang": 1,
+    "ItemId": 24135,
+    "ItemType": 812,
+    "ItemTitle": "Fracass'carapace",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238147,
+    "StateId": 5079,
+    "Rang": 1,
+    "ItemId": 24136,
+    "ItemType": 812,
+    "ItemTitle": "Alternance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238148,
+    "StateId": 5080,
+    "Rang": 1,
+    "ItemId": 24137,
+    "ItemType": 812,
+    "ItemTitle": "Confiance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 238149,
+    "StateId": 5081,
+    "Rang": 1,
+    "ItemId": 24138,
+    "ItemType": 812,
+    "ItemTitle": "Brasero",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260360,
+    "StateId": 5443,
+    "Rang": 1,
+    "ItemId": 25793,
+    "ItemType": 812,
+    "ItemTitle": "Santé de fer",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260361,
+    "StateId": 5444,
+    "Rang": 1,
+    "ItemId": 25794,
+    "ItemType": 812,
+    "ItemTitle": "Science du placement",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260363,
+    "StateId": 5445,
+    "Rang": 1,
+    "ItemId": 25795,
+    "ItemType": 812,
+    "ItemTitle": "Anatomie",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260364,
+    "StateId": 5446,
+    "Rang": 1,
+    "ItemId": 25796,
+    "ItemType": 812,
+    "ItemTitle": "Brutalité",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260365,
+    "StateId": 5448,
+    "Rang": 1,
+    "ItemId": 25797,
+    "ItemType": 812,
+    "ItemTitle": "Force Herculéenne",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260366,
+    "StateId": 5174,
+    "Rang": 1,
+    "ItemId": 25798,
+    "ItemType": 812,
+    "ItemTitle": "Alternance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260367,
+    "StateId": 5250,
+    "Rang": 1,
+    "ItemId": 25799,
+    "ItemType": 812,
+    "ItemTitle": "Excès",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260368,
+    "StateId": 5252,
+    "Rang": 1,
+    "ItemId": 25800,
+    "ItemType": 812,
+    "ItemTitle": "Sang de la Déchirure",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260369,
+    "StateId": 5453,
+    "Rang": 1,
+    "ItemId": 25801,
+    "ItemType": 812,
+    "ItemTitle": "Garde levée",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 260370,
+    "StateId": 5452,
+    "Rang": 1,
+    "ItemId": 25802,
+    "ItemType": 812,
+    "ItemTitle": "Aura de Flammes",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 271200,
+    "StateId": 751,
+    "Rang": 150,
+    "ItemId": 26497,
+    "ItemType": 110,
+    "ItemTitle": "Epée de Brâkmar",
+    "EffectGroup": "useEffects"
+  },
+  {
+    "EffectId": 325493,
+    "StateId": 5886,
+    "Rang": 1,
+    "ItemId": 26593,
+    "ItemType": 110,
+    "ItemTitle": "Epée Eternelle",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283548,
+    "StateId": 5980,
+    "Rang": 2,
+    "ItemId": 27111,
+    "ItemType": 812,
+    "ItemTitle": "Ruine II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283549,
+    "StateId": 5981,
+    "Rang": 2,
+    "ItemId": 27112,
+    "ItemType": 812,
+    "ItemTitle": "Dévastation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283550,
+    "StateId": 5982,
+    "Rang": 2,
+    "ItemId": 27113,
+    "ItemType": 812,
+    "ItemTitle": "Ravage II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283551,
+    "StateId": 5983,
+    "Rang": 2,
+    "ItemId": 27114,
+    "ItemType": 812,
+    "ItemTitle": "Carnage II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283552,
+    "StateId": 5984,
+    "Rang": 2,
+    "ItemId": 27115,
+    "ItemType": 812,
+    "ItemTitle": "Cicatrisation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283553,
+    "StateId": 5985,
+    "Rang": 2,
+    "ItemId": 27116,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283554,
+    "StateId": 5986,
+    "Rang": 2,
+    "ItemId": 27117,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283555,
+    "StateId": 5987,
+    "Rang": 2,
+    "ItemId": 27118,
+    "ItemType": 812,
+    "ItemTitle": "Détermination II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283556,
+    "StateId": 5988,
+    "Rang": 2,
+    "ItemId": 27119,
+    "ItemType": 812,
+    "ItemTitle": "Ténacité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283557,
+    "StateId": 5989,
+    "Rang": 2,
+    "ItemId": 27120,
+    "ItemType": 812,
+    "ItemTitle": "Solidité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283558,
+    "StateId": 5990,
+    "Rang": 2,
+    "ItemId": 27121,
+    "ItemType": 812,
+    "ItemTitle": "Fermeté II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283559,
+    "StateId": 5991,
+    "Rang": 2,
+    "ItemId": 27122,
+    "ItemType": 812,
+    "ItemTitle": "Légèreté II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283560,
+    "StateId": 5992,
+    "Rang": 2,
+    "ItemId": 27123,
+    "ItemType": 812,
+    "ItemTitle": "Topologie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283561,
+    "StateId": 5993,
+    "Rang": 2,
+    "ItemId": 27124,
+    "ItemType": 812,
+    "ItemTitle": "Réprobation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283564,
+    "StateId": 6042,
+    "Rang": 2,
+    "ItemId": 27125,
+    "ItemType": 812,
+    "ItemTitle": "Stupéfaction II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283565,
+    "StateId": 5994,
+    "Rang": 2,
+    "ItemId": 27126,
+    "ItemType": 812,
+    "ItemTitle": "Frénésie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283566,
+    "StateId": 5999,
+    "Rang": 2,
+    "ItemId": 27127,
+    "ItemType": 812,
+    "ItemTitle": "Dimensionnalité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283567,
+    "StateId": 6000,
+    "Rang": 2,
+    "ItemId": 27128,
+    "ItemType": 812,
+    "ItemTitle": "Théorie de la matière II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283568,
+    "StateId": 6001,
+    "Rang": 2,
+    "ItemId": 27129,
+    "ItemType": 812,
+    "ItemTitle": "Retour PA II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283569,
+    "StateId": 6002,
+    "Rang": 2,
+    "ItemId": 27130,
+    "ItemType": 812,
+    "ItemTitle": "Endurance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283570,
+    "StateId": 6004,
+    "Rang": 2,
+    "ItemId": 27131,
+    "ItemType": 812,
+    "ItemTitle": "Ecailles de lune II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283571,
+    "StateId": 6005,
+    "Rang": 2,
+    "ItemId": 27132,
+    "ItemType": 812,
+    "ItemTitle": "Vélocité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283572,
+    "StateId": 6006,
+    "Rang": 2,
+    "ItemId": 27133,
+    "ItemType": 812,
+    "ItemTitle": "Sauvegarde II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283573,
+    "StateId": 6007,
+    "Rang": 1,
+    "ItemId": 27134,
+    "ItemType": 812,
+    "ItemTitle": "Bonne action",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283574,
+    "StateId": 6008,
+    "Rang": 2,
+    "ItemId": 27135,
+    "ItemType": 812,
+    "ItemTitle": "Vivacité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283575,
+    "StateId": 6009,
+    "Rang": 2,
+    "ItemId": 27136,
+    "ItemType": 812,
+    "ItemTitle": "Critique Berserk II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283576,
+    "StateId": 6010,
+    "Rang": 2,
+    "ItemId": 27137,
+    "ItemType": 812,
+    "ItemTitle": "Visibilité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283577,
+    "StateId": 6011,
+    "Rang": 2,
+    "ItemId": 27138,
+    "ItemType": 812,
+    "ItemTitle": "Ruine cyclique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283578,
+    "StateId": 6012,
+    "Rang": 2,
+    "ItemId": 27139,
+    "ItemType": 812,
+    "ItemTitle": "Tacle Berserk II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283579,
+    "StateId": 6013,
+    "Rang": 2,
+    "ItemId": 27140,
+    "ItemType": 812,
+    "ItemTitle": "Ravage secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283580,
+    "StateId": 6014,
+    "Rang": 2,
+    "ItemId": 27141,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade lente II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283581,
+    "StateId": 6016,
+    "Rang": 2,
+    "ItemId": 27142,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade écartée II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283582,
+    "StateId": 6017,
+    "Rang": 2,
+    "ItemId": 27143,
+    "ItemType": 812,
+    "ItemTitle": "Epines II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283583,
+    "StateId": 6018,
+    "Rang": 2,
+    "ItemId": 27144,
+    "ItemType": 812,
+    "ItemTitle": "Esquive Berserk II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283584,
+    "StateId": 6019,
+    "Rang": 2,
+    "ItemId": 27145,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Distance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283585,
+    "StateId": 6020,
+    "Rang": 2,
+    "ItemId": 27146,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Mêlée II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283586,
+    "StateId": 6021,
+    "Rang": 2,
+    "ItemId": 27147,
+    "ItemType": 812,
+    "ItemTitle": "Persistance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283587,
+    "StateId": 6022,
+    "Rang": 2,
+    "ItemId": 27148,
+    "ItemType": 812,
+    "ItemTitle": "Opiniâtreté II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283588,
+    "StateId": 6023,
+    "Rang": 2,
+    "ItemId": 27149,
+    "ItemType": 812,
+    "ItemTitle": "Aisance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283589,
+    "StateId": 6024,
+    "Rang": 2,
+    "ItemId": 27150,
+    "ItemType": 812,
+    "ItemTitle": "Parade Berserk II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283590,
+    "StateId": 6025,
+    "Rang": 2,
+    "ItemId": 27151,
+    "ItemType": 812,
+    "ItemTitle": "Puits de Vitalité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283591,
+    "StateId": 6026,
+    "Rang": 2,
+    "ItemId": 27152,
+    "ItemType": 812,
+    "ItemTitle": "Influence II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283592,
+    "StateId": 6027,
+    "Rang": 2,
+    "ItemId": 27153,
+    "ItemType": 812,
+    "ItemTitle": "Fureur II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283593,
+    "StateId": 6029,
+    "Rang": 2,
+    "ItemId": 27154,
+    "ItemType": 812,
+    "ItemTitle": "Muraille II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283594,
+    "StateId": 6030,
+    "Rang": 2,
+    "ItemId": 27155,
+    "ItemType": 812,
+    "ItemTitle": "Cyclothymie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283595,
+    "StateId": 6031,
+    "Rang": 2,
+    "ItemId": 27156,
+    "ItemType": 812,
+    "ItemTitle": "Retour PM II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283596,
+    "StateId": 6032,
+    "Rang": 2,
+    "ItemId": 27157,
+    "ItemType": 812,
+    "ItemTitle": "Prospérité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283597,
+    "StateId": 6033,
+    "Rang": 2,
+    "ItemId": 27158,
+    "ItemType": 812,
+    "ItemTitle": "Clameur II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283598,
+    "StateId": 6034,
+    "Rang": 2,
+    "ItemId": 27159,
+    "ItemType": 812,
+    "ItemTitle": "Focalisation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283599,
+    "StateId": 6036,
+    "Rang": 2,
+    "ItemId": 27160,
+    "ItemType": 812,
+    "ItemTitle": "Longueur II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283600,
+    "StateId": 6037,
+    "Rang": 2,
+    "ItemId": 27161,
+    "ItemType": 812,
+    "ItemTitle": "Expert des Parades II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283601,
+    "StateId": 6038,
+    "Rang": 2,
+    "ItemId": 27162,
+    "ItemType": 812,
+    "ItemTitle": "Enveloppe rocheuse II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283602,
+    "StateId": 6039,
+    "Rang": 2,
+    "ItemId": 27163,
+    "ItemType": 812,
+    "ItemTitle": "Influence lente II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 283603,
+    "StateId": 6041,
+    "Rang": 2,
+    "ItemId": 27164,
+    "ItemType": 812,
+    "ItemTitle": "Expert des Coups critiques II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287181,
+    "StateId": 5158,
+    "Rang": 1,
+    "ItemId": 27186,
+    "ItemType": 812,
+    "ItemTitle": "Maniement : Deux mains",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287182,
+    "StateId": 5249,
+    "Rang": 1,
+    "ItemId": 27187,
+    "ItemType": 812,
+    "ItemTitle": "Maniement : Dague",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287183,
+    "StateId": 5248,
+    "Rang": 1,
+    "ItemId": 27188,
+    "ItemType": 812,
+    "ItemTitle": "Maniement : Bouclier",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287184,
+    "StateId": 5370,
+    "Rang": 1,
+    "ItemId": 27189,
+    "ItemType": 812,
+    "ItemTitle": "Pacte Wakfu",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287185,
+    "StateId": 5449,
+    "Rang": 1,
+    "ItemId": 27190,
+    "ItemType": 812,
+    "ItemTitle": "Concentration Elémentaire",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287186,
+    "StateId": 5175,
+    "Rang": 1,
+    "ItemId": 27191,
+    "ItemType": 812,
+    "ItemTitle": "Brise",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287187,
+    "StateId": 5216,
+    "Rang": 1,
+    "ItemId": 27192,
+    "ItemType": 812,
+    "ItemTitle": "Directives",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287188,
+    "StateId": 5253,
+    "Rang": 1,
+    "ItemId": 27193,
+    "ItemType": 812,
+    "ItemTitle": "Wé",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287189,
+    "StateId": 5450,
+    "Rang": 1,
+    "ItemId": 27194,
+    "ItemType": 812,
+    "ItemTitle": "Stasification",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 287190,
+    "StateId": 5976,
+    "Rang": 1,
+    "ItemId": 27195,
+    "ItemType": 812,
+    "ItemTitle": "Arme de Lumière",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 290254,
+    "StateId": 6090,
+    "Rang": 1,
+    "ItemId": 27282,
+    "ItemType": 812,
+    "ItemTitle": "Cicatrisation test (cumul 5)",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291086,
+    "StateId": 2505,
+    "Rang": 50,
+    "ItemId": 27295,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Arides",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291080,
+    "StateId": 2505,
+    "Rang": 50,
+    "ItemId": 27296,
+    "ItemType": 138,
+    "ItemTitle": "Epaulettes Arides",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 373244,
+    "StateId": 2636,
+    "Rang": 5,
+    "ItemId": 27297,
+    "ItemType": 136,
+    "ItemTitle": "Plastron Déshydraté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291072,
+    "StateId": 2636,
+    "Rang": 5,
+    "ItemId": 27298,
+    "ItemType": 136,
+    "ItemTitle": "Plastron Déshydraté",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291054,
+    "StateId": 2570,
+    "Rang": 20,
+    "ItemId": 27301,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Asséchées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291055,
+    "StateId": 2413,
+    "Rang": 20,
+    "ItemId": 27301,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Asséchées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291046,
+    "StateId": 2570,
+    "Rang": 20,
+    "ItemId": 27302,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Asséchées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 291047,
+    "StateId": 2413,
+    "Rang": 20,
+    "ItemId": 27302,
+    "ItemType": 119,
+    "ItemTitle": "Bottes Asséchées",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 298618,
+    "StateId": 6328,
+    "Rang": 2,
+    "ItemId": 27957,
+    "ItemType": 812,
+    "ItemTitle": "Intégrité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 298619,
+    "StateId": 6329,
+    "Rang": 2,
+    "ItemId": 27958,
+    "ItemType": 812,
+    "ItemTitle": "Loup solitaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 298620,
+    "StateId": 6330,
+    "Rang": 2,
+    "ItemId": 27959,
+    "ItemType": 812,
+    "ItemTitle": "Secret de la vie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 298621,
+    "StateId": 6331,
+    "Rang": 2,
+    "ItemId": 27960,
+    "ItemType": 812,
+    "ItemTitle": "Tolérance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309420,
+    "StateId": 6705,
+    "Rang": 1,
+    "ItemId": 28383,
+    "ItemType": 812,
+    "ItemTitle": "Furie",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309421,
+    "StateId": 6706,
+    "Rang": 1,
+    "ItemId": 28384,
+    "ItemType": 812,
+    "ItemTitle": "Furie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309422,
+    "StateId": 6707,
+    "Rang": 1,
+    "ItemId": 28385,
+    "ItemType": 812,
+    "ItemTitle": "Pilier",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309423,
+    "StateId": 6708,
+    "Rang": 1,
+    "ItemId": 28386,
+    "ItemType": 812,
+    "ItemTitle": "Contrôle de l'espace",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309424,
+    "StateId": 6709,
+    "Rang": 1,
+    "ItemId": 28387,
+    "ItemType": 812,
+    "ItemTitle": "Longévité",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309425,
+    "StateId": 6711,
+    "Rang": 1,
+    "ItemId": 28388,
+    "ItemType": 812,
+    "ItemTitle": "Energie ancestrale",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309426,
+    "StateId": 6712,
+    "Rang": 1,
+    "ItemId": 28389,
+    "ItemType": 812,
+    "ItemTitle": "Renaissance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 309427,
+    "StateId": 6714,
+    "Rang": 1,
+    "ItemId": 28390,
+    "ItemType": 812,
+    "ItemTitle": "Paisible",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 311742,
+    "StateId": 6731,
+    "Rang": 1,
+    "ItemId": 28417,
+    "ItemType": 646,
+    "ItemTitle": "Dofus Turquoise",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315573,
+    "StateId": 6811,
+    "Rang": 2,
+    "ItemId": 28798,
+    "ItemType": 812,
+    "ItemTitle": "Arme solide II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315574,
+    "StateId": 6812,
+    "Rang": 2,
+    "ItemId": 28799,
+    "ItemType": 812,
+    "ItemTitle": "Puissance brute II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315575,
+    "StateId": 6813,
+    "Rang": 2,
+    "ItemId": 28800,
+    "ItemType": 812,
+    "ItemTitle": "Retour enflammé II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315576,
+    "StateId": 6814,
+    "Rang": 2,
+    "ItemId": 28801,
+    "ItemType": 812,
+    "ItemTitle": "Influence du Wakfu II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315577,
+    "StateId": 6815,
+    "Rang": 2,
+    "ItemId": 28802,
+    "ItemType": 812,
+    "ItemTitle": "Wakfu Berserk II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315578,
+    "StateId": 6816,
+    "Rang": 2,
+    "ItemId": 28803,
+    "ItemType": 812,
+    "ItemTitle": "Arme empoisonnée II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315579,
+    "StateId": 6817,
+    "Rang": 2,
+    "ItemId": 28804,
+    "ItemType": 812,
+    "ItemTitle": "Vol de Tacle II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315580,
+    "StateId": 6818,
+    "Rang": 2,
+    "ItemId": 28805,
+    "ItemType": 812,
+    "ItemTitle": "Vol d'Esquive II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315581,
+    "StateId": 6819,
+    "Rang": 2,
+    "ItemId": 28806,
+    "ItemType": 812,
+    "ItemTitle": "Contre-attaque II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315582,
+    "StateId": 6821,
+    "Rang": 2,
+    "ItemId": 28807,
+    "ItemType": 812,
+    "ItemTitle": "Expert des armes légères II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315583,
+    "StateId": 6822,
+    "Rang": 2,
+    "ItemId": 28808,
+    "ItemType": 812,
+    "ItemTitle": "Arcanes II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315584,
+    "StateId": 6823,
+    "Rang": 2,
+    "ItemId": 28809,
+    "ItemType": 812,
+    "ItemTitle": "Relations sociales II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315585,
+    "StateId": 6824,
+    "Rang": 2,
+    "ItemId": 28810,
+    "ItemType": 812,
+    "ItemTitle": "Retour vital II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315586,
+    "StateId": 6825,
+    "Rang": 2,
+    "ItemId": 28811,
+    "ItemType": 812,
+    "ItemTitle": "Destruction II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315587,
+    "StateId": 6826,
+    "Rang": 2,
+    "ItemId": 28812,
+    "ItemType": 812,
+    "ItemTitle": "Être sensible II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315588,
+    "StateId": 6827,
+    "Rang": 2,
+    "ItemId": 28813,
+    "ItemType": 812,
+    "ItemTitle": "Longueur d'armure II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315589,
+    "StateId": 6828,
+    "Rang": 2,
+    "ItemId": 28814,
+    "ItemType": 812,
+    "ItemTitle": "Altruisme II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315590,
+    "StateId": 6829,
+    "Rang": 2,
+    "ItemId": 28815,
+    "ItemType": 812,
+    "ItemTitle": "Manie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315591,
+    "StateId": 6830,
+    "Rang": 2,
+    "ItemId": 28816,
+    "ItemType": 812,
+    "ItemTitle": "Nature II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315592,
+    "StateId": 6831,
+    "Rang": 2,
+    "ItemId": 28817,
+    "ItemType": 812,
+    "ItemTitle": "Dernier souffle II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315593,
+    "StateId": 6832,
+    "Rang": 2,
+    "ItemId": 28818,
+    "ItemType": 812,
+    "ItemTitle": "Main forte II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315594,
+    "StateId": 6833,
+    "Rang": 2,
+    "ItemId": 28819,
+    "ItemType": 812,
+    "ItemTitle": "Pied ferme II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315606,
+    "StateId": 5980,
+    "Rang": 1,
+    "ItemId": 28822,
+    "ItemType": 812,
+    "ItemTitle": "Ruine I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315607,
+    "StateId": 5980,
+    "Rang": 3,
+    "ItemId": 28823,
+    "ItemType": 812,
+    "ItemTitle": "Ruine III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315608,
+    "StateId": 5981,
+    "Rang": 1,
+    "ItemId": 28824,
+    "ItemType": 812,
+    "ItemTitle": "Dévastation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315609,
+    "StateId": 5981,
+    "Rang": 3,
+    "ItemId": 28825,
+    "ItemType": 812,
+    "ItemTitle": "Dévastation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315610,
+    "StateId": 5982,
+    "Rang": 1,
+    "ItemId": 28826,
+    "ItemType": 812,
+    "ItemTitle": "Ravage I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315611,
+    "StateId": 5982,
+    "Rang": 3,
+    "ItemId": 28827,
+    "ItemType": 812,
+    "ItemTitle": "Ravage III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315612,
+    "StateId": 5983,
+    "Rang": 1,
+    "ItemId": 28828,
+    "ItemType": 812,
+    "ItemTitle": "Carnage I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315613,
+    "StateId": 5983,
+    "Rang": 3,
+    "ItemId": 28829,
+    "ItemType": 812,
+    "ItemTitle": "Carnage III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315614,
+    "StateId": 5984,
+    "Rang": 1,
+    "ItemId": 28830,
+    "ItemType": 812,
+    "ItemTitle": "Cicatrisation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315615,
+    "StateId": 5984,
+    "Rang": 3,
+    "ItemId": 28831,
+    "ItemType": 812,
+    "ItemTitle": "Cicatrisation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315616,
+    "StateId": 5985,
+    "Rang": 1,
+    "ItemId": 28832,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315617,
+    "StateId": 5985,
+    "Rang": 3,
+    "ItemId": 28833,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315618,
+    "StateId": 5986,
+    "Rang": 1,
+    "ItemId": 28834,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315619,
+    "StateId": 5986,
+    "Rang": 3,
+    "ItemId": 28835,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315620,
+    "StateId": 5990,
+    "Rang": 1,
+    "ItemId": 28836,
+    "ItemType": 812,
+    "ItemTitle": "Fermeté I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315621,
+    "StateId": 5990,
+    "Rang": 3,
+    "ItemId": 28837,
+    "ItemType": 812,
+    "ItemTitle": "Fermeté III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315622,
+    "StateId": 5991,
+    "Rang": 1,
+    "ItemId": 28838,
+    "ItemType": 812,
+    "ItemTitle": "Légèreté I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315623,
+    "StateId": 5991,
+    "Rang": 3,
+    "ItemId": 28839,
+    "ItemType": 812,
+    "ItemTitle": "Légèreté III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315624,
+    "StateId": 5992,
+    "Rang": 1,
+    "ItemId": 28840,
+    "ItemType": 812,
+    "ItemTitle": "Topologie I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315625,
+    "StateId": 5992,
+    "Rang": 3,
+    "ItemId": 28841,
+    "ItemType": 812,
+    "ItemTitle": "Topologie III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315626,
+    "StateId": 6000,
+    "Rang": 1,
+    "ItemId": 28842,
+    "ItemType": 812,
+    "ItemTitle": "Théorie de la matière I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315627,
+    "StateId": 6002,
+    "Rang": 1,
+    "ItemId": 28843,
+    "ItemType": 812,
+    "ItemTitle": "Endurance I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315628,
+    "StateId": 6002,
+    "Rang": 3,
+    "ItemId": 28844,
+    "ItemType": 812,
+    "ItemTitle": "Endurance III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315629,
+    "StateId": 6004,
+    "Rang": 1,
+    "ItemId": 28845,
+    "ItemType": 812,
+    "ItemTitle": "Ecailles de lune I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315630,
+    "StateId": 6004,
+    "Rang": 3,
+    "ItemId": 28846,
+    "ItemType": 812,
+    "ItemTitle": "Ecailles de lune III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315631,
+    "StateId": 6005,
+    "Rang": 1,
+    "ItemId": 28847,
+    "ItemType": 812,
+    "ItemTitle": "Vélocité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315632,
+    "StateId": 6008,
+    "Rang": 1,
+    "ItemId": 28848,
+    "ItemType": 812,
+    "ItemTitle": "Vivacité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315633,
+    "StateId": 6009,
+    "Rang": 1,
+    "ItemId": 28849,
+    "ItemType": 812,
+    "ItemTitle": "Critique Berserk I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315634,
+    "StateId": 6009,
+    "Rang": 3,
+    "ItemId": 28850,
+    "ItemType": 812,
+    "ItemTitle": "Critique Berserk III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315635,
+    "StateId": 6010,
+    "Rang": 1,
+    "ItemId": 28851,
+    "ItemType": 812,
+    "ItemTitle": "Visibilité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315636,
+    "StateId": 6012,
+    "Rang": 1,
+    "ItemId": 28852,
+    "ItemType": 812,
+    "ItemTitle": "Tacle Berserk I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315637,
+    "StateId": 6012,
+    "Rang": 3,
+    "ItemId": 28853,
+    "ItemType": 812,
+    "ItemTitle": "Tacle Berserk III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315638,
+    "StateId": 6016,
+    "Rang": 1,
+    "ItemId": 28854,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade écartée I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315639,
+    "StateId": 6016,
+    "Rang": 3,
+    "ItemId": 28855,
+    "ItemType": 812,
+    "ItemTitle": "Embuscade écartée III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315640,
+    "StateId": 6017,
+    "Rang": 1,
+    "ItemId": 28856,
+    "ItemType": 812,
+    "ItemTitle": "Epines I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315641,
+    "StateId": 6017,
+    "Rang": 3,
+    "ItemId": 28857,
+    "ItemType": 812,
+    "ItemTitle": "Epines III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315642,
+    "StateId": 6018,
+    "Rang": 1,
+    "ItemId": 28858,
+    "ItemType": 812,
+    "ItemTitle": "Esquive Berserk I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315643,
+    "StateId": 6018,
+    "Rang": 3,
+    "ItemId": 28859,
+    "ItemType": 812,
+    "ItemTitle": "Esquive Berserk III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315644,
+    "StateId": 6019,
+    "Rang": 1,
+    "ItemId": 28860,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Distance I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315645,
+    "StateId": 6019,
+    "Rang": 3,
+    "ItemId": 28861,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Distance III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315646,
+    "StateId": 6020,
+    "Rang": 1,
+    "ItemId": 28862,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Mêlée I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315647,
+    "StateId": 6020,
+    "Rang": 3,
+    "ItemId": 28863,
+    "ItemType": 812,
+    "ItemTitle": "Barrière Mêlée III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315648,
+    "StateId": 6022,
+    "Rang": 1,
+    "ItemId": 28864,
+    "ItemType": 812,
+    "ItemTitle": "Opiniâtreté I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315649,
+    "StateId": 6022,
+    "Rang": 3,
+    "ItemId": 28865,
+    "ItemType": 812,
+    "ItemTitle": "Opiniâtreté III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315650,
+    "StateId": 6023,
+    "Rang": 1,
+    "ItemId": 28866,
+    "ItemType": 812,
+    "ItemTitle": "Aisance I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315651,
+    "StateId": 6024,
+    "Rang": 1,
+    "ItemId": 28867,
+    "ItemType": 812,
+    "ItemTitle": "Parade Berserk I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315652,
+    "StateId": 6024,
+    "Rang": 3,
+    "ItemId": 28868,
+    "ItemType": 812,
+    "ItemTitle": "Parade Berserk III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315653,
+    "StateId": 6025,
+    "Rang": 1,
+    "ItemId": 28869,
+    "ItemType": 812,
+    "ItemTitle": "Puits de Vitalité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315654,
+    "StateId": 6025,
+    "Rang": 3,
+    "ItemId": 28870,
+    "ItemType": 812,
+    "ItemTitle": "Puits de Vitalité III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315655,
+    "StateId": 6026,
+    "Rang": 1,
+    "ItemId": 28871,
+    "ItemType": 812,
+    "ItemTitle": "Influence I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315656,
+    "StateId": 6026,
+    "Rang": 3,
+    "ItemId": 28872,
+    "ItemType": 812,
+    "ItemTitle": "Influence III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315657,
+    "StateId": 6029,
+    "Rang": 1,
+    "ItemId": 28873,
+    "ItemType": 812,
+    "ItemTitle": "Muraille I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315658,
+    "StateId": 6029,
+    "Rang": 3,
+    "ItemId": 28874,
+    "ItemType": 812,
+    "ItemTitle": "Muraille III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315659,
+    "StateId": 6030,
+    "Rang": 1,
+    "ItemId": 28875,
+    "ItemType": 812,
+    "ItemTitle": "Cyclothymie I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315660,
+    "StateId": 6032,
+    "Rang": 1,
+    "ItemId": 28876,
+    "ItemType": 812,
+    "ItemTitle": "Prospérité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315661,
+    "StateId": 6032,
+    "Rang": 3,
+    "ItemId": 28877,
+    "ItemType": 812,
+    "ItemTitle": "Prospérité III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315662,
+    "StateId": 6036,
+    "Rang": 1,
+    "ItemId": 28878,
+    "ItemType": 812,
+    "ItemTitle": "Longueur I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315663,
+    "StateId": 6036,
+    "Rang": 3,
+    "ItemId": 28879,
+    "ItemType": 812,
+    "ItemTitle": "Longueur III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315664,
+    "StateId": 6038,
+    "Rang": 1,
+    "ItemId": 28880,
+    "ItemType": 812,
+    "ItemTitle": "Enveloppe rocheuse I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315665,
+    "StateId": 6038,
+    "Rang": 3,
+    "ItemId": 28881,
+    "ItemType": 812,
+    "ItemTitle": "Enveloppe rocheuse III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315666,
+    "StateId": 6039,
+    "Rang": 1,
+    "ItemId": 28882,
+    "ItemType": 812,
+    "ItemTitle": "Influence lente I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315667,
+    "StateId": 6039,
+    "Rang": 3,
+    "ItemId": 28883,
+    "ItemType": 812,
+    "ItemTitle": "Influence lente III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315668,
+    "StateId": 6041,
+    "Rang": 1,
+    "ItemId": 28884,
+    "ItemType": 812,
+    "ItemTitle": "Expert des Coups critiques I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315669,
+    "StateId": 6041,
+    "Rang": 3,
+    "ItemId": 28885,
+    "ItemType": 812,
+    "ItemTitle": "Expert des Coups critiques III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315672,
+    "StateId": 6042,
+    "Rang": 1,
+    "ItemId": 28886,
+    "ItemType": 812,
+    "ItemTitle": "Stupéfaction I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315673,
+    "StateId": 6042,
+    "Rang": 3,
+    "ItemId": 28887,
+    "ItemType": 812,
+    "ItemTitle": "Stupéfaction III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315674,
+    "StateId": 6328,
+    "Rang": 1,
+    "ItemId": 28888,
+    "ItemType": 812,
+    "ItemTitle": "Intégrité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315675,
+    "StateId": 6329,
+    "Rang": 1,
+    "ItemId": 28889,
+    "ItemType": 812,
+    "ItemTitle": "Loup solitaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315676,
+    "StateId": 6329,
+    "Rang": 3,
+    "ItemId": 28890,
+    "ItemType": 812,
+    "ItemTitle": "Loup solitaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315677,
+    "StateId": 6331,
+    "Rang": 1,
+    "ItemId": 28891,
+    "ItemType": 812,
+    "ItemTitle": "Tolérance I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315678,
+    "StateId": 6331,
+    "Rang": 3,
+    "ItemId": 28892,
+    "ItemType": 812,
+    "ItemTitle": "Tolérance III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315679,
+    "StateId": 6811,
+    "Rang": 1,
+    "ItemId": 28893,
+    "ItemType": 812,
+    "ItemTitle": "Arme solide I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315680,
+    "StateId": 6812,
+    "Rang": 1,
+    "ItemId": 28894,
+    "ItemType": 812,
+    "ItemTitle": "Puissance brute I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315681,
+    "StateId": 6812,
+    "Rang": 3,
+    "ItemId": 28895,
+    "ItemType": 812,
+    "ItemTitle": "Puissance brute III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315682,
+    "StateId": 6813,
+    "Rang": 1,
+    "ItemId": 28896,
+    "ItemType": 812,
+    "ItemTitle": "Retour enflammé I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315683,
+    "StateId": 6814,
+    "Rang": 1,
+    "ItemId": 28897,
+    "ItemType": 812,
+    "ItemTitle": "Influence du Wakfu I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315684,
+    "StateId": 6815,
+    "Rang": 1,
+    "ItemId": 28898,
+    "ItemType": 812,
+    "ItemTitle": "Wakfu Berserk I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315685,
+    "StateId": 6815,
+    "Rang": 3,
+    "ItemId": 28899,
+    "ItemType": 812,
+    "ItemTitle": "Wakfu Berserk III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315686,
+    "StateId": 6816,
+    "Rang": 1,
+    "ItemId": 28900,
+    "ItemType": 812,
+    "ItemTitle": "Arme empoisonnée I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315687,
+    "StateId": 6816,
+    "Rang": 3,
+    "ItemId": 28901,
+    "ItemType": 812,
+    "ItemTitle": "Arme empoisonnée III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315688,
+    "StateId": 6817,
+    "Rang": 1,
+    "ItemId": 28902,
+    "ItemType": 812,
+    "ItemTitle": "Vol de Tacle I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315689,
+    "StateId": 6817,
+    "Rang": 3,
+    "ItemId": 28903,
+    "ItemType": 812,
+    "ItemTitle": "Vol de Tacle III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315690,
+    "StateId": 6818,
+    "Rang": 1,
+    "ItemId": 28904,
+    "ItemType": 812,
+    "ItemTitle": "Vol d'Esquive I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315691,
+    "StateId": 6818,
+    "Rang": 3,
+    "ItemId": 28905,
+    "ItemType": 812,
+    "ItemTitle": "Vol d'Esquive III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315692,
+    "StateId": 6819,
+    "Rang": 1,
+    "ItemId": 28906,
+    "ItemType": 812,
+    "ItemTitle": "Contre-attaque I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315693,
+    "StateId": 6819,
+    "Rang": 3,
+    "ItemId": 28907,
+    "ItemType": 812,
+    "ItemTitle": "Contre-attaque III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315694,
+    "StateId": 6821,
+    "Rang": 1,
+    "ItemId": 28908,
+    "ItemType": 812,
+    "ItemTitle": "Expert des armes légères I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315695,
+    "StateId": 6821,
+    "Rang": 3,
+    "ItemId": 28909,
+    "ItemType": 812,
+    "ItemTitle": "Expert des armes légères III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315696,
+    "StateId": 6822,
+    "Rang": 1,
+    "ItemId": 28910,
+    "ItemType": 812,
+    "ItemTitle": "Arcanes I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315697,
+    "StateId": 6822,
+    "Rang": 3,
+    "ItemId": 28911,
+    "ItemType": 812,
+    "ItemTitle": "Arcanes III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315698,
+    "StateId": 6823,
+    "Rang": 1,
+    "ItemId": 28912,
+    "ItemType": 812,
+    "ItemTitle": "Relations sociales I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315699,
+    "StateId": 6823,
+    "Rang": 3,
+    "ItemId": 28913,
+    "ItemType": 812,
+    "ItemTitle": "Relations sociales III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315700,
+    "StateId": 6824,
+    "Rang": 1,
+    "ItemId": 28914,
+    "ItemType": 812,
+    "ItemTitle": "Retour vital I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315701,
+    "StateId": 6825,
+    "Rang": 1,
+    "ItemId": 28915,
+    "ItemType": 812,
+    "ItemTitle": "Destruction I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315702,
+    "StateId": 6825,
+    "Rang": 3,
+    "ItemId": 28916,
+    "ItemType": 812,
+    "ItemTitle": "Destruction III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315703,
+    "StateId": 6826,
+    "Rang": 1,
+    "ItemId": 28917,
+    "ItemType": 812,
+    "ItemTitle": "Être sensible I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315704,
+    "StateId": 6826,
+    "Rang": 3,
+    "ItemId": 28918,
+    "ItemType": 812,
+    "ItemTitle": "Être sensible III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315705,
+    "StateId": 6827,
+    "Rang": 1,
+    "ItemId": 28919,
+    "ItemType": 812,
+    "ItemTitle": "Longueur d'armure I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315706,
+    "StateId": 6827,
+    "Rang": 3,
+    "ItemId": 28920,
+    "ItemType": 812,
+    "ItemTitle": "Longueur d'armure III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315707,
+    "StateId": 6828,
+    "Rang": 1,
+    "ItemId": 28921,
+    "ItemType": 812,
+    "ItemTitle": "Altruisme I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315708,
+    "StateId": 6828,
+    "Rang": 3,
+    "ItemId": 28922,
+    "ItemType": 812,
+    "ItemTitle": "Altruisme III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315709,
+    "StateId": 6829,
+    "Rang": 1,
+    "ItemId": 28923,
+    "ItemType": 812,
+    "ItemTitle": "Manie I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315710,
+    "StateId": 6829,
+    "Rang": 3,
+    "ItemId": 28924,
+    "ItemType": 812,
+    "ItemTitle": "Manie III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315711,
+    "StateId": 6830,
+    "Rang": 1,
+    "ItemId": 28925,
+    "ItemType": 812,
+    "ItemTitle": "Nature I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315712,
+    "StateId": 6830,
+    "Rang": 3,
+    "ItemId": 28926,
+    "ItemType": 812,
+    "ItemTitle": "Nature III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315713,
+    "StateId": 6831,
+    "Rang": 1,
+    "ItemId": 28927,
+    "ItemType": 812,
+    "ItemTitle": "Dernier souffle I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315714,
+    "StateId": 6831,
+    "Rang": 3,
+    "ItemId": 28928,
+    "ItemType": 812,
+    "ItemTitle": "Dernier souffle III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315715,
+    "StateId": 6832,
+    "Rang": 1,
+    "ItemId": 28929,
+    "ItemType": 812,
+    "ItemTitle": "Main forte I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315716,
+    "StateId": 6832,
+    "Rang": 3,
+    "ItemId": 28930,
+    "ItemType": 812,
+    "ItemTitle": "Main forte III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315717,
+    "StateId": 6833,
+    "Rang": 1,
+    "ItemId": 28931,
+    "ItemType": 812,
+    "ItemTitle": "Pied ferme I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315718,
+    "StateId": 6833,
+    "Rang": 3,
+    "ItemId": 28932,
+    "ItemType": 812,
+    "ItemTitle": "Pied ferme III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 315723,
+    "StateId": 6834,
+    "Rang": 2,
+    "ItemId": 28933,
+    "ItemType": 812,
+    "ItemTitle": "Volte-face II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 316057,
+    "StateId": 6842,
+    "Rang": 1,
+    "ItemId": 28942,
+    "ItemType": 812,
+    "ItemTitle": "Courage I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 316058,
+    "StateId": 6842,
+    "Rang": 2,
+    "ItemId": 28943,
+    "ItemType": 812,
+    "ItemTitle": "Courage II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 316059,
+    "StateId": 6842,
+    "Rang": 3,
+    "ItemId": 28944,
+    "ItemType": 812,
+    "ItemTitle": "Courage III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317921,
+    "StateId": 6926,
+    "Rang": 1,
+    "ItemId": 28988,
+    "ItemType": 812,
+    "ItemTitle": "Revigoration I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317922,
+    "StateId": 6926,
+    "Rang": 2,
+    "ItemId": 28989,
+    "ItemType": 812,
+    "ItemTitle": "Revigoration II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317923,
+    "StateId": 6926,
+    "Rang": 3,
+    "ItemId": 28990,
+    "ItemType": 812,
+    "ItemTitle": "Revigoration III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317924,
+    "StateId": 6927,
+    "Rang": 1,
+    "ItemId": 28991,
+    "ItemType": 812,
+    "ItemTitle": "Précaution I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317925,
+    "StateId": 6927,
+    "Rang": 2,
+    "ItemId": 28992,
+    "ItemType": 812,
+    "ItemTitle": "Précaution II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317926,
+    "StateId": 6927,
+    "Rang": 3,
+    "ItemId": 28993,
+    "ItemType": 812,
+    "ItemTitle": "Précaution III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317927,
+    "StateId": 6928,
+    "Rang": 1,
+    "ItemId": 28994,
+    "ItemType": 812,
+    "ItemTitle": "Critique technique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317928,
+    "StateId": 6928,
+    "Rang": 2,
+    "ItemId": 28995,
+    "ItemType": 812,
+    "ItemTitle": "Critique technique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317929,
+    "StateId": 6929,
+    "Rang": 1,
+    "ItemId": 28996,
+    "ItemType": 812,
+    "ItemTitle": "Parade offensive I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317930,
+    "StateId": 6929,
+    "Rang": 2,
+    "ItemId": 28997,
+    "ItemType": 812,
+    "ItemTitle": "Parade offensive II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317931,
+    "StateId": 6930,
+    "Rang": 1,
+    "ItemId": 28998,
+    "ItemType": 812,
+    "ItemTitle": "Critique tactique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317932,
+    "StateId": 6930,
+    "Rang": 2,
+    "ItemId": 28999,
+    "ItemType": 812,
+    "ItemTitle": "Critique tactique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317933,
+    "StateId": 6930,
+    "Rang": 3,
+    "ItemId": 29000,
+    "ItemType": 812,
+    "ItemTitle": "Critique tactique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317934,
+    "StateId": 6931,
+    "Rang": 1,
+    "ItemId": 29001,
+    "ItemType": 812,
+    "ItemTitle": "Neutralité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317935,
+    "StateId": 6931,
+    "Rang": 2,
+    "ItemId": 29002,
+    "ItemType": 812,
+    "ItemTitle": "Neutralité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317936,
+    "StateId": 6931,
+    "Rang": 3,
+    "ItemId": 29003,
+    "ItemType": 812,
+    "ItemTitle": "Neutralité III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317937,
+    "StateId": 6932,
+    "Rang": 1,
+    "ItemId": 29004,
+    "ItemType": 812,
+    "ItemTitle": "Abandon I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317938,
+    "StateId": 6932,
+    "Rang": 2,
+    "ItemId": 29005,
+    "ItemType": 812,
+    "ItemTitle": "Abandon II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317939,
+    "StateId": 6932,
+    "Rang": 2,
+    "ItemId": 29006,
+    "ItemType": 812,
+    "ItemTitle": "Abandon III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317940,
+    "StateId": 6933,
+    "Rang": 1,
+    "ItemId": 29007,
+    "ItemType": 812,
+    "ItemTitle": "Prétention I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317941,
+    "StateId": 6933,
+    "Rang": 2,
+    "ItemId": 29008,
+    "ItemType": 812,
+    "ItemTitle": "Prétention II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 317942,
+    "StateId": 6933,
+    "Rang": 3,
+    "ItemId": 29009,
+    "ItemType": 812,
+    "ItemTitle": "Prétention III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323133,
+    "StateId": 7069,
+    "Rang": 1,
+    "ItemId": 29420,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'impur I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323139,
+    "StateId": 7070,
+    "Rang": 1,
+    "ItemId": 29445,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'impur II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323140,
+    "StateId": 7071,
+    "Rang": 1,
+    "ItemId": 29446,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'impur III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 369970,
+    "StateId": 7072,
+    "Rang": 1,
+    "ItemId": 29447,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'impur IV",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323142,
+    "StateId": 7073,
+    "Rang": 1,
+    "ItemId": 29448,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'impur V",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 325487,
+    "StateId": 7106,
+    "Rang": 1,
+    "ItemId": 29456,
+    "ItemType": 646,
+    "ItemTitle": "Dofushu",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323905,
+    "StateId": 7077,
+    "Rang": 1,
+    "ItemId": 29495,
+    "ItemType": 812,
+    "ItemTitle": "Armure lourde I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323906,
+    "StateId": 7077,
+    "Rang": 2,
+    "ItemId": 29496,
+    "ItemType": 812,
+    "ItemTitle": "Armure lourde II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323907,
+    "StateId": 7076,
+    "Rang": 1,
+    "ItemId": 29497,
+    "ItemType": 812,
+    "ItemTitle": "Carapace I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323908,
+    "StateId": 7076,
+    "Rang": 2,
+    "ItemId": 29498,
+    "ItemType": 812,
+    "ItemTitle": "Carapace II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323909,
+    "StateId": 7075,
+    "Rang": 1,
+    "ItemId": 29499,
+    "ItemType": 812,
+    "ItemTitle": "Combat rapproché I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323910,
+    "StateId": 7075,
+    "Rang": 2,
+    "ItemId": 29500,
+    "ItemType": 812,
+    "ItemTitle": "Combat rapproché II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323914,
+    "StateId": 7079,
+    "Rang": 1,
+    "ItemId": 29504,
+    "ItemType": 812,
+    "ItemTitle": "Préparation critique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323915,
+    "StateId": 7079,
+    "Rang": 2,
+    "ItemId": 29505,
+    "ItemType": 812,
+    "ItemTitle": "Préparation critique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323916,
+    "StateId": 7079,
+    "Rang": 3,
+    "ItemId": 29506,
+    "ItemType": 812,
+    "ItemTitle": "Préparation critique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323917,
+    "StateId": 7078,
+    "Rang": 1,
+    "ItemId": 29507,
+    "ItemType": 812,
+    "ItemTitle": "Temporisation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323918,
+    "StateId": 7078,
+    "Rang": 2,
+    "ItemId": 29508,
+    "ItemType": 812,
+    "ItemTitle": "Temporisation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323919,
+    "StateId": 7078,
+    "Rang": 3,
+    "ItemId": 29509,
+    "ItemType": 812,
+    "ItemTitle": "Temporisation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323920,
+    "StateId": 7081,
+    "Rang": 1,
+    "ItemId": 29510,
+    "ItemType": 812,
+    "ItemTitle": "Verrouillage I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323921,
+    "StateId": 7081,
+    "Rang": 2,
+    "ItemId": 29511,
+    "ItemType": 812,
+    "ItemTitle": "Verrouillage II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323922,
+    "StateId": 7081,
+    "Rang": 3,
+    "ItemId": 29512,
+    "ItemType": 812,
+    "ItemTitle": "Verrouillage III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323929,
+    "StateId": 7088,
+    "Rang": 1,
+    "ItemId": 29513,
+    "ItemType": 812,
+    "ItemTitle": "Poids Plume I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323930,
+    "StateId": 7088,
+    "Rang": 2,
+    "ItemId": 29514,
+    "ItemType": 812,
+    "ItemTitle": "Poids Plume II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 323931,
+    "StateId": 7088,
+    "Rang": 3,
+    "ItemId": 29515,
+    "ItemType": 812,
+    "ItemTitle": "Poids Plume III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 325775,
+    "StateId": 7115,
+    "Rang": 1,
+    "ItemId": 29591,
+    "ItemType": 812,
+    "ItemTitle": "Ambition I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 325776,
+    "StateId": 7115,
+    "Rang": 2,
+    "ItemId": 29592,
+    "ItemType": 812,
+    "ItemTitle": "Ambition II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 325777,
+    "StateId": 7115,
+    "Rang": 3,
+    "ItemId": 29593,
+    "ItemType": 812,
+    "ItemTitle": "Ambition III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330509,
+    "StateId": 7252,
+    "Rang": 1,
+    "ItemId": 29871,
+    "ItemType": 812,
+    "ItemTitle": "Excès II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330537,
+    "StateId": 7254,
+    "Rang": 1,
+    "ItemId": 29872,
+    "ItemType": 812,
+    "ItemTitle": "Lunatique",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330538,
+    "StateId": 7255,
+    "Rang": 1,
+    "ItemId": 29873,
+    "ItemType": 812,
+    "ItemTitle": "Contrôle de l'espace II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330554,
+    "StateId": 7256,
+    "Rang": 1,
+    "ItemId": 29874,
+    "ItemType": 812,
+    "ItemTitle": "Inflexibilité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330812,
+    "StateId": 7257,
+    "Rang": 1,
+    "ItemId": 29875,
+    "ItemType": 812,
+    "ItemTitle": "Sentinelle",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 330832,
+    "StateId": 7258,
+    "Rang": 1,
+    "ItemId": 29876,
+    "ItemType": 812,
+    "ItemTitle": "Assimilation",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344794,
+    "StateId": 7711,
+    "Rang": 1,
+    "ItemId": 30737,
+    "ItemType": 812,
+    "ItemTitle": "Art du cachement I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344795,
+    "StateId": 7711,
+    "Rang": 2,
+    "ItemId": 30738,
+    "ItemType": 812,
+    "ItemTitle": "Art du cachement II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344796,
+    "StateId": 7711,
+    "Rang": 3,
+    "ItemId": 30739,
+    "ItemType": 812,
+    "ItemTitle": "Art du cachement III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344802,
+    "StateId": 7712,
+    "Rang": 1,
+    "ItemId": 30740,
+    "ItemType": 812,
+    "ItemTitle": "Folie I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344803,
+    "StateId": 7712,
+    "Rang": 2,
+    "ItemId": 30741,
+    "ItemType": 812,
+    "ItemTitle": "Folie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344804,
+    "StateId": 7712,
+    "Rang": 3,
+    "ItemId": 30742,
+    "ItemType": 812,
+    "ItemTitle": "Folie III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344807,
+    "StateId": 7713,
+    "Rang": 1,
+    "ItemId": 30743,
+    "ItemType": 812,
+    "ItemTitle": "Tabass'Carapace I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344808,
+    "StateId": 7713,
+    "Rang": 2,
+    "ItemId": 30744,
+    "ItemType": 812,
+    "ItemTitle": "Tabass'Carapace II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344809,
+    "StateId": 7713,
+    "Rang": 3,
+    "ItemId": 30745,
+    "ItemType": 812,
+    "ItemTitle": "Tabass'Carapace III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344819,
+    "StateId": 7714,
+    "Rang": 1,
+    "ItemId": 30746,
+    "ItemType": 812,
+    "ItemTitle": "Témérité I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344820,
+    "StateId": 7714,
+    "Rang": 2,
+    "ItemId": 30747,
+    "ItemType": 812,
+    "ItemTitle": "Témérité II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344821,
+    "StateId": 7714,
+    "Rang": 3,
+    "ItemId": 30748,
+    "ItemType": 812,
+    "ItemTitle": "Témérité III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344852,
+    "StateId": 7717,
+    "Rang": 1,
+    "ItemId": 30749,
+    "ItemType": 812,
+    "ItemTitle": "Folie Vampirique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344853,
+    "StateId": 7717,
+    "Rang": 2,
+    "ItemId": 30750,
+    "ItemType": 812,
+    "ItemTitle": "Folie Vampirique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344854,
+    "StateId": 7717,
+    "Rang": 3,
+    "ItemId": 30751,
+    "ItemType": 812,
+    "ItemTitle": "Folie Vampirique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344855,
+    "StateId": 7719,
+    "Rang": 1,
+    "ItemId": 30752,
+    "ItemType": 812,
+    "ItemTitle": "Accumulation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344856,
+    "StateId": 7719,
+    "Rang": 2,
+    "ItemId": 30753,
+    "ItemType": 812,
+    "ItemTitle": "Accumulation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344857,
+    "StateId": 7719,
+    "Rang": 3,
+    "ItemId": 30754,
+    "ItemType": 812,
+    "ItemTitle": "Accumulation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344907,
+    "StateId": 7722,
+    "Rang": 1,
+    "ItemId": 30763,
+    "ItemType": 812,
+    "ItemTitle": "Conservation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344908,
+    "StateId": 7722,
+    "Rang": 2,
+    "ItemId": 30764,
+    "ItemType": 812,
+    "ItemTitle": "Conservation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 344909,
+    "StateId": 7722,
+    "Rang": 3,
+    "ItemId": 30765,
+    "ItemType": 812,
+    "ItemTitle": "Conservation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352974,
+    "StateId": 7853,
+    "Rang": 1,
+    "ItemId": 30946,
+    "ItemType": 812,
+    "ItemTitle": "Carapace sanguine I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352975,
+    "StateId": 7853,
+    "Rang": 2,
+    "ItemId": 30947,
+    "ItemType": 812,
+    "ItemTitle": "Carapace sanguine II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352976,
+    "StateId": 7853,
+    "Rang": 3,
+    "ItemId": 30948,
+    "ItemType": 812,
+    "ItemTitle": "Carapace sanguine III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352977,
+    "StateId": 7856,
+    "Rang": 1,
+    "ItemId": 30949,
+    "ItemType": 812,
+    "ItemTitle": "Profit I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352978,
+    "StateId": 7856,
+    "Rang": 2,
+    "ItemId": 30950,
+    "ItemType": 812,
+    "ItemTitle": "Profit II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352979,
+    "StateId": 7856,
+    "Rang": 3,
+    "ItemId": 30951,
+    "ItemType": 812,
+    "ItemTitle": "Profit III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352980,
+    "StateId": 7855,
+    "Rang": 2,
+    "ItemId": 30952,
+    "ItemType": 812,
+    "ItemTitle": "Retour d'Armure II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352981,
+    "StateId": 7859,
+    "Rang": 1,
+    "ItemId": 30953,
+    "ItemType": 812,
+    "ItemTitle": "Force légère I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352982,
+    "StateId": 7859,
+    "Rang": 2,
+    "ItemId": 30954,
+    "ItemType": 812,
+    "ItemTitle": "Force légère II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352983,
+    "StateId": 7859,
+    "Rang": 3,
+    "ItemId": 30955,
+    "ItemType": 812,
+    "ItemTitle": "Force légère III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352984,
+    "StateId": 7860,
+    "Rang": 2,
+    "ItemId": 30956,
+    "ItemType": 812,
+    "ItemTitle": "Agilité vitale II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352985,
+    "StateId": 7862,
+    "Rang": 1,
+    "ItemId": 30957,
+    "ItemType": 812,
+    "ItemTitle": "Influence vitale I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352986,
+    "StateId": 7862,
+    "Rang": 2,
+    "ItemId": 30958,
+    "ItemType": 812,
+    "ItemTitle": "Influence vitale II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352987,
+    "StateId": 7862,
+    "Rang": 3,
+    "ItemId": 30959,
+    "ItemType": 812,
+    "ItemTitle": "Influence vitale III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352988,
+    "StateId": 7861,
+    "Rang": 2,
+    "ItemId": 30960,
+    "ItemType": 812,
+    "ItemTitle": "Force vitale II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352989,
+    "StateId": 7864,
+    "Rang": 1,
+    "ItemId": 30961,
+    "ItemType": 812,
+    "ItemTitle": "Evasion I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352990,
+    "StateId": 7864,
+    "Rang": 2,
+    "ItemId": 30962,
+    "ItemType": 812,
+    "ItemTitle": "Evasion II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352991,
+    "StateId": 7864,
+    "Rang": 3,
+    "ItemId": 30963,
+    "ItemType": 812,
+    "ItemTitle": "Evasion III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352992,
+    "StateId": 7867,
+    "Rang": 1,
+    "ItemId": 30964,
+    "ItemType": 812,
+    "ItemTitle": "Fuite I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352993,
+    "StateId": 7867,
+    "Rang": 2,
+    "ItemId": 30965,
+    "ItemType": 812,
+    "ItemTitle": "Fuite II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352994,
+    "StateId": 7867,
+    "Rang": 3,
+    "ItemId": 30966,
+    "ItemType": 812,
+    "ItemTitle": "Fuite III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352995,
+    "StateId": 7865,
+    "Rang": 1,
+    "ItemId": 30967,
+    "ItemType": 812,
+    "ItemTitle": "Interception I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352996,
+    "StateId": 7865,
+    "Rang": 2,
+    "ItemId": 30968,
+    "ItemType": 812,
+    "ItemTitle": "Interception II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352997,
+    "StateId": 7865,
+    "Rang": 3,
+    "ItemId": 30969,
+    "ItemType": 812,
+    "ItemTitle": "Interception III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352998,
+    "StateId": 7868,
+    "Rang": 1,
+    "ItemId": 30970,
+    "ItemType": 812,
+    "ItemTitle": "Interposition I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 352999,
+    "StateId": 7868,
+    "Rang": 2,
+    "ItemId": 30971,
+    "ItemType": 812,
+    "ItemTitle": "Interposition II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353000,
+    "StateId": 7868,
+    "Rang": 3,
+    "ItemId": 30972,
+    "ItemType": 812,
+    "ItemTitle": "Interposition III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353001,
+    "StateId": 7863,
+    "Rang": 1,
+    "ItemId": 30973,
+    "ItemType": 812,
+    "ItemTitle": "Influence paradoxale I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353002,
+    "StateId": 7863,
+    "Rang": 2,
+    "ItemId": 30974,
+    "ItemType": 812,
+    "ItemTitle": "Influence paradoxale II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353003,
+    "StateId": 7863,
+    "Rang": 3,
+    "ItemId": 30975,
+    "ItemType": 812,
+    "ItemTitle": "Influence paradoxale III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353236,
+    "StateId": 7876,
+    "Rang": 1,
+    "ItemId": 30993,
+    "ItemType": 812,
+    "ItemTitle": "Constance II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353237,
+    "StateId": 7877,
+    "Rang": 1,
+    "ItemId": 30994,
+    "ItemType": 812,
+    "ItemTitle": "Elémentalisme",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353238,
+    "StateId": 7878,
+    "Rang": 1,
+    "ItemId": 30995,
+    "ItemType": 812,
+    "ItemTitle": "Chaos",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353239,
+    "StateId": 7879,
+    "Rang": 1,
+    "ItemId": 30996,
+    "ItemType": 812,
+    "ItemTitle": "Abnégation",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353240,
+    "StateId": 7880,
+    "Rang": 1,
+    "ItemId": 30997,
+    "ItemType": 812,
+    "ItemTitle": "Engagement",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353241,
+    "StateId": 7881,
+    "Rang": 1,
+    "ItemId": 30998,
+    "ItemType": 812,
+    "ItemTitle": "Volonté de fer",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353242,
+    "StateId": 7882,
+    "Rang": 1,
+    "ItemId": 30999,
+    "ItemType": 812,
+    "ItemTitle": "Démesuré",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353243,
+    "StateId": 7870,
+    "Rang": 1,
+    "ItemId": 31000,
+    "ItemType": 812,
+    "ItemTitle": "Pétillance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353244,
+    "StateId": 7872,
+    "Rang": 1,
+    "ItemId": 31001,
+    "ItemType": 812,
+    "ItemTitle": "Contact",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353245,
+    "StateId": 7873,
+    "Rang": 1,
+    "ItemId": 31002,
+    "ItemType": 812,
+    "ItemTitle": "Face-à-face",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353246,
+    "StateId": 7874,
+    "Rang": 1,
+    "ItemId": 31003,
+    "ItemType": 812,
+    "ItemTitle": "Hypermétrope",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 353247,
+    "StateId": 7875,
+    "Rang": 1,
+    "ItemId": 31004,
+    "ItemType": 812,
+    "ItemTitle": "Distribution",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 379699,
+    "StateId": 8251,
+    "Rang": 1,
+    "ItemId": 31361,
+    "ItemType": 646,
+    "ItemTitle": "Dofus Ivoire",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 375784,
+    "StateId": 8131,
+    "Rang": 1,
+    "ItemId": 31369,
+    "ItemType": 812,
+    "ItemTitle": "Allocentrisme I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 375787,
+    "StateId": 8131,
+    "Rang": 2,
+    "ItemId": 31370,
+    "ItemType": 812,
+    "ItemTitle": "Allocentrisme II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 375788,
+    "StateId": 8132,
+    "Rang": 1,
+    "ItemId": 31371,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 375789,
+    "StateId": 8132,
+    "Rang": 2,
+    "ItemId": 31372,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 375790,
+    "StateId": 8132,
+    "Rang": 3,
+    "ItemId": 31373,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381665,
+    "StateId": 8366,
+    "Rang": 1,
+    "ItemId": 31600,
+    "ItemType": 812,
+    "ItemTitle": "Dernier instant",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381681,
+    "StateId": 8367,
+    "Rang": 1,
+    "ItemId": 31601,
+    "ItemType": 812,
+    "ItemTitle": "Arrogance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381692,
+    "StateId": 8368,
+    "Rang": 1,
+    "ItemId": 31602,
+    "ItemType": 812,
+    "ItemTitle": "Modularité",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381755,
+    "StateId": 8370,
+    "Rang": 1,
+    "ItemId": 31603,
+    "ItemType": 812,
+    "ItemTitle": "Calibrage",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381786,
+    "StateId": 8372,
+    "Rang": 1,
+    "ItemId": 31604,
+    "ItemType": 812,
+    "ItemTitle": "Véhémence",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381852,
+    "StateId": 8374,
+    "Rang": 1,
+    "ItemId": 31605,
+    "ItemType": 812,
+    "ItemTitle": "Par-delà la barrière",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381868,
+    "StateId": 8375,
+    "Rang": 1,
+    "ItemId": 31606,
+    "ItemType": 812,
+    "ItemTitle": "Cuirasse singulière",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381881,
+    "StateId": 8376,
+    "Rang": 1,
+    "ItemId": 31607,
+    "ItemType": 812,
+    "ItemTitle": "Calibrage II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381892,
+    "StateId": 8379,
+    "Rang": 1,
+    "ItemId": 31608,
+    "ItemType": 812,
+    "ItemTitle": "Lunatique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381915,
+    "StateId": 8380,
+    "Rang": 1,
+    "ItemId": 31609,
+    "ItemType": 812,
+    "ItemTitle": "Aplomb naturel",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381927,
+    "StateId": 8381,
+    "Rang": 1,
+    "ItemId": 31610,
+    "ItemType": 812,
+    "ItemTitle": "Pétulance",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381932,
+    "StateId": 8382,
+    "Rang": 1,
+    "ItemId": 31611,
+    "ItemType": 812,
+    "ItemTitle": "Empressement",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381937,
+    "StateId": 8383,
+    "Rang": 1,
+    "ItemId": 31612,
+    "ItemType": 812,
+    "ItemTitle": "Lourdeur involontaire",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381948,
+    "StateId": 8384,
+    "Rang": 1,
+    "ItemId": 31613,
+    "ItemType": 812,
+    "ItemTitle": "Pilier II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 381953,
+    "StateId": 8385,
+    "Rang": 1,
+    "ItemId": 31614,
+    "ItemType": 812,
+    "ItemTitle": "Mesure II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382131,
+    "StateId": 8386,
+    "Rang": 1,
+    "ItemId": 31615,
+    "ItemType": 812,
+    "ItemTitle": "Volonté directe I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382132,
+    "StateId": 8386,
+    "Rang": 2,
+    "ItemId": 31616,
+    "ItemType": 812,
+    "ItemTitle": "Volonté directe II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382133,
+    "StateId": 8386,
+    "Rang": 3,
+    "ItemId": 31617,
+    "ItemType": 812,
+    "ItemTitle": "Volonté directe III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382134,
+    "StateId": 8387,
+    "Rang": 1,
+    "ItemId": 31618,
+    "ItemType": 812,
+    "ItemTitle": "Volonté indirecte I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382135,
+    "StateId": 8387,
+    "Rang": 2,
+    "ItemId": 31619,
+    "ItemType": 812,
+    "ItemTitle": "Volonté indirecte II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382136,
+    "StateId": 8387,
+    "Rang": 3,
+    "ItemId": 31620,
+    "ItemType": 812,
+    "ItemTitle": "Volonté indirecte III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382137,
+    "StateId": 8388,
+    "Rang": 1,
+    "ItemId": 31621,
+    "ItemType": 812,
+    "ItemTitle": "Acribie I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382138,
+    "StateId": 8388,
+    "Rang": 2,
+    "ItemId": 31622,
+    "ItemType": 812,
+    "ItemTitle": "Acribie II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382139,
+    "StateId": 8388,
+    "Rang": 3,
+    "ItemId": 31623,
+    "ItemType": 812,
+    "ItemTitle": "Acribie III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382140,
+    "StateId": 8389,
+    "Rang": 1,
+    "ItemId": 31624,
+    "ItemType": 812,
+    "ItemTitle": "Vision intermédiaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382141,
+    "StateId": 8389,
+    "Rang": 2,
+    "ItemId": 31625,
+    "ItemType": 812,
+    "ItemTitle": "Vision intermédiaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382142,
+    "StateId": 8389,
+    "Rang": 3,
+    "ItemId": 31626,
+    "ItemType": 812,
+    "ItemTitle": "Vision intermédiaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382143,
+    "StateId": 8390,
+    "Rang": 1,
+    "ItemId": 31627,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade continue I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382144,
+    "StateId": 8390,
+    "Rang": 2,
+    "ItemId": 31628,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade continue II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382145,
+    "StateId": 8390,
+    "Rang": 3,
+    "ItemId": 31629,
+    "ItemType": 812,
+    "ItemTitle": "Dérobade continue III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382146,
+    "StateId": 8391,
+    "Rang": 1,
+    "ItemId": 31630,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier critique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382147,
+    "StateId": 8391,
+    "Rang": 2,
+    "ItemId": 31631,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier critique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382148,
+    "StateId": 8391,
+    "Rang": 3,
+    "ItemId": 31632,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier critique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382149,
+    "StateId": 8393,
+    "Rang": 1,
+    "ItemId": 31633,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier dorsal I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382150,
+    "StateId": 8393,
+    "Rang": 2,
+    "ItemId": 31634,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier dorsal II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382151,
+    "StateId": 8393,
+    "Rang": 3,
+    "ItemId": 31635,
+    "ItemType": 812,
+    "ItemTitle": "Bouclier dorsal III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382162,
+    "StateId": 8392,
+    "Rang": 2,
+    "ItemId": 31636,
+    "ItemType": 812,
+    "ItemTitle": "Sauvegarde du Wakfu II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382173,
+    "StateId": 8394,
+    "Rang": 1,
+    "ItemId": 31637,
+    "ItemType": 812,
+    "ItemTitle": "Propagation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382174,
+    "StateId": 8394,
+    "Rang": 2,
+    "ItemId": 31638,
+    "ItemType": 812,
+    "ItemTitle": "Propagation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382195,
+    "StateId": 8395,
+    "Rang": 1,
+    "ItemId": 31639,
+    "ItemType": 812,
+    "ItemTitle": "Valeur ajoutée I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382196,
+    "StateId": 8395,
+    "Rang": 2,
+    "ItemId": 31640,
+    "ItemType": 812,
+    "ItemTitle": "Valeur ajoutée II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382197,
+    "StateId": 8395,
+    "Rang": 3,
+    "ItemId": 31641,
+    "ItemType": 812,
+    "ItemTitle": "Valeur ajoutée III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382198,
+    "StateId": 8398,
+    "Rang": 1,
+    "ItemId": 31642,
+    "ItemType": 812,
+    "ItemTitle": "Sanguinolence I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382199,
+    "StateId": 8398,
+    "Rang": 2,
+    "ItemId": 31643,
+    "ItemType": 812,
+    "ItemTitle": "Sanguinolence II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382200,
+    "StateId": 8398,
+    "Rang": 3,
+    "ItemId": 31644,
+    "ItemType": 812,
+    "ItemTitle": "Sanguinolence III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382211,
+    "StateId": 8518,
+    "Rang": 1,
+    "ItemId": 31645,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382212,
+    "StateId": 8518,
+    "Rang": 2,
+    "ItemId": 31646,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382213,
+    "StateId": 8518,
+    "Rang": 3,
+    "ItemId": 31647,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382214,
+    "StateId": 8519,
+    "Rang": 1,
+    "ItemId": 31648,
+    "ItemType": 812,
+    "ItemTitle": "Gel I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382215,
+    "StateId": 8519,
+    "Rang": 2,
+    "ItemId": 31649,
+    "ItemType": 812,
+    "ItemTitle": "Gel II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382216,
+    "StateId": 8519,
+    "Rang": 3,
+    "ItemId": 31650,
+    "ItemType": 812,
+    "ItemTitle": "Gel III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382217,
+    "StateId": 8520,
+    "Rang": 1,
+    "ItemId": 31651,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382218,
+    "StateId": 8520,
+    "Rang": 2,
+    "ItemId": 31652,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382219,
+    "StateId": 8520,
+    "Rang": 3,
+    "ItemId": 31653,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382220,
+    "StateId": 8521,
+    "Rang": 1,
+    "ItemId": 31654,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382221,
+    "StateId": 8521,
+    "Rang": 2,
+    "ItemId": 31655,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382222,
+    "StateId": 8521,
+    "Rang": 3,
+    "ItemId": 31656,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382244,
+    "StateId": 8399,
+    "Rang": 1,
+    "ItemId": 31657,
+    "ItemType": 812,
+    "ItemTitle": "Représailles I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382245,
+    "StateId": 8399,
+    "Rang": 2,
+    "ItemId": 31658,
+    "ItemType": 812,
+    "ItemTitle": "Représailles II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382246,
+    "StateId": 8399,
+    "Rang": 3,
+    "ItemId": 31659,
+    "ItemType": 812,
+    "ItemTitle": "Représailles III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382247,
+    "StateId": 8400,
+    "Rang": 1,
+    "ItemId": 31660,
+    "ItemType": 812,
+    "ItemTitle": "Coque I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382248,
+    "StateId": 8400,
+    "Rang": 2,
+    "ItemId": 31661,
+    "ItemType": 812,
+    "ItemTitle": "Coque II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382249,
+    "StateId": 8400,
+    "Rang": 3,
+    "ItemId": 31662,
+    "ItemType": 812,
+    "ItemTitle": "Coque III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382250,
+    "StateId": 8402,
+    "Rang": 1,
+    "ItemId": 31663,
+    "ItemType": 812,
+    "ItemTitle": "Rupture violente I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382251,
+    "StateId": 8402,
+    "Rang": 2,
+    "ItemId": 31664,
+    "ItemType": 812,
+    "ItemTitle": "Rupture violente II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382252,
+    "StateId": 8403,
+    "Rang": 2,
+    "ItemId": 31665,
+    "ItemType": 812,
+    "ItemTitle": "Rupture PA II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382754,
+    "StateId": 8131,
+    "Rang": 3,
+    "ItemId": 31706,
+    "ItemType": 812,
+    "ItemTitle": "Allocentrisme III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 382829,
+    "StateId": 8394,
+    "Rang": 3,
+    "ItemId": 31709,
+    "ItemType": 812,
+    "ItemTitle": "Propagation III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383335,
+    "StateId": 8493,
+    "Rang": 1,
+    "ItemId": 31710,
+    "ItemType": 812,
+    "ItemTitle": "Balance critique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383336,
+    "StateId": 8493,
+    "Rang": 2,
+    "ItemId": 31711,
+    "ItemType": 812,
+    "ItemTitle": "Balance critique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383337,
+    "StateId": 8493,
+    "Rang": 3,
+    "ItemId": 31712,
+    "ItemType": 812,
+    "ItemTitle": "Balance critique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383338,
+    "StateId": 8494,
+    "Rang": 1,
+    "ItemId": 31713,
+    "ItemType": 812,
+    "ItemTitle": "Consolation critique I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383339,
+    "StateId": 8494,
+    "Rang": 2,
+    "ItemId": 31714,
+    "ItemType": 812,
+    "ItemTitle": "Consolation critique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383340,
+    "StateId": 8494,
+    "Rang": 3,
+    "ItemId": 31715,
+    "ItemType": 812,
+    "ItemTitle": "Consolation critique III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383341,
+    "StateId": 8496,
+    "Rang": 1,
+    "ItemId": 31716,
+    "ItemType": 812,
+    "ItemTitle": "Dernière armure I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383342,
+    "StateId": 8496,
+    "Rang": 2,
+    "ItemId": 31717,
+    "ItemType": 812,
+    "ItemTitle": "Dernière armure II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383343,
+    "StateId": 8496,
+    "Rang": 3,
+    "ItemId": 31718,
+    "ItemType": 812,
+    "ItemTitle": "Dernière armure III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383344,
+    "StateId": 8497,
+    "Rang": 1,
+    "ItemId": 31719,
+    "ItemType": 812,
+    "ItemTitle": "Dernier soin I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383345,
+    "StateId": 8497,
+    "Rang": 2,
+    "ItemId": 31720,
+    "ItemType": 812,
+    "ItemTitle": "Dernier soin II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383346,
+    "StateId": 8497,
+    "Rang": 3,
+    "ItemId": 31721,
+    "ItemType": 812,
+    "ItemTitle": "Dernier soin III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383347,
+    "StateId": 8498,
+    "Rang": 1,
+    "ItemId": 31722,
+    "ItemType": 812,
+    "ItemTitle": "Dernières résistances I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383348,
+    "StateId": 8498,
+    "Rang": 2,
+    "ItemId": 31723,
+    "ItemType": 812,
+    "ItemTitle": "Dernières résistances II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383349,
+    "StateId": 8498,
+    "Rang": 3,
+    "ItemId": 31724,
+    "ItemType": 812,
+    "ItemTitle": "Dernières résistances III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383401,
+    "StateId": 8499,
+    "Rang": 1,
+    "ItemId": 31725,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure secondaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383402,
+    "StateId": 8499,
+    "Rang": 2,
+    "ItemId": 31726,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383403,
+    "StateId": 8499,
+    "Rang": 3,
+    "ItemId": 31727,
+    "ItemType": 812,
+    "ItemTitle": "Brûlure secondaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383404,
+    "StateId": 8502,
+    "Rang": 1,
+    "ItemId": 31728,
+    "ItemType": 812,
+    "ItemTitle": "Gel secondaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383405,
+    "StateId": 8502,
+    "Rang": 2,
+    "ItemId": 31729,
+    "ItemType": 812,
+    "ItemTitle": "Gel secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383406,
+    "StateId": 8502,
+    "Rang": 3,
+    "ItemId": 31730,
+    "ItemType": 812,
+    "ItemTitle": "Gel secondaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383407,
+    "StateId": 8505,
+    "Rang": 1,
+    "ItemId": 31731,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme secondaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383408,
+    "StateId": 8505,
+    "Rang": 2,
+    "ItemId": 31732,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383409,
+    "StateId": 8505,
+    "Rang": 3,
+    "ItemId": 31733,
+    "ItemType": 812,
+    "ItemTitle": "Tellurisme secondaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383410,
+    "StateId": 8508,
+    "Rang": 1,
+    "ItemId": 31734,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation secondaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383411,
+    "StateId": 8508,
+    "Rang": 2,
+    "ItemId": 31735,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383412,
+    "StateId": 8508,
+    "Rang": 3,
+    "ItemId": 31736,
+    "ItemType": 812,
+    "ItemTitle": "Ventilation secondaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383413,
+    "StateId": 8489,
+    "Rang": 1,
+    "ItemId": 31737,
+    "ItemType": 812,
+    "ItemTitle": "Cuirasse singulière II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383414,
+    "StateId": 8490,
+    "Rang": 1,
+    "ItemId": 31738,
+    "ItemType": 812,
+    "ItemTitle": "Contrôle du temps",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 383415,
+    "StateId": 8492,
+    "Rang": 1,
+    "ItemId": 31739,
+    "ItemType": 812,
+    "ItemTitle": "Mesure III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 392261,
+    "StateId": 8784,
+    "Rang": 1,
+    "ItemId": 32351,
+    "ItemType": 646,
+    "ItemTitle": "Dofus Ébène",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 408300,
+    "StateId": 9077,
+    "Rang": 1,
+    "ItemId": 32617,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'horloger V",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 408301,
+    "StateId": 9078,
+    "Rang": 1,
+    "ItemId": 32618,
+    "ItemType": 646,
+    "ItemTitle": "Emblème de l'horloger VI",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407889,
+    "StateId": 9060,
+    "Rang": 1,
+    "ItemId": 32627,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt secondaire I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407890,
+    "StateId": 9060,
+    "Rang": 2,
+    "ItemId": 32628,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt secondaire II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407891,
+    "StateId": 9060,
+    "Rang": 3,
+    "ItemId": 32629,
+    "ItemType": 812,
+    "ItemTitle": "Apprêt secondaire III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407892,
+    "StateId": 9062,
+    "Rang": 1,
+    "ItemId": 32630,
+    "ItemType": 812,
+    "ItemTitle": "Élan I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407893,
+    "StateId": 9062,
+    "Rang": 2,
+    "ItemId": 32631,
+    "ItemType": 812,
+    "ItemTitle": "Élan II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407894,
+    "StateId": 9062,
+    "Rang": 3,
+    "ItemId": 32632,
+    "ItemType": 812,
+    "ItemTitle": "Élan III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407895,
+    "StateId": 9064,
+    "Rang": 1,
+    "ItemId": 32633,
+    "ItemType": 812,
+    "ItemTitle": "Jugement I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407896,
+    "StateId": 9064,
+    "Rang": 2,
+    "ItemId": 32634,
+    "ItemType": 812,
+    "ItemTitle": "Jugement II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407897,
+    "StateId": 9064,
+    "Rang": 3,
+    "ItemId": 32635,
+    "ItemType": 812,
+    "ItemTitle": "Jugement III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407898,
+    "StateId": 9066,
+    "Rang": 1,
+    "ItemId": 32636,
+    "ItemType": 812,
+    "ItemTitle": "Diagnostic I",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407899,
+    "StateId": 9066,
+    "Rang": 2,
+    "ItemId": 32637,
+    "ItemType": 812,
+    "ItemTitle": "Diagnostic II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407900,
+    "StateId": 9066,
+    "Rang": 3,
+    "ItemId": 32638,
+    "ItemType": 812,
+    "ItemTitle": "Diagnostic III",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407901,
+    "StateId": 9067,
+    "Rang": 2,
+    "ItemId": 32639,
+    "ItemType": 812,
+    "ItemTitle": "Sauvegarde critique II",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407902,
+    "StateId": 9070,
+    "Rang": 1,
+    "ItemId": 32640,
+    "ItemType": 812,
+    "ItemTitle": "Sceau de Wakfu",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407903,
+    "StateId": 9071,
+    "Rang": 1,
+    "ItemId": 32641,
+    "ItemType": 812,
+    "ItemTitle": "Parade unique",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407904,
+    "StateId": 9072,
+    "Rang": 1,
+    "ItemId": 32642,
+    "ItemType": 812,
+    "ItemTitle": "Absolution",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407905,
+    "StateId": 9073,
+    "Rang": 1,
+    "ItemId": 32643,
+    "ItemType": 812,
+    "ItemTitle": "Châtiment",
+    "EffectGroup": "equipEffects"
+  },
+  {
+    "EffectId": 407906,
+    "StateId": 9074,
+    "Rang": 1,
+    "ItemId": 32644,
+    "ItemType": 812,
+    "ItemTitle": "Secret critique",
+    "EffectGroup": "equipEffects"
+  }
+]

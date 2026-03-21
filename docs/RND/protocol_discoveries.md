@@ -178,3 +178,11 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - Le registre d'effets est dans eNf (constantes statiques eNg)
 - eNg(actionId, eRO, VD, stateId, description, QF)
 - Action 304 est generique, pas dans les constantes eNg
+
+## VERITE: eNf ACTION 304 (2026-03-21 18:58)
+- Action 304 = 'State : Applique un etat' (stateId generique = 1015)
+- eNg(304, eOr, qPA, 1015, desc, QF.bhD)
+- Le VRAI stateId est dans params[0] du CDN items.json
+- Exemple: Robuste effectId=241072, params=[5082,0,1,0,-1,0] -> stateId=5082
+- F3 dans CWJ304 = effectId runtime (pas le CDN effectDefinition.id)
+- Mapping effect_to_state_mapping.json cree
