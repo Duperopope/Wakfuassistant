@@ -84,3 +84,13 @@
 - zO extends GeneratedMessageV3 (builder?)
 - zP extends AbstractParser<zO> (parser)
 - Sous-messages: im (F5), ii (F8), iA (F11), iQ (F12), iq (F13)
+
+## Sous-message ii (F8 de iM) - 23 champs
+- getValue() [NON-OBF] = wR (int32, wire 80)
+- LR() = wT (int32), LT() = wV (int32)
+- LV() = wX (int64), tL() = mj (int32)
+- Ma() = xc (int32), Mg() = xi (int32), Mi() = xk (int32)
+- Wire tag 304 present dans ii! (field 38, varint)
+- Nos donnees: F8 contenait F11=1411, F14=1
+  F11 wire=88 -> readInt32 -> mj via tL()?
+  F14 wire=112 -> readInt32
