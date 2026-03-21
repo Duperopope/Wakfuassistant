@@ -2,11 +2,11 @@
 
 ## 1. Identite du run
 
-- Run ID: RUN_20260321_040119
+- Run ID: RUN_20260321_040353
 - Date: 2026-03-21
-- Objectif: Validation pre-envoi
-- Serveur: Ogrest
-- Personnage: L'Immortel
+- Objectif: <objectif>
+- Serveur: <serveur>
+- Personnage: <personnage>
 - Version protocole:
 - Operateur:
 

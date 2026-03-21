@@ -5,7 +5,7 @@ Le LLM doit pouvoir demarrer, executer et conclure la mission avec ce seul fichi
 
 ## 1. Meta mission
 
-- Mission ID: MISSION_20260321_040119
+- Mission ID: MISSION_20260321_040353
 - Date de lancement: 2026-03-21
 - Auteur contexte (developpeur): testeur expert gameplay (14 ans), non codeur
 - LLM operateur: Claude Code (VS Code)
@@ -20,7 +20,7 @@ Le LLM doit pouvoir demarrer, executer et conclure la mission avec ce seul fichi
 
 ## 3. Objectif principal
 
-Mission de ce run: Validation pre-envoi.
+Mission de ce run: Produire un rapport decision-ready basé sur la capture HDV complète (20172 items, 02:41 le 2026-03-21, serveur Ogrest monocompte) pour guider L'Immortel (Sram 181) vers les meilleures opportunités kamas + XP disponibles maintenant.
 
 Livrables minimum:
 
@@ -64,7 +64,7 @@ Exclus sauf demande explicite:
 3. Exports lisibles: artefacts derives generes a la demande, puis archives dans logs/runs/<RUN_ID>/artifacts/
 4. Gameplay/session: wakfu.log, wakfu_chat.log
 5. Metadonnees objets: cache local + CDN Ankama
-6. Contexte operateur: serveur Ogrest, personnage L'Immortel
+6. Contexte operateur: serveur Ogrest (monocompte), personnage L'Immortel (Sram niveau 181)
 
 ## 7. Invariants non negociables
 
