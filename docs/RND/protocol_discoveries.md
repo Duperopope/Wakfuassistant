@@ -61,3 +61,26 @@
 - zO est probablement iM ou son inner class
 - Les champs sont DANS iM (pas dans un parent Wakfu)
 - GeneratedMessageV3 et AbstractParser = lib Google (pas dans JAR)
+
+## VERITE: Mapping complet iM protobuf (13 champs)
+| F# | Wire | Type | Variable | Getter | Donnees mfZ=304 |
+|-----|------|------|----------|--------|-----------------|
+| F1 | 8 | int64 | wX | LV() | 342699505 (id unique) |
+| F2 | 16 | int64 | zs | Qq() | =F1 |
+| F3 | 24 | int32 | zu | Qs() | 97794 (9 valeurs uniques) |
+| F4 | 32 | int32 | wR | getValue() [NON-OBF] | 0 |
+| F5 | 42 | msg im | zx | Qt() | coords x/y/z |
+| F6 | 48 | int64 | zz | Qw() | 3111456 (player_id) |
+| F7 | 56 | int64 | zB | Qy() | =F6 |
+| F8 | 66 | msg ii | zD | QA() | sous-msg, F11=1411 |
+| F9 | 72 | int32 | zF | QD() | 1 |
+| F10 | 80 | int64 | zH | QF() | 92536832 |
+| F11 | 90 | msg iA | zJ | Py() | metadata |
+| F12 | 98 | msg iQ | zL | RM() | sous-msg |
+| F13 | 106 | msg iq | zN | OA() | zeros |
+
+## Heritage confirme
+- iM extends GeneratedMessageV3 (Google protobuf)
+- zO extends GeneratedMessageV3 (builder?)
+- zP extends AbstractParser<zO> (parser)
+- Sous-messages: im (F5), ii (F8), iA (F11), iQ (F12), iq (F13)
