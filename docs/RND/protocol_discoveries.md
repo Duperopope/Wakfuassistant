@@ -52,3 +52,12 @@
 ## PROCHAINE ETAPE
 - Decompiler zP pour voir les vrais champs protobuf
 - Le stateId est probablement dans F3 (Qs) ou F8 (ii)
+
+## Heritage iM: iM -> GeneratedMessageV3 -> AbstractParser -> ...
+
+## VERITE: Heritage protobuf
+- iM extends GeneratedMessageV3 (Google protobuf)
+- zP extends AbstractParser<zO> -> parse vers zO
+- zO est probablement iM ou son inner class
+- Les champs sont DANS iM (pas dans un parent Wakfu)
+- GeneratedMessageV3 et AbstractParser = lib Google (pas dans JAR)
