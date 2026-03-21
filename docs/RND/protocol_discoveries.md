@@ -195,3 +195,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - ABANDON de la piste CWJ pour les sublimations
 - NOUVELLE APPROCHE: decoder CRU (items equipes) et coR/coS (offres HDV)
 - Les instances d'items contiennent directement leurs effets avec stateId
+
+## CRU = ITEMS EQUIPES - SUBLIMATIONS TROUVEES (2026-03-21 19:02)
+- CRU byte[2317] = format binaire CUSTOM Wakfu (PAS protobuf)
+- Contient noms de personnages en ASCII (longueur-prefixee)
+- Header: 4x int32 BE (version, count, ...)
+- stateIds trouves en int16 BE: 2636(Plastron Tourmente), 5078(Fracass'carapace), 6815(Wakfu Berserk II), 8367(Arrogance)
+- Nouvelle approche: parser le format custom pour extraire tous les stateIds par joueur
