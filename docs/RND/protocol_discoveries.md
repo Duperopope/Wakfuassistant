@@ -171,3 +171,10 @@ Ni F3 ni F11 ne matchent le catalogue ou CDN states
 - JARs bdata contiennent chacun un .bin (68.bin=18MB, 35.bin=1.6MB)
 - indexes.bdat = index cle-valeur (id, is_challenge, etc.)
 - data.bdat = format texte avec separateurs | et ~
+
+## CORRECTION bgG/bgJ (2026-03-21 18:57)
+- bgG = registre PERSONNAGES (CharacterInfo/bgy), PAS d'effets
+- bgJ/bYT = systeme de vote/comptage (builds populaires)
+- Le registre d'effets est dans eNf (constantes statiques eNg)
+- eNg(actionId, eRO, VD, stateId, description, QF)
+- Action 304 est generique, pas dans les constantes eNg
