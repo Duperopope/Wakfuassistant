@@ -141,3 +141,14 @@ Les 9 valeurs F3 uniques = 9 types d'effets differents
 
 ## DECOUVERTE: F8.F11 (ii) = candidat stateId
 F14=1 toujours, F11 varie par F3
+
+## VERITE: F8.F11 != stateId (aucun match)
+9 paires F3/F11 confirmees, F11 constant par F3
+Ni F3 ni F11 ne matchent le catalogue ou CDN states
+
+## CONCLUSION: stateId resolve cote client
+- F3 (Qs) = ID effet generique dans registre bgJ.bac()
+- Le registre est charge depuis bdata au demarrage
+- Le stateId n'est PAS dans le message reseau
+- Il faut extraire le mapping F3->stateId depuis bdata
+- OU chercher un autre endpoint CDN qui contient ce mapping
