@@ -405,7 +405,7 @@ mod tests {
 
     #[test]
     fn test_get_item_name_fallback() {
-        let mut db = Connection::open_in_memory().unwrap();
+        let db = Connection::open_in_memory().unwrap();
         db.execute_batch(include_str!("../migrations/001_initial.sql")).unwrap();
         db.execute_batch(include_str!("../migrations/002_cdn_cache.sql")).unwrap();
         let name = get_item_name(&db, 99999, "fr").unwrap();
