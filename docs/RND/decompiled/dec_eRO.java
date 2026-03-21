@@ -1,7 +1,69 @@
+Picked up JAVA_TOOL_OPTIONS: 
 /*
  * Decompiled with CFR 0.152.
  * 
  * Could not load the following classes:
+ *  GC
+ *  PV
+ *  QA
+ *  QC
+ *  QE
+ *  Qj
+ *  Qm
+ *  Qo
+ *  Qp
+ *  Qq
+ *  Qr
+ *  Qu
+ *  TA
+ *  TO
+ *  TZ
+ *  Ua
+ *  Ub
+ *  Uc
+ *  VE
+ *  VJ
+ *  aAu
+ *  aDU
+ *  anU
+ *  eHH
+ *  eHJ
+ *  eHW
+ *  eND
+ *  eNG
+ *  eNb
+ *  eNd
+ *  eNf
+ *  eNi
+ *  eNk
+ *  eNl
+ *  eNm
+ *  eNp
+ *  eNq
+ *  eNs
+ *  eNt
+ *  eNw
+ *  eRP
+ *  eRh
+ *  eSE
+ *  eSS
+ *  eSl
+ *  eTU
+ *  eTW
+ *  eUj
+ *  eWC
+ *  eXe
+ *  exE
+ *  ffV
+ *  fgD
+ *  fqE
+ *  fqF
+ *  fqU
+ *  fqX
+ *  iA
+ *  iM
+ *  iO
+ *  iw
  *  org.jetbrains.annotations.Nullable
  */
 import java.util.Iterator;
@@ -62,7 +124,7 @@ extends QD<eNk, eNl> {
         this.riH = TZ.biL();
         this.riJ = false;
         this.riK = null;
-        aAu.Z(this);
+        aAu.Z((Object)this);
     }
 
     public boolean fHi() {
@@ -82,11 +144,11 @@ extends QD<eNk, eNl> {
         }
         this.riG = true;
         if (this.bgJ != null && this.bgJ.bad() != null && !bl) {
-            this.bgJ.bad().b(this);
+            this.bgJ.bad().b((QD)this);
         }
         this.mfB = qD != null ? ((eRO)qD).fHn() : -1;
         if (this.bgJ != null && this.bgJ.bad() != null && bl) {
-            this.bgJ.bad().d(this);
+            this.bgJ.bad().d((QD)this);
         }
     }
 
@@ -95,7 +157,7 @@ extends QD<eNk, eNl> {
             return;
         }
         if (this.bgJ != null && this.bgJ.bad() != null && !bl) {
-            this.bgJ.bad().c(this);
+            this.bgJ.bad().c((QD)this);
         }
     }
 
@@ -145,7 +207,7 @@ extends QD<eNk, eNl> {
         if (!(qr instanceof eNq)) {
             return;
         }
-        List<eNw> list = ((eNq)qr).aYR();
+        List list = ((eNq)qr).aYR();
         if (list == null || list.isEmpty()) {
             return;
         }
@@ -161,12 +223,12 @@ extends QD<eNk, eNl> {
 
     @Override
     private void a(eNq eNq2) {
-        switch (eNq2.fBk()) {
-            case qYm: {
+        switch (eRP.riM[eNq2.fBk().ordinal()]) {
+            case 1: {
                 this.oB(eNq2.Ol());
                 break;
             }
-            case qYn: {
+            case 2: {
                 this.oB(Math.max(this.getValue() * eNq2.Ol() / 100, 1));
             }
         }
@@ -182,7 +244,7 @@ extends QD<eNk, eNl> {
         if (!(qr instanceof eNq)) {
             return;
         }
-        List<eNw> list = ((eNq)qr).aYR();
+        List list = ((eNq)qr).aYR();
         if (list == null || list.isEmpty()) {
             return;
         }
@@ -259,10 +321,10 @@ extends QD<eNk, eNl> {
                     return bl;
                 }
             }
-            Iterator<Qu> iterator = this.bgJ.bae().l(this.bbc());
+            Iterator iterator = this.bgJ.bae().l((anU)this.bbc());
             while (iterator.hasNext()) {
-                Qu qu = iterator.next();
-                bl |= qu.a(this.bbx(), this, by2);
+                Qu qu = (Qu)iterator.next();
+                bl |= qu.a(this.bbx(), (Object)this, by2);
             }
         }
         catch (Exception exception) {
@@ -279,24 +341,24 @@ extends QD<eNk, eNl> {
         }
         QC qC = ((eNk)this.bgC).aZY();
         try {
-            switch (qC) {
-                case bgq: {
+            switch (eRP.riN[qC.ordinal()]) {
+                case 1: {
                     bgA.error((Object)("Pas de type de cibles sp\u00e9cifi\u00e9e pour un effet d\u00e9clench\u00e9, on retrourne la cible originale, id : " + ((eNk)this.bgC).aZH()));
                     return this.bgF;
                 }
-                case bgr: {
+                case 2: {
                     return this.bgF;
                 }
-                case bgs: {
+                case 3: {
                     return this.bbq().bci();
                 }
-                case bgt: {
+                case 4: {
                     return this.bgE;
                 }
-                case bgu: {
+                case 5: {
                     return qD.bbc();
                 }
-                case bgv: {
+                case 6: {
                     return qD.bbd();
                 }
             }
@@ -320,24 +382,24 @@ extends QD<eNk, eNl> {
             return this.bgE;
         }
         try {
-            switch (qA) {
-                case bga: {
+            switch (eRP.riO[qA.ordinal()]) {
+                case 1: {
                     bgA.error((Object)("Pas de type de caster sp\u00e9cifi\u00e9 pour un effet d\u00e9clench\u00e9, on retourne la cible originale, id : " + ((eNk)this.bgC).aZH()));
                     return this.bgE;
                 }
-                case bgb: {
+                case 2: {
                     return this.bgE;
                 }
-                case bgc: {
+                case 3: {
                     return this.bbq().bci();
                 }
-                case bgd: {
+                case 4: {
                     return this.bgF;
                 }
-                case bge: {
+                case 5: {
                     return qD.bbc();
                 }
-                case bgf: {
+                case 6: {
                     return qD.bbd();
                 }
             }
@@ -408,7 +470,7 @@ extends QD<eNk, eNl> {
             return;
         }
         eNs eNs2 = (eNs)this.bgC;
-        this.bgJ.baf().a(new Ub(this, this.fGq()), eNs2.ej(this.fHf()));
+        this.bgJ.baf().a((TO)new Ub((QD)this, this.fGq().longValue()), eNs2.ej(this.fHf()));
     }
 
     private boolean fHk() {
@@ -453,7 +515,7 @@ extends QD<eNk, eNl> {
         }
         TA tA = this.bgJ.baf();
         this.bgV = tA.bhP();
-        this.riH = tA.a(new Uc(this, this.fGq()), ua);
+        this.riH = tA.a((TO)new Uc((QD)this, this.fGq().longValue()), ua);
     }
 
     @Override
@@ -488,7 +550,7 @@ extends QD<eNk, eNl> {
                     return ua != null && !ua.biT();
                 }
                 case 1: {
-                    eND eND2 = (eND)((Object)this.bgC);
+                    eND eND2 = (eND)this.bgC;
                     return eND2.ek(this.fHf()) > 0;
                 }
                 case 0: {
@@ -516,7 +578,7 @@ extends QD<eNk, eNl> {
                 return ua != null && ua.biS() < 0;
             }
             case 1: {
-                eND eND2 = (eND)((Object)this.bgC);
+                eND eND2 = (eND)this.bgC;
                 return eND2.ek(s) < 0;
             }
             case 0: {
@@ -606,7 +668,7 @@ extends QD<eNk, eNl> {
         short s = this.fHf();
         boolean bl = true;
         if (this.bbg() == null || !((eNq)this.bbg()).fBf()) {
-            bl = VE.pV(100) <= VJ.bt(((eNk)this.bgC).eb(s));
+            bl = VE.pV((int)100) <= VJ.bt((float)((eNk)this.bgC).eb(s));
         }
         return bl;
     }
@@ -625,7 +687,7 @@ extends QD<eNk, eNl> {
         if (this.bgD instanceof fqU && ((fqU)this.bgD).gjJ() == exE.pcX) {
             return false;
         }
-        return this.bgF != null && this.bgF.a(eXe.rEw);
+        return this.bgF != null && this.bgF.a((PV)eXe.rEw);
     }
 
     private boolean fHq() {
@@ -650,7 +712,7 @@ extends QD<eNk, eNl> {
             return false;
         }
         short s = this.fHf();
-        return VE.pV(100) <= VJ.bt(((eNk)this.bgC).eb(s));
+        return VE.pV((int)100) <= VJ.bt((float)((eNk)this.bgC).eb(s));
     }
 
     /*
@@ -662,7 +724,7 @@ extends QD<eNk, eNl> {
         Qu qu2 = this.aZQ() ? this.l(qD) : this.bgF;
         this.riF = qD;
         try {
-            bl = ((eNk)this.bgC).fAx() == null || ((eNk)this.bgC).fAx().b(qu, qu2 == null ? this.bgG : qu2, this, this.bgJ);
+            bl = ((eNk)this.bgC).fAx() == null || ((eNk)this.bgC).fAx().b((Object)qu, qu2 == null ? this.bgG : qu2, (Object)this, (Object)this.bgJ);
         }
         catch (Exception exception) {
             bgA.error((Object)"Exception levee", (Throwable)exception);
@@ -716,15 +778,15 @@ extends QD<eNk, eNl> {
 
     @Override
     public iA QH() {
-        return iA.Pr().G(this.riJ).eB(this.riE).a(iw.OU().ai(this.riH.OO()).eA(this.riH.biN()).F(this.riH.biM())).aj(this.riI).H(this.rdU).Px();
+        return iA.Pr().G(this.riJ).eB((int)this.riE).a(iw.OU().ai(this.riH.OO()).eA((int)this.riH.biN()).F(this.riH.biM())).aj(this.riI).H(this.rdU).Px();
     }
 
     @Override
     protected void f(iA iA2) {
         this.riJ = iA2.Pi();
-        this.riE = GC.ct(iA2.Pk());
+        this.riE = GC.ct((long)iA2.Pk());
         iw iw2 = iA2.Pm();
-        this.riH = new TZ(iw2.OO(), GC.cu(iw2.OQ()), iw2.OS());
+        this.riH = new TZ(iw2.OO(), GC.cu((long)iw2.OQ()), iw2.OS());
         this.riI = iA2.Pp();
         this.rdU = iA2.MB();
     }
@@ -733,8 +795,8 @@ extends QD<eNk, eNl> {
         switch (n) {
             case 11: 
             case 25: {
-                int n2 = fqE.uC(l);
-                short s = fqE.uD(l);
+                int n2 = fqE.uC((long)l);
+                short s = fqE.uD((long)l);
                 fqE fqE2 = fqF.giR().i(n2, s);
                 this.a(fqE2);
                 break;
@@ -764,8 +826,8 @@ extends QD<eNk, eNl> {
                         bgA.error((Object)("Area with id " + l + " not found, and the effect execution listener does not allow for rebinding : " + qq.getClass().getSimpleName()));
                         break;
                     }
-                    Qp qp = (Qp)((Object)qq);
-                    qp.a(new eSl(this, this.bgJ, l));
+                    Qp qp = (Qp)qq;
+                    qp.a((Qo)new eSl((QD)this, this.bgJ, l));
                     break;
                 }
                 bgA.error((Object)"contexte non ou mal initialis\u00e9");
@@ -792,7 +854,7 @@ extends QD<eNk, eNl> {
                 break;
             }
             case 21: {
-                this.a(eWC.a(l, (eNk)this.bba()));
+                this.a(eWC.a((long)l, (eNk)((eNk)this.bba())));
                 break;
             }
             case 28: {
@@ -808,11 +870,11 @@ extends QD<eNk, eNl> {
                 break;
             }
             case 36: {
-                int n3 = eNp.qu(l);
-                short s = eNp.qv(l);
-                Object t = eHJ.qsV.Py(n3);
-                if (t == null) break;
-                this.a(new eHH((eHW)t, s));
+                int n3 = eNp.qu((long)l);
+                short s = eNp.qv((long)l);
+                eHW eHW2 = eHJ.qsV.Py(n3);
+                if (eHW2 == null) break;
+                this.a(new eHH(eHW2, s));
                 break;
             }
             case 26: 
@@ -843,7 +905,7 @@ extends QD<eNk, eNl> {
         if (fqU2 == null) {
             return false;
         }
-        this.bgD = fqU2.cm(fqU.YZ((int)l));
+        this.bgD = fqU2.cm(fqU.YZ((int)((int)l)));
         return true;
     }
 
@@ -888,10 +950,10 @@ extends QD<eNk, eNl> {
     @Override
     public boolean o(QD qD) {
         try {
-            return qD != null && qD.getValue() == this.getValue() && (qD.bbe() == null || qD.bbe().equals(this.bbe())) && qD.bbc() == this.bbc() && qD.bbf() == this.bbf() && qD.bba() == this.bba() && qD.bbW() == this.bbW() && qD.d() == this.d() && qD.bbi() == this.bbi();
+            return qD != null && qD.getValue() == this.getValue() && (qD.bbe() == null || qD.bbe().equals((Object)this.bbe())) && qD.bbc() == this.bbc() && qD.bbf() == this.bbf() && qD.bba() == this.bba() && qD.bbW() == this.bbW() && qD.d() == this.d() && qD.bbi() == this.bbi();
         }
         catch (Exception exception) {
-            bgA.warn((Object)aDU.a(exception));
+            bgA.warn((Object)aDU.a((Throwable)exception));
             return false;
         }
     }
@@ -1014,3 +1076,4 @@ extends QD<eNk, eNl> {
         this.a((Qr)eNq2.fBm());
     }
 }
+

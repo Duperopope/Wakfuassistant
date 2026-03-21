@@ -1,4 +1,4 @@
-﻿# MISSION CONTEXT (Single-file handoff for Claude Code)
+# MISSION CONTEXT (Single-file handoff for Claude Code)
 
 Ce document est la source unique que l'operateur donne au LLM.
 Le LLM doit pouvoir demarrer, executer et conclure la mission avec ce seul fichier.
@@ -20,7 +20,7 @@ Le LLM doit pouvoir demarrer, executer et conclure la mission avec ce seul fichi
 
 ## 3. Objectif principal
 
-Mission de ce run: Produire un rapport decision-ready basé sur la capture HDV complète (20172 items, 02:41 le 2026-03-21, serveur Ogrest monocompte) pour guider L'Immortel (Sram 181) vers les meilleures opportunités kamas + XP disponibles maintenant.
+Mission de ce run: Reverse-engineer le protocole reseau Wakfu pour extraire couleurs sockets et sublimations appliquees des items (donnees absentes du CDN).
 
 Livrables minimum:
 
@@ -133,3 +133,4 @@ Ordre impose:
 - Question la plus utile posee par le LLM:
 - Question inutile ou floue a supprimer:
 - Amelioration pour le prochain run:
+

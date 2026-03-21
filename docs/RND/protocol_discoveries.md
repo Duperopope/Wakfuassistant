@@ -1,0 +1,54 @@
+# Protocol Discoveries - Wakfu Network Reverse Engineering
+> Updated: 2026-03-21 18:38:58
+> VERITES CONFIRMEES PAR DECOMPILATION
+
+## Chaine de deserialisation CWJ (CONFIRMEE)
+1. Reseau -> cwj.dn(byte[]) deserialise le message
+2. cwj.mfZ = actionId (304=sublimation)
+3. cwj.hvy = payload protobuf (byte[short])
+4. Handler cdV.java appelle eNf.fBb().pU(mfZ) pour lookup effet
+5. Puis eRO.dr(hvy) -> QD.dr(byte[]) -> iM.bf(byte[])
+6. iM.bf() = zP.parseFrom(byArray) = PROTOBUF GOOGLE STANDARD
+7. iM extends zP (classe protobuf generee)
+
+## Classe cwj (decompilee, id=12265)
+- mfZ (int) = actionId
+- hvy (byte[short]) = payload protobuf
+- mga, mkP = booleans
+- mkQ = ArrayList<azy<int,int,long>> triplets
+- ezG()=mfZ, ezH()=hvy
+
+## Classe eNg (registre effets)
+- eNg(actionId, eRO, VD, stateId, description, QF)
+- qWm = stateId accessible via cbt()
+- 304 = generique, stateId vient du parchemin
+
+## Classe iM (protobuf hvy) - extends zP
+- iM.bf(byte[]) = zP.parseFrom(byArray)
+- Champs protobuf (wire tags du switch/case):
+  F1(8)=long LV(), F2(16)=long Qq(), F3(24)=int Qs()
+  F4(32)=int getValue() [NON-OBFUSQUE!]
+  F5(42)=msg im Qt(), F6(48)=long Qw(), F7(56)=long Qy()
+  F8(66)=msg ii QA(), F9(72)=int QD(), F10(80)=long QF()
+  F11(90)=msg, F12(98)=msg, F13(106)=msg
+- Seul 1 champ prive: byte Y = -1
+- Tout le reste est dans zP (parent)
+
+## Donnees CWJ mfZ=304 decodees
+- F1/F2: IDs uniques (varient)
+- F3: Qs() = 9 valeurs uniques (97794, 45980, etc.)
+- F4: getValue() = 0 pour tous les 304
+- F6/F7: player_id
+- F8: sous-msg ii avec F11=1411 constant
+- F10: 92536832 constant
+
+## FAUX POSITIFS (NE PLUS REPETER)
+- Abandon III dans CSN = concatenation index+champ
+- CSN = blocs 24B, pas de sublimations
+- coY = categories HDV
+- CSA = joueur proche
+- F3/16 matches = coincidence
+
+## PROCHAINE ETAPE
+- Decompiler zP pour voir les vrais champs protobuf
+- Le stateId est probablement dans F3 (Qs) ou F8 (ii)

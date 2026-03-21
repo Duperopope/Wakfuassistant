@@ -1,0 +1,60 @@
+=== CSN STRUCTURE DECODE (1106 bytes) ===
+
+HEADER:
+  Byte[0] = 4 (nombre de sections? ou type?)
+  Byte[1] = 0
+  Byte[2] = 6 (nombre d'items?)
+  Byte[3] = 0
+  Header interpretation: type=4, count16=1536
+
+=== SCAN DES BLOCS (index incrementaux) ===
+
+Recherche des identifiants 4-bytes recurrents (67xx, 65xx, 61xx):
+Positions trouvees: 40
+  @0004 dist=  0 prev=00,06 | 0x67B0F67C | 67 B0 F6 7C 00 04 77 00 00 5A 5F 05 
+  @0018 dist= 20 prev=00,00 | 0x67B60E0F | 67 B6 0E 0F 00 00 45 00 00 43 86 01 
+  @002C dist= 20 prev=00,00 | 0x67B60E0F | 67 B6 0E 0F 00 00 4B 00 00 43 86 02 
+  @0040 dist= 20 prev=00,00 | 0x67B60E0F | 67 B6 0E 0F 00 00 6C 00 00 43 86 03 
+  @0054 dist= 20 prev=00,00 | 0x61B07FF8 | 61 B0 7F F8 00 02 1D 00 00 08 7F 00 
+  @0068 dist= 20 prev=14,00 | 0x67C328BB | 67 C3 28 BB 00 01 01 00 00 61 B4 00 
+  @0071 dist=  9 prev=00,00 | 0x61B40001 | 61 B4 00 01 00 00 00 00 01 04 01 00 
+  @0082 dist= 17 prev=14,0B | 0x67C32DEA | 67 C3 2D EA 00 01 E9 00 00 64 53 00 
+  @00CF dist= 77 prev=14,11 | 0x67C32DF8 | 67 C3 2D F8 00 02 8C 00 00 64 67 00 
+  @00D9 dist= 10 prev=64,00 | 0x67000100 | 67 00 01 00 00 01 00 04 00 00 00 69 
+  @011C dist= 67 prev=00,00 | 0x67B0F67C | 67 B0 F6 7C 00 04 70 00 00 5A 5F 04 
+  @0130 dist= 20 prev=14,00 | 0x67C2DEF7 | 67 C2 DE F7 00 02 D0 00 00 30 24 01 
+  @014A dist= 26 prev=14,01 | 0x67C328CB | 67 C3 28 CB 00 02 04 00 00 35 46 00 
+  @0162 dist= 24 prev=14,02 | 0x67C2DF61 | 67 C2 DF 61 00 01 68 00 00 69 D5 01 
+  @0165 dist=  3 prev=DF,C2 | 0x61000168 | 61 00 01 68 00 00 69 D5 01 99 00 00 
+  @017A dist= 21 prev=14,03 | 0x67C328CC | 67 C3 28 CC 00 01 1F 00 00 09 24 02 
+  @0192 dist= 24 prev=14,04 | 0x67C31C5B | 67 C3 1C 5B 00 00 E2 00 00 20 25 00 
+  @01AA dist= 24 prev=14,05 | 0x65C2FB70 | 65 C2 FB 70 00 02 40 00 00 24 1F 00 
+  @01C2 dist= 24 prev=00,06 | 0x61B0DE75 | 61 B0 DE 75 00 01 F3 00 00 26 54 00 
+  @01DC dist= 26 prev=14,07 | 0x67C30AFF | 67 C3 0A FF 00 00 EE 00 00 29 3C 00 
+  @01F4 dist= 24 prev=14,08 | 0x67C328CB | 67 C3 28 CB 00 01 A2 00 00 2F FC 00 
+  @020C dist= 24 prev=14,09 | 0x67C30AFD | 67 C3 0A FD 00 01 65 00 00 37 EB 00 
+  @0212 dist=  6 prev=01,00 | 0x65000037 | 65 00 00 37 EB 00 01 00 00 00 00 01 
+  @0226 dist= 20 prev=14,0A | 0x61C30CCC | 61 C3 0C CC 00 01 0D 00 00 48 8C 00 
+  @023E dist= 24 prev=14,0B | 0x61C2E8BA | 61 C2 E8 BA 00 00 01 00 00 48 FE 00 
+  @0272 dist= 52 prev=14,0D | 0x65C2D47F | 65 C2 D4 7F 00 03 E2 00 00 4F F7 00 
+  @028D dist= 27 prev=24,C3 | 0x65000002 | 65 00 00 02 00 00 69 C7 00 01 00 00 
+  @02A2 dist= 21 prev=14,0F | 0x67C2E059 | 67 C2 E0 59 00 00 59 00 00 69 CB 24 
+  @0333 dist=145 prev=14,14 | 0x67C328CC | 67 C3 28 CC 00 01 FE 00 00 74 16 00 
+  @034B dist= 24 prev=14,15 | 0x65C32375 | 65 C3 23 75 00 02 16 00 00 50 73 00 
+  @0363 dist= 24 prev=14,16 | 0x67C31C5B | 67 C3 1C 5B 00 00 EE 00 00 2E A3 00 
+  @037B dist= 24 prev=14,17 | 0x67C32B1B | 67 C3 2B 1B 00 00 7F 00 00 38 14 00 
+  @0393 dist= 24 prev=14,18 | 0x67C32B0F | 67 C3 2B 0F 00 00 09 00 00 38 15 00 
+  @03AB dist= 24 prev=14,19 | 0x67C31C5B | 67 C3 1C 5B 00 01 00 00 00 7F D3 00 
+  @03C3 dist= 24 prev=14,1A | 0x67C31756 | 67 C3 17 56 00 01 62 00 00 4E CA 00 
+  @03DB dist= 24 prev=14,1B | 0x67C328EB | 67 C3 28 EB 00 01 FE 00 00 5D DD 00 <<< STATE: Abandon III
+  @03F3 dist= 24 prev=14,1C | 0x67C32B5A | 67 C3 2B 5A 00 00 B1 00 00 4A E1 00 
+  @040B dist= 24 prev=14,1D | 0x67C32B5A | 67 C3 2B 5A 00 01 18 00 00 48 22 00 
+  @043B dist= 48 prev=14,1F | 0x67C32B78 | 67 C3 2B 78 00 00 65 00 00 2C B1 00 
+  @0441 dist=  6 prev=00,00 | 0x6500002C | 65 00 00 2C B1 00 01 00 00 00 00 00 
+
+=== RECHERCHE EXHAUSTIVE de 6932 ===
+
+Verification @03D9:
+  bytes[0x03D9]=0x1B, bytes[0x03DA]=0x14
+  int16BE = 6932
+

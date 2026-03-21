@@ -1,9 +1,33 @@
+Picked up JAVA_TOOL_OPTIONS: 
 /*
  * Decompiled with CFR 0.152.
  * 
  * Could not load the following classes:
+ *  GC
+ *  QE
+ *  QF
+ *  QH
+ *  QJ
+ *  Qj
+ *  Qk
+ *  Qm
+ *  Qr
+ *  Qs
+ *  Qu
+ *  TN
+ *  TZ
+ *  Ud
+ *  aCd
+ *  anU
+ *  aoY
  *  com.google.protobuf.ByteString
  *  com.google.protobuf.InvalidProtocolBufferException
+ *  fi
+ *  iA
+ *  iM
+ *  iO
+ *  ii
+ *  im
  *  org.apache.log4j.Logger
  *  org.jetbrains.annotations.NotNull
  */
@@ -231,10 +255,10 @@ implements aoY {
         }
         if (this.bbB()) {
             if (qu2 == null || FX != null && FX.baa()) {
-                object = this.a(FX, qu, qm, n, n2, s);
+                object = this.a(FX, (anU)qu, qm, n, n2, s);
                 this.d((Collection<Qu>)object);
                 if (this.bhc != null) {
-                    this.bhc.b((Collection<Qu>)object);
+                    this.bhc.b((Collection)object);
                 }
             } else {
                 this.g(qu2);
@@ -572,45 +596,45 @@ implements aoY {
                 ArrayList<Qu> arrayList = new ArrayList<Qu>();
                 while (this.bbc() != null && !arrayList.contains(this.bbc())) {
                     arrayList.add(this.bbc());
-                    bl |= this.bbc().a(this.bbx(), this, (byte)10);
+                    bl |= this.bbc().a(this.bbx(), (Object)this, (byte)10);
                 }
                 arrayList.clear();
                 while (this.bbd() != null && !arrayList.contains(this.bbd())) {
                     arrayList.add(this.bbd());
-                    bl |= this.bbd().a(this.bbx(), this, (byte)1);
+                    bl |= this.bbd().a(this.bbx(), (Object)this, (byte)1);
                 }
                 break;
             }
             case 2: {
                 if (this.bbc() != null) {
-                    bl |= this.bbc().a(this.bbx(), this, (byte)20);
+                    bl |= this.bbc().a(this.bbx(), (Object)this, (byte)20);
                 }
                 if (this.bbd() == null) break;
-                bl |= this.bbd().a(this.bbx(), this, (byte)2);
+                bl |= this.bbd().a(this.bbx(), (Object)this, (byte)2);
                 break;
             }
             case 3: {
                 if (this.bbc() != null) {
-                    bl |= this.bbc().a(this.bbx(), this, (byte)30);
+                    bl |= this.bbc().a(this.bbx(), (Object)this, (byte)30);
                 }
                 if (this.bbd() == null) break;
-                bl |= this.bbd().a(this.bbx(), this, (byte)3);
+                bl |= this.bbd().a(this.bbx(), (Object)this, (byte)3);
                 break;
             }
             case 4: {
                 if (this.bbc() != null) {
-                    bl |= this.bbc().a(this.bbx(), this, (byte)40);
+                    bl |= this.bbc().a(this.bbx(), (Object)this, (byte)40);
                 }
                 if (this.bbd() == null) break;
-                bl |= this.bbd().a(this.bbx(), this, (byte)4);
+                bl |= this.bbd().a(this.bbx(), (Object)this, (byte)4);
                 break;
             }
             case 6: {
                 if (this.bbc() != null) {
-                    bl |= this.bbc().a(this.bbx(), this, (byte)60);
+                    bl |= this.bbc().a(this.bbx(), (Object)this, (byte)60);
                 }
                 if (this.bbd() == null) break;
-                bl |= this.bbd().a(this.bbx(), this, (byte)6);
+                bl |= this.bbd().a(this.bbx(), (Object)this, (byte)6);
                 break;
             }
         }
@@ -768,13 +792,13 @@ implements aoY {
     }
 
     public void k(QD qD) {
-        Object object;
+        Qu qu;
         long l;
-        Qu qu = this.m(qD);
-        long l2 = qu != null ? qu.Sn() : 0L;
-        Qu qu2 = this.l(qD);
-        long l3 = l = qu2 != null ? qu2.Sn() : 0L;
-        if (QJ.bhM.get().b(this.aZH(), l2, l)) {
+        Qu qu2 = this.m(qD);
+        long l2 = qu2 != null ? qu2.Sn() : 0L;
+        Qu qu3 = this.l(qD);
+        long l3 = l = qu3 != null ? qu3.Sn() : 0L;
+        if (((QJ)QJ.bhM.get()).b(this.aZH(), l2, l)) {
             return;
         }
         if (!this.i(qD)) {
@@ -788,11 +812,11 @@ implements aoY {
             qD2.e(this.m(qD));
             qD2.f(this.l(qD));
             if (qD2.bbd() != null) {
-                object = qD2.bbd();
-                qD2.c(object.bcC(), object.bcD(), object.bcE());
+                qu = qD2.bbd();
+                qD2.c(qu.bcC(), qu.bcD(), qu.bcE());
             } else {
-                object = qD.bbe();
-                qD2.c(((aCd)object).getX(), ((aCd)object).getY(), ((aCd)object).bdi());
+                qu = qD.bbe();
+                qD2.c(qu.getX(), qu.getY(), qu.bdi());
             }
         }
         if (qD2.bbB() && qD2.bbd() == null || qD2.bbA() && qD2.bbc() == null || qD2.bbd() != null && qD2.bbd().baM() && !this.bce() || qD2.bbC() && qD2.bbe() == null) {
@@ -808,8 +832,8 @@ implements aoY {
             qD2.aZp();
             return;
         }
-        object = QJ.bhM.get().a(this.aZH(), l2, l);
-        boolean bl = ((QL)object).bcr() == null;
+        qu = ((QJ)QJ.bhM.get()).a(this.aZH(), l2, l);
+        boolean bl = qu.bcr() == null;
         try {
             if (qD2.bbt()) {
                 qD2.n(qD);
@@ -824,9 +848,9 @@ implements aoY {
         catch (Exception exception) {
             bgA.error((Object)("[RE] An error occurred while executing running effect " + String.valueOf(qD2) + ", current effect = " + String.valueOf(this)), (Throwable)exception);
         }
-        QJ.bhM.get().bcp();
+        ((QJ)QJ.bhM.get()).bcp();
         if (bl) {
-            QJ.bhM.get().clear();
+            ((QJ)QJ.bhM.get()).clear();
         }
     }
 
@@ -980,7 +1004,7 @@ implements aoY {
     public iM bcb() {
         iO iO2 = iM.QQ().ak(this.LV()).al(this.Qq()).eK(this.bgC == null ? this.bcd().aZH() : this.bgC.aZH()).eL(this.aQL);
         if (this.bgG != null) {
-            iO2.a(im.NP().es(this.bgG.getX()).et(this.bgG.getY()).eu(this.bgG.bdi()));
+            iO2.a(im.NP().es(this.bgG.getX()).et(this.bgG.getY()).eu((int)this.bgG.bdi()));
         }
         if (this.bgE != null) {
             iO2.am(this.bgE.Sn());
@@ -1000,7 +1024,7 @@ implements aoY {
 
     public iM dr(byte[] byArray) {
         try {
-            iM iM2 = iM.bf(byArray);
+            iM iM2 = iM.bf((byte[])byArray);
             this.d(iM2);
             return iM2;
         }
@@ -1021,7 +1045,7 @@ implements aoY {
             }
         }
         if (iM2.LW()) {
-            this.bgG.Q(iM2.Qt().getX(), iM2.Qt().getY(), GC.cu(iM2.Qt().NN()));
+            this.bgG.Q(iM2.Qt().getX(), iM2.Qt().getY(), GC.cu((long)iM2.Qt().NN()));
         }
         this.aQL = iM2.getValue();
         if (iM2.Qv()) {
@@ -1130,3 +1154,4 @@ implements aoY {
         return "RunningEffect{m_genericEffect=" + String.valueOf(this.bgC) + ", m_caster=" + String.valueOf(this.bgE) + ", m_target=" + String.valueOf(this.bgF) + ", m_targetCell=" + String.valueOf(this.bgG) + ", m_id=" + this.o + ", m_uid=" + this.bgK + ", m_value=" + this.aQL + "}";
     }
 }
+

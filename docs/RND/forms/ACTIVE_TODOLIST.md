@@ -1,13 +1,12 @@
-﻿# ACTIVE TODO LIST
+# ACTIVE TODO LIST
+> Updated: 2026-03-21 18:14:15
 
-Date: 2026-03-21
-Run ID: RUN_20260321_040353
-
-## TODO
-
-| ID | Action | Statut | Preuve attendue | Risque | Evidence |
-|----|--------|--------|-----------------|--------|----------|
-| 1 | Verifier preconditions | not-started | Checklist preconditions remplie | Moyen | |
-| 2 | Executer protocole test | not-started | Etapes cochees + verdict | Moyen | |
-| 3 | Generer rapport run | not-started | Rapport final cree | Moyen | |
-| 4 | Consolider retours | not-started | Section retours completee | Faible | |
+| # | Tache | Status | Notes |
+|---|-------|--------|-------|
+| 1-7 | Setup + corrections | DONE | historique |
+| 8 | Decoder cqv | DONE | aucune sublimation |
+| 9 | Decoder csn | DONE | faux positif Abandon III |
+| 10 | Classifier types | DONE | 85 types, coe=mouvement |
+| 11 | **Decoder CWJ mfZ=304 protobuf** | IN-PROGRESS | LE msg sublimation |
+| 12 | Modifier agent pour coR/coS | NOT-STARTED | offres HDV objets Java |
+| 13 | Extraire sockets+sublims | BLOCKED | depends 11 ou 12 |
