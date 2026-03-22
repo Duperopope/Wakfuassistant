@@ -2,6 +2,47 @@
 
 ---
 
+## [0.5.2] - 2026-03-22 — Pivot Strategie C : decodage protobuf depuis Netty (cru + csS)
+
+### Architecture
+
+Le hook ByteBuddy sur `aDj.channelRead0` capture DEJA tous les messages reseau.
+Les items passent par les messages `cru` (builds) et `csS` (equipement complet).
+Plus besoin d'un second hook sur `fgA.eM` ou d'`ItemDecoderAdvice`.
+
+### Ajoute
+
+- `WakfuSpyAgent.decodeProto(msgType, bytes)` : decodeur protobuf generique pur JDK
+  - Parser recursif (profondeur max 3, 50 champs/niveau, arrays pour champs repetes)
+  - `readProtoVarint` : lecture varint protobuf
+  - `tryProtoUtf8` : detection texte UTF-8 valide avec check round-trip + lettre obligatoire
+  - `scanProtoStrings` : scan rapide des noms de builds (tag 0x1A dans cru)
+  - Sortie JSON dans `wakfu_items_decoded.jsonl` et resume dans `wakfu_items_summary.log`
+- `ChannelReadAdvice` : detection de `cru` (field `mgi`) et `csS` (field `mhJ`)
+  - Extraction du byte[] par reflection + appel `decodeProto`
+  - Messages `cr*` ajoutes au filtre HDV log
+
+### Supprime
+
+- `ItemDecoderAdvice.java` (hook fgA inutile, Netty suffit)
+- Bloc scanner universel `eM(byte[])` dans `WakfuSpyAgent` (meme raison)
+
+### Structure protobuf identifiee
+
+- `cru` : header 12 bytes non-protobuf `[type][count][len]` + protobuf
+  - field 3 (0x1A) = nom du build : "Kairos L'Intemporel", "Mortel", etc.
+- `csS` : protobuf direct offset 0
+  - field 1 repete = slots d'equipement avec item UID (int64) + refId
+
+### Comment tester
+
+1. Relancer Wakfu avec l'agent
+2. Ouvrir l'inventaire ou aller sur l'ecran de builds
+3. `Select-String "PROTO\|cru" agent\logs\wakfu_items_summary.log`
+4. Le fichier `agent\logs\wakfu_items_decoded.jsonl` doit contenir les noms de builds
+
+---
+
 ## [0.5.1] - 2026-03-22 — Correctif critique : hook item decoder sur fgA (pas fga_0)
 
 ### Corrige

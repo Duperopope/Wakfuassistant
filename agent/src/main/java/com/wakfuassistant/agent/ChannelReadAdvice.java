@@ -103,8 +103,34 @@ public class ChannelReadAdvice {
 
             // Route vers HDV log si c'est un message marche
             if (simpleType.startsWith("co") || simpleType.startsWith("cq") ||
-                simpleType.startsWith("cs") || simpleType.startsWith("cl")) {
+                simpleType.startsWith("cs") || simpleType.startsWith("cl") ||
+                simpleType.startsWith("cr")) {
                 com.wakfuassistant.agent.WakfuSpyAgent.logHdv(line);
+            }
+
+            // Decodage protobuf pour messages items/builds
+            // cru : builds d'equipement avec noms (field mgi)
+            // csS : equipement complet (field mhJ)
+            if ("cru".equals(simpleType) || "csS".equals(simpleType)) {
+                try {
+                    String payloadField = "cru".equals(simpleType) ? "mgi" : "mhJ";
+                    Field pf = null;
+                    Class<?> lookupClass = msg.getClass();
+                    while (lookupClass != null && pf == null) {
+                        try {
+                            pf = lookupClass.getDeclaredField(payloadField);
+                        } catch (NoSuchFieldException nfe) {
+                            lookupClass = lookupClass.getSuperclass();
+                        }
+                    }
+                    if (pf != null) {
+                        pf.setAccessible(true);
+                        Object payloadVal = pf.get(msg);
+                        if (payloadVal instanceof byte[]) {
+                            com.wakfuassistant.agent.WakfuSpyAgent.decodeProto(simpleType, (byte[]) payloadVal);
+                        }
+                    }
+                } catch (Exception ignored) {}
             }
 
         } catch (Exception e) {

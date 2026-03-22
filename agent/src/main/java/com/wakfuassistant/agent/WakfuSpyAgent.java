@@ -135,61 +135,6 @@ public class WakfuSpyAgent {
         }
 
         builder.installOn(inst);
-
-        // === SCANNER eM(byte[]) + HOOK DYNAMIQUE ===
-        try {
-            log("Installation scanner universel eM(byte[])...");
-
-            // Un seul AgentBuilder qui intercepte TOUTE classe ayant eM(byte[])
-            new AgentBuilder.Default()
-                .disableClassFormatChanges()
-                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .type(ElementMatchers.declaresMethod(
-                    ElementMatchers.named("eM")
-                        .and(ElementMatchers.takesArguments(1))
-                        .and(ElementMatchers.takesArgument(0, byte[].class))
-                ))
-                .transform((builder2, typeDescription, classLoader, module, protectionDomain) -> {
-                    log("=== eM(byte[]) TROUVEE dans: " + typeDescription.getName() + " ===");
-                    // Logger toutes les methodes de cette classe
-                    for (net.bytebuddy.description.method.MethodDescription.InDefinedShape m : typeDescription.getDeclaredMethods()) {
-                        log("  METHOD: " + m.getName() + " | params=" + m.getParameters().size() + " | returns=" + m.getReturnType().getTypeName());
-                    }
-                    return builder2.visit(
-                        Advice.to(ItemDecoderAdvice.class)
-                            .on(ElementMatchers.named("eM")
-                                .and(ElementMatchers.takesArguments(1))
-                                .and(ElementMatchers.takesArgument(0, byte[].class)))
-                    );
-                })
-                .installOn(inst);
-
-            log("Scanner universel eM(byte[]) installe.");
-
-            // Aussi retransformer les classes deja chargees qui matchent
-            int found = 0;
-            for (Class<?> c : inst.getAllLoadedClasses()) {
-                try {
-                    for (java.lang.reflect.Method m : c.getDeclaredMethods()) {
-                        if (m.getName().equals("eM") && m.getParameterCount() == 1 && m.getParameterTypes()[0] == byte[].class) {
-                            log("=== eM(byte[]) DEJA CHARGEE: " + c.getName() + " | retour=" + m.getReturnType().getName() + " ===");
-                            if (inst.isModifiableClass(c)) {
-                                inst.retransformClasses(c);
-                                log("RETRANSFORM OK: " + c.getName());
-                            }
-                            found++;
-                            break;
-                        }
-                    }
-                } catch (Throwable ignored) {}
-            }
-            log("Classes avec eM(byte[]) deja chargees: " + found);
-
-        } catch (Exception ex) {
-            log("ERREUR scanner eM: " + ex.getClass().getName() + " - " + ex.getMessage());
-            ex.printStackTrace();
-        }
-        // === FIN SCANNER ===
     }
 
     // =========================================================
@@ -324,6 +269,244 @@ public class WakfuSpyAgent {
                 // fallback
             }
         }
+    }
+
+    // =========================================================
+    //  DECODEUR PROTOBUF - pour cru (builds) et csS (stuff)
+    // =========================================================
+
+    /**
+     * Decode le payload protobuf d'un message cru ou csS et l'ecrit dans
+     * wakfu_items_decoded.jsonl + wakfu_items_summary.log.
+     *
+     * cru : 12 bytes de header non-protobuf puis protobuf. Field 3 (0x1A) = nom du build.
+     * csS : protobuf direct depuis l'offset 0.
+     */
+    public static void decodeProto(String msgType, byte[] data) {
+        if (data == null || data.length < 4) return;
+        try {
+            String ts = new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
+
+            // cru a un header 12-bytes non-protobuf (00 00 00 XX 00 00 00 XX 00 00 XX XX)
+            int protoStart = 0;
+            if ("cru".equals(msgType) && data.length > 12 && (data[0] & 0xFF) == 0 && (data[1] & 0xFF) == 0) {
+                protoStart = 12;
+            }
+
+            // Parse generique du protobuf -> JSON
+            String protoJson = parseProtoJson(data, protoStart, data.length, 0);
+
+            // Pour cru: scan rapide des noms de builds (field 0x1A = 3)
+            String namesJson = "[]";
+            if ("cru".equals(msgType)) {
+                namesJson = scanProtoStrings(data, protoStart, data.length);
+            }
+
+            // JSON final
+            StringBuilder out = new StringBuilder(1024);
+            out.append("{\"ts\":\"").append(ts).append("\"");
+            out.append(",\"type\":\"").append(msgType).append("\"");
+            out.append(",\"size\":").append(data.length);
+            out.append(",\"protoStart\":").append(protoStart);
+            if ("cru".equals(msgType)) out.append(",\"names\":").append(namesJson);
+            out.append(",\"proto\":").append(protoJson);
+            out.append("}");
+
+            ItemLogWriter.writeItem(out.toString());
+
+            String summary = ts + "|PROTO|" + msgType + "|size=" + data.length + "|names=" + namesJson;
+            log(summary);
+            ItemLogWriter.writeSummary(summary);
+
+        } catch (Throwable t) {
+            log("PROTO_ERROR|" + msgType + "|" + t.getMessage());
+        }
+    }
+
+    /**
+     * Parse recursif d'un buffer protobuf. Retourne un objet JSON avec les champs
+     * groupes en arrays si repetitifs. Profondeur max 3, 50 champs max par niveau.
+     */
+    private static String parseProtoJson(byte[] data, int start, int end, int depth) {
+        if (depth > 3 || data == null || start >= end) return "{}";
+
+        java.util.ArrayList<Integer> fieldNums = new java.util.ArrayList<>();
+        java.util.ArrayList<String> fieldVals  = new java.util.ArrayList<>();
+        int[] pos = {start};
+        int count = 0;
+
+        while (pos[0] < end && count < 50) {
+            try {
+                long tag = readProtoVarint(data, pos, end);
+                if (tag <= 0 || pos[0] > end) break;
+                int fieldNum = (int)(tag >>> 3);
+                int wireType = (int)(tag & 0x7);
+                if (fieldNum <= 0 || fieldNum > 65536) { pos[0] = end; break; }
+
+                String val = null;
+                switch (wireType) {
+                    case 0: {
+                        long v = readProtoVarint(data, pos, end);
+                        val = Long.toString(v);
+                        break;
+                    }
+                    case 1: {
+                        if (pos[0] + 8 > end) { pos[0] = end; break; }
+                        long v = 0;
+                        for (int i = 0; i < 8; i++) v |= ((long)(data[pos[0]+i] & 0xFF)) << (i*8);
+                        pos[0] += 8;
+                        val = Long.toString(v);
+                        break;
+                    }
+                    case 2: {
+                        long lenL = readProtoVarint(data, pos, end);
+                        if (lenL < 0 || lenL > 200000) { pos[0] = end; break; }
+                        int len = (int)lenL;
+                        if (pos[0] + len > end) { pos[0] = end; break; }
+                        int subStart = pos[0];
+                        pos[0] += len;
+
+                        String asStr = tryProtoUtf8(data, subStart, len);
+                        if (asStr != null) {
+                            val = "\"" + ItemLogWriter.escapeJson(asStr) + "\"";
+                        } else if (depth < 3 && len >= 2) {
+                            String sub = parseProtoJson(data, subStart, subStart + len, depth + 1);
+                            val = "{}".equals(sub)
+                                ? "\"0x" + hexProtoStr(data, subStart, Math.min(len, 8)) + "\""
+                                : sub;
+                        } else {
+                            val = "\"0x" + hexProtoStr(data, subStart, Math.min(len, 8)) + "\"";
+                        }
+                        break;
+                    }
+                    case 5: {
+                        if (pos[0] + 4 > end) { pos[0] = end; break; }
+                        int v = 0;
+                        for (int i = 0; i < 4; i++) v |= (data[pos[0]+i] & 0xFF) << (i*8);
+                        pos[0] += 4;
+                        val = Integer.toString(v);
+                        break;
+                    }
+                    default:
+                        pos[0] = end;
+                        break;
+                }
+
+                if (val != null) {
+                    fieldNums.add(fieldNum);
+                    fieldVals.add(val);
+                    count++;
+                }
+            } catch (Exception e) {
+                break;
+            }
+        }
+
+        // Grouper les champs repetitifs en arrays
+        java.util.LinkedHashMap<Integer, java.util.ArrayList<String>> grouped = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < fieldNums.size(); i++) {
+            int fn = fieldNums.get(i);
+            if (!grouped.containsKey(fn)) grouped.put(fn, new java.util.ArrayList<>());
+            grouped.get(fn).add(fieldVals.get(i));
+        }
+
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+        for (java.util.Map.Entry<Integer, java.util.ArrayList<String>> e : grouped.entrySet()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"f").append(e.getKey()).append("\":");
+            java.util.ArrayList<String> v = e.getValue();
+            if (v.size() == 1) {
+                sb.append(v.get(0));
+            } else {
+                sb.append("[");
+                int cap = Math.min(v.size(), 15);
+                for (int i = 0; i < cap; i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append(v.get(i));
+                }
+                if (v.size() > 15) sb.append(",\"+(").append(v.size() - 15).append(")\"");
+                sb.append("]");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /** Lit un varint protobuf, avance pos[0]. */
+    private static long readProtoVarint(byte[] data, int[] pos, int limit) {
+        long result = 0;
+        int shift = 0;
+        while (pos[0] < limit && shift < 63) {
+            int b = data[pos[0]++] & 0xFF;
+            result |= (long)(b & 0x7F) << shift;
+            if ((b & 0x80) == 0) return result;
+            shift += 7;
+        }
+        return result;
+    }
+
+    /**
+     * Retourne les bytes comme String UTF-8 si c'est du texte lisible
+     * (au moins une lettre, >= 70% printable, valide UTF-8). Null sinon.
+     */
+    private static String tryProtoUtf8(byte[] data, int start, int len) {
+        if (len < 2 || len > 200) return null;
+        try {
+            byte[] sub = new byte[len];
+            System.arraycopy(data, start, sub, 0, len);
+            String s = new String(sub, "UTF-8");
+            // Verification round-trip (detecte UTF-8 invalide)
+            byte[] back = s.getBytes("UTF-8");
+            if (back.length != len) return null;
+            int letters = 0, printable = 0;
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
+                if (Character.isLetter(c)) letters++;
+                if (c >= 0x20 || c == '\t') printable++;
+            }
+            if (letters < 1 || printable < (int)(s.length() * 0.7)) return null;
+            return s;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Scan lineaire pour les strings de field 3 (tag 0x1A) dans un buffer protobuf.
+     * Utilise pour extraire les noms de builds depuis les messages cru.
+     */
+    private static String scanProtoStrings(byte[] data, int start, int end) {
+        StringBuilder result = new StringBuilder("[");
+        int count = 0;
+        for (int i = start; i < end - 2; i++) {
+            if ((data[i] & 0xFF) == 0x1A) {
+                int len = data[i+1] & 0xFF;
+                if (len >= 3 && len <= 80 && i + 2 + len <= end) {
+                    String s = tryProtoUtf8(data, i + 2, len);
+                    if (s != null) {
+                        if (count > 0) result.append(",");
+                        result.append("\"").append(ItemLogWriter.escapeJson(s)).append("\"");
+                        count++;
+                        i += 1 + len; // sauter le string scanne
+                    }
+                }
+            }
+        }
+        result.append("]");
+        return result.toString();
+    }
+
+    /** Encode N bytes en hexadecimal (pour les champs binaires non-texte). */
+    private static String hexProtoStr(byte[] data, int start, int len) {
+        StringBuilder sb = new StringBuilder(len * 2);
+        for (int i = 0; i < len && start + i < data.length; i++) {
+            int v = data[start + i] & 0xFF;
+            sb.append("0123456789ABCDEF".charAt(v >> 4));
+            sb.append("0123456789ABCDEF".charAt(v & 0xF));
+        }
+        return sb.toString();
     }
 
     // =========================================================
