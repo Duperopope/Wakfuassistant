@@ -136,34 +136,25 @@ public class WakfuSpyAgent {
 
         builder.installOn(inst);
 
-        // === HOOK ITEM DECODER (fgA.eM) - RETRANSFORM ===
+        // === SCANNER eM(byte[]) + HOOK DYNAMIQUE ===
         try {
-            log("Installation hook item decoder RETRANSFORM (fgA.eM)...");
+            log("Installation scanner universel eM(byte[])...");
 
+            // Un seul AgentBuilder qui intercepte TOUTE classe ayant eM(byte[])
             new AgentBuilder.Default()
                 .disableClassFormatChanges()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
-                .with(new AgentBuilder.Listener.Adapter() {
-                    @Override
-                    public void onTransformation(net.bytebuddy.description.type.TypeDescription td,
-                                                  ClassLoader cl,
-                                                  net.bytebuddy.utility.JavaModule mod,
-                                                  boolean loaded,
-                                                  net.bytebuddy.dynamic.DynamicType dt) {
-                        log("RETRANSFORM SUCCESS: " + td.getName() + " (loaded=" + loaded + ")");
-                    }
-                    @Override
-                    public void onError(String typeName,
-                                        ClassLoader cl,
-                                        net.bytebuddy.utility.JavaModule mod,
-                                        boolean loaded,
-                                        Throwable throwable) {
-                        log("RETRANSFORM ERROR on " + typeName + ": " + throwable.getMessage());
-                    }
-                })
-                .type(ElementMatchers.named("fgA"))
+                .type(ElementMatchers.declaresMethod(
+                    ElementMatchers.named("eM")
+                        .and(ElementMatchers.takesArguments(1))
+                        .and(ElementMatchers.takesArgument(0, byte[].class))
+                ))
                 .transform((builder2, typeDescription, classLoader, module, protectionDomain) -> {
-                    log("RETRANSFORM TRIGGERED on: " + typeDescription.getName());
+                    log("=== eM(byte[]) TROUVEE dans: " + typeDescription.getName() + " ===");
+                    // Logger toutes les methodes de cette classe
+                    for (net.bytebuddy.description.method.MethodDescription.InDefinedShape m : typeDescription.getDeclaredMethods()) {
+                        log("  METHOD: " + m.getName() + " | params=" + m.getParameters().size() + " | returns=" + m.getReturnType().getTypeName());
+                    }
                     return builder2.visit(
                         Advice.to(ItemDecoderAdvice.class)
                             .on(ElementMatchers.named("eM")
@@ -173,32 +164,32 @@ public class WakfuSpyAgent {
                 })
                 .installOn(inst);
 
-            log("Hook item decoder RETRANSFORM installe.");
+            log("Scanner universel eM(byte[]) installe.");
 
-            // Scanner fgA deja chargee (probable - confirmee dans tous les logs)
-            boolean fgAFound = false;
+            // Aussi retransformer les classes deja chargees qui matchent
+            int found = 0;
             for (Class<?> c : inst.getAllLoadedClasses()) {
-                if (c.getName().equals("fgA")) {
-                    log("CLASSE fgA CHARGEE: modifiable=" + inst.isModifiableClass(c));
-                    fgAFound = true;
-                    try {
-                        inst.retransformClasses(c);
-                        log("RETRANSFORMATION EXPLICITE fgA REUSSIE");
-                    } catch (Exception e) {
-                        log("ERREUR retransformation fgA: " + e.getClass().getName() + " - " + e.getMessage());
+                try {
+                    for (java.lang.reflect.Method m : c.getDeclaredMethods()) {
+                        if (m.getName().equals("eM") && m.getParameterCount() == 1 && m.getParameterTypes()[0] == byte[].class) {
+                            log("=== eM(byte[]) DEJA CHARGEE: " + c.getName() + " | retour=" + m.getReturnType().getName() + " ===");
+                            if (inst.isModifiableClass(c)) {
+                                inst.retransformClasses(c);
+                                log("RETRANSFORM OK: " + c.getName());
+                            }
+                            found++;
+                            break;
+                        }
                     }
-                    break;
-                }
+                } catch (Throwable ignored) {}
             }
-            if (!fgAFound) {
-                log("fgA PAS ENCORE CHARGEE - le hook la captera au chargement");
-            }
+            log("Classes avec eM(byte[]) deja chargees: " + found);
 
-        } catch (Exception hookEx) {
-            log("ERREUR hook RETRANSFORM: " + hookEx.getClass().getName() + " - " + hookEx.getMessage());
-            hookEx.printStackTrace();
+        } catch (Exception ex) {
+            log("ERREUR scanner eM: " + ex.getClass().getName() + " - " + ex.getMessage());
+            ex.printStackTrace();
         }
-        // === FIN HOOK ITEM DECODER ===
+        // === FIN SCANNER ===
     }
 
     // =========================================================
