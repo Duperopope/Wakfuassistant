@@ -1,0 +1,46 @@
+=== crV dans messages log ===
+Nombre de lignes crV: 636
+04:09:15.116|MSG|crV|mgE={-1811995158655771=azy@bd0e026,-1811995158555590=azy@4cfcc1ac,-1811995158889376=azy@9814513c,-181199...|_fieldCount=1
+04:09:15.165|MSG|crv|iJl=2451720|_fieldCount=1
+04:09:15.165|MSG|crv|iJl=2451720|_fieldCount=1
+04:10:19.148|MSG|crV|mgE={-1811995158513824=azy@bf8c1982}|_fieldCount=1
+04:10:19.148|MSG|crV|mgE={-1811995158513824=azy@bf8c1982}|_fieldCount=1
+
+=== Erreurs recentes agent spy ===
+[04:10:04.020] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:08.714] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:09.029] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:13.717] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:14.052] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:18.733] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:19.059] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:23.740] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:24.046] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:28.743] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:29.049] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:33.752] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:34.056] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+[04:10:38.755] DISCOVERY|java.lang.UnsupportedOperationException|size=654
+[04:10:39.079] DISCOVERY|com.sun.tools.attach.AttachOperationFailedException|size=436
+
+=== Fichiers dans logs/ ===
+runs | 0 KB
+build_fgA_fix_err.log | 0 KB
+build_fgA_fix.log | 2.9 KB
+build_pivot_err.log | 0 KB
+build_pivot.log | 2.9 KB
+build_retransform_20260321_214007.log | 6.5 KB
+build_retransform_20260321_214007.log.err | 0.2 KB
+build_scan_err.log | 0 KB
+build_scan.log | 2.9 KB
+build_v2_20260322_005256_err.log | 0 KB
+build_v2_20260322_005256.log | 6.5 KB
+build_v2_20260322_012347_err.log | 0 KB
+build_v2_20260322_012347.log | 6.5 KB
+build_v3_err.log | 0 KB
+build_v3.log | 2.9 KB
+wakfu_agent_spy.log | 55685.5 KB
+wakfu_hdv.log | 27159.2 KB
+wakfu_items_decoded.jsonl | 172.7 KB
+wakfu_items_summary.log | 8.9 KB
+wakfu_messages.log | 44438.6 KB

@@ -553,4 +553,131 @@ public class WakfuSpyAgent {
             return null; // Ne modifie rien
         }
     }
+
+    // === INSPECT AZY OBJECT (HDV OFFER) ===
+    public static void inspectObject(String context, Object obj, String logPath) {
+        try {
+            if (obj == null) return;
+            Class<?> clazz = obj.getClass();
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\"context\":\"").append(context).append("\",\"class\":\"").append(clazz.getName()).append("\",\"ts\":\"").append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
+            
+            // Get ALL fields including inherited
+            java.util.List<java.lang.reflect.Field> allFields = new java.util.ArrayList<>();
+            Class<?> current = clazz;
+            while (current != null && !current.equals(Object.class)) {
+                for (java.lang.reflect.Field f : current.getDeclaredFields()) {
+                    allFields.add(f);
+                }
+                current = current.getSuperclass();
+            }
+            
+            sb.append(",\"fieldCount\":").append(allFields.size());
+            sb.append(",\"fields\":{");
+            boolean first = true;
+            for (java.lang.reflect.Field f : allFields) {
+                try {
+                    f.setAccessible(true);
+                    Object val = f.get(obj);
+                    if (!first) sb.append(",");
+                    first = false;
+                    sb.append("\"").append(f.getName()).append("\":");
+                    if (val == null) {
+                        sb.append("null");
+                    } else if (val instanceof Number) {
+                        sb.append(val);
+                    } else if (val instanceof Boolean) {
+                        sb.append(val);
+                    } else if (val instanceof String) {
+                        sb.append("\"").append(((String)val).replace("\"","\\\"")).append("\"");
+                    } else if (val instanceof byte[]) {
+                        byte[] bytes = (byte[]) val;
+                        sb.append("\"byte[").append(bytes.length).append("]\"");
+                    } else if (val instanceof java.util.Map) {
+                        java.util.Map<?,?> map = (java.util.Map<?,?>) val;
+                        sb.append("{\"size\":").append(map.size());
+                        int count = 0;
+                        for (java.util.Map.Entry<?,?> e : map.entrySet()) {
+                            if (count < 3) {
+                                sb.append(",\"").append(e.getKey()).append("\":\"").append(String.valueOf(e.getValue()).substring(0, Math.min(100, String.valueOf(e.getValue()).length()))).append("\"");
+                            }
+                            count++;
+                        }
+                        sb.append("}");
+                    } else if (val instanceof java.util.Collection) {
+                        sb.append("\"Collection[").append(((java.util.Collection<?>)val).size()).append("]\"");
+                    } else {
+                        String s = String.valueOf(val);
+                        if (s.length() > 200) s = s.substring(0, 200);
+                        sb.append("\"").append(s.replace("\"","\\\"").replace("\n"," ")).append("\"");
+                    }
+                } catch (Exception ex) {
+                    if (!first) sb.append(",");
+                    first = false;
+                    sb.append("\"").append(f.getName()).append("\":\"ERROR:").append(ex.getClass().getSimpleName()).append("\"");
+                }
+            }
+            sb.append("}}");
+            
+            // Write to hdv log
+            try (java.io.FileWriter fw = new java.io.FileWriter(logPath, true)) {
+                fw.write(sb.toString());
+                fw.write("\n");
+            }
+            
+            // Also inspect sub-objects that might be items
+            for (java.lang.reflect.Field f : allFields) {
+                try {
+                    f.setAccessible(true);
+                    Object val = f.get(obj);
+                    if (val != null && !val.getClass().getName().startsWith("java.") && !val.getClass().isPrimitive() && !(val instanceof String) && !(val instanceof Number) && !(val instanceof byte[])) {
+                        Class<?> vc = val.getClass();
+                        if (vc.getName().length() <= 5) {
+                            // Short obfuscated class - likely game object, inspect it too
+                            StringBuilder sub = new StringBuilder();
+                            sub.append("{\"context\":\"").append(context).append(".").append(f.getName()).append("\",\"class\":\"").append(vc.getName()).append("\",\"ts\":\"").append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
+                            sub.append(",\"fields\":{");
+                            boolean subFirst = true;
+                            Class<?> subCurrent = vc;
+                            while (subCurrent != null && !subCurrent.equals(Object.class)) {
+                                for (java.lang.reflect.Field sf : subCurrent.getDeclaredFields()) {
+                                    try {
+                                        sf.setAccessible(true);
+                                        Object sval = sf.get(val);
+                                        if (!subFirst) sub.append(",");
+                                        subFirst = false;
+                                        sub.append("\"").append(sf.getName()).append("\":");
+                                        if (sval == null) sub.append("null");
+                                        else if (sval instanceof Number) sub.append(sval);
+                                        else if (sval instanceof Boolean) sub.append(sval);
+                                        else if (sval instanceof String) sub.append("\"").append(((String)sval).replace("\"","\\\"")).append("\"");
+                                        else if (sval instanceof byte[]) sub.append("\"byte[").append(((byte[])sval).length).append("]\"");
+                                        else {
+                                            String ss = String.valueOf(sval);
+                                            if (ss.length() > 150) ss = ss.substring(0, 150);
+                                            sub.append("\"").append(ss.replace("\"","\\\"").replace("\n"," ")).append("\"");
+                                        }
+                                    } catch (Exception ex2) {
+                                        if (!subFirst) sub.append(",");
+                                        subFirst = false;
+                                        sub.append("\"").append(sf.getName()).append("\":\"ERR\"");
+                                    }
+                                }
+                                subCurrent = subCurrent.getSuperclass();
+                            }
+                            sub.append("}}");
+                            try (java.io.FileWriter fw = new java.io.FileWriter(logPath, true)) {
+                                fw.write(sub.toString());
+                                fw.write("\n");
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ex) {
+            try (java.io.FileWriter fw = new java.io.FileWriter(logPath, true)) {
+                fw.write("{\"error\":\"" + ex.getMessage() + "\"}\n");
+            } catch (Exception ignored) {}
+        }
+    }
 }

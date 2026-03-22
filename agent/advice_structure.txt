@@ -1,0 +1,21 @@
+=== STRUCTURE ChannelReadAdvice.java (140 lignes) ===
+L7: public class ChannelReadAdvice {
+L10: public static void onEnter(
+L14: try {
+L15: String msgType = msg.getClass().getName();
+L16: String simpleType = msgType.contains(".") ? msgType.substring(msgType.lastIndexOf('.') + 1) : msgType;
+L28: try {
+L95: } catch (Exception e) {
+L112: // cru : builds d'equipement avec noms (field mgi)
+L113: // csS : equipement complet (field mhJ)
+L114: if ("cru".equals(simpleType) || "csS".equals(simpleType)) {
+L115: try {
+L116: String payloadField = "cru".equals(simpleType) ? "mgi" : "mhJ";
+L118: Class<?> lookupClass = msg.getClass();
+L119: while (lookupClass != null && pf == null) {
+L120: try {
+L122: } catch (NoSuchFieldException nfe) {
+L123: lookupClass = lookupClass.getSuperclass();
+L130: com.wakfuassistant.agent.WakfuSpyAgent.decodeProto(simpleType, (byte[]) payloadVal);
+L133: } catch (Exception ignored) {}
+L136: } catch (Exception e) {

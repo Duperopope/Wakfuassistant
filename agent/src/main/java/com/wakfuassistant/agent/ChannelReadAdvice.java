@@ -133,6 +133,79 @@ public class ChannelReadAdvice {
                 } catch (Exception ignored) {}
             }
 
+
+            // === HDV OFFER INSPECTION (crV) ===
+            if ("crV".equals(simpleType)) {
+                try {
+                    java.lang.reflect.Field mgEField = null;
+                    Class<?> mc = msg.getClass();
+                    while (mc != null) {
+                        try { mgEField = mc.getDeclaredField("mgE"); break; }
+                        catch (NoSuchFieldException e2) { mc = mc.getSuperclass(); }
+                    }
+                    if (mgEField != null) {
+                        mgEField.setAccessible(true);
+                        Object mgE = mgEField.get(msg);
+                        if (mgE instanceof java.util.Map) {
+                            java.util.Map<?,?> offers = (java.util.Map<?,?>) mgE;
+                            for (java.util.Map.Entry<?,?> entry : offers.entrySet()) {
+                                Object offerObj = entry.getValue();
+                                if (offerObj == null) continue;
+                                Class<?> oc = offerObj.getClass();
+                                StringBuilder hdvSb = new StringBuilder();
+                                hdvSb.append("{\"offerId\":\"").append(entry.getKey()).append("\",\"class\":\"").append(oc.getName()).append("\",\"ts\":\"");
+                                hdvSb.append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
+                                // Inspect ALL fields of the offer object
+                                Class<?> walk = oc;
+                                hdvSb.append(",\"fields\":{");
+                                boolean first = true;
+                                while (walk != null && !walk.equals(Object.class)) {
+                                    for (java.lang.reflect.Field f : walk.getDeclaredFields()) {
+                                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                                        try {
+                                            f.setAccessible(true);
+                                            Object val = f.get(offerObj);
+                                            if (!first) hdvSb.append(",");
+                                            first = false;
+                                            hdvSb.append("\"").append(f.getName()).append("\":");
+                                            if (val == null) hdvSb.append("null");
+                                            else if (val instanceof Number) hdvSb.append(val);
+                                            else if (val instanceof Boolean) hdvSb.append(val);
+                                            else if (val instanceof String) hdvSb.append("\"").append(((String)val).replace("\"","\\\"")).append("\"");
+                                            else if (val instanceof byte[]) hdvSb.append("\"byte[").append(((byte[])val).length).append("]\"");
+                                            else {
+                                                String sv = String.valueOf(val);
+                                                if (sv.length() > 300) sv = sv.substring(0, 300);
+                                                hdvSb.append("\"").append(sv.replace("\"","\\\"").replace("\n"," ")).append("\"");
+                                            }
+                                        } catch (Exception fx) {
+                                            if (!first) hdvSb.append(",");
+                                            first = false;
+                                            hdvSb.append("\"").append(f.getName()).append("\":\"ERR\"");
+                                        }
+                                    }
+                                    walk = walk.getSuperclass();
+                                }
+                                hdvSb.append("}}");
+                                // Write to file using pure JDK
+                                java.io.File hdvDir = new java.io.File("logs");
+                                hdvDir.mkdirs();
+                                try (java.io.FileWriter fw2 = new java.io.FileWriter(new java.io.File(hdvDir, "wakfu_hdv_offers.jsonl"), true)) {
+                                    fw2.write(hdvSb.toString());
+                                    fw2.write("\n");
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception hdvEx) {
+                    // Log error to file
+                    try (java.io.FileWriter fw3 = new java.io.FileWriter(new java.io.File("logs", "wakfu_hdv_offers.jsonl"), true)) {
+                        fw3.write("{\"error\":\"" + hdvEx.getClass().getName() + ": " + hdvEx.getMessage() + "\"}\n");
+                    } catch (Exception ignored2) {}
+                }
+            }
+            // === FIN HDV OFFER INSPECTION ===
+
         } catch (Exception e) {
             // silent
         }

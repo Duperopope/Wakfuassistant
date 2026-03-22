@@ -1,0 +1,15 @@
+
+[ERROR] COMPILATION ERROR : 
+[ERROR] /H:/Code/Wakfuassistant/agent/src/main/java/com/wakfuassistant/agent/WakfuSpyAgent.java:[685,24] method inspectObject(java.lang.String,java.lang.Object,java.lang.String) is already defined in class com.wakfuassistant.agent.WakfuSpyAgent
+[INFO] 1 error
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project wakfu-spy-agent: Compilation failure
+[ERROR] /H:/Code/Wakfuassistant/agent/src/main/java/com/wakfuassistant/agent/WakfuSpyAgent.java:[685,24] method inspectObject(java.lang.String,java.lang.Object,java.lang.String) is already defined in class com.wakfuassistant.agent.WakfuSpyAgent
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+
