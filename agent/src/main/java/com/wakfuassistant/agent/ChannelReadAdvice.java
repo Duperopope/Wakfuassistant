@@ -132,11 +132,13 @@ public class ChannelReadAdvice {
                     }
                 } catch (Exception ignored) {}
             }
-// === HDV OFFER INSPECTION (crV) ===
+
+            // === HDV OFFER INSPECTION (crV) ===
             if ("crV".equals(simpleType)) {
-                String hdvPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_offers.jsonl";
-                String hdvErrPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_errors.log";
+                String hdvOfferPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_offers.jsonl";
+                String hdvErrorPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_errors.log";
                 try {
+                    // 1. Trouver le champ mgE
                     java.lang.reflect.Field mgEField = null;
                     Class<?> mc = msg.getClass();
                     while (mc != null && mgEField == null) {
@@ -144,89 +146,145 @@ public class ChannelReadAdvice {
                         catch (NoSuchFieldException nsfe) { mc = mc.getSuperclass(); }
                     }
                     if (mgEField == null) {
-                        try (java.io.FileWriter errW = new java.io.FileWriter(hdvErrPath, true)) {
-                            errW.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|mgE FIELD NOT FOUND in " + msg.getClass().getName() + "\n");
+                        try (java.io.FileWriter ew = new java.io.FileWriter(hdvErrorPath, true)) {
+                            ew.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|mgE not found in " + msg.getClass().getName() + "\n");
                         }
                     } else {
                         mgEField.setAccessible(true);
                         Object mgEVal = mgEField.get(msg);
-                        if (mgEVal instanceof java.util.Map) {
-                            java.util.Map<?,?> offers = (java.util.Map<?,?>) mgEVal;
-                            for (java.util.Map.Entry<?,?> entry : offers.entrySet()) {
-                                Object offerKey = entry.getKey();
-                                Object offerObj = entry.getValue();
-                                StringBuilder hdvSb2 = new StringBuilder();
-                                hdvSb2.append("{\"ts\":\"").append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
-                                hdvSb2.append(",\"offerId\":\"").append(offerKey).append("\"");
-                                hdvSb2.append(",\"offerClass\":\"").append(offerObj.getClass().getName()).append("\"");
-                                // Dump ALL fields of the offer object
-                                hdvSb2.append(",\"fields\":{");
-                                boolean first = true;
-                                Class<?> oc = offerObj.getClass();
-                                while (oc != null) {
-                                    for (java.lang.reflect.Field f : oc.getDeclaredFields()) {
-                                        try {
-                                            f.setAccessible(true);
-                                            Object val = f.get(offerObj);
-                                            if (!first) hdvSb2.append(",");
-                                            first = false;
-                                            String fname = f.getName();
-                                            hdvSb2.append("\"").append(fname).append("\":");
-                                            if (val == null) {
-                                                hdvSb2.append("null");
-                                            } else if (val instanceof Number) {
-                                                hdvSb2.append(val);
-                                            } else if (val instanceof Boolean) {
-                                                hdvSb2.append(val);
-                                            } else if (val instanceof String) {
-                                                hdvSb2.append("\"").append(((String)val).replace("\"","\\\"")).append("\"");
-                                            } else if (val instanceof byte[]) {
-                                                byte[] ba = (byte[]) val;
-                                                hdvSb2.append("\"byte[").append(ba.length).append("]_");
-                                                for (int bi = 0; bi < Math.min(ba.length, 40); bi++) {
-                                                    hdvSb2.append(String.format("%02X", ba[bi] & 0xFF));
-                                                }
-                                                if (ba.length > 40) hdvSb2.append("...");
-                                                hdvSb2.append("\"");
-                                            } else if (val.getClass().isArray()) {
-                                                hdvSb2.append("\"array[").append(java.lang.reflect.Array.getLength(val)).append("]\"");
-                                            } else if (val instanceof java.util.Collection) {
-                                                hdvSb2.append("\"collection[").append(((java.util.Collection<?>)val).size()).append("]\"");
-                                            } else if (val instanceof java.util.Map) {
-                                                hdvSb2.append("\"map[").append(((java.util.Map<?,?>)val).size()).append("]\"");
-                                            } else {
-                                                String vs = val.toString();
-                                                if (vs.length() > 100) vs = vs.substring(0, 100) + "...";
-                                                hdvSb2.append("\"").append(vs.replace("\"","\\\"").replace("\n"," ")).append("\"");
-                                            }
-                                        } catch (Exception fex) {
-                                            if (!first) hdvSb2.append(",");
-                                            first = false;
-                                            hdvSb2.append("\"").append(f.getName()).append("\":\"ERROR:").append(fex.getClass().getSimpleName()).append("\"");
-                                        }
-                                    }
-                                    oc = oc.getSuperclass();
-                                    if (oc != null && oc.equals(Object.class)) break;
+                        
+                        // 2. Obtenir keys() et get(long) via reflexion (TLongObjectHashMap)
+                        java.lang.reflect.Method keysMethod = mgEVal.getClass().getMethod("keys");
+                        long[] offerKeys = (long[]) keysMethod.invoke(mgEVal);
+                        java.lang.reflect.Method getMethod = mgEVal.getClass().getMethod("get", long.class);
+                        
+                        String nowTs = new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date());
+                        
+                        for (long offerKey : offerKeys) {
+                            Object offerObj = getMethod.invoke(mgEVal, offerKey);
+                            if (offerObj == null) continue;
+                            
+                            StringBuilder ob = new StringBuilder(2048);
+                            ob.append("{\"ts\":\"").append(nowTs).append("\"");
+                            ob.append(",\"offerId\":").append(offerKey);
+                            ob.append(",\"offerClass\":\"").append(offerObj.getClass().getName()).append("\"");
+                            // Dump class hierarchy
+                            ob.append(",\"hierarchy\":\"");
+                            Class<?> hc = offerObj.getClass();
+                            while (hc != null && !hc.equals(Object.class)) {
+                                ob.append(hc.getName()).append("(");
+                                int fc = 0;
+                                for (java.lang.reflect.Field hf : hc.getDeclaredFields()) {
+                                    if (!java.lang.reflect.Modifier.isStatic(hf.getModifiers())) fc++;
                                 }
-                                hdvSb2.append("}}");
-                                try (java.io.FileWriter fw4 = new java.io.FileWriter(hdvPath, true)) {
-                                    fw4.write(hdvSb2.toString() + "\n");
-                                    fw4.flush();
-                                }
+                                ob.append(fc).append("f)");
+                                hc = hc.getSuperclass();
+                                if (hc != null && !hc.equals(Object.class)) ob.append(" -> ");
                             }
-                        } else {
-                            try (java.io.FileWriter errW2 = new java.io.FileWriter(hdvErrPath, true)) {
-                                errW2.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|mgE is not Map: " + (mgEVal == null ? "null" : mgEVal.getClass().getName()) + "\n");
+                            ob.append("\"");
+                            ob.append(",\"fields\":{");
+                            
+                            boolean isFirst = true;
+                            Class<?> oc = offerObj.getClass();
+                            while (oc != null && !oc.equals(Object.class)) {
+                                for (java.lang.reflect.Field of : oc.getDeclaredFields()) {
+                                    if (java.lang.reflect.Modifier.isStatic(of.getModifiers())) continue;
+                                    try {
+                                        of.setAccessible(true);
+                                        Object ov = of.get(offerObj);
+                                        if (!isFirst) ob.append(",");
+                                        isFirst = false;
+                                        ob.append("\"").append(of.getName()).append("\":");
+                                        
+                                        if (ov == null) {
+                                            ob.append("null");
+                                        } else if (ov instanceof Number) {
+                                            ob.append(ov);
+                                        } else if (ov instanceof Boolean) {
+                                            ob.append(ov);
+                                        } else if (ov instanceof String) {
+                                            ob.append("\"").append(((String)ov).replace("\\","\\\\").replace("\"","\\\"")).append("\"");
+                                        } else if (ov instanceof byte[]) {
+                                            byte[] ba = (byte[]) ov;
+                                            ob.append("\"byte[").append(ba.length).append("]_");
+                                            for (int xi = 0; xi < Math.min(ba.length, 80); xi++) {
+                                                int bv = ba[xi] & 0xFF;
+                                                ob.append("0123456789ABCDEF".charAt(bv >> 4));
+                                                ob.append("0123456789ABCDEF".charAt(bv & 0xF));
+                                            }
+                                            if (ba.length > 80) ob.append("...");
+                                            ob.append("\"");
+                                        } else if (ov instanceof int[]) {
+                                            int[] ia = (int[]) ov;
+                                            ob.append("[");
+                                            for (int xi = 0; xi < Math.min(ia.length, 30); xi++) {
+                                                if (xi > 0) ob.append(",");
+                                                ob.append(ia[xi]);
+                                            }
+                                            if (ia.length > 30) ob.append(",...(").append(ia.length).append(")");
+                                            ob.append("]");
+                                        } else if (ov instanceof long[]) {
+                                            long[] la = (long[]) ov;
+                                            ob.append("[");
+                                            for (int xi = 0; xi < Math.min(la.length, 30); xi++) {
+                                                if (xi > 0) ob.append(",");
+                                                ob.append(la[xi]);
+                                            }
+                                            if (la.length > 30) ob.append(",...(").append(la.length).append(")");
+                                            ob.append("]");
+                                        } else {
+                                            // Sous-objet: dump ses champs (1 niveau)
+                                            Class<?> sc = ov.getClass();
+                                            ob.append("{\"_class\":\"").append(sc.getSimpleName()).append("\"");
+                                            java.lang.reflect.Field[] sfs = sc.getDeclaredFields();
+                                            for (java.lang.reflect.Field sf : sfs) {
+                                                if (java.lang.reflect.Modifier.isStatic(sf.getModifiers())) continue;
+                                                try {
+                                                    sf.setAccessible(true);
+                                                    Object sv = sf.get(ov);
+                                                    ob.append(",\"").append(sf.getName()).append("\":");
+                                                    if (sv == null) ob.append("null");
+                                                    else if (sv instanceof Number) ob.append(sv);
+                                                    else if (sv instanceof Boolean) ob.append(sv);
+                                                    else if (sv instanceof String) ob.append("\"").append(((String)sv).replace("\\","\\\\").replace("\"","\\\"")).append("\"");
+                                                    else ob.append("\"").append(sv.getClass().getSimpleName()).append("\"");
+                                                } catch (Exception sfx) {
+                                                    ob.append(",\"").append(sf.getName()).append("\":\"ERR\"");
+                                                }
+                                            }
+                                            ob.append("}");
+                                        }
+                                    } catch (Exception fx) {
+                                        if (!isFirst) ob.append(",");
+                                        isFirst = false;
+                                        ob.append("\"").append(of.getName()).append("\":\"ERROR:").append(fx.getClass().getSimpleName()).append("\"");
+                                    }
+                                }
+                                oc = oc.getSuperclass();
+                            }
+                            ob.append("}}");
+                            
+                            try (java.io.FileWriter ofw = new java.io.FileWriter(hdvOfferPath, true)) {
+                                ofw.write(ob.toString());
+                                ofw.write("\n");
+                                ofw.flush();
                             }
                         }
                     }
-                } catch (Exception hdvEx2) {
-                    try (java.io.FileWriter errW3 = new java.io.FileWriter(hdvErrPath, true)) {
-                        errW3.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|EXCEPTION:" + hdvEx2.getClass().getName() + ":" + hdvEx2.getMessage() + "\n");
-                    } catch (Exception ignored2) {}
+                } catch (Exception hdvEx) {
+                    try (java.io.FileWriter ew2 = new java.io.FileWriter(hdvErrorPath, true)) {
+                        java.io.StringWriter sw2 = new java.io.StringWriter();
+                        hdvEx.printStackTrace(new java.io.PrintWriter(sw2));
+                        ew2.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|" + sw2.toString().replace("\n"," | ") + "\n");
+                    } catch (Exception ign) {}
                 }
             }
             // === FIN HDV OFFER INSPECTION ===
+
+
+
+
+
 
 
             
