@@ -1,0 +1,52 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+import java.nio.ByteBuffer;
+
+/*
+ * Renamed from pC
+ */
+class pc_1
+extends fi_1 {
+    final /* synthetic */ pb_2 Ta;
+
+    pc_1(pb_2 pb_22) {
+        this.Ta = pb_22;
+    }
+
+    @Override
+    public void as(ByteBuffer byteBuffer) {
+        try {
+            boolean bl = this.Ta.aF(byteBuffer);
+            if (bl) {
+                this.zq();
+            } else {
+                this.D("Erreur lors de la s\u00e9rialisation de CharacterSerializedDungeonProgression");
+            }
+        }
+        catch (Exception exception) {
+            this.a("Exception lev\u00e9e lors de la s\u00e9rialisation de CharacterSerializedDungeonProgression", exception);
+        }
+    }
+
+    @Override
+    public void a(ByteBuffer byteBuffer, int n) {
+        try {
+            boolean bl = this.Ta.b(byteBuffer, n);
+            if (bl) {
+                this.zq();
+            } else {
+                this.D("Erreur lors de la d\u00e9s\u00e9rialisation de CharacterSerializedDungeonProgression");
+            }
+        }
+        catch (Exception exception) {
+            this.a("Exception lev\u00e9e lors de la d\u00e9s\u00e9rialisation de CharacterSerializedDungeonProgression", exception);
+        }
+    }
+
+    @Override
+    public int zt() {
+        return this.Ta.DN();
+    }
+}
+

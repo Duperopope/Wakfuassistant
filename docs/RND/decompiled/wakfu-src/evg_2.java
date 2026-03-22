@@ -1,0 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+/*
+ * Renamed from evG
+ */
+final class evg_2
+extends eva_1 {
+    @Override
+    public evv_2 feu() {
+        return new frq_0();
+    }
+}
+

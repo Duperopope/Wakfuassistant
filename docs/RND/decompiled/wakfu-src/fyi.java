@@ -1,0 +1,46 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+public class fyi
+implements aqz_2 {
+    protected int o;
+    protected String asF;
+    protected fvd tyG;
+
+    public int d() {
+        return this.o;
+    }
+
+    public String aGr() {
+        return this.asF;
+    }
+
+    public fvd gnz() {
+        return this.tyG;
+    }
+
+    @Override
+    public void reset() {
+        this.o = 0;
+        this.asF = null;
+        this.tyG = null;
+    }
+
+    @Override
+    public void a(aqh_1 aqh_12) {
+        this.o = aqh_12.bGI();
+        this.asF = aqh_12.bGL().intern();
+        if (aqh_12.aTf() != 0) {
+            this.tyG = new fvd();
+            this.tyG.a(aqh_12);
+        } else {
+            this.tyG = null;
+        }
+    }
+
+    @Override
+    public final int bGA() {
+        return ewj_2.ozG.d();
+    }
+}
+

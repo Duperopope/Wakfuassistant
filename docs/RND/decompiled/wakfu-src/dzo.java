@@ -1,0 +1,50 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+import java.util.Stack;
+
+public class dzo
+implements fhh_2 {
+    private fhq_2 okR;
+    private Stack<fhs_2> nei = new Stack();
+
+    @Override
+    public void a(fhs_2 fhs_22, fhq_2 fhq_22, fes_2 fes_22) {
+        this.okR = fhq_22;
+        this.nei.push(fhs_22);
+        fhs_2 fhs_23 = this.nei.peek();
+        fes_2 fes_23 = fes_22;
+        fys_0 fys_02 = fes_23.getAppearance();
+        fys_02.setElementMap(fhs_23);
+        fes_22.X(fys_02);
+        fys_02.guy();
+        String string = "pmbNeoMap";
+        fkd_1 fkd_12 = fkd_1.checkOut();
+        fkd_12.setElementMap(fhs_23);
+        if (fhs_23 != null && string != null) {
+            fhs_23.a(string, fkd_12);
+        }
+        fkd_12.setRepeated(false);
+        fkd_12.setScaled(false);
+        fys_02.X(fkd_12);
+        fkd_12.guy();
+        String string2 = "pmNeoMap";
+        fze fze2 = fze.checkOut();
+        fze2.setElementMap(fhs_23);
+        if (fhs_23 != null && string2 != null) {
+            fhs_23.a(string2, fze2);
+        }
+        fze2.setHeight(1080);
+        fze2.setPosition(fzw_0.tLg);
+        fze2.setTexture(this.okR.uF("txNeoMap"));
+        fze2.setWidth(1920);
+        fze2.setX(0);
+        fze2.setY(0);
+        fkd_12.X(fze2);
+        fze2.guy();
+        fze2.onChildrenAdded();
+        fkd_12.onChildrenAdded();
+        fys_02.onChildrenAdded();
+    }
+}
+

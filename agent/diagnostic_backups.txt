@@ -1,0 +1,62 @@
+=== BACKUPS ===
+WakfuSpyAgent.java.bak_20260321_212908 | 13.1 KB | 21:35:30
+WakfuSpyAgent.java.bak_v2_20260322_005256 | 13.1 KB | 21:35:30
+WakfuSpyAgent.java.bak_v2_20260322_012347 | 13.1 KB | 21:35:30
+WakfuSpyAgent.java.bak_20260321_213326 | 14.7 KB | 21:29:09
+WakfuSpyAgent.java.bak_retransform_20260321_214007 | 14.7 KB | 21:29:09
+WakfuSpyAgent.java | 16.9 KB | 01:23:47
+
+=== 25 PREMIERES LIGNES FICHIER ACTUEL ===
+package com.wakfuassistant.agent;
+
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
+
+import java.io.*;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Wakfu Spy Agent V3.1
+ * 
+ * Architecture:
+ *   - Byte Buddy instrument aDj.channelRead0 avec ChannelReadAdvice (INLINE)
+ *   - L'advice utilise UNIQUEMENT des classes JDK (java.lang.reflect, java.io)
+ *   - Pas d'appel a des classes de l'agent depuis l'advice
+
+=== BACKUP LE PLUS GROS ===
+Fichier: WakfuSpyAgent.java.bak_20260321_213326
+package com.wakfuassistant.agent;
+
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
+
+import java.io.*;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Wakfu Spy Agent V3.1
+ * 
+ * Architecture:
+ *   - Byte Buddy instrument aDj.channelRead0 avec ChannelReadAdvice (INLINE)
+ *   - L'advice utilise UNIQUEMENT des classes JDK (java.lang.reflect, java.io)
+ *   - Pas d'appel a des classes de l'agent depuis l'advice

@@ -1,0 +1,164 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+import java.awt.Insets;
+import java.util.Stack;
+
+/*
+ * Renamed from dnK
+ */
+public class dnk_2
+implements fhh_2 {
+    private fhq_2 okR;
+    private Stack<fhs_2> nei = new Stack();
+
+    @Override
+    public void a(fhs_2 fhs_22, fhq_2 fhq_22, fes_2 fes_22) {
+        this.okR = fhq_22;
+        this.nei.push(fhs_22);
+        fhs_2 fhs_23 = this.nei.peek();
+        fes_2 fes_23 = fes_22;
+        fym_0 fym_02 = (fym_0)fes_23.getAppearance();
+        fym_02.setElementMap(fhs_23);
+        fym_02.setAlignment(faa_2.tLO);
+        fym_02.setState("default");
+        fes_22.X(fym_02);
+        fym_02.guy();
+        fyW fyW2 = fyW.checkOut();
+        fyW2.setRenderer(fyw_0.gqw().gqB().uG("fontDefault10"));
+        fyW2.setElementMap(fhs_23);
+        fym_02.X(fyW2);
+        fyW2.guy();
+        fyW2.onChildrenAdded();
+        fyp_0 fyp_02 = fyp_0.checkOut();
+        fyp_02.setElementMap(fhs_23);
+        fyp_02.setColor(new fhl_2("defaultLightColor"));
+        fym_02.X(fyp_02);
+        fyp_02.guy();
+        fyp_02.onChildrenAdded();
+        fkk_1 fkk_12 = new fkk_1();
+        fkk_12.aVI();
+        fkk_12.setElementMap(fhs_23);
+        fym_02.X(fkk_12);
+        fkk_12.guy();
+        fyp_0 fyp_03 = fyp_0.checkOut();
+        fyp_03.setElementMap(fhs_23);
+        fyp_03.setColor(new fhl_2("defaultDarkGreyColor"));
+        fkk_12.X(fyp_03);
+        fyp_03.guy();
+        fyp_03.onChildrenAdded();
+        fkk_12.onChildrenAdded();
+        fkm_1 fkm_12 = new fkm_1();
+        fkm_12.aVI();
+        fkm_12.setElementMap(fhs_23);
+        fkm_12.setColor(new awx_2(1.0f, 1.0f, 1.0f, 0.1f));
+        fkm_12.setInsets(new Insets(1, 1, 1, 1));
+        fym_02.X(fkm_12);
+        fkm_12.guy();
+        fkm_12.onChildrenAdded();
+        fym_02.onChildrenAdded();
+        fes_2 fes_24 = fes_22;
+        fym_0 fym_03 = (fym_0)fes_24.getAppearance();
+        fym_03.setElementMap(fhs_23);
+        fym_03.setAlignment(faa_2.tLO);
+        fym_03.setState("disabled");
+        fes_22.X(fym_03);
+        fym_03.guy();
+        fyp_0 fyp_04 = fyp_0.checkOut();
+        fyp_04.setElementMap(fhs_23);
+        fyp_04.setColor(new fhl_2("defaultDisabledColor"));
+        fym_03.X(fyp_04);
+        fyp_04.guy();
+        fyp_04.onChildrenAdded();
+        fkk_1 fkk_13 = new fkk_1();
+        fkk_13.aVI();
+        fkk_13.setElementMap(fhs_23);
+        fym_03.X(fkk_13);
+        fkk_13.guy();
+        fyp_0 fyp_05 = fyp_0.checkOut();
+        fyp_05.setElementMap(fhs_23);
+        fyp_05.setColor(new fhl_2("defaultDarkGreyColor"));
+        fkk_13.X(fyp_05);
+        fyp_05.guy();
+        fyp_05.onChildrenAdded();
+        fkk_13.onChildrenAdded();
+        fkm_1 fkm_13 = new fkm_1();
+        fkm_13.aVI();
+        fkm_13.setElementMap(fhs_23);
+        fkm_13.setColor(new awx_2(1.0f, 1.0f, 1.0f, 0.1f));
+        fkm_13.setInsets(new Insets(1, 1, 1, 1));
+        fym_03.X(fkm_13);
+        fkm_13.guy();
+        fkm_13.onChildrenAdded();
+        fym_03.onChildrenAdded();
+        fes_2 fes_25 = fes_22;
+        fym_0 fym_04 = (fym_0)fes_25.getAppearance();
+        fym_04.setElementMap(fhs_23);
+        fym_04.setAlignment(faa_2.tLO);
+        fym_04.setState("mouseHover");
+        fes_22.X(fym_04);
+        fym_04.guy();
+        fyp_0 fyp_06 = fyp_0.checkOut();
+        fyp_06.setElementMap(fhs_23);
+        fyp_06.setColor(new fhl_2("blackColor"));
+        fym_04.X(fyp_06);
+        fyp_06.guy();
+        fyp_06.onChildrenAdded();
+        fkk_1 fkk_14 = new fkk_1();
+        fkk_14.aVI();
+        fkk_14.setElementMap(fhs_23);
+        fym_04.X(fkk_14);
+        fkk_14.guy();
+        fyp_0 fyp_07 = fyp_0.checkOut();
+        fyp_07.setElementMap(fhs_23);
+        fyp_07.setColor(new fhl_2("defaultLightColor"));
+        fkk_14.X(fyp_07);
+        fyp_07.guy();
+        fyp_07.onChildrenAdded();
+        fkk_14.onChildrenAdded();
+        fkm_1 fkm_14 = new fkm_1();
+        fkm_14.aVI();
+        fkm_14.setElementMap(fhs_23);
+        fkm_14.setColor(new fhl_2("pressedBlackColor"));
+        fkm_14.setInsets(new Insets(1, 1, 1, 1));
+        fym_04.X(fkm_14);
+        fkm_14.guy();
+        fkm_14.onChildrenAdded();
+        fym_04.onChildrenAdded();
+        fes_2 fes_26 = fes_22;
+        fym_0 fym_05 = (fym_0)fes_26.getAppearance();
+        fym_05.setElementMap(fhs_23);
+        fym_05.setAlignment(faa_2.tLO);
+        fym_05.setState("pressed");
+        fes_22.X(fym_05);
+        fym_05.guy();
+        fyp_0 fyp_08 = fyp_0.checkOut();
+        fyp_08.setElementMap(fhs_23);
+        fyp_08.setColor(new fhl_2("blackColor"));
+        fym_05.X(fyp_08);
+        fyp_08.guy();
+        fyp_08.onChildrenAdded();
+        fkk_1 fkk_15 = new fkk_1();
+        fkk_15.aVI();
+        fkk_15.setElementMap(fhs_23);
+        fym_05.X(fkk_15);
+        fkk_15.guy();
+        fyp_0 fyp_09 = fyp_0.checkOut();
+        fyp_09.setElementMap(fhs_23);
+        fyp_09.setColor(new fhl_2("pressedBlackColor"));
+        fkk_15.X(fyp_09);
+        fyp_09.guy();
+        fyp_09.onChildrenAdded();
+        fkk_15.onChildrenAdded();
+        fkm_1 fkm_15 = new fkm_1();
+        fkm_15.aVI();
+        fkm_15.setElementMap(fhs_23);
+        fkm_15.setColor(new awx_2(1.0f, 1.0f, 1.0f, 0.1f));
+        fkm_15.setInsets(new Insets(1, 1, 1, 1));
+        fym_05.X(fkm_15);
+        fkm_15.guy();
+        fkm_15.onChildrenAdded();
+        fym_05.onChildrenAdded();
+    }
+}
+

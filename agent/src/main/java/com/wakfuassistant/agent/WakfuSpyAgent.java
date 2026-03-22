@@ -135,6 +135,81 @@ public class WakfuSpyAgent {
         }
 
         builder.installOn(inst);
+
+        // === HOOK ITEM DECODER (fga_0.eM) - RETRANSFORM ===
+        try {
+            log("Installation hook item decoder RETRANSFORM (fga_0.eM)...");
+
+            new AgentBuilder.Default()
+                .disableClassFormatChanges()
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(new AgentBuilder.Listener.Adapter() {
+                    @Override
+                    public void onTransformation(net.bytebuddy.description.type.TypeDescription td,
+                                                  ClassLoader cl,
+                                                  net.bytebuddy.utility.JavaModule mod,
+                                                  boolean loaded,
+                                                  net.bytebuddy.dynamic.DynamicType dt) {
+                        log("RETRANSFORM SUCCESS: " + td.getName() + " (loaded=" + loaded + ")");
+                    }
+                    @Override
+                    public void onError(String typeName,
+                                        ClassLoader cl,
+                                        net.bytebuddy.utility.JavaModule mod,
+                                        boolean loaded,
+                                        Throwable throwable) {
+                        log("RETRANSFORM ERROR on " + typeName + ": " + throwable.getMessage());
+                    }
+                })
+                .type(ElementMatchers.named("fga_0"))
+                .transform((builder2, typeDescription, classLoader, module, protectionDomain) -> {
+                    log("RETRANSFORM TRIGGERED on: " + typeDescription.getName());
+                    return builder2.visit(
+                        Advice.to(ItemDecoderAdvice.class)
+                            .on(ElementMatchers.named("eM")
+                                .and(ElementMatchers.takesArguments(1))
+                                .and(ElementMatchers.takesArgument(0, byte[].class)))
+                    );
+                })
+                .installOn(inst);
+
+            log("Hook item decoder RETRANSFORM installe.");
+
+            // Scanner les classes fga* deja chargees
+            int fgaCount = 0;
+            boolean fga0Found = false;
+            for (Class<?> c : inst.getAllLoadedClasses()) {
+                String name = c.getName();
+                if (name.startsWith("fga")) {
+                    log("CLASSE fga* CHARGEE: " + name + " | modifiable=" + inst.isModifiableClass(c));
+                    fgaCount++;
+                    if (name.equals("fga_0")) { fga0Found = true; }
+                }
+            }
+            log("Total classes fga* chargees: " + fgaCount);
+
+            if (fga0Found) {
+                log("fga_0 DEJA CHARGEE - retransformation explicite...");
+                for (Class<?> c : inst.getAllLoadedClasses()) {
+                    if (c.getName().equals("fga_0")) {
+                        try {
+                            inst.retransformClasses(c);
+                            log("RETRANSFORMATION EXPLICITE fga_0 REUSSIE");
+                        } catch (Exception e) {
+                            log("ERREUR retransformation fga_0: " + e.getClass().getName() + " - " + e.getMessage());
+                        }
+                        break;
+                    }
+                }
+            } else {
+                log("fga_0 PAS ENCORE CHARGEE - le hook la captera au chargement");
+            }
+
+        } catch (Exception hookEx) {
+            log("ERREUR hook RETRANSFORM: " + hookEx.getClass().getName() + " - " + hookEx.getMessage());
+            hookEx.printStackTrace();
+        }
+        // === FIN HOOK ITEM DECODER ===
     }
 
     // =========================================================

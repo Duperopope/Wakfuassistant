@@ -1,0 +1,349 @@
+package com.wakfuassistant.agent;
+
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
+
+import java.io.*;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Wakfu Spy Agent V3.1
+ * 
+ * Architecture:
+ *   - Byte Buddy instrument aDj.channelRead0 avec ChannelReadAdvice (INLINE)
+ *   - L'advice utilise UNIQUEMENT des classes JDK (java.lang.reflect, java.io)
+ *   - Pas d'appel a des classes de l'agent depuis l'advice
+ *   - RuntimeScanner tourne en background pour documenter les classes
+ *
+ * Sources:
+ *   - Elastic Blog: https://www.elastic.co/blog/embracing-invokedynamic-to-tame-class-loaders-in-java-agents
+ *   - Byte Buddy: https://bytebuddy.net/#/tutorial
+ *   - Baeldung: https://www.baeldung.com/byte-buddy
+ */
+public class WakfuSpyAgent {
+
+    // Fichiers de log (chemins absolus pour acces depuis l'advice inline)
+    public static final String LOG_DIR = "H:\\Code\\Wakfuassistant\\agent\\logs";
+    public static final String SPY_LOG = LOG_DIR + "\\wakfu_agent_spy.log";
+    public static final String MSG_LOG = LOG_DIR + "\\wakfu_messages.log";
+    public static final String HDV_LOG = LOG_DIR + "\\wakfu_hdv.log";
+
+    // Stats globales
+    public static final AtomicInteger totalMessages = new AtomicInteger(0);
+    public static final AtomicInteger hdvMessages = new AtomicInteger(0);
+    public static final Set<String> seenMessageTypes = ConcurrentHashMap.newKeySet();
+
+    // Ecriture thread-safe dans les logs
+    private static final Object LOCK = new Object();
+
+    public static void premain(String args, Instrumentation inst) {
+        init(inst, "premain");
+    }
+
+    public static void agentmain(String args, Instrumentation inst) {
+        init(inst, "agentmain");
+    }
+
+    private static void init(Instrumentation inst, String mode) {
+        try {
+            // Creer le dossier de logs
+            new File(LOG_DIR).mkdirs();
+
+            log("========================================");
+            log("WAKFU SPY AGENT V3.1 DEMARRE (mode: " + mode + ")");
+            log("Java version: " + System.getProperty("java.version"));
+            log("========================================");
+
+            // --- Phase 1: Discovery passive (ClassFileTransformer simple) ---
+            inst.addTransformer(new DiscoveryTransformer(), false);
+            log("Phase 1: Discovery transformer OK");
+
+            // --- Phase 2: Byte Buddy intercepte aDj.channelRead0 ---
+            log("Installation Byte Buddy V3.1...");
+            installByteBuddy(inst);
+            log("Byte Buddy V3.1 installe");
+
+            // --- Phase 3: Runtime scanner en background ---
+            Thread scanner = new Thread(() -> runtimeScan(inst), "WakfuSpy-Scanner");
+            scanner.setDaemon(true);
+            scanner.start();
+            log("RuntimeScanner demarre");
+
+        } catch (Throwable t) {
+            log("ERREUR INIT: " + t.getMessage());
+            t.printStackTrace();
+        }
+    }
+
+    /**
+     * Installe Byte Buddy pour intercepter:
+     *  - aDj (handler Netty principal) -> channelRead0
+     *  - aXh, aXi, aXj, aXl, aXm, aXn (handlers pipeline secondaires)
+     */
+    private static void installByteBuddy(Instrumentation inst) {
+        // Classes cibles: le handler principal + handlers pipeline
+        String[] targetClasses = {"aDj", "aXh", "aXi", "aXj", "aXl", "aXm", "aXn"};
+
+        AgentBuilder builder = new AgentBuilder.Default()
+            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+            .with(new AgentBuilder.Listener() {
+                @Override
+                public void onDiscovery(String name, ClassLoader cl, JavaModule mod, boolean loaded) {}
+                @Override
+                public void onTransformation(TypeDescription td, ClassLoader cl, JavaModule mod, boolean loaded, DynamicType dt) {
+                    log("BYTE BUDDY TRANSFORMED: " + td.getName());
+                }
+                @Override
+                public void onIgnored(TypeDescription td, ClassLoader cl, JavaModule mod, boolean loaded) {}
+                @Override
+                public void onError(String name, ClassLoader cl, JavaModule mod, boolean loaded, Throwable t) {
+                    log("BYTE BUDDY ERROR on " + name + ": " + t.getMessage());
+                }
+                @Override
+                public void onComplete(String name, ClassLoader cl, JavaModule mod, boolean loaded) {}
+            });
+
+        for (String target : targetClasses) {
+            if (target.equals("aDj")) {
+                // Handler principal: intercepte channelRead0 avec inspection profonde
+                builder = builder.type(ElementMatchers.named(target))
+                    .transform((b, td, cl, mod, pd) ->
+                        b.visit(Advice.to(ChannelReadAdvice.class)
+                            .on(ElementMatchers.named("channelRead0")
+                                .or(ElementMatchers.named("a")
+                                    .and(ElementMatchers.takesArguments(2)))))
+                    );
+            } else {
+                // Handlers pipeline: inspection legere
+                builder = builder.type(ElementMatchers.named(target))
+                    .transform((b, td, cl, mod, pd) ->
+                        b.visit(Advice.to(PipelineAdvice.class)
+                            .on(ElementMatchers.named("channelRead0")
+                                .or(ElementMatchers.named("channelRead"))))
+                    );
+            }
+        }
+
+        builder.installOn(inst);
+
+        // === HOOK ITEM DECODER : fga_0.eM(byte[]) ===
+        // fga_0.eM() est LE decodeur central d'items du client Wakfu.
+        // Chaque item deserialise (inventaire, equip, HDV) passe par cette methode.
+        // Elle retourne un objet ffV contenant toutes les donnees de l'item.
+        // Source : decompilation fga_0.java (10884 B, 334 lignes)
+        // Ref : memory/PROTOCOL_ITEMS_SERIALIZATION.md
+        log("Installation hook item decoder (fga_0.eM)...");
+        new AgentBuilder.Default()
+            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+            .with(new AgentBuilder.Listener.Adapter() {
+                @Override
+                public void onTransformation(TypeDescription td, ClassLoader cl, JavaModule mod, boolean loaded, DynamicType dt) {
+                    log("ITEM DECODER HOOK TRANSFORMED: " + td.getName());
+                }
+                @Override
+                public void onError(String name, ClassLoader cl, JavaModule mod, boolean loaded, Throwable t) {
+                    log("ITEM DECODER HOOK ERROR on " + name + ": " + t.getMessage());
+                }
+            })
+            .type(ElementMatchers.named("fga_0"))
+            .transform((b, td, cl, mod, pd) ->
+                b.visit(Advice.to(ItemDecoderAdvice.class)
+                    .on(ElementMatchers.named("eM")
+                        .and(ElementMatchers.takesArguments(byte[].class))
+                        .and(ElementMatchers.returns(ElementMatchers.not(ElementMatchers.is(void.class))))))
+            )
+            .installOn(inst);
+        log("Hook item decoder installe sur fga_0.eM(byte[])");
+
+    }
+
+    // =========================================================
+    //  RUNTIME SCANNER - explore les classes chargees
+    // =========================================================
+    private static void runtimeScan(Instrumentation inst) {
+        try {
+            Thread.sleep(15000); // Attendre que le jeu charge
+        } catch (InterruptedException e) {
+            return;
+        }
+
+        log("=== RUNTIME SCAN V3.1 DEBUT ===");
+        log("Classes chargees: " + inst.getAllLoadedClasses().length);
+
+        // Classes cibles a documenter en detail
+        String[] targets = {
+            "aDj", "aAM", "ffV", "feG", "fgA", "fhj", "kF", "uY",
+            "cAu", "cAv", "aXh", "aXi", "aXj", "aXl", "aXm", "aXn",
+            "aXo", "aXp", "aXq", "aXr", "aXt",
+            "aza", "aDK", "ayF", "bgZ",
+            "RT", "SG", "aEF", "ayZ", "eOd", "bJD", "ddU"
+        };
+
+        Set<String> targetSet = new HashSet<>(Arrays.asList(targets));
+
+        for (Class<?> cls : inst.getAllLoadedClasses()) {
+            String name = cls.getName();
+            if (targetSet.contains(name)) {
+                documentClass(cls);
+            }
+        }
+
+        // Chercher aussi les classes avec "market", "hdv", "exchange", "auction"
+        for (Class<?> cls : inst.getAllLoadedClasses()) {
+            String name = cls.getName().toLowerCase();
+            if (name.contains("market") || name.contains("hdv") ||
+                name.contains("exchange") || name.contains("auction") ||
+                name.contains("merchant") || name.contains("trade")) {
+                log("MARKET-RELATED: " + cls.getName());
+                documentClass(cls);
+            }
+        }
+
+        log("=== RUNTIME SCAN V3.1 FIN ===");
+    }
+
+    private static void documentClass(Class<?> cls) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("CLASS DETAIL|").append(cls.getName());
+
+            // Superclass
+            if (cls.getSuperclass() != null) {
+                sb.append("|super=").append(cls.getSuperclass().getName());
+            }
+
+            // Interfaces
+            Class<?>[] ifaces = cls.getInterfaces();
+            if (ifaces.length > 0) {
+                sb.append("|interfaces=");
+                for (int i = 0; i < ifaces.length; i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append(ifaces[i].getName());
+                }
+            }
+
+            // Champs (tous, y compris prives)
+            java.lang.reflect.Field[] fields = cls.getDeclaredFields();
+            if (fields.length > 0) {
+                sb.append("|fields=");
+                for (int i = 0; i < Math.min(fields.length, 30); i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append(fields[i].getName()).append(":").append(fields[i].getType().getSimpleName());
+                }
+                if (fields.length > 30) sb.append("...(").append(fields.length).append(" total)");
+            }
+
+            // Methodes
+            java.lang.reflect.Method[] methods = cls.getDeclaredMethods();
+            if (methods.length > 0) {
+                sb.append("|methods=");
+                for (int i = 0; i < Math.min(methods.length, 20); i++) {
+                    if (i > 0) sb.append(",");
+                    sb.append(methods[i].getName()).append("(");
+                    Class<?>[] params = methods[i].getParameterTypes();
+                    for (int j = 0; j < params.length; j++) {
+                        if (j > 0) sb.append(";");
+                        sb.append(params[j].getSimpleName());
+                    }
+                    sb.append(")");
+                }
+                if (methods.length > 20) sb.append("...(").append(methods.length).append(" total)");
+            }
+
+            log(sb.toString());
+        } catch (Throwable t) {
+            log("CLASS DETAIL ERROR|" + cls.getName() + "|" + t.getMessage());
+        }
+    }
+
+    // =========================================================
+    //  LOGGING UTILITIES
+    // =========================================================
+    public static void log(String message) {
+        String timestamp = new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
+        String line = "[" + timestamp + "] " + message;
+        synchronized (LOCK) {
+            try (FileWriter fw = new FileWriter(SPY_LOG, true)) {
+                fw.write(line + "\n");
+            } catch (IOException e) {
+                System.err.println("[WakfuSpy] " + line);
+            }
+        }
+    }
+
+    public static void logMessage(String line) {
+        synchronized (LOCK) {
+            try (FileWriter fw = new FileWriter(MSG_LOG, true)) {
+                fw.write(line + "\n");
+            } catch (IOException e) {
+                // fallback
+            }
+        }
+    }
+
+    public static void logHdv(String line) {
+        synchronized (LOCK) {
+            try (FileWriter fw = new FileWriter(HDV_LOG, true)) {
+                fw.write(line + "\n");
+            } catch (IOException e) {
+                // fallback
+            }
+        }
+    }
+
+    // =========================================================
+    //  DISCOVERY TRANSFORMER (passive, sans Byte Buddy)
+    // =========================================================
+    static class DiscoveryTransformer implements ClassFileTransformer {
+        private final Set<String> seen = ConcurrentHashMap.newKeySet();
+        private final AtomicInteger count = new AtomicInteger(0);
+
+        // Mots-cles interessants
+        private static final String[] KEYWORDS = {
+            "channel", "handler", "netty", "message", "proto",
+            "item", "inventory", "market", "storage", "operation"
+        };
+
+        @Override
+        public byte[] transform(ClassLoader loader, String className,
+                Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
+                byte[] classfileBuffer) {
+            if (className == null) return null;
+
+            String dotName = className.replace('/', '.');
+            if (seen.add(dotName)) {
+                int n = count.incrementAndGet();
+                String nameLower = dotName.toLowerCase();
+                boolean interesting = false;
+                for (String kw : KEYWORDS) {
+                    if (nameLower.contains(kw)) { interesting = true; break; }
+                }
+                // Classes courtes (obfusquees Wakfu) = toujours interessantes
+                String simpleName = dotName.contains(".") ? dotName.substring(dotName.lastIndexOf('.') + 1) : dotName;
+                if (simpleName.length() <= 4 && !dotName.startsWith("java.") && !dotName.startsWith("sun.") && !dotName.startsWith("jdk.")) {
+                    interesting = true;
+                }
+
+                if (interesting && n <= 15000) {
+                    log("DISCOVERY|" + dotName + "|size=" + classfileBuffer.length);
+                }
+
+                if (n % 5000 == 0) {
+                    log("DISCOVERY STATS|loaded=" + n + " unique=" + seen.size());
+                }
+            }
+            return null; // Ne modifie rien
+        }
+    }
+}
+

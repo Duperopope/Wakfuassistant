@@ -1,5 +1,65 @@
-# CHANGELOG
+# CHANGELOG — Wakfu Assistant
 
+---
+
+## [0.5.0] - 2026-03-21 — Decompilation complete et protocole items
+
+### Ajoute
+
+- Decompilation complete de wakfu-client.jar : 18 979 classes, 86.8 MB de sources Java
+- Cartographie automatique : 1 917 classes reseau, 274 items, 2 279 effets, 109 marche, 2 005 serialiseurs
+- 8 index Markdown generes dans docs/RND/decompiled/wakfu-src/_MAP/
+- Documentation complete du protocole de serialisation des items (uy_1) :
+  - Header : uniqueId (long) + refId (int) + quantity (short)
+  - 8 sous-blocs optionnels : pet, xp, shard, companion, bind, elements, merged, mimiSymbic
+  - Bloc shard (yd_2) : slots (yf_1, 10 bytes), gems (ye_2, 5 bytes), sublimations, charges
+- Enums decodes : rd_0 (5 couleurs slots), ffS (25 slots equipement), fgg_0 (24 proprietes items)
+- Messages reseau identifies par ID exact :
+  - 13668 (cru_0) : items equipes, blob brut -> bbs_2 -> evx_2
+  - 12125 (csn_0) : inventaire complet, long + byte[] -> fga_0.eM -> protobuf kW
+  - 13804 (csf) : update inventaire incremental
+  - 13003 (cso) : item deplace (uid + qty)
+- Protobuf HDV reconstruit et valide :
+  - mg (12294) : SellSearchResult avec mc entries (9 champs)
+  - mi_0 (13653) : BuySearchResult avec mE entries (15 champs)
+  - mk : Pagination (page_index, total_count, page_size)
+- Donnees de test internes Ankama extraites (fhj_0) : 7 items de reference
+- Spec Rust prete pour implementation decodeur (pseudo-code dans 09-PROTOCOL_ITEMS.md)
+
+### Documentation
+
+- memory/PROTOCOL_ITEMS_SERIALIZATION.md : reference complete (~400 lignes)
+- docs/RND/09-PROTOCOL_ITEMS.md : spec technique developpeur (~300 lignes)
+- docs/INDEX.md : refonte complete avec arborescence, statuts, identifiants
+- 7 fichiers de log R&D dans agent/logs/runs/RUN_20260321_175522/
+
+### Decouvertes techniques
+
+- vp_2 (pas vd_2) contient yd_2 : confirme par toString "rawShard"
+- vd_2 = "rawItemElements" (2 bytes : damage + resistance)
+- vj_1 = "mimiSymbic" (4 bytes : skinItemRefId) — dernier sous-bloc
+- fga_0.eM(byte[]) est le decodeur central item (protobuf -> ffV)
+- evx_2 = GameAccountManager (Long2ObjectOpenHashMap<EnumMap>)
+- Couleurs slots : 0=NONE, 1=RED, 2=BLUE, 3=GREEN, 4=WHITE
+- BuyEntry (mE) a 15 champs dont rarity, item_type_ids[], min/max_level
+- SellEntry (mc) a 9 champs dont un Item imbrique (kW protobuf)
+
+### Corrections
+
+- cru_0 (13668) est dans cru_0.java, pas crU.java (crU = msgId 13674)
+- csn_0 (12125) est dans csn_0.java, pas csN.java (csN = msgId 13648 sacrifice)
+- ffS n'est PAS un contexte d'effet mais l'enum des slots d'equipement
+- fgg_0 n'est PAS un enum de couleurs de gemmes mais les proprietes d'items
+
+### Statistiques session
+
+- Duree decompilation CFR : 03:43 (4 GB heap, AMD 5700 X3D)
+- Duree cartographie : 01:29
+- Scripts PowerShell executes : 12
+- Classes analysees en detail : ~50
+- Hypotheses invalidees : 4 (crU/csN confusion, ffS/fgg_0 roles)
+
+---
 ## [Chantier A — CDN Recettes + Tests + Documentation] - 2026-03-21
 
 ### Ajouté
@@ -266,3 +326,5 @@
 
 Voir l'historique git pour les détails de la v1.
 Le tag `v1.0-final` marque le dernier état du prototype.
+
+

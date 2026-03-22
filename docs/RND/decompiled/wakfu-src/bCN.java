@@ -1,0 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+public class bCN
+extends bCJ {
+    public bCN(int n) {
+        super(n);
+    }
+
+    @Override
+    protected void bVi() {
+    }
+
+    @Override
+    public boolean bH(bgy bgy2) {
+        return true;
+    }
+
+    @Override
+    public boolean bI(bgy bgy2) {
+        return true;
+    }
+}
+

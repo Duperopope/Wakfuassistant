@@ -1,0 +1,3238 @@
+Summary for C:\Users\Smedj\AppData\Local\Ankama\Wakfu\lib\wakfu-client.jar
+Decompiled with CFR 0.152
+
+
+ajt_0
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.alea.graphics.havenWorldMini.DisplayedScreenMultiElement float )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aJN
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aJH
+----------------------------
+
+<init>(bsi_0 aJI )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aIr
+----------------------------
+
+<init>(aIq asj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+akm_0
+----------------------------
+
+<init>(akj_0 ZH )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cBb
+----------------------------
+
+<init>(cAY ahd_2 float int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cBc
+----------------------------
+
+<init>(cAY ahd_2 float int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cBm
+----------------------------
+
+<init>(aae_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cnE
+----------------------------
+
+<init>(cnD java.nio.ByteBuffer )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+czp_0
+----------------------------
+
+<init>(czo_0 aWc )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdZ
+----------------------------
+
+<init>(cdv_0 long byte[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ccp_0
+----------------------------
+
+<init>(cco_0 abi_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdv
+----------------------------
+
+<init>(cdu_0 bgv_2 bdj_2 bmv_2 bgy bKV byte )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ccq_0
+----------------------------
+
+<init>(cco_0 bgy int int cov_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfu_0
+----------------------------
+
+<init>(cft_0 evr_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdW
+----------------------------
+
+<init>(cdv_0 bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdq_0
+----------------------------
+
+<init>(java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ccs_0
+----------------------------
+
+<init>(cco_0 abi_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdx_0
+----------------------------
+
+<init>(cdv_0 aue_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdy_0
+----------------------------
+
+<init>(cdv_0 aaj_0 bgt_0 long bzq_2 aie_0 bdj_2 acd_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aUh
+----------------------------
+
+<init>(int int int int java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aTT
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.console.command.debug.ListCharacterInfoCommand gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aUb
+----------------------------
+
+<init>(aUa bdj_2 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aTW
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.console.command.debug.ListResourceInfoCommand java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aTV
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.console.command.debug.ListResourceInfoCommand int int gnu.trove.map.hash.TShortObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aSN
+----------------------------
+
+<init>(asm_0 java.util.regex.Pattern java.lang.StringBuilder int[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aTJ
+----------------------------
+
+cQc()
+  Recovered potentially malformed switches.  Disable with '--allowmalformedswitch false'
+  Unable to fully structure code
+
+
+aTN
+----------------------------
+
+cSw()
+  Unable to fully structure code
+cSJ()
+  Recovered potentially malformed switches.  Disable with '--allowmalformedswitch false'
+  Unable to fully structure code
+
+
+aSQ
+----------------------------
+
+<init>(asm_0 java.util.regex.Pattern java.lang.StringBuilder int[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aSP
+----------------------------
+
+<init>(asm_0 java.util.regex.Pattern java.lang.StringBuilder int[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aso_0
+----------------------------
+
+<init>(asm_0 java.util.regex.Pattern java.lang.StringBuilder int[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ark_0
+----------------------------
+
+<init>(aRj java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aUj
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.console.command.xulor.property.ListCommand java.lang.StringBuilder )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aWP
+----------------------------
+
+<init>(awo_0 bdj_2 bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+awg_0
+----------------------------
+
+<init>(awf_0 bgy bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aWI
+----------------------------
+
+<init>(aWH bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ava_0
+----------------------------
+
+<init>(avz_0 bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aWE
+----------------------------
+
+<init>(aWD bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+awh_0
+----------------------------
+
+<init>(awf_0 bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+awc_0
+----------------------------
+
+<init>(aWB bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aYz
+----------------------------
+
+<init>(eKW gnu.trove.map.hash.TIntObjectHashMap gnu.trove.map.hash.TIntObjectHashMap java.util.Map java.util.Map )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bap
+----------------------------
+
+<init>(gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aZx
+----------------------------
+
+<init>(aZu bgo_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aZH
+----------------------------
+
+<init>(azg_0 eyw )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aXP
+----------------------------
+
+<init>(aXO gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ayf_0
+----------------------------
+
+<init>(aYE bmi_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbe
+----------------------------
+
+<init>(bbd_0 ZH eSS )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbt
+----------------------------
+
+<init>(bbs eSS ZH )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbn_0
+----------------------------
+
+<init>(bbl_0 java.lang.String java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbm_0
+----------------------------
+
+<init>(bbl_0 java.lang.String java.lang.String java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbk_0
+----------------------------
+
+<init>(bbj_0 bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bQU
+----------------------------
+
+<init>(bQT LU )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bQS
+----------------------------
+
+<init>(bQP fsm_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bQM
+----------------------------
+
+<init>(bQK java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bRe
+----------------------------
+
+<init>(bRd ahv_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bQQ
+----------------------------
+
+<init>(bQP bQK )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bLf
+----------------------------
+
+<init>(bLe aaj_0 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bLg
+----------------------------
+
+<init>(bLe aaj_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bJA
+----------------------------
+
+<init>(wk_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bJz
+----------------------------
+
+<init>(wk_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bbm_2
+----------------------------
+
+<init>(bbl_1 rw_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bCh
+----------------------------
+
+<init>(bCd bgt_0 fdg_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bcg_0
+----------------------------
+
+<init>(bCd bdj_2 fdg_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bmc_0
+----------------------------
+
+<init>(bmb_0 gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bmu_0
+----------------------------
+
+<init>(eNd )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bmk_1
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+boq
+----------------------------
+
+<init>(boo boolean bon )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bsk_0
+----------------------------
+
+<init>(bsj_0 bvl_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+btp_0
+----------------------------
+
+<init>(bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+btk_0
+----------------------------
+
+<init>(bdt_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bto_0
+----------------------------
+
+<init>(bdj_2 bth_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+btw
+----------------------------
+
+<init>(int QR bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+blg_1
+----------------------------
+
+<init>(bly_0 alx_2 blx_0 boolean ZG )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ble_1
+----------------------------
+
+<init>(bly_0 fax_1 ZG )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+blf_1
+----------------------------
+
+<init>(bly_0 blx_0 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bOb
+----------------------------
+
+<init>(bOa RH long )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bNM
+----------------------------
+
+<init>(bNL long bgt_0 bco_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvt
+----------------------------
+
+<init>(bvk java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvp
+----------------------------
+
+<init>(bvk java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvf_0
+----------------------------
+
+<init>(bve_0 long )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bnx_0
+----------------------------
+
+<init>(bnw_0 java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bqp_0
+----------------------------
+
+<init>(boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bjh_0
+----------------------------
+
+<init>(bjg_0 ahv_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bja_0
+----------------------------
+
+<init>(bIZ cyf_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bsx_0
+----------------------------
+
+<init>(bsu_0 bgt_0 java.util.Optional )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+box_1
+----------------------------
+
+<init>(java.util.Map faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bhz
+----------------------------
+
+<init>(bhx_0 long )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bgd_0
+----------------------------
+
+<init>(bgy long ezw bgg_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bga_0
+----------------------------
+
+<init>(bgy eza_0 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bjw_1
+----------------------------
+
+<init>(bjv_2 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bjg_2
+----------------------------
+
+<init>(bjf_2 bjj_2 boolean[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bjl_2
+----------------------------
+
+<init>(java.lang.String bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bjm_2
+----------------------------
+
+<init>(bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bgb_0
+----------------------------
+
+<init>(bgy bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bgu_0
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bkj_2
+----------------------------
+
+<init>(bkg_2 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bki_2
+----------------------------
+
+<init>(bkg_2 bcs_0 bdj_2 abi_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bkh_2
+----------------------------
+
+<init>(bkg_2 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bhr_0
+----------------------------
+
+<init>(bhp_0 bbu_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bfg_1
+----------------------------
+
+<init>(bff_1 ffV )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bes_0
+----------------------------
+
+<init>(bEr gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bnq_2
+----------------------------
+
+<init>(bnp_2 boolean java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdl_2
+----------------------------
+
+<init>(bdk_1 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdq_1
+----------------------------
+
+<init>(bdp_1 bdj_2 bdr_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdu_1
+----------------------------
+
+<init>(bdt_1 bdj_2 bdv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bds_1
+----------------------------
+
+<init>(bdr_1 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdw_1
+----------------------------
+
+<init>(bdv_1 bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdo_2
+----------------------------
+
+<init>(bdj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdb_1
+----------------------------
+
+<init>(gnu.trove.set.hash.TIntHashSet )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bdv_2
+----------------------------
+
+<init>(bdt_2 bdm_1 bdm_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bwr_0
+----------------------------
+
+<init>(bwq_0 bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bpy_1
+----------------------------
+
+<init>(bpp_2 com.ankama.shopi.client.api.CartApi com.ankama.shopi.client.model.Language com.ankama.shopi.client.model.ShopKey bpg_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bqg_2
+----------------------------
+
+<init>(bpp_2 bqk_2 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bpw_2
+----------------------------
+
+<init>(bpp_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bpv_1
+----------------------------
+
+<init>(bpp_2 boolean java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bqp_2
+----------------------------
+
+<init>(bpp_2 java.lang.Object )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bpu_2
+----------------------------
+
+<init>(bpp_2 boolean boolean boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bof_2
+----------------------------
+
+<init>(boe_2 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bia_2
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+biz_2
+----------------------------
+
+<init>(java.util.ArrayList cav_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+byk_1
+----------------------------
+
+<init>(byj_1 fey_2 byl_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bza_2
+----------------------------
+
+<init>(byz_2 java.util.HashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bzk_2
+----------------------------
+
+<init>(bzj_2 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cax_2
+----------------------------
+
+<init>(cav_2 java.util.ArrayList java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+caw_2
+----------------------------
+
+<init>(cav_2 cab_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bzx_2
+----------------------------
+
+<init>(bzw_2 afb_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bzi_2
+----------------------------
+
+<init>(bze_2 acd_1 int int short bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+buv_1
+----------------------------
+
+<init>(buu_1 long long afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvg_1
+----------------------------
+
+<init>(bvf_1 int afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bwc_1
+----------------------------
+
+<init>(bwb_1 int int afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bxk_1
+----------------------------
+
+<init>(bxj_1 afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bxq_1
+----------------------------
+
+<init>(bxp_1 java.lang.String boolean exf_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+buq_1
+----------------------------
+
+<init>(bup_1 afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+btj_2
+----------------------------
+
+<init>(bti_2 afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bus_1
+----------------------------
+
+<init>(bur_1 long afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvf_2
+----------------------------
+
+<init>(bve_1 afq_2[] afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bwa_1
+----------------------------
+
+<init>(bvz_1 int int afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bux_2
+----------------------------
+
+<init>(buw_2 agf afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bve_2
+----------------------------
+
+<init>(bvd_1 int afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvd_2
+----------------------------
+
+<init>(bvc_1 afq_2[] afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bvv_2
+----------------------------
+
+<init>(bvu_1 afk_0 afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+bsv_2
+----------------------------
+
+<init>(bsu_2 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cbk_2
+----------------------------
+
+<init>(cbi_2 java.lang.String java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ccu_2
+----------------------------
+
+<init>(boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+crr_1
+----------------------------
+
+<init>(crq_1 bgt_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+crf_1
+----------------------------
+
+<init>(cre_1 bbl_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgl_1
+----------------------------
+
+<init>(fiq_1 bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdw_1
+----------------------------
+
+<init>(int fax_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgd_1
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfz_1
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgj_1
+----------------------------
+
+<init>(boolean bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdb_1
+----------------------------
+
+<init>(bgl_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgq_2
+----------------------------
+
+<init>(aff boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgs_2
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cft_1
+----------------------------
+
+<init>(bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chb_1
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfa_2
+----------------------------
+
+<init>(fdd_2 fsr_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfw_1
+----------------------------
+
+<init>(bsn_1 bgv_0 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgw_1
+----------------------------
+
+<init>(afd boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfm_1
+----------------------------
+
+<init>(bsn_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cge_1
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfk_1
+----------------------------
+
+<init>(bsg_1 afd float )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgv_2
+----------------------------
+
+<init>(afd boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chd_1
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfs_2
+----------------------------
+
+<init>(bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdf_1
+----------------------------
+
+<init>(fey_2 apr_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdh_2
+----------------------------
+
+<init>(fey_2 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cel_1
+----------------------------
+
+<init>(boolean int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgb_1
+----------------------------
+
+<init>(bsn_1 bsd_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgc_1
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgk_1
+----------------------------
+
+<init>(boolean bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdo_1
+----------------------------
+
+<init>(fey_2 apr_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfv_1
+----------------------------
+
+<init>(bsg_1 afd float )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chc_1
+----------------------------
+
+<init>(faw_2 cie_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfy_1
+----------------------------
+
+<init>(bsn_1 boolean boolean aKe aKj )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chc_2
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfb_1
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfx_1
+----------------------------
+
+<init>(bsn_1 boolean boolean aKe aKj )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfn_1
+----------------------------
+
+<init>(aff int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdv_2
+----------------------------
+
+<init>(fax_1 java.util.ArrayList ZC )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgg_2
+----------------------------
+
+<init>(bsg_1 afd float )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgi_1
+----------------------------
+
+<init>(boolean bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgr_2
+----------------------------
+
+<init>(afd boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cha_1
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgm_2
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfr_2
+----------------------------
+
+<init>(boolean bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgu_1
+----------------------------
+
+<init>(afd boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chz_1
+----------------------------
+
+<init>(fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chy_1
+----------------------------
+
+<init>(fea_1 fey_2 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgf_2
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfh_1
+----------------------------
+
+<init>(fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgy_2
+----------------------------
+
+<init>(afe boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cde_1
+----------------------------
+
+<init>(fey_2 int int apr_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgp_2
+----------------------------
+
+<init>(afe boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfp_2
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgx_2
+----------------------------
+
+<init>(afe cAM )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgh_2
+----------------------------
+
+<init>(bsn_1 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cgo_2
+----------------------------
+
+<init>(bsn_1 bsb_1 bsb_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfq_1
+----------------------------
+
+<init>(boolean bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfl_2
+----------------------------
+
+<init>(aff boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cga_2
+----------------------------
+
+<init>(bsa_1 bsn_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cdg_2
+----------------------------
+
+<init>(java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cfu_2
+----------------------------
+
+<init>(bsn_1 aKj aKj aKe )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+chd_2
+----------------------------
+
+<init>(faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ccs_2
+----------------------------
+
+<init>(java.lang.String fbt_1 fsh_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cvv_1
+----------------------------
+
+<init>(cvu_1 fey_2 dbE )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cyj_1
+----------------------------
+
+<init>(cyi_2 dae_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxc_1
+----------------------------
+
+<init>(cwz_1 fsr_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cyu_1
+----------------------------
+
+<init>(cyr_2 bpg_2 bpp_2 bpt_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cso_1
+----------------------------
+
+<init>(csm_1 bgr_0 fdf_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxt_1
+----------------------------
+
+<init>(cxs_1 bvi_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxm_1
+----------------------------
+
+<init>(cxk_2 boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+crz_2
+----------------------------
+
+<init>(crx_2 int int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cta_1
+----------------------------
+
+<init>(csz_1 java.lang.String int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+csr_1
+----------------------------
+
+<init>(csp_1 fhv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cwe_1
+----------------------------
+
+k(aam_2 )
+  Unable to fully structure code
+
+
+csd_1
+----------------------------
+
+<init>(csc_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+csl_1
+----------------------------
+
+<init>(csk_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cwm_2
+----------------------------
+
+<init>(cwl_1 fhv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cyy_1
+----------------------------
+
+<init>(cyr_2 java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+crq_2
+----------------------------
+
+<init>(crp_2 java.lang.String java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ctd_2
+----------------------------
+
+av(java.util.List<? extends fhc_0> )
+  Could not resolve type clashes
+  Unable to fully structure code
+
+
+cyt_2
+----------------------------
+
+<init>(cyr_2 java.lang.String bpt_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cwn_1
+----------------------------
+
+<init>(fey_2 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxb_2
+----------------------------
+
+<init>(cwz_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ctt_1
+----------------------------
+
+<init>(cts_1 fey_2 int int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+csy_2
+----------------------------
+
+<init>(fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cvw_2
+----------------------------
+
+<init>(cvv_2 cdv_0 bgt_0 aue_0 bgt_0 long byte )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cvn_1
+----------------------------
+
+<init>(cvj_2 fdy_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+czd_2
+----------------------------
+
+<init>(java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+czq_2
+----------------------------
+
+<init>(czp_2 apr_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+czs_2
+----------------------------
+
+<init>(bgy )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+czv_2
+----------------------------
+
+<init>(fys_0 fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cuq_2
+----------------------------
+
+<init>(cuo_2 fes_2 fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cwj_2
+----------------------------
+
+<init>(cwh_1 fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cwg_1
+----------------------------
+
+<init>(cwe_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cuy_2
+----------------------------
+
+<init>(cux_2 fey_2 int int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ctb_1
+----------------------------
+
+<init>(csz_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ctv_2
+----------------------------
+
+<init>(ctu_2 gnu.trove.map.hash.TIntObjectHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cse_2
+----------------------------
+
+<init>(int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxd_1
+----------------------------
+
+<init>(cwz_1 faw_2 fsr_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cty_2
+----------------------------
+
+<init>(ctw_1 fes_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cyb_2
+----------------------------
+
+<init>(cya_1 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cvs_2
+----------------------------
+
+<init>(cvo_2 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxz_1
+----------------------------
+
+<init>(cxx_1 fey_2 dbo_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+csq_2
+----------------------------
+
+<init>(csp_1 fhv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cvr_2
+----------------------------
+
+<init>(cvo_2 fey_2 int int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cxk_2
+----------------------------
+
+<init>(cxh_2 aue_0 cdv_0 bgt_0 long byte )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+deb
+----------------------------
+
+<init>(dea afx_1 java.lang.String afq_2[] java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ddZ
+----------------------------
+
+<init>(ddY afx_1 java.lang.String afq_2[] java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ddM
+----------------------------
+
+<init>(ddL int[] chj_2 java.lang.String[] java.lang.String afx_1 afq_2[] int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aib_0
+----------------------------
+
+<init>(com.ankamagames.wakfu.client.WakfuClient aie_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+FA
+----------------------------
+
+<init>(FB )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+FJ
+----------------------------
+
+<init>(FI FU )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Mt
+----------------------------
+
+e(java.lang.String boolean )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+
+
+cia_2
+----------------------------
+
+<init>(chv_2 java.util.ArrayList int[] int[] int[] int[] abn )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewg
+----------------------------
+
+<init>(ewf azg_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+foJ
+----------------------------
+
+<init>(foI gnu.trove.map.hash.TIntIntHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+foW
+----------------------------
+
+<init>(foV fpd java.util.Collection )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+foK
+----------------------------
+
+<init>(foI gnu.trove.map.hash.TIntIntHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eIe
+----------------------------
+
+<init>(eId eIb )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewk_2
+----------------------------
+
+<init>(azg_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewj_0
+----------------------------
+
+<init>(azg_1 ewn_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewl_1
+----------------------------
+
+<init>(LU azg_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewl_2
+----------------------------
+
+<init>(ewk_1 java.lang.StringBuilder )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ewm_2
+----------------------------
+
+<init>(ewk_1 java.lang.StringBuilder )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eUs
+----------------------------
+
+<init>(short short )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+evz_0
+----------------------------
+
+<init>(azg_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+evs_0
+----------------------------
+
+<init>(evr_0 exP )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eVt
+----------------------------
+
+<init>(evr_0 evb_0[] java.util.Collection )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eut_0
+----------------------------
+
+<init>(short short )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eJP
+----------------------------
+
+<init>(eJN java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eJO
+----------------------------
+
+<init>(eJN java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eym_2
+----------------------------
+
+<init>(java.util.ArrayList ezu_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eyn_2
+----------------------------
+
+<init>(jv_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eyl_2
+----------------------------
+
+<init>(jv_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fqe_0
+----------------------------
+
+<init>(fqd_0 azg_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fck_0
+----------------------------
+
+<init>(fcj_0 fas_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fac_0
+----------------------------
+
+<init>(fab_0 int int long fae_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fbs_0
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fbr_0
+----------------------------
+
+<init>(fby_0 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ftM
+----------------------------
+
+<init>(ftJ java.nio.ByteBuffer )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ftL
+----------------------------
+
+<init>(ftJ int[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eLM
+----------------------------
+
+<init>(emu_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eMi
+----------------------------
+
+a(boolean java.util.ArrayList java.lang.Byte fhn_0 )
+  Unable to fully structure code
+
+
+ffw
+----------------------------
+
+<init>(fft_0 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ffv_0
+----------------------------
+
+<init>(fft_0 RX )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fgb_0
+----------------------------
+
+<init>(kI ffs_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eOY
+----------------------------
+
+<init>(eox_0 exf_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+eqw_0
+----------------------------
+
+<init>(eqv_0 enq_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+frT
+----------------------------
+
+<init>(frs_0 gnu.trove.map.hash.TIntIntHashMap )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fpe_0
+----------------------------
+
+<init>(oi_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fsu_0
+----------------------------
+
+<init>(fsm_0 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fsI
+----------------------------
+
+<init>(fsH fam_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fsa_0
+----------------------------
+
+<init>(fsz_0 aci_1 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+elh_0
+----------------------------
+
+<init>(eLG elg_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ehr_0
+----------------------------
+
+fpj()
+  Unable to fully structure code
+
+
+exj_2
+----------------------------
+
+<init>(exh_1 exh_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exa_2
+----------------------------
+
+<init>(exy_2 tp_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exl_2
+----------------------------
+
+<init>(exh_1 pu_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exk_2
+----------------------------
+
+<init>(exh_1 tp_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exb_2
+----------------------------
+
+<init>(exy_2 pu_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exm_2
+----------------------------
+
+<init>(exh_1 pu_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+exc_2
+----------------------------
+
+<init>(exy_2 pu_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fjv_0
+----------------------------
+
+<init>(fju_0 java.util.Collection )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+acY
+----------------------------
+
+<init>(acV aaj_0 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+acZ
+----------------------------
+
+<init>(acV asj_2 aaj_0 axm_1 aaj_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+acX
+----------------------------
+
+<init>(acV long int asj_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aeK
+----------------------------
+
+<init>(aeJ java.lang.String aeL )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+adm
+----------------------------
+
+<init>(adk short short )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+adw
+----------------------------
+
+<init>(adu adz )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ade
+----------------------------
+
+<init>(add_0 fs_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+adx
+----------------------------
+
+<init>(adu ady )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+adv
+----------------------------
+
+<init>(adu gnu.trove.list.array.TIntArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aei_0
+----------------------------
+
+<init>(aeh_0 adx_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+agv_0
+----------------------------
+
+<init>(agu_0 gnu.trove.procedure.TObjectProcedure )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+afo_0
+----------------------------
+
+<init>(afn_0 afQ int int int boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+WM
+----------------------------
+
+<init>(WL boolean boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aha_0
+----------------------------
+
+<init>(ahv boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aie_1
+----------------------------
+
+<init>(aic_2 aag_0 afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aik_1
+----------------------------
+
+<init>(aij_1 aag_0 afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aiz_1
+----------------------------
+
+<init>(aiy_1 agf afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aid_1
+----------------------------
+
+<init>(aic_2 aag_0 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aig_1
+----------------------------
+
+<init>(aif_1 agf afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aju_1
+----------------------------
+
+<init>(ajt_1 afx_1 java.lang.String afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ajy_2
+----------------------------
+
+<init>(ajx_2 afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aji_2
+----------------------------
+
+<init>(ajh_2 ZC afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ajw_2
+----------------------------
+
+<init>(ajv_1 boolean int int adj_0 afx_1 int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ayy_1
+----------------------------
+
+<init>(ayu_1 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ayw_1
+----------------------------
+
+<init>(ayu_1 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ayv_1
+----------------------------
+
+<init>(ayu_1 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ayf_1
+----------------------------
+
+<init>(ayd_2 aya_2 )
+  Ignored method signature, as it can't be verified against descriptor
+run()
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: CONTINUE without a while class org.benf.cfr.reader.bytecode.analysis.parse.statement.AssignmentSimple
+
+
+aye_1
+----------------------------
+
+<init>(ayd_2 aya_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+axz_1
+----------------------------
+
+<init>(axy_1 javax.swing.table.DefaultTableModel float )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+avv_2
+----------------------------
+
+<init>(avu_2 java.util.List )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+avz_2
+----------------------------
+
+<init>(avy_2 int int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aup_2
+----------------------------
+
+<init>(java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aus_2
+----------------------------
+
+<init>(com.jogamp.opengl.GL2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aur_2
+----------------------------
+
+<init>(com.jogamp.opengl.GL2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aak_1
+----------------------------
+
+<init>(aaw_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aal_1
+----------------------------
+
+<init>(java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+HD
+----------------------------
+
+<init>(JI[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ful_1
+----------------------------
+
+a(int int int int float[] float[] float[] float[] float[] float[] int )
+  Unable to fully structure code
+b(int int int int float[] float[] float[] float[] float[] float[] int )
+  Unable to fully structure code
+
+
+agi_2
+----------------------------
+
+<init>(afq_2[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+afq_1
+----------------------------
+
+<init>(afp_1 java.lang.String java.util.Collection )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+afm_2
+----------------------------
+
+<init>(afl_2 afn_1[] )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fad_2
+----------------------------
+
+<init>(fab_1 fcv_1 java.lang.Object )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fbx_1
+----------------------------
+
+<init>(fbw_1 int[] gnu.trove.procedure.TObjectProcedure )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+com.ankamagames.xulor2.component.mesh.GLTextGeometry
+----------------------------
+
+b(art_1 )
+  Unable to fully structure code
+
+
+fdi_1
+----------------------------
+
+<init>(fdh_1 faw_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fdq_2
+----------------------------
+
+<init>(fdp_1 java.lang.String fad_1 java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fen_1
+----------------------------
+
+<init>(fem_1 fsz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+few_1
+----------------------------
+
+<init>(fev_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fet_1
+----------------------------
+
+<init>(fes_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fca_1
+----------------------------
+
+<init>(fcv_1 fcv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fev_1
+----------------------------
+
+<init>(fes_2 fzb_0 fes_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fal_1
+----------------------------
+
+<init>(fak_2 fap_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fan_2
+----------------------------
+
+<init>(fak_2 fap_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fdk_1
+----------------------------
+
+<init>(fdh_1 faw_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fce_1
+----------------------------
+
+<init>(fcd_2 boolean float short float int )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+feu_2
+----------------------------
+
+<init>(fes_2 java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fdr_2
+----------------------------
+
+<init>(fdq_1 fgm_2 fad_1 java.lang.String java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fdj_2
+----------------------------
+
+<init>(fdh_1 faw_2 java.util.function.Consumer faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fdo_2
+----------------------------
+
+<init>(fdn_1 fcv_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fac_2
+----------------------------
+
+<init>(fab_1 fcv_1 java.lang.Object )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fyx
+----------------------------
+
+<init>(fyw_0 java.lang.StringBuilder )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fkk_2
+----------------------------
+
+<init>(fkj_2 fey_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fyu_0
+----------------------------
+
+<init>(fys_0 fku_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fya_0
+----------------------------
+
+<init>(fyw_0 fes_2 fch_1 java.lang.String java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fyy_0
+----------------------------
+
+<init>(fyw_0 java.util.Collection )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+fyz_0
+----------------------------
+
+<init>(fyw_0 java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+va_0
+----------------------------
+
+<init>(Vy java.lang.Runnable long )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Vz
+----------------------------
+
+<init>(Vy java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+TK
+----------------------------
+
+<init>(TJ LU int long LU )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Ul
+----------------------------
+
+<init>(Uj TO )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Uk
+----------------------------
+
+<init>(Uj TO )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Um
+----------------------------
+
+<init>(Uj short TA )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+Sc
+----------------------------
+
+<init>(Sb long )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+RN
+----------------------------
+
+<init>(RM java.lang.StringBuilder )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+WC
+----------------------------
+
+<init>(short short )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+wi_0
+----------------------------
+
+<init>(wh_0 java.nio.ByteBuffer )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cky_1
+----------------------------
+
+<init>(ckv_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjr_1
+----------------------------
+
+<init>(cjq_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+conn_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cod_1
+----------------------------
+
+<init>(coc_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjq_1
+----------------------------
+
+<init>(cjn_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cor_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clb_1
+----------------------------
+
+<init>(cla_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmg_1
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coo_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cou_1
+----------------------------
+
+<init>(cot_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmk_1
+----------------------------
+
+<init>(cmj_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coq_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cls_1
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coj_1
+----------------------------
+
+<init>(coi_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmf_1
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cld_1
+----------------------------
+
+<init>(cla_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clc_1
+----------------------------
+
+<init>(clb_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coa_1
+----------------------------
+
+<init>(coz_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjs_1
+----------------------------
+
+<init>(cjn_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coi_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cor_2
+----------------------------
+
+<init>(coq_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmd_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjg_1
+----------------------------
+
+<init>(cjf_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cly_1
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coi_2
+----------------------------
+
+<init>(coh_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+com_2
+----------------------------
+
+<init>(col_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cog_1
+----------------------------
+
+<init>(cof_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clb_2
+----------------------------
+
+<init>(ckv_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cof_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cju_1
+----------------------------
+
+<init>(cjn_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cos_1
+----------------------------
+
+<init>(cor_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clw_1
+----------------------------
+
+<init>(clv_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+col_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjh_1
+----------------------------
+
+<init>(cjg_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjo_2
+----------------------------
+
+<init>(cjn_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ckg_2
+----------------------------
+
+<init>(ckf_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjt_1
+----------------------------
+
+<init>(cjs_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clp_1
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coc_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ckh_2
+----------------------------
+
+<init>(ckg_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coe_2
+----------------------------
+
+<init>(cod_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cox_2
+----------------------------
+
+<init>(cow_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ckz_2
+----------------------------
+
+<init>(cky_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clq_1
+----------------------------
+
+<init>(clp_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cok_2
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cme_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmm_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cle_1
+----------------------------
+
+<init>(cld_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+col_2
+----------------------------
+
+<init>(cok_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cow_1
+----------------------------
+
+<init>(cod_2 fcq_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cop_2
+----------------------------
+
+<init>(coo_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ckw_2
+----------------------------
+
+<init>(ckv_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmj_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coh_1
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clz_2
+----------------------------
+
+<init>(cly_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clp_2
+----------------------------
+
+<init>(clo_1 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmc_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmh_2
+----------------------------
+
+<init>(cmg_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coo_2
+----------------------------
+
+<init>(conn_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cof_2
+----------------------------
+
+<init>(coe_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cot_2
+----------------------------
+
+<init>(cod_2 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmb_2
+----------------------------
+
+<init>(cln_1 fdh_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clv_2
+----------------------------
+
+<init>(cln_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+coz_2
+----------------------------
+
+<init>(cod_2 fbz_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cmn_2
+----------------------------
+
+<init>(cmm_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clt_2
+----------------------------
+
+<init>(cls_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjv_2
+----------------------------
+
+<init>(cju_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clo_2
+----------------------------
+
+<init>(cln_1 fdh_1 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clc_2
+----------------------------
+
+<init>(clb_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjp_2
+----------------------------
+
+<init>(cjo_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+clq_2
+----------------------------
+
+<init>(clp_1 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjx_2
+----------------------------
+
+<init>(cjw_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+cjw_2
+----------------------------
+
+<init>(cjn_1 faw_2 )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+ckx_2
+----------------------------
+
+<init>(ckw_2 java.lang.Runnable )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+apz_1
+----------------------------
+
+<init>(apy_1 java.io.DataOutputStream )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aqb_2
+----------------------------
+
+<init>(apy_1 java.util.regex.Pattern )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+azg_2
+----------------------------
+
+<init>(azz_1 java.util.Comparator )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+adp_2
+----------------------------
+
+<init>(adm_1 java.lang.Object )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+abp_2
+----------------------------
+
+<init>(abo_2 java.util.ArrayList )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+aae_2
+----------------------------
+
+<init>(aad_2 java.lang.StringBuilder gnu.trove.map.hash.TObjectLongHashMap gnu.trove.map.hash.TObjectLongHashMap gnu.trove.map.hash.TObjectLongHashMap java.lang.String )
+  Ignored method signature, as it can't be verified against descriptor
