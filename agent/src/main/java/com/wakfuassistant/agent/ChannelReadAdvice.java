@@ -207,12 +207,11 @@ public class ChannelReadAdvice {
                                         } else if (ov instanceof byte[]) {
                                             byte[] ba = (byte[]) ov;
                                             ob.append("\"byte[").append(ba.length).append("]_");
-                                            for (int xi = 0; xi < Math.min(ba.length, 80); xi++) {
+                                            for (int xi = 0; xi < ba.length; xi++) {
                                                 int bv = ba[xi] & 0xFF;
                                                 ob.append("0123456789ABCDEF".charAt(bv >> 4));
                                                 ob.append("0123456789ABCDEF".charAt(bv & 0xF));
                                             }
-                                            if (ba.length > 80) ob.append("...");
                                             ob.append("\"");
                                         } else if (ov instanceof int[]) {
                                             int[] ia = (int[]) ov;
