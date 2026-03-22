@@ -132,79 +132,104 @@ public class ChannelReadAdvice {
                     }
                 } catch (Exception ignored) {}
             }
-
-
-            // === HDV OFFER INSPECTION (crV) ===
+// === HDV OFFER INSPECTION (crV) ===
             if ("crV".equals(simpleType)) {
+                String hdvPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_offers.jsonl";
+                String hdvErrPath = "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_hdv_errors.log";
                 try {
                     java.lang.reflect.Field mgEField = null;
                     Class<?> mc = msg.getClass();
-                    while (mc != null) {
-                        try { mgEField = mc.getDeclaredField("mgE"); break; }
-                        catch (NoSuchFieldException e2) { mc = mc.getSuperclass(); }
+                    while (mc != null && mgEField == null) {
+                        try { mgEField = mc.getDeclaredField("mgE"); }
+                        catch (NoSuchFieldException nsfe) { mc = mc.getSuperclass(); }
                     }
-                    if (mgEField != null) {
+                    if (mgEField == null) {
+                        try (java.io.FileWriter errW = new java.io.FileWriter(hdvErrPath, true)) {
+                            errW.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|mgE FIELD NOT FOUND in " + msg.getClass().getName() + "\n");
+                        }
+                    } else {
                         mgEField.setAccessible(true);
-                        Object mgE = mgEField.get(msg);
-                        if (mgE instanceof java.util.Map) {
-                            java.util.Map<?,?> offers = (java.util.Map<?,?>) mgE;
+                        Object mgEVal = mgEField.get(msg);
+                        if (mgEVal instanceof java.util.Map) {
+                            java.util.Map<?,?> offers = (java.util.Map<?,?>) mgEVal;
                             for (java.util.Map.Entry<?,?> entry : offers.entrySet()) {
+                                Object offerKey = entry.getKey();
                                 Object offerObj = entry.getValue();
-                                if (offerObj == null) continue;
-                                Class<?> oc = offerObj.getClass();
-                                StringBuilder hdvSb = new StringBuilder();
-                                hdvSb.append("{\"offerId\":\"").append(entry.getKey()).append("\",\"class\":\"").append(oc.getName()).append("\",\"ts\":\"");
-                                hdvSb.append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
-                                // Inspect ALL fields of the offer object
-                                Class<?> walk = oc;
-                                hdvSb.append(",\"fields\":{");
+                                StringBuilder hdvSb2 = new StringBuilder();
+                                hdvSb2.append("{\"ts\":\"").append(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date())).append("\"");
+                                hdvSb2.append(",\"offerId\":\"").append(offerKey).append("\"");
+                                hdvSb2.append(",\"offerClass\":\"").append(offerObj.getClass().getName()).append("\"");
+                                // Dump ALL fields of the offer object
+                                hdvSb2.append(",\"fields\":{");
                                 boolean first = true;
-                                while (walk != null && !walk.equals(Object.class)) {
-                                    for (java.lang.reflect.Field f : walk.getDeclaredFields()) {
-                                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                                Class<?> oc = offerObj.getClass();
+                                while (oc != null) {
+                                    for (java.lang.reflect.Field f : oc.getDeclaredFields()) {
                                         try {
                                             f.setAccessible(true);
                                             Object val = f.get(offerObj);
-                                            if (!first) hdvSb.append(",");
+                                            if (!first) hdvSb2.append(",");
                                             first = false;
-                                            hdvSb.append("\"").append(f.getName()).append("\":");
-                                            if (val == null) hdvSb.append("null");
-                                            else if (val instanceof Number) hdvSb.append(val);
-                                            else if (val instanceof Boolean) hdvSb.append(val);
-                                            else if (val instanceof String) hdvSb.append("\"").append(((String)val).replace("\"","\\\"")).append("\"");
-                                            else if (val instanceof byte[]) hdvSb.append("\"byte[").append(((byte[])val).length).append("]\"");
-                                            else {
-                                                String sv = String.valueOf(val);
-                                                if (sv.length() > 300) sv = sv.substring(0, 300);
-                                                hdvSb.append("\"").append(sv.replace("\"","\\\"").replace("\n"," ")).append("\"");
+                                            String fname = f.getName();
+                                            hdvSb2.append("\"").append(fname).append("\":");
+                                            if (val == null) {
+                                                hdvSb2.append("null");
+                                            } else if (val instanceof Number) {
+                                                hdvSb2.append(val);
+                                            } else if (val instanceof Boolean) {
+                                                hdvSb2.append(val);
+                                            } else if (val instanceof String) {
+                                                hdvSb2.append("\"").append(((String)val).replace("\"","\\\"")).append("\"");
+                                            } else if (val instanceof byte[]) {
+                                                byte[] ba = (byte[]) val;
+                                                hdvSb2.append("\"byte[").append(ba.length).append("]_");
+                                                for (int bi = 0; bi < Math.min(ba.length, 40); bi++) {
+                                                    hdvSb2.append(String.format("%02X", ba[bi] & 0xFF));
+                                                }
+                                                if (ba.length > 40) hdvSb2.append("...");
+                                                hdvSb2.append("\"");
+                                            } else if (val.getClass().isArray()) {
+                                                hdvSb2.append("\"array[").append(java.lang.reflect.Array.getLength(val)).append("]\"");
+                                            } else if (val instanceof java.util.Collection) {
+                                                hdvSb2.append("\"collection[").append(((java.util.Collection<?>)val).size()).append("]\"");
+                                            } else if (val instanceof java.util.Map) {
+                                                hdvSb2.append("\"map[").append(((java.util.Map<?,?>)val).size()).append("]\"");
+                                            } else {
+                                                String vs = val.toString();
+                                                if (vs.length() > 100) vs = vs.substring(0, 100) + "...";
+                                                hdvSb2.append("\"").append(vs.replace("\"","\\\"").replace("\n"," ")).append("\"");
                                             }
-                                        } catch (Exception fx) {
-                                            if (!first) hdvSb.append(",");
+                                        } catch (Exception fex) {
+                                            if (!first) hdvSb2.append(",");
                                             first = false;
-                                            hdvSb.append("\"").append(f.getName()).append("\":\"ERR\"");
+                                            hdvSb2.append("\"").append(f.getName()).append("\":\"ERROR:").append(fex.getClass().getSimpleName()).append("\"");
                                         }
                                     }
-                                    walk = walk.getSuperclass();
+                                    oc = oc.getSuperclass();
+                                    if (oc != null && oc.equals(Object.class)) break;
                                 }
-                                hdvSb.append("}}");
-                                // Write to file using pure JDK
-                                java.io.File hdvDir = new java.io.File("logs");
-                                hdvDir.mkdirs();
-                                try (java.io.FileWriter fw2 = new java.io.FileWriter(new java.io.File(hdvDir, "wakfu_hdv_offers.jsonl"), true)) {
-                                    fw2.write(hdvSb.toString());
-                                    fw2.write("\n");
+                                hdvSb2.append("}}");
+                                try (java.io.FileWriter fw4 = new java.io.FileWriter(hdvPath, true)) {
+                                    fw4.write(hdvSb2.toString() + "\n");
+                                    fw4.flush();
                                 }
+                            }
+                        } else {
+                            try (java.io.FileWriter errW2 = new java.io.FileWriter(hdvErrPath, true)) {
+                                errW2.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|mgE is not Map: " + (mgEVal == null ? "null" : mgEVal.getClass().getName()) + "\n");
                             }
                         }
                     }
-                } catch (Exception hdvEx) {
-                    // Log error to file
-                    try (java.io.FileWriter fw3 = new java.io.FileWriter(new java.io.File("logs", "wakfu_hdv_offers.jsonl"), true)) {
-                        fw3.write("{\"error\":\"" + hdvEx.getClass().getName() + ": " + hdvEx.getMessage() + "\"}\n");
+                } catch (Exception hdvEx2) {
+                    try (java.io.FileWriter errW3 = new java.io.FileWriter(hdvErrPath, true)) {
+                        errW3.write(new java.text.SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date()) + "|EXCEPTION:" + hdvEx2.getClass().getName() + ":" + hdvEx2.getMessage() + "\n");
                     } catch (Exception ignored2) {}
                 }
             }
             // === FIN HDV OFFER INSPECTION ===
+
+
+            
 
         } catch (Exception e) {
             // silent
