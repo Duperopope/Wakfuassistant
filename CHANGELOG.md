@@ -2,6 +2,30 @@
 
 ---
 
+## [0.5.1] - 2026-03-22 — Correctif critique : hook item decoder sur fgA (pas fga_0)
+
+### Corrige
+
+- **Bug bloquant** : le hook item decoder ciblait `fga_0` (classe inexistante, jamais chargee par le JVM)
+  - La vraie classe est `fgA` (A majuscule), confirmee dans 3 sessions de logs differentes
+  - `fgA` contient bien `eM(byte[])` qui decode les bytes bruts en objet item `ffV`
+  - Resultat : zero item capture depuis le debut — le hook ne s'est jamais declenche
+
+### Ameliore
+
+- `ItemDecoderAdvice` : appel de `ffV.getName()` par reflection pour capturer le nom de l'item directement
+  - Le nom est maintenant dans le JSON (`"name":"..."`) et dans le log de synthese (`ITEM_DECODED|name=...`)
+- `WakfuSpyAgent` : retransformation explicite de `fgA` au demarrage (deja chargee avant l'agent dans tous les tests)
+
+### Comment tester
+
+1. Relancer Wakfu avec l'agent
+2. Ouvrir son inventaire ou visiter l'HDV
+3. Chercher dans `agent/logs/wakfu_agent_spy.log` : `RETRANSFORMATION EXPLICITE fgA REUSSIE`
+4. Chercher `ITEM_DECODED` dans le log — doit apparaitre avec `ref=` et `name=` non vides
+
+---
+
 ## [0.5.0] - 2026-03-21 — Decompilation complete et protocole items
 
 ### Ajoute

@@ -24,6 +24,16 @@ public class ItemDecoderAdvice {
                 .format(new java.util.Date());
 
             Class<?> itemClass = itemObj.getClass();
+
+            // ffV.getName() existe directement — recuperation du nom de l'item
+            String itemName = "";
+            try {
+                java.lang.reflect.Method getNameMethod = itemClass.getDeclaredMethod("getName");
+                getNameMethod.setAccessible(true);
+                Object nameResult = getNameMethod.invoke(itemObj);
+                if (nameResult != null) itemName = nameResult.toString();
+            } catch (Exception ignored) {}
+
             java.lang.reflect.Field[] allFields = itemClass.getDeclaredFields();
 
             java.util.ArrayList<java.lang.reflect.Field> longFields = new java.util.ArrayList<>();
@@ -267,11 +277,13 @@ public class ItemDecoderAdvice {
                 json.append(",\"optionalBlocks\":{").append(optionalBlocks.toString()).append("}");
             }
             json.append(",\"itemClass\":\"").append(itemClass.getSimpleName()).append("\"");
+            json.append(",\"name\":\"").append(itemName.replace("\"", "'")).append("\"");
             json.append("}");
 
             com.wakfuassistant.agent.ItemLogWriter.writeItem(json.toString());
 
             String summary = ts + "|ITEM_DECODED|uid=" + uniqueId + "|ref=" + refId
+                + "|name=" + itemName
                 + "|qty=" + quantity + "|shards=" + shardCount + "|gems=" + gemCount
                 + "|sublim=" + sublimationId + "|rawSize=" + (rawBytes != null ? rawBytes.length : 0);
             com.wakfuassistant.agent.WakfuSpyAgent.log(summary);

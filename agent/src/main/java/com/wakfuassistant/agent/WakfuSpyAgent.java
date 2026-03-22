@@ -136,9 +136,9 @@ public class WakfuSpyAgent {
 
         builder.installOn(inst);
 
-        // === HOOK ITEM DECODER (fga_0.eM) - RETRANSFORM ===
+        // === HOOK ITEM DECODER (fgA.eM) - RETRANSFORM ===
         try {
-            log("Installation hook item decoder RETRANSFORM (fga_0.eM)...");
+            log("Installation hook item decoder RETRANSFORM (fgA.eM)...");
 
             new AgentBuilder.Default()
                 .disableClassFormatChanges()
@@ -161,7 +161,7 @@ public class WakfuSpyAgent {
                         log("RETRANSFORM ERROR on " + typeName + ": " + throwable.getMessage());
                     }
                 })
-                .type(ElementMatchers.named("fga_0"))
+                .type(ElementMatchers.named("fgA"))
                 .transform((builder2, typeDescription, classLoader, module, protectionDomain) -> {
                     log("RETRANSFORM TRIGGERED on: " + typeDescription.getName());
                     return builder2.visit(
@@ -175,34 +175,23 @@ public class WakfuSpyAgent {
 
             log("Hook item decoder RETRANSFORM installe.");
 
-            // Scanner les classes fga* deja chargees
-            int fgaCount = 0;
-            boolean fga0Found = false;
+            // Scanner fgA deja chargee (probable - confirmee dans tous les logs)
+            boolean fgAFound = false;
             for (Class<?> c : inst.getAllLoadedClasses()) {
-                String name = c.getName();
-                if (name.startsWith("fga")) {
-                    log("CLASSE fga* CHARGEE: " + name + " | modifiable=" + inst.isModifiableClass(c));
-                    fgaCount++;
-                    if (name.equals("fga_0")) { fga0Found = true; }
+                if (c.getName().equals("fgA")) {
+                    log("CLASSE fgA CHARGEE: modifiable=" + inst.isModifiableClass(c));
+                    fgAFound = true;
+                    try {
+                        inst.retransformClasses(c);
+                        log("RETRANSFORMATION EXPLICITE fgA REUSSIE");
+                    } catch (Exception e) {
+                        log("ERREUR retransformation fgA: " + e.getClass().getName() + " - " + e.getMessage());
+                    }
+                    break;
                 }
             }
-            log("Total classes fga* chargees: " + fgaCount);
-
-            if (fga0Found) {
-                log("fga_0 DEJA CHARGEE - retransformation explicite...");
-                for (Class<?> c : inst.getAllLoadedClasses()) {
-                    if (c.getName().equals("fga_0")) {
-                        try {
-                            inst.retransformClasses(c);
-                            log("RETRANSFORMATION EXPLICITE fga_0 REUSSIE");
-                        } catch (Exception e) {
-                            log("ERREUR retransformation fga_0: " + e.getClass().getName() + " - " + e.getMessage());
-                        }
-                        break;
-                    }
-                }
-            } else {
-                log("fga_0 PAS ENCORE CHARGEE - le hook la captera au chargement");
+            if (!fgAFound) {
+                log("fgA PAS ENCORE CHARGEE - le hook la captera au chargement");
             }
 
         } catch (Exception hookEx) {
