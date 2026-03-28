@@ -1,0 +1,100 @@
+{
+  "cdn_items_full.json": {
+    "Desc": "Base items CDN",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 13:31",
+    "Hash": "CE7D998579A7D7340E93A26032F7B0DBAEF22D35E9084C5BB7D957485516E526",
+    "Size": 0.0
+  },
+  "tools/calculate_weights.py": {
+    "Desc": "Calcul poids",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-26 04:08",
+    "Hash": "4209B9F42575A70F25F60DF0CD623C7D9266EF7F9F484F14F6EBCF8527BD3EC8",
+    "Size": 26.5
+  },
+  "cdn_recipe_ingredients.json": {
+    "Desc": "Ingredients CDN",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 13:31",
+    "Hash": "987EF6258535B528F3169285C3E27502798602241D5E46ADF2AF8F61F224FD61",
+    "Size": 0.0
+  },
+  "build-generator/index.html": {
+    "Desc": "Simulateur build",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-27 12:50",
+    "Hash": "0BAF79962A095870DBE4F014599C4EC824786FF38F48D031DA086BD3914E53DD",
+    "Size": 22.3
+  },
+  "overlay/main.js": {
+    "Desc": "Overlay Electron",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-25 19:21",
+    "Hash": "530CEE7413D592D3EADE4CA293B83FC82BC7782C706813A9E048510000148616",
+    "Size": 7.9
+  },
+  "agent/live_decoder.py": {
+    "Desc": "Decodeur live",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-21 06:05",
+    "Hash": "2721016C9AEC5597C4F5EE9744177839B28DB22FC48897386ADB29A6AEFF6967",
+    "Size": 7.0
+  },
+  "build-generator/js/damage-engine.js": {
+    "Desc": "Moteur degats",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-27 12:50",
+    "Hash": "189093A42C9918BF262ED898F2E02DE9D9269489F5BD22430DD7A0CD04888F02",
+    "Size": 31.0
+  },
+  "tools/build_optimizer_v6.ps1": {
+    "Desc": "Optimizer v8.3",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 12:47",
+    "Hash": "61BDCD14FABC070946FA3228746DC5C3612B6283DCE9E2FEA7999BF4EEF6B2DE",
+    "Size": 72.7
+  },
+  "market_prices.json": {
+    "Desc": "Prix marche",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 13:31",
+    "Hash": "B76D4EF55B48E51F4A90FA3302BD4E853D40834408F9E602CD78FF3363A3053E",
+    "Size": 0.0
+  },
+  "overlay/index.html": {
+    "Desc": "Overlay UI",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-25 19:21",
+    "Hash": "AF72E5A08255F67B0731934F88ABD2BC18BEAC9FACF6E8888E04A270F6B6AD2F",
+    "Size": 13.0
+  },
+  "overlay/package.json": {
+    "Desc": "Overlay deps",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-24 21:22",
+    "Hash": "DFBD614D2AD867BAF21DECE9E199ECBA61415B6451BF9326650B4A7ECC2DAA73",
+    "Size": 0.2
+  },
+  "tools/weights_api.py": {
+    "Desc": "Ranking API",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-26 04:14",
+    "Hash": "C7BE7FAB39F67349AAA35FB71060CCEA5F89DA7B29C6AA994D6753B436B5C7A2",
+    "Size": 63.9
+  },
+  "cdn_recipes.json": {
+    "Desc": "Base recettes CDN",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 13:31",
+    "Hash": "C0446C79517FBFA4EBA8AD945EA6E2A9A1CFF64CC46114343FCED0DB035F011A",
+    "Size": 0.0
+  },
+  "build-generator/equipment.html": {
+    "Desc": "Viewer equipement",
+    "CheckedAt": "2026-03-28 13:46:51",
+    "LastMod": "2026-03-28 12:47",
+    "Hash": "9347B5B46ED354D0B4C527C3BF5A393C1131C3313AEC500BC7BBE36D69D55A1B",
+    "Size": 14.7
+  }
+}

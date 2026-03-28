@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "source": "Document de reference Sram L'Immortel — 27/03/2026",
+    "formula_source": "WakfuCalc par Ectawem (sites.google.com/view/wakfucalc)"
+  },
+  "identity": {
+    "name": "L'Immortel",
+    "class": "Sram",
+    "level": 140,
+    "xp_current": 1757285257,
+    "xp_next": 1981281126
+  },
+  "base_stats": {
+    "hp": 1450,
+    "ap": 6,
+    "mp": 3,
+    "wp": 6,
+    "critical_chance_percent": 3
+  },
+  "guild_bonuses": {
+    "hp": 45,
+    "wisdom": 10,
+    "prospection": 10,
+    "initiative": 10,
+    "dodge": 15,
+    "lock": 15,
+    "damage_inflicted_percent": 8,
+    "heals_performed_percent": 6,
+    "resistance_earth": 20,
+    "resistance_fire": 20,
+    "resistance_water": 20,
+    "resistance_air": 20,
+    "craft_xp_percent": 10
+  },
+  "territory_bonuses": {
+    "level": 39,
+    "hp": 39,
+    "wisdom": 30,
+    "prospection": 30
+  },
+  "total_without_aptitudes": {
+    "hp": 1534,
+    "ap": 6,
+    "mp": 3,
+    "wp": 6,
+    "damage_inflicted_percent": 8,
+    "heals_performed_percent": 6,
+    "dodge": 15,
+    "lock": 15,
+    "wisdom": 40,
+    "prospection": 40,
+    "resistance_each": 20
+  },
+  "aptitude_points": {
+    "total": 142,
+    "intelligence": 35,
+    "strength": 35,
+    "agility": 35,
+    "chance": 34,
+    "major": 3
+  },
+  "passive_slots_by_level": {
+    "1-49": 2,
+    "50-99": 3,
+    "100-149": 4,
+    "150-199": 5,
+    "200+": 6
+  },
+  "hp_formula": "Total HP = (50 + (Level * 10) + sum_flat_hp) * (1 + (sum_percent_hp / 100))"
+}

@@ -1,0 +1,258 @@
+{
+  "_meta": {
+    "source": "Screenshots in-game confirmes — Document de reference v2.7",
+    "last_update": "27/03/2026"
+  },
+  "common_passives": [
+    {
+      "id": "evasion",
+      "name": "Evasion",
+      "tier": "B",
+      "effects": [{ "trigger": "dodge_success", "stat": "various_buffs", "description": "Bonus apres esquive reussie" }]
+    },
+    {
+      "id": "interception",
+      "name": "Interception",
+      "tier": "B",
+      "effects": [{ "trigger": "lock_success", "stat": "various_buffs", "description": "Bonus apres tacle reussi" }]
+    },
+    {
+      "id": "inspiration",
+      "name": "Inspiration",
+      "tier": "B",
+      "effects": [{ "trigger": "wp_spent", "stat": "mastery_bonus", "description": "+Maitrise quand PW depense" }]
+    },
+    {
+      "id": "motivation",
+      "name": "Motivation",
+      "tier": "A",
+      "effects": [{ "trigger": "conditional", "stat": "ap_or_mp", "description": "+PA ou +PM conditionnel" }]
+    },
+    {
+      "id": "medecine",
+      "name": "Medecine",
+      "tier": "B",
+      "effects": [{ "trigger": "passive", "stat": "heals", "description": "Ameliore soins recus/donnes" }]
+    },
+    {
+      "id": "rock",
+      "name": "Rock",
+      "tier": "B",
+      "effects": [{ "trigger": "passive", "stat": "resistance_stability", "description": "+Resistance et stabilite" }]
+    },
+    {
+      "id": "carnage",
+      "name": "Carnage",
+      "tier": "S",
+      "effects": [{ "trigger": "not_hit_this_turn", "stat": "damage_inflicted_percent", "value": 15, "description": "+15% DI tant que pas touche ce tour" }]
+    },
+    {
+      "id": "fluctuation",
+      "name": "Fluctuation",
+      "tier": "S",
+      "effects": [
+        { "trigger": "pass_adjacent_enemy", "stat": "fluctuation_on_target", "value": 10, "description": "+Fluctuation sur la cible (passage adjacent)" },
+        { "trigger": "dodge_success", "stat": "fluctuation_on_target", "value": 15, "description": "+15 Niv. Fluctuation sur esquive" },
+        { "trigger": "lock_success", "stat": "fluctuation_on_target", "value": 15, "description": "+15 Niv. Fluctuation sur tacle" },
+        { "trigger": "enemy_ends_turn_contact", "stat": "fluctuation_on_target", "value": 20, "description": "+20 Niv. Fluctuation si ennemi finit tour au contact" }
+      ],
+      "payoff": {
+        "scaling": 1,
+        "unit": "percent_damage_received_per_level",
+        "cap": 60,
+        "duration_turns": 2,
+        "is_debuff_on_target": true,
+        "works_while_invisible": true,
+        "note": "Debuff cible. 1%/niv, cap 60 = +60% dmg recus. Multiplicateur separe (pas DI additif). En invisibilite le Sram est quasi-intaclable donc les passages adjacents sont quasi-garantis."
+      }
+    }
+  ],
+  "sram_passives": [
+    {
+      "id": "duperie",
+      "name": "Duperie",
+      "unlock_level": 10,
+      "tier": "A",
+      "tier_context": "survie",
+      "effects": [{ "trigger": "active", "description": "Swap avec le Double + effets defensifs" }],
+      "conflicts": ["leurre"],
+      "conflict_reason": "Duperie veut le Double vivant pour swap; Leurre veut le Double mort pour explosion"
+    },
+    {
+      "id": "assassin",
+      "name": "Assassin",
+      "unlock_level": 10,
+      "tier": "S",
+      "tier_context": "farm",
+      "effects": [
+        { "trigger": "kill", "stat": "ap", "value": 1 },
+        { "trigger": "kill", "stat": "mp", "value": 1 },
+        { "trigger": "kill", "stat": "wp", "value": 1 },
+        { "trigger": "kill", "stat": "heal_percent_hp", "value": 20 }
+      ],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "retenue",
+      "name": "Retenue",
+      "unlock_level": 15,
+      "tier": "S",
+      "tier_context": "burst",
+      "effects": [
+        { "trigger": "end_of_turn_invisible", "stat": "pf_gain", "value": 50, "note": "2 tours = 100 PF" },
+        { "trigger": "passive", "stat": "invis_break_condition", "value": "sort >= 4PA", "note": "L'invisibilite ne se brise que par un sort coutant 4PA ou plus" }
+      ],
+      "conflicts": ["assaut_brutal"],
+      "conflict_reason": "Assaut Brutal supprime le PF des sorts >=4PA, rendant l'accumulation PF via Retenue moins exploitable"
+    },
+    {
+      "id": "passe_passe",
+      "name": "Passe-passe",
+      "unlock_level": 20,
+      "tier": "A",
+      "tier_context": "burst",
+      "effects": [{ "trigger": "active", "description": "Swap Double <-> ennemi; repositionnement burst" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "embuscade",
+      "name": "Embuscade",
+      "unlock_level": 25,
+      "tier": "B-C",
+      "tier_context": "pièges",
+      "effects": [
+        { "trigger": "enemy_triggers_trap", "stat": "wp_gain", "value": 1 },
+        { "trigger": "enemy_triggers_trap", "stat": "fixed_damage", "value": 72 },
+        { "trigger": "passive", "stat": "trap_no_ap_refund", "value": true }
+      ],
+      "conflicts": [],
+      "conflict_reason": "Retire le refund PA des pieges"
+    },
+    {
+      "id": "piege_attraction_ii",
+      "name": "Piege d'Attraction II",
+      "unlock_level": 30,
+      "tier": "B",
+      "tier_context": "AoE",
+      "effects": [{ "trigger": "trap", "description": "Piege AoE attirance" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "peur_alternative",
+      "name": "Peur alternative",
+      "unlock_level": 35,
+      "tier": "A",
+      "tier_context": "single",
+      "effects": [{ "trigger": "conditional", "description": "Push/fuite conditionnelle" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "hemophilie",
+      "name": "Hemophilie",
+      "unlock_level": 40,
+      "tier": "B",
+      "tier_context": "DoT",
+      "effects": [{ "trigger": "passive", "description": "Convertit Hemorragie en poison" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "piege_repulsion_ii",
+      "name": "Piege de Repulsion II",
+      "unlock_level": 45,
+      "tier": "B",
+      "tier_context": "mobilite",
+      "effects": [{ "trigger": "trap", "description": "Piege push zone" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "localisation_quantique",
+      "name": "Localisation quantique",
+      "unlock_level": 50,
+      "tier": "D-B",
+      "tier_context": "situationnel",
+      "effects": [
+        { "trigger": "passive", "stat": "ignore_orientation", "value": true },
+        { "trigger": "passive", "stat": "lose_back_bonus", "value": true, "note": "Perd le x1.25 dos = -20% dmg en temps normal" }
+      ],
+      "conflicts": [],
+      "conflict_reason": "Utile uniquement contre cibles anti-dos ou dos inaccessible"
+    },
+    {
+      "id": "leurre",
+      "name": "Leurre",
+      "unlock_level": 60,
+      "tier": "A",
+      "tier_context": "AoE",
+      "effects": [
+        { "trigger": "double_takes_direct_damage", "stat": "explosion_zone", "value_percent_double_hp": 50 },
+        { "trigger": "double_takes_direct_damage", "stat": "hemorrhage_on_adjacent", "value": 20 }
+      ],
+      "leurre_damage": {
+        "base_no_stuff": 317,
+        "with_stuff": 1220,
+        "element": "neutral",
+        "scales_on": "wapin"
+      },
+      "conflicts": ["duperie"],
+      "conflict_reason": "Leurre veut le Double mort; Duperie veut le Double vivant. A HL Leurre est generalement preferable."
+    },
+    {
+      "id": "diversion_alternative",
+      "name": "Diversion alternative",
+      "unlock_level": 70,
+      "tier": "C",
+      "tier_context": "niche",
+      "effects": [{ "trigger": "conditional", "description": "Repositionnement niche" }],
+      "conflicts": [],
+      "conflict_reason": ""
+    },
+    {
+      "id": "piege_teleportation_ii",
+      "name": "Piege de Teleportation II",
+      "unlock_level": 80,
+      "tier": "B",
+      "tier_context": "team-play",
+      "effects": [
+        { "trigger": "trap", "stat": "teleport_ally", "range": 4 },
+        { "trigger": "passive", "stat": "trap_not_consumed", "cooldown": 1 }
+      ],
+      "conflicts": [],
+      "conflict_reason": "Allies uniquement. Utile pour replacer un monstre mal place via un allie."
+    },
+    {
+      "id": "assaut_letal",
+      "name": "Assaut letal",
+      "unlock_level": 90,
+      "tier": "S",
+      "tier_context": "farm",
+      "effects": [
+        { "trigger": "kill", "stat": "teleport_behind_marked", "value": true },
+        { "trigger": "kill", "stat": "ap_gain", "value": 2 },
+        { "trigger": "kill", "stat": "hemorrhage_transfer", "value": true }
+      ],
+      "conflicts": [],
+      "conflict_reason": "",
+      "synergy_note": "Avec Assassin: kill = +3PA, +1PM, +1PW, soin 20%, TP derriere marque"
+    },
+    {
+      "id": "assaut_brutal",
+      "name": "Assaut Brutal",
+      "unlock_level": 100,
+      "tier": "A",
+      "tier_context": "burst alternatif",
+      "effects": [
+        { "trigger": "spell_costs_4ap_or_more", "stat": "lose_pf_generation", "value": true },
+        { "trigger": "spell_costs_4ap_or_more", "stat": "damage_bonus_per_ap", "value": 5, "note": "4PA=+20%, 5PA=+25%" }
+      ],
+      "excluded_spells": ["mise_a_mort", "traumatisme"],
+      "conflicts": ["retenue"],
+      "conflict_reason": "Pas de generation PF = Retenue accumule du PF inutilisable par les sorts qui le generent normalement"
+    }
+  ]
+}

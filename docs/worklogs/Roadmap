@@ -1,0 +1,133 @@
+J'ai maintenant une vision complète des options. Voici l'analyse sans détour.
+
+Le Vrai Problème : Tu Construis un EVE-Central pour Wakfu
+Ce que tu décris — des centaines de clients qui interceptent les données de marché HDV et les centralisent pour créer un snapshot temps réel — c'est exactement ce qu'a fait la communauté EVE Online avec EVE-Central puis Fuzzwork Market Data. La différence c'est que EVE a une API officielle, toi tu interceptes le protobuf. Le volume de données est comparable.
+
+Les chiffres multi-joueurs
+Hypothèse	1 joueur (toi)	50 joueurs	500 joueurs
+Snapshots HDV/jour	~3	~150	~1 500
+Offres brutes/jour	~120 000	~6 M	~60 M
+Offres uniques (dédupliquées)	~36 000	~36 000	~36 000
+Données utiles/jour	~200 KB (Parquet)	~500 KB	~2 MB
+Données brutes reçues/jour	~20 MB	~1 GB	~10 GB
+Le point crucial : les 500 joueurs voient le même marché. Les offres sont identiques pour tous. Donc 99 % des données reçues sont des doublons inter-joueurs. L'architecture doit dédupler massivement côté serveur.
+
+Comparaison des technologies serveur
+J'ai étudié toutes les options viables pour ton cas :
+
+Solution	Type	Free Tier	Forces	Faiblesses
+Supabase	PostgreSQL managé + Realtime	500 MB DB, 5 GB egress, 2M messages RT, 50K MAU	API REST/Realtime prêt à l'emploi, auth intégrée, RLS	500 MB = ~6 mois de données compressées, pas de time-series natif
+Cloudflare D1 + Workers	SQLite edge + serverless	5 GB DB, 5M reads/jour, 100K writes/jour	Latence ultra-basse, SQLite natif (comme ton client), serverless	Pas de realtime natif, Workers limités en CPU
+ClickHouse Cloud	OLAP time-series	10 GB, 1 service	Le plus rapide pour agrégations analytiques sur milliards de lignes	Overkill pour ton volume, learning curve
+TimescaleDB	PostgreSQL + time-series	25 GB (Timescale Cloud)	Compression hypertable native, SQL standard, partitionnement auto	Plus complexe à configurer
+Turso	SQLite distribué (libSQL)	9 GB, 500 DBs, 25B row reads	SQLite partout (client = serveur), réplication edge	Pas de realtime WebSocket natif
+Ma recommandation : Supabase + DuckDB/Parquet
+Pourquoi cette combinaison et pas une seule techno ? Parce que ton système a deux jobs très différents :
+
+Job 1 — Collecter en temps réel (les clients envoient leurs snapshots) → Supabase est imbattable ici. L'auth est intégrée (chaque joueur a un compte), les Edge Functions reçoivent les données, la DB PostgreSQL stocke le snapshot courant, et Supabase Realtime broadcast les mises à jour à tous les clients connectés. Le free tier (500 MB, 50K utilisateurs, 2M messages realtime) suffit largement pour le lancement (source: Supabase pricing, source: Supabase Realtime docs).
+
+Job 2 — Analyser l'historique (tendances, saisonnalité, prédictions) → DuckDB + Parquet en local. Chaque nuit, un job exporte les données de la journée en Parquet et les rend disponibles en téléchargement. Les joueurs qui veulent faire de l'analyse lourde le font en local avec DuckDB, sans charger le serveur.
+
+L'architecture complète
+┌─────────────────────────────────────────────────────────┐
+│                    CLIENTS (Tauri app)                    │
+│                                                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
+│  │ Joueur 1 │  │ Joueur 2 │  │ Joueur N │              │
+│  │ L'Immortel│  │ Roma     │  │ Maggie   │              │
+│  │          │  │          │  │          │              │
+│  │ Agent    │  │ Agent    │  │ Agent    │              │
+│  │ ByteBuddy│  │ ByteBuddy│  │ ByteBuddy│              │
+│  │    ↓     │  │    ↓     │  │    ↓     │              │
+│  │ SQLite   │  │ SQLite   │  │ SQLite   │  ← HOT local │
+│  │ (24h)    │  │ (24h)    │  │ (24h)    │              │
+│  │    ↓     │  │    ↓     │  │    ↓     │              │
+│  │ Upload   │  │ Upload   │  │ Upload   │              │
+│  │ delta    │  │ delta    │  │ delta    │              │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘              │
+│       │              │              │                    │
+└───────┼──────────────┼──────────────┼────────────────────┘
+        │              │              │
+        ▼              ▼              ▼
+┌─────────────────────────────────────────────────────────┐
+│              SUPABASE (gratuit jusqu'à 500 joueurs)      │
+│                                                          │
+│  ┌─────────────────────────────────────────────┐        │
+│  │ Edge Function : /api/upload-snapshot         │        │
+│  │  1. Auth (JWT du joueur)                     │        │
+│  │  2. Validate (schema check)                  │        │
+│  │  3. Deduplicate (UPSERT par offer_uid)       │        │
+│  │  4. Insert dans PostgreSQL                   │        │
+│  │  5. Broadcast Realtime aux abonnés           │        │
+│  └─────────────────────┬───────────────────────┘        │
+│                        ▼                                 │
+│  ┌─────────────────────────────────────────────┐        │
+│  │ PostgreSQL                                   │        │
+│  │                                              │        │
+│  │ market_snapshot (offres actuelles)  ~5 MB    │        │
+│  │ market_history  (OHLC par jour)    ~50 KB/j  │        │
+│  │ contributors    (joueurs actifs)   ~10 KB    │        │
+│  │ craft_recipes   (CDN cache)        ~2 MB     │        │
+│  │                                              │        │
+│  │ TOTAL : ~10-50 MB (bien sous 500 MB)         │        │
+│  └─────────────────────┬───────────────────────┘        │
+│                        │                                 │
+│  ┌─────────────────────▼───────────────────────┐        │
+│  │ Supabase Realtime                            │        │
+│  │  Channel: "market-ogrest"                    │        │
+│  │  → Broadcast prix mis à jour                 │        │
+│  │  → Broadcast alertes (snipe, whale dump)     │        │
+│  │  → Broadcast nouvelles offres                │        │
+│  └─────────────────────────────────────────────┘        │
+│                                                          │
+│  ┌─────────────────────────────────────────────┐        │
+│  │ Cron (pg_cron ou Edge Function scheduled)    │        │
+│  │  Chaque nuit :                               │        │
+│  │  1. Agrège snapshot → OHLC daily             │        │
+│  │  2. Exporte Parquet → Supabase Storage       │        │
+│  │  3. Purge offres expirées                    │        │
+│  └─────────────────────────────────────────────┘        │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+        │
+        │ (téléchargement Parquet optionnel)
+        ▼
+┌─────────────────────────────────────────────────────────┐
+│              LOCAL (analyse avancée, optionnel)           │
+│                                                          │
+│  DuckDB + fichiers Parquet mensuels                      │
+│  "SELECT * FROM 'market_2026_*.parquet'"                 │
+│  → Tendances long terme                                  │
+│  → Détection de saisonnalité                             │
+│  → Machine learning sur prix                             │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+L'astuce qui change tout : le Delta Upload
+Chaque client n'envoie pas ses 36 000 offres à chaque cycle. Il envoie uniquement le delta : les offres nouvelles ou modifiées depuis le dernier upload. Voici comment :
+
+Le client garde un hash (CRC32) de chaque offre envoyée. Au cycle suivant, il compare les nouvelles offres avec les hash stockés. Seules les différences partent vers le serveur. Résultat : au lieu de 36 000 offres × 500 joueurs = 18 M offres/cycle, on envoie peut-être 200 nouvelles offres × 500 joueurs = 100K offres, dont 99 % sont des doublons entre joueurs → après UPSERT côté serveur = ~200 offres insérées. Le trafic passe de gigaoctets à kilooctets.
+
+Côté serveur : l'agrégation OHLC
+Au lieu de stocker chaque observation brute pour l'éternité, le serveur calcule chaque nuit un résumé OHLC (Open/High/Low/Close) par item et par jour. C'est la technique standard de la finance pour stocker des années de données de marché (source: QuestDB finance article).
+
+Pour un item donné sur une journée, au lieu de stocker 500 observations (~50 KB), on stocke une seule ligne de 100 octets :
+
+item_ref_id | date       | open  | high   | low   | close  | volume | nb_sellers
+29590       | 2026-03-24 | 7500k | 7800k  | 7200k | 7500k  | 12     | 3
+9 014 items × 365 jours = 3.3 millions de lignes par an = environ 200 MB en PostgreSQL, ~20 MB en Parquet. Dix ans : 200 MB en Parquet. C'est rien.
+
+Estimation des coûts
+Phase	Joueurs	Coût mensuel
+Lancement	1-50	0 € (Supabase free tier)
+Croissance	50-500	25 $/mois (Supabase Pro)
+Maturité	500+	~50 $/mois (Pro + compute addon)
+Prochaines étapes concrètes
+Le plan est en trois phases :
+
+Phase 1 (maintenant) — Finir le client local. Corriger l'XP, la taxe, les noms. Avoir un client qui marche parfaitement en solo. C'est ce qu'on fait.
+
+Phase 2 (quand le client est stable) — Créer le projet Supabase, définir le schema PostgreSQL (4 tables : market_snapshot, market_ohlc, contributors, craft_recipes), écrire l'Edge Function de réception, ajouter l'upload delta dans le client Tauri.
+
+Phase 3 (quand 10+ joueurs testent) — Activer Supabase Realtime pour le broadcast, implémenter le cron nocturne d'agrégation OHLC, rendre les Parquet téléchargeables.
+
+Tu veux qu'on continue à corriger le client (XP, taxe, etc.) avant de passer à l'architecture serveur, ou tu veux que je te prépare le schema Supabase tout de suite ?

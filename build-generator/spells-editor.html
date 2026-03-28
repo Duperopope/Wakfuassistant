@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sram Spells Editor</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  body{padding:20px;max-width:1400px;margin:0 auto}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+  .top-bar h1{margin:0;font-size:1.4rem}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .top-actions button{padding:8px 16px;border:none;border-radius:6px;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s}
+  .btn-save{background:var(--accent-green);color:#000}
+  .btn-save:hover{background:#27ae60}
+  .btn-load{background:var(--accent-blue);color:#fff}
+  .btn-load:hover{background:#2980b9}
+  .btn-add{background:var(--accent-purple);color:#fff}
+  .btn-add:hover{background:#8e44ad}
+  .btn-export{background:var(--accent-gold);color:#000}
+  .btn-export:hover{background:#d4ac0d}
+  .btn-import{background:rgba(255,255,255,.1);color:var(--text-primary);border:1px solid var(--border-color) !important}
+  .btn-danger{background:var(--accent-red);color:#fff}
+  .btn-danger:hover{background:#c0392b}
+
+  /* Tabs */
+  .tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+  .tab{padding:8px 16px;border-radius:6px 6px 0 0;cursor:pointer;font-weight:700;font-size:.8rem;background:var(--bg-secondary);color:var(--text-muted);border:1px solid var(--border-color);border-bottom:none;transition:all .2s}
+  .tab.active{background:var(--bg-card);color:var(--accent-gold);border-color:var(--accent-gold)}
+  .tab .count{font-size:.65rem;margin-left:4px;opacity:.6}
+
+  /* Table */
+  .spell-table{width:100%;border-collapse:collapse;font-size:.78rem;font-family:var(--font-mono)}
+  .spell-table th{text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--accent-purple);position:sticky;top:0;background:var(--bg-primary);z-index:1}
+  .spell-table td{padding:6px 10px;border-bottom:1px solid rgba(44,44,84,.3);vertical-align:middle}
+  .spell-table tr:hover{background:rgba(155,89,182,.05)}
+  .spell-table input,.spell-table select{background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-primary);padding:4px 6px;border-radius:4px;font-size:.75rem;font-family:var(--font-mono);width:100%}
+  .spell-table input:focus,.spell-table select:focus{outline:none;border-color:var(--accent-purple);box-shadow:0 0 0 2px rgba(155,89,182,.2)}
+  .spell-table input[type="number"]{width:60px;text-align:center}
+  .spell-table input[type="checkbox"]{width:auto;cursor:pointer}
+  .spell-name-input{font-weight:700 !important;min-width:120px}
+  .col-id{width:120px;color:var(--text-muted);font-size:.65rem}
+  .col-actions{width:80px;text-align:center}
+  .btn-row{padding:3px 8px;border:none;border-radius:4px;cursor:pointer;font-size:.7rem;font-weight:600;margin:1px}
+  .btn-del{background:rgba(231,76,60,.15);color:var(--accent-red);border:1px solid var(--accent-red) !important}
+  .btn-del:hover{background:rgba(231,76,60,.3)}
+  .btn-dup{background:rgba(52,152,219,.15);color:var(--accent-blue);border:1px solid var(--accent-blue) !important}
+  .btn-dup:hover{background:rgba(52,152,219,.3)}
+
+  /* Status */
+  .elem-feu{color:#e74c3c}
+  .elem-eau{color:#3498db}
+  .elem-air{color:#2ecc71}
+  .elem-terre{color:#cd6133}
+  .elem-neutre{color:#bdc3c7}
+
+  .status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700}
+  .status-confirmed{background:rgba(46,204,113,.15);color:var(--accent-green);border:1px solid var(--accent-green)}
+  .status-unverified{background:rgba(241,196,15,.15);color:var(--accent-gold);border:1px solid var(--accent-gold)}
+  .status-removed{background:rgba(231,76,60,.15);color:var(--accent-red);border:1px solid var(--accent-red)}
+
+  .toast{position:fixed;bottom:20px;right:20px;padding:12px 24px;border-radius:8px;font-weight:700;font-size:.85rem;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast-ok{background:var(--accent-green);color:#000}
+  .toast-err{background:var(--accent-red);color:#fff}
+  .toast-info{background:var(--accent-blue);color:#fff}
+
+  .summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:var(--bg-secondary);border-radius:8px}
+  .summary-item{text-align:center}
+  .summary-item .sv{font-size:1.1rem;font-weight:800;font-family:var(--font-mono);color:var(--accent-gold)}
+  .summary-item .sl{font-size:.6rem;color:var(--text-muted);text-transform:uppercase}
+
+  .json-preview{margin-top:16px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px;max-height:400px;overflow-y:auto}
+  .json-preview pre{font-size:.7rem;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;margin:0}
+
+  .hidden{display:none}
+  #fileInput{display:none}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>Sram Spells & Passives Editor</h1>
+    <span class="version">Edite les donnees du Build Generator — Sauvegarde locale (localStorage + JSON export)</span>
+  </div>
+  <div class="top-actions">
+    <button class="btn-save" onclick="saveAll()">Sauvegarder</button>
+    <button class="btn-load" onclick="loadFromJSON()">Charger JSON</button>
+    <button class="btn-export" onclick="exportJSON()">Exporter JSON</button>
+    <button class="btn-import" onclick="document.getElementById('fileInput').click()">Importer fichier</button>
+    <button class="btn-add" onclick="addNewSpell()">+ Sort</button>
+    <button class="btn-add" onclick="addNewPassive()">+ Passif</button>
+    <input type="file" id="fileInput" accept=".json" onchange="importFile(event)"/>
+  </div>
+</div>
+
+<div class="summary" id="summary"></div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="burst" onclick="switchTab('burst')">Sorts Burst<span class="count" id="countBurst"></span></div>
+  <div class="tab" data-tab="neutral" onclick="switchTab('neutral')">Sorts Neutres<span class="count" id="countNeutral"></span></div>
+  <div class="tab" data-tab="all_class" onclick="switchTab('all_class')">Neutres Toutes Classes<span class="count" id="countAllClass"></span></div>
+  <div class="tab" data-tab="missing" onclick="switchTab('missing')">Sorts Manquants<span class="count" id="countMissing"></span></div>
+  <div class="tab" data-tab="passives_sram" onclick="switchTab('passives_sram')">Passifs Sram<span class="count" id="countPSram"></span></div>
+  <div class="tab" data-tab="passives_common" onclick="switchTab('passives_common')">Passifs Communs<span class="count" id="countPCommon"></span></div>
+  <div class="tab" data-tab="json" onclick="switchTab('json')">JSON Preview</div>
+</div>
+
+<div id="content"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =============================================
+     DATA STORE
+     Tout est dans localStorage + export JSON
+     ============================================= */
+  var STORAGE_KEY = "sram_editor_data";
+  var currentTab = "burst";
+
+  /* Structure par defaut — loaded from doc ref */
+  var DEFAULT_DATA = {
+    _meta: {
+      source: "Document de reference Sram L'Immortel v2.7",
+      github: "https://github.com/Duperopope/Wakfuassistant",
+      last_update: new Date().toISOString().slice(0,10),
+      editor_version: "1.0"
+    },
+    burst_spells: [
+      { id:"mise_a_mort", name:"Mise a mort", ap:4, wp:0, base:154, elem:"feu",
+        pf_scaling:true, gen_pf:false, consume_pf:true, upt:1, upt_target:1,
+        breaks_invis:true, ab_eligible:false, range_min:0, range_max:3,
+        status:"confirmed", notes:"Sort burst principal. Scale avec PF." },
+      { id:"arnaque", name:"Arnaque", ap:3, wp:0, base:108, elem:"feu",
+        pf_scaling:true, gen_pf:false, consume_pf:true, upt:2, upt_target:1,
+        breaks_invis:true, ab_eligible:false, range_min:0, range_max:3,
+        status:"confirmed", notes:"Second sort PF-scaling." },
+      { id:"traumatisme", name:"Traumatisme", ap:5, wp:0, base:192, elem:"eau",
+        pf_scaling:true, gen_pf:false, consume_pf:true, upt:1, upt_target:1,
+        breaks_invis:true, ab_eligible:false, range_min:0, range_max:3,
+        status:"confirmed", notes:"Gros burst eau, scale avec PF." },
+      { id:"coup_penetrant", name:"Coup penetrant", ap:4, wp:0, base:140, elem:"air",
+        pf_scaling:false, gen_pf:true, consume_pf:false, upt:2, upt_target:1,
+        breaks_invis:true, ab_eligible:true, range_min:0, range_max:3,
+        status:"confirmed", notes:"Genere PF." },
+      { id:"attaque_letale", name:"Attaque letale", ap:4, wp:0, base:140, elem:"terre",
+        pf_scaling:false, gen_pf:true, consume_pf:false, upt:2, upt_target:1,
+        breaks_invis:true, ab_eligible:true, range_min:0, range_max:3,
+        status:"confirmed", notes:"Genere PF." },
+      { id:"attaque_mortelle", name:"Attaque mortelle", ap:5, wp:0, base:175, elem:"terre",
+        pf_scaling:false, gen_pf:true, consume_pf:false, upt:1, upt_target:1,
+        breaks_invis:true, ab_eligible:true, range_min:0, range_max:3,
+        status:"confirmed", notes:"Genere PF, gros cout." },
+      { id:"contact_letal", name:"Contact letal", ap:2, wp:0, base:62, elem:"feu",
+        pf_scaling:false, gen_pf:true, consume_pf:false, upt:3, upt_target:2,
+        breaks_invis:true, ab_eligible:false, range_min:0, range_max:1,
+        status:"confirmed", notes:"Melee, genere PF, utilisable pendant invis si Retenue (< 4PA)." }
+    ],
+    neutral_spells: [
+      { id:"invisibilite", name:"Invisibilite", ap:2, wp:2, base:0, elem:"neutre",
+        pf_scaling:false, gen_pf:false, consume_pf:false, upt:1, upt_target:0,
+        breaks_invis:false, ab_eligible:false, range_min:0, range_max:0,
+        cooldown:5, status:"confirmed", notes:"Invisible 2 tours. Quasi-intaclable." },
+      { id:"surineur", name:"Surineur", ap:0, wp:2, base:0, elem:"neutre",
+        pf_scaling:false, gen_pf:false, consume_pf:false, upt:1, upt_target:0,
+        breaks_invis:false, ab_eligible:false, range_min:0, range_max:0,
+        cooldown:2, status:"confirmed", notes:"+20% dmg dos, +20% dmg crit (tour suivant). Stabilise." },
+      { id:"double", name:"Double", ap:2, wp:1, base:0, elem:"neutre",
+        pf_scaling:false, gen_pf:false, consume_pf:false, upt:1, upt_target:0,
+        breaks_invis:false, ab_eligible:false, range_min:1, range_max:3,
+        cooldown:3, status:"confirmed", notes:"Invoque Double (40% PV, 2PA, 2 Tacle)." },
+      { id:"charme_de_masse", name:"Charme de Masse", ap:0, wp:2, base:0, elem:"neutre",
+        pf_scaling:false, gen_pf:false, consume_pf:false, upt:1, upt_target:1,
+        breaks_invis:true, ab_eligible:false, range_min:1, range_max:4,
+        cooldown:3, status:"confirmed", notes:"+150 Tacle cible, attire 2 cases." }
+    ],
+    all_class_neutral: [
+      { id:"neutre_tc_1", name:"???", ap:0, wp:0, base:0, elem:"neutre",
+        status:"missing", notes:"Sort neutre toutes classes #1 — A DOCUMENTER" },
+      { id:"neutre_tc_2", name:"???", ap:0, wp:0, base:0, elem:"neutre",
+        status:"missing", notes:"Sort neutre toutes classes #2 — A DOCUMENTER" },
+      { id:"neutre_tc_3", name:"???", ap:0, wp:0, base:0, elem:"neutre",
+        status:"missing", notes:"Sort neutre toutes classes #3 — A DOCUMENTER" }
+    ],
+    missing_spells: [
+      { id:"elem_manquant_1", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #1 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_2", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #2 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_3", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #3 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_4", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #4 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_5", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #5 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_6", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #6 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_7", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #7 — SCREENSHOT REQUIS" },
+      { id:"elem_manquant_8", name:"???", ap:0, wp:0, base:0, elem:"???",
+        status:"missing", notes:"Sort elementaire manquant #8 — SCREENSHOT REQUIS" },
+      { id:"neutre_classe_5", name:"???", ap:0, wp:0, base:0, elem:"neutre",
+        status:"missing", notes:"Sort neutre de classe #5 — A DOCUMENTER" },
+      { id:"neutre_classe_6", name:"???", ap:0, wp:0, base:0, elem:"neutre",
+        status:"missing", notes:"Sort neutre de classe #6 — A DOCUMENTER" }
+    ],
+    passives_sram: [
+      { id:"retenue", name:"Retenue", unlock:15, tier:"S", context:"burst",
+        effects:"Invisible: +50 PF/tour (2t=100). Invis ne break que par sort >= 4PA.",
+        conflicts:"assaut_brutal", status:"confirmed" },
+      { id:"assassin", name:"Assassin", unlock:10, tier:"S", context:"farm",
+        effects:"On kill: +1PA, +1PM, +1PW, heal 20%.",
+        conflicts:"", status:"confirmed" },
+      { id:"duperie", name:"Duperie", unlock:10, tier:"A", context:"survie",
+        effects:"Swap avec Double + effets defensifs.",
+        conflicts:"leurre", status:"confirmed" },
+      { id:"passe_passe", name:"Passe-passe", unlock:20, tier:"A", context:"burst",
+        effects:"Swap Double <-> ennemi.",
+        conflicts:"", status:"confirmed" },
+      { id:"embuscade", name:"Embuscade", unlock:25, tier:"B-C", context:"pieges",
+        effects:"Piege declenche: +1PW, 72 dmg fixe. Retire refund PA pieges.",
+        conflicts:"", status:"confirmed" },
+      { id:"piege_attraction_ii", name:"Piege Attraction II", unlock:30, tier:"B", context:"AoE",
+        effects:"Piege AoE attirance.",
+        conflicts:"", status:"confirmed" },
+      { id:"peur_alternative", name:"Peur alternative", unlock:35, tier:"A", context:"single",
+        effects:"Push/fuite conditionnelle.",
+        conflicts:"", status:"confirmed" },
+      { id:"hemophilie", name:"Hemophilie", unlock:40, tier:"B", context:"DoT",
+        effects:"Convertit Hemorragie en poison.",
+        conflicts:"", status:"confirmed" },
+      { id:"piege_repulsion_ii", name:"Piege Repulsion II", unlock:45, tier:"B", context:"mobilite",
+        effects:"Piege push zone.",
+        conflicts:"", status:"confirmed" },
+      { id:"localisation_quantique", name:"Localisation quantique", unlock:50, tier:"D-B", context:"situationnel",
+        effects:"Ignore orientation, perd bonus dos (x1.25).",
+        conflicts:"", status:"confirmed" },
+      { id:"leurre", name:"Leurre", unlock:60, tier:"A", context:"AoE",
+        effects:"Double touche -> explosion zone (50% PV Double) + hemorragie adj. 317 sans stuff, 1220 avec stuff (neutre).",
+        conflicts:"duperie", status:"confirmed" },
+      { id:"diversion_alternative", name:"Diversion alternative", unlock:70, tier:"C", context:"niche",
+        effects:"Repositionnement niche.",
+        conflicts:"", status:"confirmed" },
+      { id:"piege_teleportation_ii", name:"Piege Teleportation II", unlock:80, tier:"B", context:"team",
+        effects:"TP allie, piege non consomme (cd 1 tour).",
+        conflicts:"", status:"confirmed" },
+      { id:"assaut_letal", name:"Assaut letal", unlock:90, tier:"S", context:"farm",
+        effects:"On kill: TP derriere marque, +2PA, transfert hemorragie.",
+        conflicts:"", status:"confirmed" },
+      { id:"assaut_brutal", name:"Assaut Brutal", unlock:100, tier:"A", context:"burst alt",
+        effects:"Sorts >= 4PA: perdent gen PF, +5%/PA dmg (4PA=+20%, 5PA=+25%). Exclut Mise a mort et Traumatisme.",
+        conflicts:"retenue", status:"confirmed" }
+    ],
+    passives_common: [
+      { id:"carnage", name:"Carnage", unlock:0, tier:"S",
+        effects:"+15% DI si pas touche ce tour.",
+        conflicts:"", status:"confirmed" },
+      { id:"fluctuation", name:"Fluctuation", unlock:0, tier:"S",
+        effects:"Passage adj: +10 Fluct. Esquive: +15. Tacle: +15. Ennemi finit tour contact: +20. Cap 60. Debuff cible 2 tours.",
+        conflicts:"", status:"confirmed" },
+      { id:"evasion", name:"Evasion", unlock:0, tier:"B",
+        effects:"Bonus apres esquive reussie.",
+        conflicts:"", status:"confirmed" },
+      { id:"interception", name:"Interception", unlock:0, tier:"B",
+        effects:"Bonus apres tacle reussi.",
+        conflicts:"", status:"confirmed" },
+      { id:"inspiration", name:"Inspiration", unlock:0, tier:"B",
+        effects:"+Maitrise quand PW depense.",
+        conflicts:"", status:"confirmed" },
+      { id:"motivation", name:"Motivation", unlock:0, tier:"A",
+        effects:"+PA ou +PM conditionnel.",
+        conflicts:"", status:"confirmed" },
+      { id:"medecine", name:"Medecine", unlock:0, tier:"B",
+        effects:"Ameliore soins recus/donnes.",
+        conflicts:"", status:"confirmed" },
+      { id:"rock", name:"Rock", unlock:0, tier:"B",
+        effects:"+Resistance et stabilite.",
+        conflicts:"", status:"confirmed" }
+    ]
+  };
+
+  var data = null;
+
+  /* =============================================
+     LOAD / SAVE
+     ============================================= */
+  function load() {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try { data = JSON.parse(raw); }
+      catch(e) { data = JSON.parse(JSON.stringify(DEFAULT_DATA)); }
+    } else {
+      data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+    data._meta.last_update = new Date().toISOString().slice(0,10);
+  }
+
+  function save() {
+    data._meta.last_update = new Date().toISOString().slice(0,10);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  window.saveAll = function() {
+    readAllFromDOM();
+    save();
+    toast("Sauvegarde OK — localStorage", "ok");
+    renderSummary();
+  };
+
+  window.exportJSON = function() {
+    readAllFromDOM();
+    save();
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "sram-spells-editor-" + data._meta.last_update + ".json";
+    a.click();
+    toast("JSON exporte", "ok");
+  };
+
+  window.loadFromJSON = function() {
+    /* Charge depuis le fichier sram-spells.json du build-generator/data/ */
+    fetch("data/sram-spells.json")
+      .then(function(r){ return r.json(); })
+      .then(function(json){
+        /* Convertir le format sram-spells.json vers notre format editor */
+        if (json.key_damage_spells) {
+          data.burst_spells = json.key_damage_spells.map(function(s){
+            return {
+              id: s.id, name: s.name, ap: s.cost_ap || s.ap || 0, wp: s.cost_wp || s.wp || 0,
+              base: s.base_damage || s.base || 0, elem: s.element || s.elem || "???",
+              pf_scaling: !!s.pf_scaling, gen_pf: !!s.generates_pf,
+              consume_pf: !!s.consumes_pf, upt: s.uses_per_turn || s.upt || 1,
+              upt_target: s.uses_per_target || s.upt_target || 1,
+              breaks_invis: s.breaks_invisibility !== false,
+              ab_eligible: !!s.ab_eligible,
+              range_min: s.range_min || 0, range_max: s.range_max || 3,
+              status: "confirmed", notes: s.description || ""
+            };
+          });
+        }
+        if (json.neutral_spells) {
+          data.neutral_spells = json.neutral_spells.map(function(s){
+            return {
+              id: s.id, name: s.name, ap: s.cost_ap || s.ap || 0, wp: s.cost_wp || s.wp || 0,
+              base: 0, elem: "neutre",
+              pf_scaling: false, gen_pf: false, consume_pf: false,
+              upt: 1, upt_target: 0, breaks_invis: !!s.breaks_invisibility,
+              ab_eligible: false, range_min: s.range_min || 0, range_max: s.range_max || 0,
+              cooldown: s.cooldown || 0,
+              status: "confirmed", notes: s.description || ""
+            };
+          });
+        }
+        save();
+        renderTab();
+        renderSummary();
+        toast("Charge depuis data/sram-spells.json", "info");
+      })
+      .catch(function(e){
+        toast("Erreur lecture sram-spells.json: " + e.message, "err");
+      });
+  };
+
+  window.importFile = function(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var imported = JSON.parse(e.target.result);
+        /* Si c'est un export de l'editor */
+        if (imported.burst_spells || imported.neutral_spells) {
+          data = imported;
+          save();
+          renderTab();
+          renderSummary();
+          toast("Import OK : " + file.name, "ok");
+        }
+        /* Si c'est le format sram-spells.json original */
+        else if (imported.key_damage_spells) {
+          window.loadFromJSON();
+        }
+        else {
+          toast("Format JSON non reconnu", "err");
+        }
+      } catch(err) {
+        toast("Erreur JSON : " + err.message, "err");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
+  /* =============================================
+     TOAST
+     ============================================= */
+  function toast(msg, type) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show toast-" + (type || "info");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.className = "toast"; }, 3000);
+  }
+
+  /* =============================================
+     SUMMARY
+     ============================================= */
+  function renderSummary() {
+    var confirmed = 0, unverified = 0, missing = 0, total = 0;
+    var lists = ["burst_spells","neutral_spells","all_class_neutral","missing_spells"];
+    for (var li = 0; li < lists.length; li++) {
+      var arr = data[lists[li]] || [];
+      for (var i = 0; i < arr.length; i++) {
+        total++;
+        if (arr[i].status === "confirmed") confirmed++;
+        else if (arr[i].status === "unverified") unverified++;
+        else if (arr[i].status === "missing") missing++;
+      }
+    }
+    var pSram = (data.passives_sram || []).length;
+    var pCommon = (data.passives_common || []).length;
+
+    var h = '';
+    h += '<div class="summary-item"><div class="sv">' + total + '</div><div class="sl">Sorts total</div></div>';
+    h += '<div class="summary-item"><div class="sv" style="color:var(--accent-green)">' + confirmed + '</div><div class="sl">Confirmes</div></div>';
+    h += '<div class="summary-item"><div class="sv" style="color:var(--accent-gold)">' + unverified + '</div><div class="sl">Non verifies</div></div>';
+    h += '<div class="summary-item"><div class="sv" style="color:var(--accent-red)">' + missing + '</div><div class="sl">Manquants</div></div>';
+    h += '<div class="summary-item"><div class="sv" style="color:var(--accent-purple)">' + pSram + '</div><div class="sl">Passifs Sram</div></div>';
+    h += '<div class="summary-item"><div class="sv" style="color:var(--accent-blue)">' + pCommon + '</div><div class="sl">Passifs Communs</div></div>';
+
+    document.getElementById("summary").innerHTML = h;
+
+    /* Update counts */
+    document.getElementById("countBurst").textContent = " (" + (data.burst_spells||[]).length + ")";
+    document.getElementById("countNeutral").textContent = " (" + (data.neutral_spells||[]).length + ")";
+    document.getElementById("countAllClass").textContent = " (" + (data.all_class_neutral||[]).length + ")";
+    document.getElementById("countMissing").textContent = " (" + (data.missing_spells||[]).length + ")";
+    document.getElementById("countPSram").textContent = " (" + (data.passives_sram||[]).length + ")";
+    document.getElementById("countPCommon").textContent = " (" + (data.passives_common||[]).length + ")";
+  }
+
+  /* =============================================
+     TABS
+     ============================================= */
+  window.switchTab = function(tab) {
+    readAllFromDOM();
+    currentTab = tab;
+    var tabs = document.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle("active", tabs[i].getAttribute("data-tab") === tab);
+    }
+    renderTab();
+  };
+
+  /* =============================================
+     READ DOM -> DATA (before switching/saving)
+     ============================================= */
+  function readAllFromDOM() {
+    var rows = document.querySelectorAll("tr[data-idx]");
+    for (var r = 0; r < rows.length; r++) {
+      var row = rows[r];
+      var listKey = row.getAttribute("data-list");
+      var idx = parseInt(row.getAttribute("data-idx"));
+      var item = data[listKey][idx];
+      if (!item) continue;
+
+      var inputs = row.querySelectorAll("[data-field]");
+      for (var i = 0; i < inputs.length; i++) {
+        var field = inputs[i].getAttribute("data-field");
+        if (inputs[i].type === "checkbox") {
+          item[field] = inputs[i].checked;
+        } else if (inputs[i].type === "number") {
+          item[field] = parseFloat(inputs[i].value) || 0;
+        } else {
+          item[field] = inputs[i].value;
+        }
+      }
+
+      /* Auto-generate ID from name */
+      if (item.name && item.name !== "???") {
+        item.id = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+      }
+    }
+  }
+
+  /* =============================================
+     RENDER
+     ============================================= */
+  function renderTab() {
+    var c = document.getElementById("content");
+    if (currentTab === "json") {
+      c.innerHTML = '<div class="json-preview"><pre>' + escHtml(JSON.stringify(data, null, 2)) + '</pre></div>';
+      return;
+    }
+    if (currentTab === "passives_sram") { renderPassives("passives_sram", c); return; }
+    if (currentTab === "passives_common") { renderPassives("passives_common", c); return; }
+
+    var listKey = {
+      burst: "burst_spells",
+      neutral: "neutral_spells",
+      all_class: "all_class_neutral",
+      missing: "missing_spells"
+    }[currentTab];
+
+    var list = data[listKey] || [];
+    var h = '<table class="spell-table">';
+    h += '<tr>';
+    h += '<th>Nom</th><th>Elem</th><th>PA</th><th>PW</th><th>Base</th>';
+    h += '<th>PF Scale</th><th>Gen PF</th><th>UPT</th><th>Break Inv</th><th>AB Elig</th>';
+    h += '<th>Portee</th><th>CD</th><th>Statut</th><th>Notes</th><th>Actions</th>';
+    h += '</tr>';
+
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      h += '<tr data-list="' + listKey + '" data-idx="' + i + '">';
+      h += '<td><input class="spell-name-input" data-field="name" value="' + escAttr(s.name) + '"/></td>';
+      h += '<td><select data-field="elem">';
+      ["feu","eau","air","terre","neutre","???"].forEach(function(e){
+        h += '<option value="'+e+'"'+(s.elem===e?' selected':'')+'>'+e+'</option>';
+      });
+      h += '</select></td>';
+      h += '<td><input type="number" data-field="ap" value="' + (s.ap||0) + '" min="0" max="12"/></td>';
+      h += '<td><input type="number" data-field="wp" value="' + (s.wp||0) + '" min="0" max="12"/></td>';
+      h += '<td><input type="number" data-field="base" value="' + (s.base||0) + '" min="0" max="999"/></td>';
+      h += '<td><input type="checkbox" data-field="pf_scaling"' + (s.pf_scaling?' checked':'') + '/></td>';
+      h += '<td><input type="checkbox" data-field="gen_pf"' + (s.gen_pf?' checked':'') + '/></td>';
+      h += '<td><input type="number" data-field="upt" value="' + (s.upt||1) + '" min="0" max="9"/></td>';
+      h += '<td><input type="checkbox" data-field="breaks_invis"' + (s.breaks_invis?' checked':'') + '/></td>';
+      h += '<td><input type="checkbox" data-field="ab_eligible"' + (s.ab_eligible?' checked':'') + '/></td>';
+      h += '<td><input type="number" data-field="range_max" value="' + (s.range_max||0) + '" min="0" max="12" style="width:40px"/></td>';
+      h += '<td><input type="number" data-field="cooldown" value="' + (s.cooldown||0) + '" min="0" max="20" style="width:40px"/></td>';
+      h += '<td><select data-field="status">';
+      ["confirmed","unverified","missing","removed"].forEach(function(st){
+        h += '<option value="'+st+'"'+(s.status===st?' selected':'')+'>'+st+'</option>';
+      });
+      h += '</select></td>';
+      h += '<td><input data-field="notes" value="' + escAttr(s.notes||"") + '" style="min-width:150px"/></td>';
+      h += '<td class="col-actions">';
+      h += '<button class="btn-row btn-dup" onclick="dupItem(\'' + listKey + '\',' + i + ')">Dup</button>';
+      h += '<button class="btn-row btn-del" onclick="delItem(\'' + listKey + '\',' + i + ')">Sup</button>';
+      h += '</td>';
+      h += '</tr>';
+    }
+    h += '</table>';
+    c.innerHTML = h;
+  }
+
+  function renderPassives(listKey, container) {
+    var list = data[listKey] || [];
+    var h = '<table class="spell-table">';
+    h += '<tr><th>Nom</th><th>Unlock Niv</th><th>Tier</th><th>Contexte</th>';
+    h += '<th>Effets</th><th>Conflits</th><th>Statut</th><th>Actions</th></tr>';
+
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      h += '<tr data-list="' + listKey + '" data-idx="' + i + '">';
+      h += '<td><input class="spell-name-input" data-field="name" value="' + escAttr(p.name) + '"/></td>';
+      h += '<td><input type="number" data-field="unlock" value="' + (p.unlock||0) + '" min="0" max="230" style="width:50px"/></td>';
+      h += '<td><select data-field="tier">';
+      ["S","A","B","B-C","C","D","D-B"].forEach(function(t){
+        h += '<option value="'+t+'"'+(p.tier===t?' selected':'')+'>'+t+'</option>';
+      });
+      h += '</select></td>';
+      h += '<td><input data-field="context" value="' + escAttr(p.context||"") + '" style="width:80px"/></td>';
+      h += '<td><input data-field="effects" value="' + escAttr(p.effects||"") + '" style="min-width:200px"/></td>';
+      h += '<td><input data-field="conflicts" value="' + escAttr(p.conflicts||"") + '" style="width:100px"/></td>';
+      h += '<td><select data-field="status">';
+      ["confirmed","unverified","missing"].forEach(function(st){
+        h += '<option value="'+st+'"'+(p.status===st?' selected':'')+'>'+st+'</option>';
+      });
+      h += '</select></td>';
+      h += '<td class="col-actions">';
+      h += '<button class="btn-row btn-dup" onclick="dupItem(\'' + listKey + '\',' + i + ')">Dup</button>';
+      h += '<button class="btn-row btn-del" onclick="delItem(\'' + listKey + '\',' + i + ')">Sup</button>';
+      h += '</td>';
+      h += '</tr>';
+    }
+    h += '</table>';
+    container.innerHTML = h;
+  }
+
+  /* =============================================
+     ADD / DELETE / DUPLICATE
+     ============================================= */
+  window.addNewSpell = function() {
+    readAllFromDOM();
+    var listKey = {
+      burst:"burst_spells", neutral:"neutral_spells",
+      all_class:"all_class_neutral", missing:"missing_spells"
+    }[currentTab];
+    if (!listKey) { toast("Va sur un onglet sorts d'abord", "err"); return; }
+    data[listKey].push({
+      id:"nouveau_sort", name:"Nouveau sort", ap:0, wp:0, base:0, elem:"???",
+      pf_scaling:false, gen_pf:false, consume_pf:false, upt:1, upt_target:1,
+      breaks_invis:true, ab_eligible:false, range_min:0, range_max:0,
+      cooldown:0, status:"unverified", notes:"A REMPLIR"
+    });
+    save(); renderTab(); renderSummary();
+    toast("Sort ajoute", "ok");
+  };
+
+  window.addNewPassive = function() {
+    readAllFromDOM();
+    var listKey = (currentTab === "passives_common") ? "passives_common" : "passives_sram";
+    data[listKey].push({
+      id:"nouveau_passif", name:"Nouveau passif", unlock:0, tier:"B",
+      context:"", effects:"A REMPLIR", conflicts:"", status:"unverified"
+    });
+    save(); renderTab(); renderSummary();
+    toast("Passif ajoute", "ok");
+  };
+
+  window.delItem = function(listKey, idx) {
+    readAllFromDOM();
+    var name = data[listKey][idx].name;
+    if (!confirm("Supprimer " + name + " ?")) return;
+    data[listKey].splice(idx, 1);
+    save(); renderTab(); renderSummary();
+    toast(name + " supprime", "err");
+  };
+
+  window.dupItem = function(listKey, idx) {
+    readAllFromDOM();
+    var copy = JSON.parse(JSON.stringify(data[listKey][idx]));
+    copy.name = copy.name + " (copie)";
+    copy.id = copy.id + "_copy";
+    copy.status = "unverified";
+    data[listKey].splice(idx + 1, 0, copy);
+    save(); renderTab(); renderSummary();
+    toast("Duplique", "ok");
+  };
+
+  /* =============================================
+     MOVE BETWEEN TABS
+     Quand un sort missing est rempli, on peut le deplacer vers burst
+     ============================================= */
+  window.moveToTab = function(fromList, idx, toList) {
+    readAllFromDOM();
+    var item = data[fromList].splice(idx, 1)[0];
+    data[toList].push(item);
+    save(); renderTab(); renderSummary();
+    toast("Deplace vers " + toList, "info");
+  };
+
+  /* =============================================
+     UTILS
+     ============================================= */
+  function escHtml(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function escAttr(s) { return String(s||"").replace(/"/g,"&quot;").replace(/&/g,"&amp;"); }
+
+  /* =============================================
+     INIT
+     ============================================= */
+  load();
+  renderSummary();
+  renderTab();
+
+})();
+</script>
+
+</body>
+</html>

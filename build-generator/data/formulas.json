@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "source": "WakfuCalc par Ectawem — sites.google.com/view/wakfucalc/en/guides/formulas",
+    "verified": "27/03/2026"
+  },
+  "damage_formula": {
+    "text": "((Base * (1 + SumMasteries/100) * OrientationBonus * CritMultiplier * (1 + SumDI/100) * (1 - ResPercent/100)) + FixedDamage - Barrier) * BlockCoef",
+    "sram_addons": {
+      "percent_df_sources": [
+        { "id": "isolated", "multiplier": 1.50, "condition": "1 seul ennemi a portee <= 2 cases" },
+        { "id": "maitre_des_ombres", "multiplier": 2.00, "condition": "Premier sort dmg direct apres sortie invisibilite" },
+        { "id": "pf_scaling", "formula": "1 + pf_percent/100", "condition": "Sort qui consomme PF (Mise a mort, Arnaque, Traumatisme)", "example_100pf": 2.00 }
+      ],
+      "fluctuation": {
+        "type": "separate_multiplier_on_target",
+        "formula": "1 + fluctuation_level/100",
+        "cap": 60,
+        "max_multiplier": 1.60,
+        "is_damage_received_debuff": true,
+        "note": "Applique APRES le calcul principal, sur la cible. Pas du DI additif."
+      }
+    }
+  },
+  "resistance_formula": {
+    "flat_to_percent": "percent_res = floor((1 - 0.8^(flat_res / 100)) * 100)",
+    "percent_to_flat": "flat_res = ceil(100 * log(1 - percent_res/100) / log(0.8))",
+    "cap": 90
+  },
+  "orientation_bonuses": {
+    "back": 1.25,
+    "side": 1.10,
+    "front": 1.00
+  },
+  "critical_multiplier": 1.25,
+  "block_coefficients": {
+    "not_blocked": 1.00,
+    "blocked": 0.80,
+    "blocked_with_expert": 0.68
+  },
+  "hp_formula": "total_hp = (50 + level * 10 + sum_flat_hp) * (1 + sum_percent_hp / 100)",
+  "ehp_formula": "ehp = (hp * 10000) / ((100 - res_percent) * (100 - (1 - block_coef) * block_percent))",
+  "em_formula": {
+    "regular": "em = (((sum_masteries + 100) * (sum_di + 100)) / 10000) - 100",
+    "critical": "em_crit = ((((sum_masteries_with_crit + 100) * (sum_di_with_crit + 100)) / 10000) * 1.25) - 100",
+    "average": "em_avg = em + ((em_crit - em) * crit_chance_percent / 100)"
+  }
+}

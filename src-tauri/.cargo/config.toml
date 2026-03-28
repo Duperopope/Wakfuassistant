@@ -1,0 +1,15 @@
+# === Optimisations build dev pour Wakfu Overlay ===
+# Source: https://doc.rust-lang.org/cargo/guide/build-performance.html
+
+[build]
+# Nombre de jobs paralleles (ton 5700 X3D a 8 cores / 16 threads)
+jobs = 12
+
+[target.x86_64-pc-windows-msvc]
+# LLD est 2-5x plus rapide que le linker MSVC par defaut
+# Inclus avec Rust, pas d'installation supplementaire
+linker = "rust-lld"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[registries.crates-io]
+protocol = "sparse"

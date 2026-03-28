@@ -1,0 +1,524 @@
+﻿{
+    "burst":  {
+                  "masteryPool":  396,
+                  "withoutFluct":  null,
+                  "fluctLevel":  0,
+                  "withFluct":  null
+              },
+    "sublimations":  [
+                         {
+                             "slot":  "Arme1Main",
+                             "name":  "[Expertise Blocage]"
+                         },
+                         {
+                             "slot":  "Amulette",
+                             "name":  "[Destruction I]"
+                         },
+                         {
+                             "slot":  "Ceinture",
+                             "name":  "[Force Vitale]"
+                         },
+                         {
+                             "slot":  "Anneau",
+                             "name":  "[Force Vitale]"
+                         },
+                         {
+                             "slot":  "Casque",
+                             "name":  "[Temerite]"
+                         }
+                     ],
+    "owned":  [
+                  {
+                      "name":  "Bottes Harry",
+                      "source":  "Inventaire",
+                      "slot":  "Bottes"
+                  },
+                  {
+                      "name":  "Hache Abraknyde",
+                      "source":  "Coffre (autre niv.)",
+                      "slot":  "Arme1Main"
+                  },
+                  {
+                      "name":  "Capawotte Sordide",
+                      "source":  "Coffre (autre niv.)",
+                      "slot":  "Cape"
+                  },
+                  {
+                      "name":  "Amulette Cornue",
+                      "source":  "Inventaire",
+                      "slot":  "Amulette"
+                  },
+                  {
+                      "name":  "Sceau flétri",
+                      "source":  "Coffre",
+                      "slot":  "Anneau"
+                  },
+                  {
+                      "name":  "Anneau Phorzerker",
+                      "source":  "Inventaire",
+                      "slot":  "Anneau"
+                  },
+                  {
+                      "name":  "Couvle-Noleille du Lenald",
+                      "source":  "Inventaire (autre niv.)",
+                      "slot":  "Casque"
+                  },
+                  {
+                      "name":  "Torse de Télob",
+                      "source":  "Coffre (autre niv.)",
+                      "slot":  "Plastron"
+                  },
+                  {
+                      "name":  "Emblème fruité",
+                      "source":  "Coffre",
+                      "slot":  "Embleme"
+                  }
+              ],
+    "meta":  {
+                 "pmMin":  5,
+                 "version":  "v8.3",
+                 "paMin":  13,
+                 "level":  null,
+                 "date":  "2026-03-28 12:47:59",
+                 "budgetUsed":  76000,
+                 "budget":  200000,
+                 "class":  null,
+                 "passives":  [
+                                  "Carnage",
+                                  "Retenue",
+                                  "Fluctuation",
+                                  "Passe-passe"
+                              ]
+             },
+    "score":  {
+                  "total":  10345.000000000002,
+                  "enchant":  1719.8
+              },
+    "stats":  {
+                  "tacle":  {
+                                "equip":  0,
+                                "total":  0,
+                                "base":  null
+                            },
+                  "pa":  {
+                             "equip":  6,
+                             "total":  13,
+                             "base":  7
+                         },
+                  "res":  {
+                              "equip":  0
+                          },
+                  "pm":  {
+                             "equip":  2,
+                             "total":  6,
+                             "base":  4
+                         },
+                  "pv":  {
+                             "equip":  0,
+                             "total":  3682,
+                             "base":  1534
+                         },
+                  "esquive":  {
+                                  "equip":  0,
+                                  "total":  0,
+                                  "base":  null
+                              },
+                  "cc":  {
+                             "equip":  21,
+                             "total":  64,
+                             "base":  43
+                         },
+                  "mastery":  {
+                                  "equip":  0,
+                                  "apt":  396,
+                                  "total":  396
+                              }
+              },
+    "items":  [
+                  {
+                      "rarity":  5,
+                      "slot":  "Bottes",
+                      "typeId":  119,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "Rouge,Rouge,Vert,Rouge",
+                      "nch":  null,
+                      "id":  18380,
+                      "ownedSource":  "Inventaire",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA +1PM",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Bottes Harry",
+                      "sublimation":  "-",
+                      "enchScore":  106.8
+                  },
+                  {
+                      "rarity":  4,
+                      "slot":  "Arme1Main",
+                      "typeId":  101,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "Blanc,Bleu,Rouge,Rouge",
+                      "nch":  null,
+                      "id":  25762,
+                      "ownedSource":  "Coffre (autre niv.)",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Hache Abraknyde",
+                      "sublimation":  "[Expertise Blocage]",
+                      "enchScore":  153
+                  },
+                  {
+                      "rarity":  4,
+                      "slot":  "Cape",
+                      "typeId":  132,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "Vert,Vert,Rouge,Bleu",
+                      "nch":  null,
+                      "id":  31081,
+                      "ownedSource":  "Coffre (autre niv.)",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Capawotte Sordide",
+                      "sublimation":  "-",
+                      "enchScore":  74.6
+                  },
+                  {
+                      "rarity":  3,
+                      "slot":  "Amulette",
+                      "typeId":  120,
+                      "owned":  true,
+                      "level":  138,
+                      "slotColors":  "Rouge,Rouge,Blanc,Rouge",
+                      "nch":  null,
+                      "id":  21558,
+                      "ownedSource":  "Inventaire",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Amulette Cornue",
+                      "sublimation":  "[Destruction I]",
+                      "enchScore":  103.8
+                  },
+                  {
+                      "rarity":  7,
+                      "slot":  "Epaulettes",
+                      "typeId":  138,
+                      "owned":  false,
+                      "level":  140,
+                      "slotColors":  "Rouge,Blanc,Vert,Blanc",
+                      "nch":  null,
+                      "id":  17357,
+                      "ownedSource":  null,
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA",
+                      "price":  40000,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Epaulettes Génétiquement Modifiées",
+                      "sublimation":  "-",
+                      "enchScore":  112
+                  },
+                  {
+                      "rarity":  7,
+                      "slot":  "Ceinture",
+                      "typeId":  133,
+                      "owned":  false,
+                      "level":  140,
+                      "slotColors":  "Bleu,Bleu,Blanc,Rouge",
+                      "nch":  null,
+                      "id":  18641,
+                      "ownedSource":  null,
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PA",
+                      "price":  36000,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Chode Foullule Lenald",
+                      "sublimation":  "[Force Vitale]",
+                      "enchScore":  34.8
+                  },
+                  {
+                      "rarity":  3,
+                      "slot":  "Anneau",
+                      "typeId":  103,
+                      "owned":  true,
+                      "level":  127,
+                      "slotColors":  "Bleu,Bleu,Bleu,Bleu",
+                      "nch":  null,
+                      "id":  31074,
+                      "ownedSource":  "Coffre",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Sceau flétri",
+                      "sublimation":  "[Force Vitale]",
+                      "enchScore":  480
+                  },
+                  {
+                      "rarity":  3,
+                      "slot":  "Anneau",
+                      "typeId":  103,
+                      "owned":  true,
+                      "level":  137,
+                      "slotColors":  "Vert,Bleu,Bleu,Blanc",
+                      "nch":  null,
+                      "id":  21562,
+                      "ownedSource":  "Inventaire",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Anneau Phorzerker",
+                      "sublimation":  "-",
+                      "enchScore":  392
+                  },
+                  {
+                      "rarity":  4,
+                      "slot":  "Casque",
+                      "typeId":  134,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "Rouge,Rouge,Rouge,Rouge",
+                      "nch":  null,
+                      "id":  22887,
+                      "ownedSource":  "Inventaire (autre niv.)",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Couvle-Noleille du Lenald",
+                      "sublimation":  "[Temerite]",
+                      "enchScore":  232.1
+                  },
+                  {
+                      "rarity":  4,
+                      "slot":  "Plastron",
+                      "typeId":  136,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "Blanc",
+                      "nch":  null,
+                      "id":  18166,
+                      "ownedSource":  "Coffre (autre niv.)",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "+1PM",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Torse de Télob",
+                      "sublimation":  "-",
+                      "enchScore":  30.7
+                  },
+                  {
+                      "rarity":  4,
+                      "slot":  "Embleme",
+                      "typeId":  646,
+                      "owned":  true,
+                      "level":  140,
+                      "slotColors":  "",
+                      "nch":  null,
+                      "id":  31363,
+                      "ownedSource":  "Coffre",
+                      "score":  null,
+                      "scoreTotal":  null,
+                      "paPm":  "",
+                      "price":  0,
+                      "stats":  {
+                                    "tacle":  null,
+                                    "berserk":  null,
+                                    "dos":  null,
+                                    "pa":  null,
+                                    "resFeu":  null,
+                                    "pm":  null,
+                                    "resEau":  null,
+                                    "melee":  null,
+                                    "crit":  null,
+                                    "resTerre":  null,
+                                    "pv":  null,
+                                    "esquive":  null,
+                                    "cc":  null,
+                                    "resAir":  null,
+                                    "mastery":  null
+                                },
+                      "name":  "Emblème fruité",
+                      "sublimation":  "-",
+                      "enchScore":  0
+                  }
+              ]
+}

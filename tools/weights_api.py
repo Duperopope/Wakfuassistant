@@ -350,6 +350,12 @@ import sys
 sys.path.insert(0, r"H:\Code\Wakfuassistant\tools")
 from patch_unified_api import register_unified_routes, register_ui_route
 
+# --- Auth & Security ---
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from auth import verify_api_key, register_auth_routes
+from patch_unified_api import register_unified_routes, register_ui_route
+
 app = FastAPI(
     title="Wakfu Weights API",
     description="API de classement des joueurs par poids d'équipement normalisé.",

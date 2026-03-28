@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sram Equipment Optimizer — Build Result</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  .eq-layout{max-width:1200px;margin:0 auto;padding:20px}
+  .eq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  @media(max-width:900px){.eq-grid{grid-template-columns:1fr}}
+
+  /* Cards */
+  .eq-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:16px;transition:border-color .3s}
+  .eq-card:hover{border-color:var(--accent-purple)}
+  .eq-card-title{font-size:.85rem;font-weight:800;color:var(--accent-purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border-color)}
+
+  /* Stats banner */
+  .stats-banner{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0;padding:14px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border-color)}
+  .stat-item{text-align:center;min-width:70px}
+  .stat-val{font-size:1.3rem;font-weight:800;font-family:var(--font-mono);color:var(--accent-gold)}
+  .stat-label{font-size:.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
+  .stat-detail{font-size:.55rem;color:var(--text-secondary);font-family:var(--font-mono)}
+
+  /* Item row */
+  .item-row{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:3px 0;background:var(--bg-card);border-radius:8px;border-left:3px solid var(--border-color);transition:all .2s}
+  .item-row:hover{background:var(--bg-card-hover);border-left-color:var(--accent-purple)}
+  .item-row.owned{border-left-color:var(--accent-green)}
+  .item-row.hdv{border-left-color:var(--accent-gold)}
+  .item-slot{font-size:.6rem;color:var(--text-muted);text-transform:uppercase;width:80px;flex-shrink:0;letter-spacing:.5px}
+  .item-name{font-weight:700;font-size:.85rem;color:var(--text-primary);flex:1}
+  .item-level{font-size:.7rem;color:var(--text-secondary);font-family:var(--font-mono)}
+  .item-score{font-size:.8rem;font-weight:800;font-family:var(--font-mono);color:var(--accent-gold);width:60px;text-align:right}
+  .item-price{font-size:.7rem;font-family:var(--font-mono);color:var(--text-muted);width:70px;text-align:right}
+  .item-tags{display:flex;gap:3px;flex-wrap:wrap}
+  .item-tag{display:inline-block;padding:1px 6px;border-radius:8px;font-size:.6rem;font-weight:600}
+  .tag-pa{background:rgba(52,152,219,.15);color:var(--accent-blue);border:1px solid rgba(52,152,219,.3)}
+  .tag-pm{background:rgba(46,204,113,.15);color:var(--accent-green);border:1px solid rgba(46,204,113,.3)}
+  .tag-sub{background:rgba(155,89,182,.15);color:var(--accent-purple);border:1px solid rgba(155,89,182,.3)}
+  .tag-owned{background:rgba(46,204,113,.1);color:var(--accent-green);border:1px solid rgba(46,204,113,.2)}
+  .tag-2h{background:rgba(231,76,60,.15);color:var(--accent-red);border:1px solid rgba(231,76,60,.3)}
+
+  /* Rarity colors */
+  .rarity-2{color:#95a5a6}
+  .rarity-3{color:#3498db}
+  .rarity-4{color:#9b59b6}
+  .rarity-5{color:#f1c40f}
+  .rarity-7{color:#e74c3c}
+
+  /* Burst box */
+  .burst-box{background:rgba(241,196,15,.06);border:1px solid var(--accent-gold);border-radius:10px;padding:16px;margin:16px 0;text-align:center}
+  .burst-title{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .burst-val{font-size:2rem;font-weight:900;font-family:var(--font-mono);color:var(--accent-gold)}
+  .burst-sub{font-size:.85rem;color:var(--text-secondary);font-family:var(--font-mono)}
+  .burst-fluct{font-size:.7rem;color:var(--accent-purple);margin-top:4px}
+
+  /* Sublimation list */
+  .subli-row{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:2px 0;background:var(--bg-card);border-radius:6px}
+  .subli-slot{font-size:.6rem;color:var(--text-muted);text-transform:uppercase;width:80px}
+  .subli-name{font-weight:700;font-size:.8rem;color:var(--accent-purple)}
+
+  /* CC diagnostic */
+  .cc-bar{height:20px;background:var(--bg-card);border-radius:10px;overflow:hidden;margin:8px 0;position:relative}
+  .cc-fill{height:100%;border-radius:10px;transition:width .5s}
+  .cc-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.7rem;font-weight:800;font-family:var(--font-mono);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+  /* Budget bar */
+  .budget-bar{height:14px;background:var(--bg-card);border-radius:7px;overflow:hidden;margin:6px 0;position:relative}
+  .budget-fill{height:100%;border-radius:7px;background:var(--accent-green)}
+  .budget-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6rem;font-weight:700;font-family:var(--font-mono);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+
+  /* Owned summary */
+  .owned-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .owned-item{font-size:.7rem;padding:4px 8px;background:var(--bg-card);border-radius:4px}
+  .owned-item .src{color:var(--accent-green);font-weight:600}
+
+  /* Load button */
+  .load-area{text-align:center;margin:20px 0}
+  .load-area p{color:var(--text-muted);font-size:.8rem;margin-top:8px}
+
+  /* Nav */
+  .nav-links{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+  .nav-links a{color:var(--accent-purple);text-decoration:none;padding:6px 14px;border:1px solid var(--accent-purple);border-radius:6px;font-size:.8rem;font-weight:600;transition:all .2s}
+  .nav-links a:hover{background:var(--accent-purple);color:#fff}
+
+  /* Slot icon mapping */
+  .slot-icon{font-size:1rem;width:24px;text-align:center}
+
+  /* Error */
+  .error-msg{color:var(--accent-red);text-align:center;padding:40px;font-size:.9rem}
+
+  /* Two hand badge */
+  .two-hand-badge{font-size:.55rem;color:var(--accent-red);font-weight:700;border:1px solid var(--accent-red);border-radius:4px;padding:0 4px;margin-left:4px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Sram Equipment Optimizer</h1>
+  <span class="version" id="headerVersion">v8.3 — Build Result</span>
+</header>
+
+<div class="nav-links" style="max-width:1200px;margin:12px auto;padding:0 20px">
+  <a href="index.html">Meta Build</a>
+  <a href="reference.html">Reference</a>
+  <a href="spells-editor.html">Spells Editor</a>
+  <a href="equipment.html" style="background:var(--accent-purple);color:#fff">Equipment</a>
+</div>
+
+<div class="eq-layout" id="app">
+  <div class="load-area" id="loadArea">
+    <button class="btn-calculate" onclick="loadBuild()">CHARGER LE BUILD</button>
+    <p>Charge le fichier <code>data/build-result.json</code> genere par l'optimiseur PowerShell</p>
+    <p style="margin-top:4px;font-size:.7rem;color:var(--text-muted)">
+      Commande : <code>powershell -NoProfile -ExecutionPolicy Bypass -File "tools\build_optimizer_v6.ps1"</code>
+    </p>
+  </div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<div class="footer">
+  Source : <strong>Doc Sram "L'Immortel" v2.7</strong>
+  — <a href="https://github.com/Duperopope/Wakfuassistant" target="_blank">GitHub</a>
+  — Formules <a href="https://sites.google.com/view/wakfucalc/en/guides/formulas" target="_blank">WakfuCalc</a>
+</div>
+
+<script>
+var SLOT_ICONS = {
+  "Amulette":"💎","Anneau":"💍","Arme1Main":"⚔️","SecondeMain":"🛡️",
+  "Bottes":"👢","Cape":"🧣","Casque":"⛑️","Ceinture":"🎗️",
+  "Epaulettes":"🦾","Plastron":"🛡️","Embleme":"🏷️","Familier":"🐾","Monture":"🐎"
+};
+var TWO_HAND_TYPES = [101,108,111,113,114,115,117,219,223,253];
+var RARITY_NAMES = {1:"Commun",2:"Inhabituel",3:"Rare",4:"Mythique",5:"Legendaire",7:"Relique"};
+
+function fmt(n) {
+  if (n === null || n === undefined) return "0";
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function loadBuild() {
+  fetch("data/build-result.json?t=" + Date.now())
+    .then(function(r) {
+      if (!r.ok) throw new Error("Fichier non trouve. Lancez d'abord l'optimiseur PowerShell.");
+      return r.json();
+    })
+    .then(function(data) { render(data); })
+    .catch(function(e) {
+      document.getElementById("content").style.display = "block";
+      document.getElementById("content").innerHTML = '<div class="error-msg">' + e.message + '</div>';
+      document.getElementById("loadArea").style.display = "none";
+    });
+}
+
+function render(d) {
+  document.getElementById("loadArea").style.display = "none";
+  document.getElementById("content").style.display = "block";
+  document.getElementById("headerVersion").textContent = (d.meta.version || "v8.3") + " — " + d.meta.class + " " + d.meta.level + " — " + d.meta.date;
+
+  var s = d.stats;
+  var h = '';
+
+  /* === STATS BANNER === */
+  h += '<div class="stats-banner">';
+  h += statBox("PA", s.pa.total, s.pa.base + " + " + s.pa.equip);
+  h += statBox("PM", s.pm.total, s.pm.base + " + " + s.pm.equip);
+  h += statBox("CC", s.cc.total + "%", s.cc.base + " + " + s.cc.equip);
+  h += statBox("PV", fmt(s.pv.total), "brut " + fmt(s.pv.base + s.pv.equip));
+  h += statBox("ESQ", fmt(s.esquive.total), s.esquive.base + " + " + s.esquive.equip);
+  h += statBox("TAC", fmt(s.tacle.total), s.tacle.base + " + " + s.tacle.equip);
+  h += statBox("MAST", fmt(s.mastery.total), "equip " + s.mastery.equip + " + apt " + s.mastery.apt);
+  h += statBox("SCORE", fmt(d.score.total), "ench " + fmt(d.score.enchant));
+  h += '</div>';
+
+  /* === BURST === */
+  h += '<div class="burst-box">';
+  h += '<div class="burst-title">Simulation Burst — Mise a mort (6PA, 154 base crit)</div>';
+  h += '<div class="burst-val">' + fmt(d.burst.withFluct) + ' dmg</div>';
+  h += '<div class="burst-sub">Sans fluct: ' + fmt(d.burst.withoutFluct) + '</div>';
+  if (d.burst.fluctLevel > 0) {
+    h += '<div class="burst-fluct">Fluctuation ' + d.burst.fluctLevel + ' (x' + (1 + d.burst.fluctLevel/100).toFixed(2) + ')</div>';
+  }
+  h += '<div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Pool mastery: ' + fmt(d.burst.masteryPool) + '</div>';
+  h += '</div>';
+
+  /* === GRID : Items + Diagnostics === */
+  h += '<div class="eq-grid">';
+
+  /* -- LEFT : ITEMS -- */
+  h += '<div>';
+  h += '<div class="eq-card">';
+  h += '<div class="eq-card-title">Equipement (' + d.items.length + ' pieces)</div>';
+  for (var i = 0; i < d.items.length; i++) {
+    var it = d.items[i];
+    var is2h = TWO_HAND_TYPES.indexOf(it.typeId) !== -1;
+    var rowClass = "item-row";
+    if (it.owned) rowClass += " owned";
+    else if (it.price > 0) rowClass += " hdv";
+
+    h += '<div class="' + rowClass + '">';
+    h += '<span class="slot-icon">' + (SLOT_ICONS[it.slot] || "📦") + '</span>';
+    h += '<span class="item-slot">' + it.slot + '</span>';
+    h += '<span class="item-name rarity-' + it.rarity + '">' + it.name;
+    if (is2h) h += ' <span class="two-hand-badge">2H</span>';
+    h += '</span>';
+    h += '<span class="item-level">Niv.' + it.level + '</span>';
+    h += '<span class="item-score">' + fmt(it.scoreTotal) + '</span>';
+    h += '<span class="item-price">' + (it.price > 0 ? fmt(it.price) + 'k' : '—') + '</span>';
+    h += '<div class="item-tags">';
+    if (it.paPm) {
+      var parts = it.paPm.split(/\s+/);
+      for (var p = 0; p < parts.length; p++) {
+        if (parts[p].indexOf("PA") !== -1) h += '<span class="item-tag tag-pa">' + parts[p] + '</span>';
+        else if (parts[p].indexOf("PM") !== -1) h += '<span class="item-tag tag-pm">' + parts[p] + '</span>';
+      }
+    }
+    if (it.sublimation && it.sublimation !== "-") h += '<span class="item-tag tag-sub">' + it.sublimation + '</span>';
+    if (it.owned) h += '<span class="item-tag tag-owned">' + (it.ownedSource || "Possede") + '</span>';
+    h += '</div></div>';
+  }
+  h += '</div></div>';
+
+  /* -- RIGHT : Diagnostics -- */
+  h += '<div>';
+
+  /* Budget */
+  h += '<div class="eq-card">';
+  h += '<div class="eq-card-title">Budget</div>';
+  var budgetPct = Math.min(100, Math.round(d.meta.budgetUsed / d.meta.budget * 100));
+  h += '<div style="display:flex;justify-content:space-between;font-size:.8rem;font-family:var(--font-mono)">';
+  h += '<span style="color:var(--accent-gold)">' + fmt(d.meta.budgetUsed) + ' k</span>';
+  h += '<span style="color:var(--text-muted)">/ ' + fmt(d.meta.budget) + ' k</span>';
+  h += '</div>';
+  h += '<div class="budget-bar"><div class="budget-fill" style="width:' + budgetPct + '%;background:' + (budgetPct > 90 ? 'var(--accent-red)' : 'var(--accent-green)') + '"></div>';
+  h += '<span class="budget-text">' + budgetPct + '%</span></div>';
+  h += '<div style="font-size:.65rem;color:var(--text-muted)">Reste: ' + fmt(d.meta.budget - d.meta.budgetUsed) + ' k | Passifs: ' + d.meta.passives.join(", ") + '</div>';
+  h += '</div>';
+
+  /* CC Diagnostic */
+  h += '<div class="eq-card">';
+  h += '<div class="eq-card-title">Diagnostic CC</div>';
+  var ccPct = Math.min(100, s.cc.total);
+  var ccColor = ccPct >= 80 ? 'var(--accent-green)' : ccPct >= 50 ? 'var(--accent-gold)' : 'var(--accent-red)';
+  h += '<div class="cc-bar"><div class="cc-fill" style="width:' + ccPct + '%;background:' + ccColor + '"></div>';
+  h += '<span class="cc-text">' + s.cc.total + '% / 100%</span></div>';
+  if (s.cc.total < 100) {
+    h += '<div style="font-size:.7rem;color:var(--accent-red);margin-top:4px">Manque ' + (100 - s.cc.total) + '% — Anatomie (GBR, +20%) ou Ebullition (BRG, +30%)</div>';
+  } else {
+    h += '<div style="font-size:.7rem;color:var(--accent-green);margin-top:4px">CAP 100% ATTEINT</div>';
+  }
+  h += '</div>';
+
+  /* Sublimations */
+  if (d.sublimations && d.sublimations.length > 0) {
+    h += '<div class="eq-card">';
+    h += '<div class="eq-card-title">Sublimations (' + d.sublimations.length + ')</div>';
+    for (var si = 0; si < d.sublimations.length; si++) {
+      var sub = d.sublimations[si];
+      h += '<div class="subli-row"><span class="subli-slot">' + sub.slot + '</span><span class="subli-name">' + sub.name + '</span></div>';
+    }
+    h += '</div>';
+  }
+
+  /* Owned items */
+  if (d.owned && d.owned.length > 0) {
+    h += '<div class="eq-card">';
+    h += '<div class="eq-card-title">Items possedes (' + d.owned.length + '/' + d.items.length + ')</div>';
+    h += '<div class="owned-grid">';
+    for (var oi = 0; oi < d.owned.length; oi++) {
+      var ow = d.owned[oi];
+      h += '<div class="owned-item">' + (SLOT_ICONS[ow.slot]||"") + ' ' + ow.name + ' <span class="src">' + ow.source + '</span></div>';
+    }
+    h += '</div></div>';
+  }
+
+  h += '</div>'; /* end right */
+  h += '</div>'; /* end grid */
+
+  document.getElementById("content").innerHTML = h;
+}
+
+function statBox(label, val, detail) {
+  return '<div class="stat-item"><div class="stat-val">' + val + '</div><div class="stat-label">' + label + '</div>' + (detail ? '<div class="stat-detail">' + detail + '</div>' : '') + '</div>';
+}
+
+/* Auto-load on page open */
+window.addEventListener("DOMContentLoaded", function() {
+  fetch("data/build-result.json?t=" + Date.now()).then(function(r) {
+    if (r.ok) { r.json().then(render); }
+  }).catch(function(){});
+});
+</script>
+
+</body>
+</html>

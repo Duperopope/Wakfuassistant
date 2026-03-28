@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sram Reference — Passifs & Sorts</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+  .ref-container{max-width:1100px;margin:0 auto;padding:20px}
+  .ref-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.82rem}
+  .ref-table th{text-align:left;padding:8px 10px;background:var(--bg-secondary);color:var(--accent-gold);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid var(--accent-purple)}
+  .ref-table td{padding:7px 10px;border-bottom:1px solid var(--border-color);vertical-align:top}
+  .ref-table tr:hover{background:var(--bg-card-hover)}
+  .status-confirmed{color:var(--accent-green);font-weight:700}
+  .status-unverified{color:var(--accent-gold);font-weight:700}
+  .status-hallucination{color:var(--accent-red);font-weight:700;text-decoration:line-through}
+  .status-removed{color:var(--accent-red);font-weight:700}
+  .section-title{font-size:1.2rem;color:var(--accent-purple);margin-top:30px;padding-bottom:8px;border-bottom:2px solid var(--accent-purple)}
+  .legend{padding:12px;background:var(--bg-secondary);border-radius:8px;margin:16px 0;font-size:.8rem}
+  .legend span{font-weight:700;margin-right:16px}
+  .nav-links{display:flex;gap:12px;margin:16px 0}
+  .nav-links a{color:var(--accent-purple);text-decoration:none;padding:6px 14px;border:1px solid var(--accent-purple);border-radius:6px;font-size:.8rem;font-weight:600}
+  .nav-links a:hover{background:var(--accent-purple);color:#fff}
+  .conflict-note{font-size:.72rem;color:var(--accent-red);font-style:italic}
+  .synergy-note{font-size:.72rem;color:var(--accent-green);font-style:italic}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Sram Reference — Sorts & Passifs</h1>
+  <span class="version">Source unique : Document Sram "L'Immortel" v2.7 — Audit 27/03/2026</span>
+</header>
+
+<div class="ref-container">
+
+<div class="nav-links">
+  <a href="index.html">Retour Optimizer</a>
+  <a href="#sorts-dmg">Sorts degats</a>
+  <a href="#sorts-neutres">Sorts neutres</a>
+  <a href="#passifs-sram">Passifs Sram</a>
+  <a href="#passifs-communs">Passifs communs</a>
+  <a href="#sublimations">Sublimations</a>
+  <a href="#removed">Supprimees (hallucinations)</a>
+</div>
+
+<div class="legend">
+  <span class="status-confirmed">CONFIRMED</span> = Screenshot ou discussion confirmee
+  <span class="status-unverified">UNVERIFIED</span> = Mentionne mais screenshot manquant
+  <span class="status-removed">REMOVED</span> = Hallucination supprimee
+</div>
+
+<!-- ===== SORTS DE DEGATS ===== -->
+<h2 class="section-title" id="sorts-dmg">Sorts de degats (6 documentes)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Nom</th><th>PA</th><th>Base</th><th>Elem</th><th>PF</th><th>Utilisation</th><th>Notes</th></tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Mise a mort</strong></td><td>4</td><td>154</td><td>Feu</td>
+  <td>Consomme + Scale</td><td>1/tour, 1/cible</td>
+  <td>Sort burst principal. %df = (1 + PF%/100). Brise invisibilite.</td>
+</tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Arnaque</strong></td><td>3</td><td>108</td><td>Feu</td>
+  <td>Consomme + Scale</td><td>2/tour, 1/cible</td>
+  <td>Second sort PF-scaling. Cite dans doc ref.</td>
+</tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Contact letal</strong></td><td>2</td><td>62</td><td>Feu</td>
+  <td>Genere</td><td>3/tour, 2/cible</td>
+  <td>Melee seulement. Cite dans builds farm.</td>
+</tr>
+<tr>
+  <td class="status-unverified">UNVERIFIED</td>
+  <td>Coup penetrant</td><td>4</td><td>140</td><td>Air</td>
+  <td>Genere</td><td>2/tour, 1/cible</td>
+  <td>Mentionne dans calculs doc ref. Screenshot sort manquant.</td>
+</tr>
+<tr>
+  <td class="status-unverified">UNVERIFIED</td>
+  <td>Attaque letale</td><td>4</td><td>140</td><td>Terre</td>
+  <td>Genere</td><td>2/tour, 1/cible</td>
+  <td>Mentionne dans calculs doc ref. Screenshot sort manquant.</td>
+</tr>
+<tr>
+  <td class="status-unverified">UNVERIFIED</td>
+  <td>Attaque mortelle</td><td>5</td><td>175</td><td>Terre</td>
+  <td>Genere</td><td>1/tour, 1/cible</td>
+  <td>Mentionne dans calculs doc ref. Screenshot sort manquant.</td>
+</tr>
+</table>
+
+<!-- ===== SORTS NEUTRES ===== -->
+<h2 class="section-title" id="sorts-neutres">Sorts neutres / utilitaires (4 documentes)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Nom</th><th>Cout</th><th>CD</th><th>Cible</th><th>Brise invis</th><th>Description</th></tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Surineur</strong></td><td>2 PW</td><td>2</td><td>Soi</td><td>Non</td>
+  <td>Tour suivant: +20% dmg dos, +20% dmg crit, Stabilise</td>
+</tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Charme de Masse</strong></td><td>2 PW</td><td>3</td><td>Ennemi (1-4)</td><td>Oui</td>
+  <td>+150 Tacle cible, attire 2 cases. Sort commun.</td>
+</tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Invisibilite</strong></td><td>2 PA + 2 PW</td><td>5</td><td>Soi</td><td>Non</td>
+  <td>Invisible 2 tours. Quasi-intaclable. Fin auto tour 2.</td>
+</tr>
+<tr>
+  <td class="status-confirmed">CONFIRMED</td>
+  <td><strong>Double</strong></td><td>2 PA + 1 PW</td><td>3</td><td>Case (1-3)</td><td>Non</td>
+  <td>Invoque Double (40% PV, 2 PA, 2 Tacle). Fragile HL.</td>
+</tr>
+</table>
+
+<!-- ===== PASSIFS SRAM ===== -->
+<h2 class="section-title" id="passifs-sram">Passifs specifiques Sram (15/15 — COMPLET)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Niv.</th><th>Nom</th><th>Tier</th><th>Effet</th><th>Conflits</th></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>10</td><td><strong>Duperie</strong></td><td>A (survie)</td><td>Swap Double + effets defensifs</td><td class="conflict-note">Conflit Leurre</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>10</td><td><strong>Assassin</strong></td><td>S (farm)</td><td>Kill: +1PA, +1PM, +1PW, soin 20% PV</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>15</td><td><strong>Retenue</strong></td><td>S (burst)</td><td>+50 PF/tour invisible (2t = 100PF). Invis brise que par sort >= 4PA.</td><td class="conflict-note">Conflit Assaut Brutal</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>20</td><td><strong>Passe-passe</strong></td><td>A (burst)</td><td>Swap Double &lt;-&gt; ennemi</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>25</td><td><strong>Embuscade</strong></td><td>B-C</td><td>Pieges: +1PW + 72 dmg fixes par trigger. Plus de refund PA.</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>30</td><td><strong>Piege Attraction II</strong></td><td>B (AoE)</td><td>Piege AoE attirance</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>35</td><td><strong>Peur alternative</strong></td><td>A (single)</td><td>Push/fuite conditionnelle</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>40</td><td><strong>Hemophilie</strong></td><td>B (DoT)</td><td>Convertit Hemorragie en poison</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>45</td><td><strong>Piege Repulsion II</strong></td><td>B (mobilite)</td><td>Piege push zone</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>50</td><td><strong>Localisation quantique</strong></td><td>D-B</td><td>Ignore orientation. Perd x1.25 dos. Utile si dos inaccessible.</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>60</td><td><strong>Leurre</strong></td><td>A (AoE)</td><td>Explosion Double: 50% PV zone + 20 Hemorragie. 317 base, 1220 stuff.</td><td class="conflict-note">Conflit Duperie</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>70</td><td><strong>Diversion alternative</strong></td><td>C (niche)</td><td>Repositionnement niche</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>80</td><td><strong>Piege Teleportation II</strong></td><td>B (team)</td><td>TP allie <=4 cases. Piege non consomme (1t CD).</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>90</td><td><strong>Assaut letal</strong></td><td>S (farm)</td><td>Kill: TP derriere marque + 2PA + transfert Hemorragie</td><td><span class="synergy-note">Synergie Assassin: +3PA +1PM +1PW soin TP</span></td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>100</td><td><strong>Assaut Brutal</strong></td><td>A (alt)</td><td>Sorts >=4PA: +5%/PA depense. Perd generation PF.</td><td class="conflict-note">Conflit Retenue</td></tr>
+</table>
+
+<!-- ===== PASSIFS COMMUNS ===== -->
+<h2 class="section-title" id="passifs-communs">Passifs communs (8 documentes)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Nom</th><th>Tier</th><th>Effet</th></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Carnage</strong></td><td>S</td><td>+15% DI tant que pas touche ce tour</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Fluctuation</strong></td><td>S (burst)</td><td>Debuff cible: 1%/niv dmg recus. Cap 60. Stack passage adjacent, esquive, tacle, contact fin tour. Fonctionne invisible.</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Evasion</strong></td><td>B</td><td>Bonus apres esquive reussie</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Interception</strong></td><td>B</td><td>Bonus apres tacle reussi</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Inspiration</strong></td><td>B</td><td>+Maitrise quand PW depense</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Motivation</strong></td><td>A</td><td>+PA ou +PM conditionnel</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Medecine</strong></td><td>B</td><td>Ameliore soins recus/donnes</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Rock</strong></td><td>B</td><td>+Resistance et stabilite</td></tr>
+</table>
+
+<!-- ===== SUBLIMATIONS ===== -->
+<h2 class="section-title" id="sublimations">Sublimations (documentees)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Nom</th><th>Rarete</th><th>Effet</th><th>Source</th></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Assassin Squelettique</strong></td><td>Classique</td><td>Kill = relance tour (1x/tour)</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Temerite</strong></td><td>Classique</td><td>+15% DI si PV > 80%</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Anatomie</strong></td><td>Epique</td><td>-20% DI global, +40% DI dos. Net +20% si toujours dos.</td><td>Bourse Epique/Relique</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Mesure III</strong></td><td>Epique</td><td>+20% DI sur coups critiques</td><td>Bourse Epique/Relique</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Petulance</strong></td><td>Relique</td><td>+1 PA par sort de deplacement (max 2 PA/tour)</td><td>Bourse Epique/Relique</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Par-dela la barriere</strong></td><td>Relique</td><td>Effet special traversee</td><td>Bourse Epique/Relique</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td><strong>Brasero</strong></td><td>Relique</td><td>Effet zone feu</td><td>Bourse Epique/Relique</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>Destruction</td><td>Classique</td><td>Bonus dommages</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>Force vitale</td><td>Classique</td><td>PV bonus</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>Influence vitale</td><td>Classique</td><td>PV% scaling</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>Carnage (sub)</td><td>Classique</td><td>%DI conditionnel</td><td>-</td></tr>
+<tr><td class="status-confirmed">CONFIRMED</td><td>Rupture PA</td><td>Classique</td><td>Retrait PA</td><td>-</td></tr>
+</table>
+
+<!-- ===== SUPPRIMEES ===== -->
+<h2 class="section-title" id="removed">Donnees supprimees (hallucinations)</h2>
+<table class="ref-table">
+<tr><th>Statut</th><th>Nom</th><th>Raison</th><th>Ancienne valeur</th></tr>
+<tr>
+  <td class="status-removed">REMOVED</td>
+  <td class="status-hallucination">Traumatisme</td>
+  <td>HALLUCINATION — Jamais confirme par screenshot ni mentionne dans la conversation originale. Genere par erreur lors de la creation du sram-spells.json v1.</td>
+  <td>5PA, base 192, eau, PF-scaling</td>
+</tr>
+</table>
+
+<div style="margin-top:30px;padding:16px;background:var(--bg-secondary);border-radius:8px;font-size:.8rem;color:var(--text-muted);">
+  <strong>Sorts a documenter :</strong> Les sorts elementaires complets (5 feu, 5 eau, 5 air, 5 terre — non screenshots)
+  ainsi que les sorts neutres restants (Escrosramerie, Filouterie, Fourberie, Ouvrir les veines, Piege sournois, etc.)
+  ne sont pas encore dans le document de reference. Ils seront ajoutes quand Sam fournira les screenshots.
+</div>
+
+</div>
+
+<div class="footer">
+  Source unique : <strong>Document Sram "L'Immortel" v2.7</strong>
+  — <a href="https://github.com/Duperopope/Wakfuassistant" target="_blank">GitHub</a>
+  — <a href="index.html">Retour Optimizer</a>
+</div>
+
+</body>
+</html>

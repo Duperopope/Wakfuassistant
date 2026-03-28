@@ -1,0 +1,183 @@
+{
+  "_meta": {
+    "source": "Document de reference Sram L'Immortel v2.7",
+    "rule": "SEUL le document de reference fait foi. Aucune donnee externe.",
+    "last_audit": "27/03/2026",
+    "legend": "CONFIRMED = screenshot ou discussion confirmee. UNVERIFIED = mentionne dans doc mais base non verifiee par screenshot."
+  },
+  "neutral_spells": [
+    {
+      "id": "surineur",
+      "name": "Surineur",
+      "status": "CONFIRMED",
+      "status_detail": "Screenshot confirme dans conversation",
+      "cost_ap": 0,
+      "cost_wp": 2,
+      "cooldown": 2,
+      "target": "self",
+      "breaks_invisibility": false,
+      "generates_pf": false,
+      "effects": [
+        { "type": "buff_next_turn", "stat": "damage_back_percent", "value": 20 },
+        { "type": "buff_next_turn", "stat": "damage_critical_percent", "value": 20 },
+        { "type": "buff_next_turn", "stat": "stabilized", "value": true }
+      ],
+      "description": "Tour suivant: +20% dmg dos, +20% dmg crit, Stabilise"
+    },
+    {
+      "id": "charme_de_masse",
+      "name": "Charme de Masse",
+      "status": "CONFIRMED",
+      "status_detail": "Screenshot confirme — sort commun",
+      "cost_ap": 0,
+      "cost_wp": 2,
+      "cooldown": 3,
+      "range_min": 1,
+      "range_max": 4,
+      "target": "enemy",
+      "breaks_invisibility": true,
+      "generates_pf": false,
+      "description": "+150 Tacle cible, attire 2 cases"
+    },
+    {
+      "id": "invisibilite",
+      "name": "Invisibilite",
+      "status": "CONFIRMED",
+      "status_detail": "Mecanique de base Sram confirmee dans document",
+      "cost_ap": 2,
+      "cost_wp": 2,
+      "cooldown": 5,
+      "target": "self",
+      "breaks_invisibility": false,
+      "generates_pf": false,
+      "description": "Invisible 2 tours. Quasi-intaclable. Fin auto tour 2."
+    },
+    {
+      "id": "double",
+      "name": "Double",
+      "status": "CONFIRMED",
+      "status_detail": "Mecanique de base Sram confirmee dans document",
+      "cost_ap": 2,
+      "cost_wp": 1,
+      "cooldown": 3,
+      "range_min": 1,
+      "range_max": 3,
+      "target": "cell",
+      "breaks_invisibility": false,
+      "generates_pf": false,
+      "description": "Invoque Double (40% PV Sram, 2 PA, 2 Tacle)"
+    }
+  ],
+  "damage_spells": [
+    {
+      "id": "mise_a_mort",
+      "name": "Mise a mort",
+      "status": "CONFIRMED",
+      "status_detail": "Cite dans document ref avec base 154 et formule PF",
+      "cost_ap": 4,
+      "cost_wp": 0,
+      "base_damage": 154,
+      "element": "feu",
+      "generates_pf": false,
+      "consumes_pf": true,
+      "pf_scaling": true,
+      "breaks_invisibility": true,
+      "uses_per_turn": 1,
+      "uses_per_target": 1,
+      "description": "Sort burst principal. Scale PF en %df."
+    },
+    {
+      "id": "arnaque",
+      "name": "Arnaque",
+      "status": "CONFIRMED",
+      "status_detail": "Cite dans document ref comme sort PF-scaling",
+      "cost_ap": 3,
+      "cost_wp": 0,
+      "base_damage": 108,
+      "element": "feu",
+      "generates_pf": false,
+      "consumes_pf": true,
+      "pf_scaling": true,
+      "breaks_invisibility": true,
+      "uses_per_turn": 2,
+      "uses_per_target": 1,
+      "description": "Second sort PF-scaling feu."
+    },
+    {
+      "id": "contact_letal",
+      "name": "Contact letal",
+      "status": "CONFIRMED",
+      "status_detail": "Cite dans builds farm du document ref",
+      "cost_ap": 2,
+      "cost_wp": 0,
+      "base_damage": 62,
+      "element": "feu",
+      "generates_pf": true,
+      "consumes_pf": false,
+      "pf_scaling": false,
+      "breaks_invisibility": true,
+      "uses_per_turn": 3,
+      "uses_per_target": 2,
+      "range_max": 1,
+      "description": "Melee, genere PF, chain farm."
+    },
+    {
+      "id": "coup_penetrant",
+      "name": "Coup penetrant",
+      "status": "UNVERIFIED",
+      "status_detail": "Mentionne dans calculs doc ref (base 140, 4PA) — screenshot sort manquant",
+      "cost_ap": 4,
+      "cost_wp": 0,
+      "base_damage": 140,
+      "element": "air",
+      "generates_pf": true,
+      "consumes_pf": false,
+      "pf_scaling": false,
+      "breaks_invisibility": true,
+      "uses_per_turn": 2,
+      "uses_per_target": 1,
+      "description": "UNVERIFIED — Genere PF, air."
+    },
+    {
+      "id": "attaque_letale",
+      "name": "Attaque letale",
+      "status": "UNVERIFIED",
+      "status_detail": "Mentionne dans calculs doc ref (base 140, 4PA) — screenshot sort manquant",
+      "cost_ap": 4,
+      "cost_wp": 0,
+      "base_damage": 140,
+      "element": "terre",
+      "generates_pf": true,
+      "consumes_pf": false,
+      "pf_scaling": false,
+      "breaks_invisibility": true,
+      "uses_per_turn": 2,
+      "uses_per_target": 1,
+      "description": "UNVERIFIED — Genere PF, terre."
+    },
+    {
+      "id": "attaque_mortelle",
+      "name": "Attaque mortelle",
+      "status": "UNVERIFIED",
+      "status_detail": "Mentionne dans calculs doc ref (base 175, 5PA) — screenshot sort manquant",
+      "cost_ap": 5,
+      "cost_wp": 0,
+      "base_damage": 175,
+      "element": "terre",
+      "generates_pf": true,
+      "consumes_pf": false,
+      "pf_scaling": false,
+      "breaks_invisibility": true,
+      "uses_per_turn": 1,
+      "uses_per_target": 1,
+      "description": "UNVERIFIED — Genere PF, terre, gros cout."
+    }
+  ],
+  "REMOVED": [
+    {
+      "id": "traumatisme",
+      "reason": "HALLUCINATION — Jamais confirme par screenshot. Retire le 27/03/2026.",
+      "was": "5PA, base 192, eau, PF-scaling"
+    }
+  ]
+}

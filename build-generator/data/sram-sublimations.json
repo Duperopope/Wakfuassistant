@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "source": "Document de reference Sram L'Immortel v2.7 + screenshots",
+    "last_update": "27/03/2026"
+  },
+  "sublimations": [
+    { "id": "assassin_squelettique", "name": "Assassin Squelettique", "rarity": "classique", "tier": "S", "effect": "Kill = relance tour (1x/tour)", "di_bonus": 0, "is_percent_df": false },
+    { "id": "temerite", "name": "Temerite", "rarity": "classique", "tier": "S", "effect": "+15% DI si PV > 80%", "di_bonus": 15, "condition": "hp_above_80_percent", "is_percent_df": false },
+    { "id": "carnage_sub", "name": "Carnage (sub)", "rarity": "classique", "tier": "A", "effect": "%DI conditionnel", "di_bonus": 0, "is_percent_df": false },
+    { "id": "destruction", "name": "Destruction", "rarity": "classique", "tier": "B", "effect": "Bonus dommages", "di_bonus": 0, "is_percent_df": false },
+    { "id": "force_vitale", "name": "Force vitale", "rarity": "classique", "tier": "C", "effect": "PV bonus", "di_bonus": 0, "is_percent_df": false },
+    { "id": "influence_vitale", "name": "Influence vitale", "rarity": "classique", "tier": "B", "effect": "PV% scaling", "di_bonus": 0, "is_percent_df": false },
+    { "id": "rupture_pa", "name": "Rupture PA", "rarity": "classique", "tier": "B", "effect": "Retrait PA", "di_bonus": 0, "is_percent_df": false },
+    { "id": "anatomie", "name": "Anatomie", "rarity": "epique", "tier": "S", "source": "Bourse Epique/Relique - Ebeniste", "effect": "-20% DI global, +40% DI dos. Net +20% DI si toujours dos.", "di_bonus_back": 20, "di_penalty_global": -20, "is_percent_df": false },
+    { "id": "mesure_iii", "name": "Mesure III", "rarity": "epique", "tier": "S", "source": "Bourse Epique/Relique - Ebeniste", "effect": "+20% DI sur coups critiques", "di_bonus_crit": 20, "is_percent_df": false },
+    { "id": "petulance", "name": "Petulance", "rarity": "relique", "tier": "S", "source": "Bourse Epique/Relique - Ebeniste", "effect": "+1 PA par sort de deplacement utilise (max 2 PA/tour)", "di_bonus": 0, "is_percent_df": false },
+    { "id": "par_dela_la_barriere", "name": "Par-dela la barriere", "rarity": "relique", "tier": "A", "source": "Bourse Epique/Relique - Ebeniste", "effect": "Effet special traversee", "di_bonus": 0, "is_percent_df": false },
+    { "id": "brasero", "name": "Brasero", "rarity": "relique", "tier": "B", "source": "Bourse Epique/Relique - Ebeniste", "effect": "Effet zone feu", "di_bonus": 0, "is_percent_df": false }
+  ]
+}
