@@ -1,0 +1,64 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/preflight" layer(base);
+@import "tailwindcss/utilities" layer(utilities);
+
+/* ── Color tokens ────────────────────────────────────── */
+:root {
+  --accent: #E8872A;
+  --accent-hover: #F09A3E;
+  --accent-dim: #C46B1A;
+  --overlay-bg: #1A1B2E;
+  --overlay-surface: #252640;
+  --overlay-border: #3A3B55;
+  --bar-bg: #F5F5F7;
+  --bar-icon: #6B6B80;
+  --bar-icon-active: #2A2A3E;
+  --tab-combat: #E74C3C;
+  --tab-professions: #9B59B6;
+  --tab-economy: #D4A843;
+  --kamas: #D4A843;
+  --xp-blue: #5DADE2;
+  --victory-green: #2ECC71;
+  --defeat-red: #E74C3C;
+  --profession-purple: #9B59B6;
+  --text-primary: #E8E8F0;
+  --text-secondary: #8888A0;
+  --text-muted: #5A5A70;
+  --titlebar: #141525;
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: transparent;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--text-primary);
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ── Glass panel ─────────────────────────────────────── */
+.glass-panel {
+  background: rgba(26, 27, 46, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--overlay-border);
+  border-radius: 12px 12px 0 0;
+}
+
+/* ── Panel slide animations ──────────────────────────── */
+.panel-slide-enter {
+  animation: panelSlideUp 250ms ease-out forwards;
+}
+.panel-slide-exit {
+  animation: panelSlideDown 250ms ease-in forwards;
+}
+@keyframes panelSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes panelSlideDown {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(20px); }
+}

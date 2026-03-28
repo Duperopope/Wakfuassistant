@@ -1,0 +1,93 @@
+# ============================================
+# Wakfu Assistant - .gitignore FINAL
+# Politique: seul le CODE SOURCE est commite
+# ============================================
+
+# === OS ===
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === Environnement ===
+.env
+.env.*
+.claude/
+
+# === Node.js ===
+node_modules/
+dist/
+package-lock.json
+
+# === Rust / Tauri ===
+target/
+Cargo.lock
+src-tauri/target/
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.class
+
+# === Java / Maven ===
+agent/maven/
+agent/tools/apache-maven*/
+agent/.mvn/
+*.jar
+
+# === TOUT le runtime (logs, DB, data) ===
+*.log
+*.log.*
+*.err
+*.jsonl
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+logs/
+agent/logs/
+
+# === R&D / decompiles / POCs ===
+rnd/
+overlay/
+
+# === Data volumineuse ===
+docs/RND/data/
+cdn_*.json
+market_prices.json
+item_meta_cache*.json
+
+# === Archives / backups ===
+_archive/
+backups/
+*.zip
+*.tar.gz
+*.7z
+
+# === Scripts locaux (pas du code source) ===
+*.bat
+*.ps1
+CONTEXTE!
+
+# === Fichiers generes / temporaires ===
+*.tmp
+*.bak
+*.orig
+_create_ui.py
+_diag*.py
+_fix_*.py
+
+# === Overlay browser profile ===
+overlay/
+
+# === Fichiers racine orphelins ===
+hdv_market_ui.mjs
+extract_herbalist_items.js
+index.html

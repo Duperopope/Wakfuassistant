@@ -1,0 +1,247 @@
+import type { Component } from "solid-js";
+import { For, createSignal, onMount } from "solid-js";
+import { gameState } from "../../stores/sessionStore";
+import {
+    togglePin, isPinned, isClickThrough, setClickThrough,
+    adjustPanelOpacity, adjustBarOpacity, wakfuDetected,
+    barOpacity, toggleWidthLink, isWidthLinked,
+} from "../../lib/overlayTracker";
+import { minimizeToTray } from "../../lib/tray";
+import { L } from "../../lib/logger";
+
+// Types et constantes
+export type TabId = "character" | "combat" | "professions" | "economy" | "options";
+const HOME_TAB: TabId = "character";
+const SETTINGS_TAB: TabId = "options";
+
+const EXPAND_TABS: Array<{ id: TabId; label: string; icon: string; color: string }> = [
+    { id: "combat",      label: "Combat",        icon: "\u2694\uFE0F",  color: "var(--color-tab-combat)" },
+    { id: "professions", label: "M\u00e9tiers",  icon: "\u2692\uFE0F",  color: "var(--color-tab-professions)" },
+    { id: "economy",     label: "\u00c9conomie", icon: "\uD83D\uDCB0",  color: "var(--color-tab-economy)" },
+];
+
+// Signaux partages
+const [activeTab, setActiveTab]   = createSignal<TabId | null>(null);
+const [expandOpen, setExpandOpen] = createSignal(false);
+const [panelOpen, setPanelOpen]   = createSignal(false);
+export { activeTab, panelOpen };
+
+// Navigation
+function handleHomeClick() {
+    setExpandOpen(false);
+    if (activeTab() === HOME_TAB && panelOpen()) {
+        setPanelOpen(false);
+        setActiveTab(null);
+    } else {
+        setActiveTab(HOME_TAB);
+        setPanelOpen(true);
+    }
+}
+
+function handleSettingsClick() {
+    setExpandOpen(false);
+    if (activeTab() === SETTINGS_TAB && panelOpen()) {
+        setPanelOpen(false);
+        setActiveTab(null);
+    } else {
+        setActiveTab(SETTINGS_TAB);
+        setPanelOpen(true);
+    }
+}
+
+function handlePlusClick() {
+    if (!panelOpen()) {
+        // Panel ferme -> ouvrir le panel + expand
+        const lastTab = activeTab() || HOME_TAB;
+        setActiveTab(lastTab);
+        setPanelOpen(true);
+        setExpandOpen(true);
+    } else {
+        // Panel ouvert -> toggle expand
+        setExpandOpen(!expandOpen());
+    }
+}
+
+function handleExpandTabClick(tabId: TabId) {
+    if (activeTab() === tabId && panelOpen()) {
+        setPanelOpen(false);
+        setActiveTab(null);
+    } else {
+        setActiveTab(tabId);
+        setPanelOpen(true);
+    }
+    setExpandOpen(false);
+}
+
+// StatusDot
+function StatusDot() {
+    const color = () => {
+        if (wakfuDetected()) return "bg-victory-green";
+        const s = gameState();
+        switch (s.state) {
+            case "InGame": case "InCombat": return "bg-victory-green";
+            case "Loading": return "bg-accent animate-pulse";
+            case "Disconnected": return "bg-defeat-red";
+            default: return "bg-text-muted";
+        }
+    };
+    return <div class={`w-1.5 h-1.5 rounded-full shrink-0 ${color()}`} />;
+}
+
+// ControlStrip (24px, en bas)
+function ControlStrip() {
+    const handleEyeWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.05 : -0.05;
+        if (e.ctrlKey || !panelOpen()) {
+            adjustBarOpacity(delta).catch(() => {});
+        } else {
+            adjustPanelOpacity(delta).catch(() => {});
+        }
+    };
+
+    return (
+        <div data-tauri-drag-region
+             class="flex items-center select-none shrink-0"
+             style={{
+                 height: "24px",
+                 background: "var(--color-overlay-bg)",
+                 opacity: barOpacity(),
+             }}>
+            <div data-tauri-drag-region class="flex-1 h-full flex items-center gap-1.5 px-2">
+                <StatusDot />
+            </div>
+
+            <button
+                onClick={() => togglePin().catch(() => {})}
+                onContextMenu={(e: MouseEvent) => { e.preventDefault(); toggleWidthLink(); }}
+                class={`relative w-6 h-6 flex items-center justify-center transition-colors ${
+                    isPinned() ? "text-accent" : "text-text-muted hover:text-text-primary"
+                }`}
+                title={`Pin | Clic droit: largeurs ${isWidthLinked() ? "liees" : "independantes"}`}>
+                <svg width="8" height="10" viewBox="0 0 10 12" fill="currentColor">
+                    <path d="M3 0v5L1 7v1h3v4l1 .5L6 8h3V7L7 5V0z"/>
+                </svg>
+                {!isWidthLinked() && (
+                    <div class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-xp-blue" />
+                )}
+            </button>
+
+            <button
+                onClick={() => setClickThrough(!isClickThrough()).catch(() => {})}
+                onWheel={handleEyeWheel}
+                class={`w-6 h-6 flex items-center justify-center transition-colors ${
+                    isClickThrough() ? "text-xp-blue" : "text-text-muted hover:text-text-primary"
+                }`}
+                title="Click-through (F12) | Molette: opacite">
+                <svg width="12" height="8" viewBox="0 0 14 10" fill="currentColor">
+                    <path d="M7 0C3 0 0 5 0 5s3 5 7 5 7-5 7-5S11 0 7 0zm0 8a3 3 0 110-6 3 3 0 010 6z"/>
+                </svg>
+            </button>
+
+            <button
+                onClick={() => minimizeToTray().catch(() => {})}
+                class="w-6 h-6 flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
+                title="Minimiser dans le tray">
+                <svg width="10" height="2" viewBox="0 0 10 2">
+                    <rect fill="currentColor" width="10" height="2" rx="1" />
+                </svg>
+            </button>
+        </div>
+    );
+}
+
+// BottomBar (72px, au-dessus du ControlStrip)
+function BottomBar() {
+    return (
+        <div data-tauri-drag-region
+             class="relative flex items-center justify-between px-8 shrink-0"
+             style={{
+                 height: "72px",
+                 background: "var(--color-bar-bg)",
+                 "box-shadow": "0 -2px 20px rgba(0,0,0,0.15)",
+                 overflow: "visible",
+                 opacity: barOpacity(),
+                 "border-radius": "12px 12px 0 0",
+             }}>
+
+            {/* Perso */}
+            <button onClick={handleHomeClick}
+                class={`flex flex-col items-center gap-1 transition-all z-20 ${
+                    activeTab() === HOME_TAB && panelOpen() ? "scale-110" : "hover:scale-105"
+                }`}
+                style={{ color: activeTab() === HOME_TAB && panelOpen() ? "var(--color-bar-icon-active)" : "var(--color-bar-icon)" }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3L4 9v12h5v-7h6v7h5V9l-8-6z"/>
+                </svg>
+                <span class="text-[9px] font-medium">Perso</span>
+            </button>
+
+            {/* Bouton + */}
+            <div style={{
+                position: "absolute", left: "50%", bottom: "8px",
+                transform: "translateX(-50%)", "z-index": "30",
+                display: "flex", "flex-direction": "column", "align-items": "center",
+            }}>
+                <div class={`expand-circle ${expandOpen() ? "expanded" : ""}`}
+                     style={{
+                         width: "62px", background: "var(--color-accent)",
+                         "box-shadow": "0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)",
+                     }}>
+                    <div onClick={handlePlusClick}
+                         class="shrink-0 flex items-center justify-center cursor-pointer"
+                         style={{ width: "62px", height: "56px" }}>
+                        <svg class={`plus-rotate ${expandOpen() ? "rotate-45" : ""}`}
+                             width="28" height="28" viewBox="0 0 24 24"
+                             fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </div>
+                    <For each={EXPAND_TABS}>
+                        {(tab) => (
+                            <button onClick={() => handleExpandTabClick(tab.id)}
+                                class={`expand-icon shrink-0 rounded-full flex items-center justify-center transition-all border-2 ${
+                                    activeTab() === tab.id && panelOpen()
+                                        ? "border-white/80 shadow-lg scale-110"
+                                        : "border-transparent hover:border-white/40 hover:scale-105"
+                                }`}
+                                style={{ width: "48px", height: "48px", background: tab.color, margin: "3px auto" }}
+                                title={tab.label}>
+                                <span class="text-[22px] leading-none drop-shadow">{tab.icon}</span>
+                            </button>
+                        )}
+                    </For>
+                </div>
+            </div>
+
+            {/* Options */}
+            <button onClick={handleSettingsClick}
+                class={`flex flex-col items-center gap-1 transition-all z-20 ${
+                    activeTab() === SETTINGS_TAB && panelOpen() ? "scale-110" : "hover:scale-105"
+                }`}
+                style={{ color: activeTab() === SETTINGS_TAB && panelOpen() ? "var(--color-bar-icon-active)" : "var(--color-bar-icon)" }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/>
+                </svg>
+                <span class="text-[9px] font-medium">Options</span>
+            </button>
+        </div>
+    );
+}
+
+// Composant principal
+const WidgetBay: Component = () => {
+    onMount(() => {
+        L.ui.info("WidgetBay", "v4.0 mounted — dual-window");
+    });
+
+    return (
+        <div class="flex flex-col">
+            <BottomBar />
+            <ControlStrip />
+        </div>
+    );
+};
+
+export default WidgetBay;

@@ -1,0 +1,82 @@
+[package]
+name = "wakfu-overlay"
+version = "2.2.0"
+description = "Wakfu Overlay - overlay gaming temps reel pour le MMORPG Wakfu"
+authors = ["Smedj"]
+license = "MIT"
+repository = "https://github.com/Duperopope/Wakfuassistant"
+edition = "2021"
+rust-version = "1.80"
+
+[lib]
+name = "wakfu_overlay_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# === PROFIL DEV : compilation rapide ===
+[profile.dev]
+incremental = true
+opt-level = 0
+# Seulement les tables de lignes pour les backtraces, pas le debug complet
+debug = "line-tables-only"
+
+# Dependencies: un peu d'optimisation, pas de debug info
+[profile.dev.package."*"]
+opt-level = 1
+debug = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-log = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Logging — tracing uniquement (pas besoin de log + tracing)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+
+# Async — seulement les features necessaires au lieu de "full"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "sync", "time", "io-util"] }
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Regex
+regex = "1"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# File watching
+notify = "8"
+notify-debouncer-mini = "0.6"
+
+# HTTP client — features reduites
+reqwest = { version = "0.12", features = ["json"] }
+
+# UUID
+uuid = { version = "1", features = ["v4"] }
+
+# Directories
+dirs = "6"
+tauri-plugin-process = "2"
+tauri-plugin-store = "2"
+tauri-plugin-single-instance = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Accessibility",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
