@@ -79,6 +79,9 @@ public class WakfuSpyAgent {
             scanner.start();
             log("RuntimeScanner demarre");
 
+            // --- Phase 4: Memory Monitor ---
+            MemoryMonitorAdvice.start();
+            log("Phase 4: Memory Monitor OK");
         } catch (Throwable t) {
             log("ERREUR INIT: " + t.getMessage());
             t.printStackTrace();
