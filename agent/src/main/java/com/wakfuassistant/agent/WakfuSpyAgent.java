@@ -82,6 +82,10 @@ public class WakfuSpyAgent {
             // --- Phase 4: Memory Monitor ---
             MemoryMonitorAdvice.start();
             log("Phase 4: Memory Monitor OK");
+
+            // --- Phase 5: Heap Profiler ---
+            HeapProfilerAdvice.start();
+            log("Phase 5: Heap Profiler OK");
         } catch (Throwable t) {
             log("ERREUR INIT: " + t.getMessage());
             t.printStackTrace();
