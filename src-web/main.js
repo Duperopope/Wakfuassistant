@@ -1,4 +1,5 @@
-// Main entry - point d entree Vite HMR
+// Main entry - Wakfu Command Center
+// Tabs: Classement / Personnage / HDV Market
 import "./css/app.css";
 import { fetchJson, reloadData, connectSSE } from "./js/api.js";
 import { getState, setState, updateFilters, subscribe } from "./js/state.js";
@@ -8,12 +9,15 @@ import { loadGuilds } from "./js/tabs/guilds.js";
 import { loadClasses } from "./js/tabs/classes.js";
 import { loadInventory } from "./js/tabs/inventory.js";
 import { loadRecent } from "./js/tabs/recent.js";
-import { loadCdn, populateCdnFilters } from "./js/tabs/cdn.js";
+import { loadCharacter } from "./js/tabs/character.js";
 import { showPlayer, closeModal } from "./js/modal.js";
-// import "./css/builds.css"; // desactive temporairement
 import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
+
+// ─── State pour sous-onglets Personnage ───
+let persoLoaded = { fiche: false, builder: false, optimizer: false, spells: false };
+let currentPersoSub = "fiche";
 
 // ─── Onglets principaux ───
 function switchTab(tab) {
@@ -28,13 +32,15 @@ function switchTab(tab) {
     const sub = getState().currentSubtab || "players";
     switchSubtab(sub);
   }
-  if (tab === "cdn") loadCdn(true);
+  if (tab === "cdn") {
+    switchPersoSub(currentPersoSub);
+  }
 }
 
 // ─── Sous-onglets Classement ───
 function switchSubtab(sub) {
   setState({ currentSubtab: sub });
-  document.querySelectorAll(".subtab").forEach(el =>
+  document.querySelectorAll(".subtab:not([data-perso-sub])").forEach(el =>
     el.classList.toggle("active", el.dataset.subtab === sub)
   );
   document.querySelectorAll(".subtab-content").forEach(el =>
@@ -44,6 +50,27 @@ function switchSubtab(sub) {
   if (sub === "guilds") loadGuilds();
   if (sub === "recent") loadRecent();
   if (sub === "inventory") loadInventory();
+}
+
+// ─── Sous-onglets Personnage ───
+function switchPersoSub(sub) {
+  currentPersoSub = sub;
+  // Toggle active class
+  document.querySelectorAll("[data-perso-sub]").forEach(el =>
+    el.classList.toggle("active", el.dataset.persoSub === sub)
+  );
+  // Toggle panels
+  document.querySelectorAll("[data-perso-content]").forEach(el =>
+    el.style.display = el.dataset.persoContent === sub ? "" : "none"
+  );
+  // Lazy load
+  if (!persoLoaded[sub]) {
+    persoLoaded[sub] = true;
+    if (sub === "fiche") loadCharacter();
+    if (sub === "builder") loadEquipment(document.getElementById("equipment-container"));
+    if (sub === "optimizer") loadOptimizer(document.getElementById("optimizer-container"));
+    if (sub === "spells") loadSpellsEditor(document.getElementById("spells-container"));
+  }
 }
 
 // ─── Stats bar ───
@@ -97,7 +124,6 @@ async function init() {
   renderStats(stats);
   populateBreedFilter(stats.classes);
   loadClasses(stats.classes);
-  populateCdnFilters();
   await populateGuildFilter();
   await loadPlayers();
 
@@ -123,9 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
     el.addEventListener("click", () => switchTab(el.dataset.tab));
   });
 
-  // Sous-onglets
-  document.querySelectorAll(".subtab").forEach(el => {
+  // Sous-onglets Classement
+  document.querySelectorAll(".subtab:not([data-perso-sub])").forEach(el => {
     el.addEventListener("click", () => switchSubtab(el.dataset.subtab));
+  });
+
+  // Sous-onglets Personnage
+  document.querySelectorAll("[data-perso-sub]").forEach(el => {
+    el.addEventListener("click", () => switchPersoSub(el.dataset.persoSub));
   });
 
   // Search
@@ -171,15 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPlayers();
   });
 
-  // CDN search + filters
-  const cdnSearch = document.getElementById("cdnSearch");
-  if (cdnSearch) {
-    const debouncedCdn = debounce(() => loadCdn(true), 300);
-    cdnSearch.addEventListener("input", debouncedCdn);
-  }
-  document.getElementById("cdnTypeFilter")?.addEventListener("change", () => loadCdn(true));
-  document.getElementById("cdnRarityFilter")?.addEventListener("change", () => loadCdn(true));
-
   // Modal
   document.getElementById("modalOverlay")?.addEventListener("click", (e) => {
     if (e.target.id === "modalOverlay") closeModal();
@@ -202,13 +224,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.__showPlayer = showPlayer;
 
-
   init();
 });
 
-
-// === LISTENER DELEGUE GLOBAL: tous les .clickable-player du site ===
-// Place au top level, hors de tout callback, pour garantir l execution
+// === LISTENER DELEGUE GLOBAL: .clickable-player ===
 document.addEventListener("click", function(e) {
   var el = e.target.closest(".clickable-player");
   if (!el) return;
@@ -223,47 +242,4 @@ document.addEventListener("click", function(e) {
 // Vite HMR
 if (import.meta.hot) {
   import.meta.hot.accept();
-}
-
-
-// === BUILDS SUB-TABS ===
-let buildsLoaded = { equipment: false, optimizer: false, spells: false };
-
-function initBuildsSubtabs() {
-  document.querySelectorAll("[data-builds-sub]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const sub = btn.dataset.buildsSub;
-      // Active tab
-      document.querySelectorAll("[data-builds-sub]").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      // Show content
-      document.querySelectorAll("[data-builds-content]").forEach(el => el.style.display = "none");
-      const content = document.querySelector('[data-builds-content="' + sub + '"]');
-      if (content) content.style.display = "block";
-      // Lazy load
-      loadBuildsTab(sub);
-    });
-  });
-}
-
-async function loadBuildsTab(tab) {
-  if (buildsLoaded[tab]) return;
-  buildsLoaded[tab] = true;
-  if (tab === "equipment") {
-    await loadEquipment(document.getElementById("equipment-container"));
-  } else if (tab === "optimizer") {
-    await loadOptimizer(document.getElementById("optimizer-container"));
-  } else if (tab === "spells") {
-    await loadSpellsEditor(document.getElementById("spells-container"));
-  }
-}
-
-// Charger equipment par defaut quand on ouvre Builds
-const origSwitchTab = typeof switchTab === "function" ? switchTab : null;
-
-// Init builds subtabs au chargement
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { initBuildsSubtabs(); loadBuildsTab('equipment'); });
-} else {
-  initBuildsSubtabs(); loadBuildsTab('equipment');
 }
