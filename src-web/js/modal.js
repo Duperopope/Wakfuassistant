@@ -31,7 +31,7 @@ export async function showPlayer(name, tranche, keepTab) {
   const body = document.getElementById("modalBody");
   if (!overlay || !body) return;
 
-  header.textContent = `${p.name} — Niv.${p.level} ${p.breedName}`;
+  header.textContent = `${p.name} — Niv.${p.level} ${p.breedName || ""}`;
   const tsHtml = (() => {
     if (!p.snapshot_timestamp) return "";
     let ts = p.snapshot_timestamp;
@@ -70,7 +70,7 @@ export async function showPlayer(name, tranche, keepTab) {
     <div class="player-stat"><div class="ps-label">POIDS DEFENSIF</div><div class="ps-value" style="color:var(--purple)">${rnd(p.poids_defensif)}</div></div>
     <div class="player-stat"><div class="ps-label">PV</div><div class="ps-value">${p.total_pv}</div></div>
     <div class="player-stat"><div class="ps-label">RESISTANCE</div><div class="ps-value">${p.total_res}</div></div>
-    <div class="player-stat"><div class="ps-label">PA / PM / PO</div><div class="ps-value">${p.pa} / ${p.pm} / ${p.po}</div></div>
+    <div class="player-stat"><div class="ps-label">PA / PM / PO / PW</div><div class="ps-value"><span style="color:#4a9eff">${p.pa || 0}</span> / <span style="color:#4ade80">${p.pm || 0}</span> / <span style="color:#fff">${p.po || 0}</span> / <span style="color:#22d3ee">${p.pw || 0}</span></div></div>
     <div class="player-stat"><div class="ps-label">COUP CRITIQUE</div><div class="ps-value">+${p.coup_crit}%</div></div>
     <div class="player-stat"><div class="ps-label">TACLE / ESQUIVE</div><div class="ps-value">${p.tacle} / ${p.esquive}</div></div>
   </div>`;
@@ -157,7 +157,7 @@ export async function showPlayer(name, tranche, keepTab) {
 
   body.innerHTML = tsHtml + tranchesHtml + statsHtml + guildHtml + tabsHtml + `
     <div id="modalEquip" style="${activeTab !== "equip" ? "display:none" : ""}">
-      <h3 style="font-size:14px;margin:16px 0 8px">EQUIPEMENT (${(p.equipment||[]).length} pieces) — ${p.viewing_tranche !== null ? "Tranche " + p.viewing_tranche : "Niveau actuel"}</h3>
+      <h3 style="font-size:14px;margin:16px 0 8px">EQUIPEMENT (${(p.equipment||[]).length} pieces) — ${p.viewing_tranche != null && p.viewing_tranche !== undefined ? "Tranche " + p.viewing_tranche : "Niveau actuel"}</h3>
       <table class="equip-table">
         <thead><tr><th>SLOT</th><th>ITEM</th><th>NIV</th><th>RARETE</th><th>POIDS OFF</th><th>PV</th><th>RES</th><th>PA</th><th>PM</th></tr></thead>
         <tbody>${equipHtml}</tbody>
