@@ -1,5 +1,5 @@
 // Build Optimizer - genere et affiche les top builds
-import { optimize, simulateMultiTurn } from "../engine/damage-engine.js";
+// import differe - engine charge a la demande
 
 let optimizerData = null;
 

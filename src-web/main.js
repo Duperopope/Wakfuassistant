@@ -8,7 +8,7 @@ import { loadGuilds } from "./js/tabs/guilds.js";
 import { loadClasses } from "./js/tabs/classes.js";
 import { loadCdn, populateCdnFilters } from "./js/tabs/cdn.js";
 import { showPlayer, closeModal } from "./js/modal.js";
-import "./css/builds.css";
+// import "./css/builds.css"; // desactive temporairement
 import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
