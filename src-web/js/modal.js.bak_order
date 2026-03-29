@@ -13,7 +13,6 @@ import { getState, setState } from "./state.js";
 
 const RARITY_CLASSES = {0:"rarity-0",1:"rarity-1",2:"rarity-2",3:"rarity-3",4:"rarity-4",5:"rarity-5",6:"rarity-6",7:"rarity-7"};
 const SLOT_ICON_MAP = {0:"casque",3:"epaulettes",4:"amulette",5:"plastron",7:"anneau",8:"anneau",10:"ceinture",12:"bottes",13:"cape",15:"arme",17:"accessoire",18:"secondemain",22:"familier",23:"monture",24:"monture"};
-const SLOT_ORDER = {0:0,13:1,4:2,3:3,5:4,10:5,12:6,7:7,8:8,15:9,18:10,17:11,22:12,24:13};
 
 
 export async function showPlayer(name, tranche, keepTab) {
@@ -79,20 +78,20 @@ export async function showPlayer(name, tranche, keepTab) {
   const guildHtml = p.guild_name ? `<div style="margin-bottom:12px"><span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:13px"><b>GUILDE</b> ${esc(p.guild_name)}</span></div>` : "";
 
   // Equipment table
-  const equipHtml = (p.equipment || []).slice().sort(function(a,b){return (SLOT_ORDER[a.slot]!==undefined?SLOT_ORDER[a.slot]:99)-(SLOT_ORDER[b.slot]!==undefined?SLOT_ORDER[b.slot]:99);}).map(e => {
+  const equipHtml = (p.equipment || []).map(e => {
     const rarCls = RARITY_CLASSES[e.rarity] || "";
     const iconUrl = e.gfx_id ? `/icons/items/${e.gfx_id}.png` : "";
     const iconImg = iconUrl ? `<img src="${iconUrl}" class="item-icon" onerror="this.style.display='none'" alt="">` : "";
     return `<tr>
       <td style="white-space:nowrap"><img src="/icons/slots/${SLOT_ICON_MAP[e.slot] || 'accessoire'}.png?v=1774811227" style="width:20px;height:20px;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'" alt="">${esc(e.slot_name || String(e.slot))}</td>
       <td>${iconImg}<span class="${rarCls}">${esc(e.name)}</span></td>
-      <td class="num">${(e.slot === 22 || e.slot === 24) ? "" : (e.level || "")}</td>
-      <td class="${rarCls}">${e.rarityName ? esc(e.rarityName) : ""}</td>
-      <td class="num">${e.poids_off ? '<span style="color:' + (e.poids_off > 0 ? 'var(--green)' : 'var(--red, #f44)') + '">' + rnd(e.poids_off) + '</span>' : ""}</td>
-      <td class="num">${e.pv ? '<span style="color:' + (e.pv > 0 ? 'var(--green)' : 'var(--red, #f44)') + '">' + rnd(e.pv) + '</span>' : ""}</td>
-      <td class="num">${e.res ? '<span style="color:' + (e.res > 0 ? 'var(--green)' : 'var(--red, #f44)') + '">' + rnd(e.res) + '</span>' : ""}</td>
-      <td class="num">${e.pa ? '<span style="color:' + (e.pa > 0 ? 'var(--green)' : 'var(--red, #f44)') + '">' + e.pa + '</span>' : ""}</td>
-      <td class="num">${e.pm ? '<span style="color:' + (e.pm > 0 ? 'var(--green)' : 'var(--red, #f44)') + '">' + e.pm + '</span>' : ""}</td>
+      <td class="num">${(e.slot === 22 || e.slot === 23 || e.slot === 24) && e.level <= 1 ? "-" : e.level}</td>
+      <td class="${rarCls}">${esc(e.rarityName)}</td>
+      <td class="num high">${rnd(e.poids_off)}</td>
+      <td class="num">${rnd(e.pv)}</td>
+      <td class="num">${rnd(e.res)}</td>
+      <td class="num">${e.pa}</td>
+      <td class="num">${e.pm}</td>
     </tr>`;
   }).join("");
 

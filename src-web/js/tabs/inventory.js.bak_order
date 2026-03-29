@@ -6,20 +6,21 @@
 // ============================================================
 
 const SLOT_LAYOUT = [
-  { id: "Casque", col: "left", icon: "casque" },
-  { id: "Cape", col: "left", icon: "cape" },
-  { id: "Amulette", col: "left", icon: "amulette" },
-  { id: "Epaulettes", col: "left", icon: "epaulettes" },
-  { id: "Plastron", col: "left", icon: "plastron" },
-  { id: "Ceinture", col: "left", icon: "ceinture" },
-  { id: "Bottes", col: "right", icon: "bottes" },
-  { id: "Anneau 1", col: "right", icon: "anneau" },
-  { id: "Anneau 2", col: "right", icon: "anneau" },
-  { id: "Arme principale", col: "right", icon: "arme" },
-  { id: "Seconde main", col: "right", icon: "secondemain" },
-  { id: "Accessoire", col: "right", icon: "accessoire" },
-  { id: "Familier", col: "right", icon: "familier" },
-  { id: "Monture", col: "right", icon: "monture" }
+  { id: "Casque",           col: "left",  icon: "casque" },
+  { id: "Epaulettes",       col: "left",  icon: "epaulettes" },
+  { id: "Amulette",         col: "left",  icon: "amulette" },
+  { id: "Plastron",         col: "left",  icon: "plastron" },
+  { id: "Anneau 1",         col: "left",  icon: "anneau" },
+  { id: "Ceinture",         col: "left",  icon: "ceinture" },
+  { id: "Cape",             col: "left",  icon: "cape" },
+  { id: "Anneau 2",         col: "right", icon: "anneau" },
+  { id: "Bottes",           col: "right", icon: "bottes" },
+  { id: "Arme principale",  col: "right", icon: "arme" },
+  { id: "Seconde main",     col: "right", icon: "secondemain" },
+  { id: "Accessoire",       col: "right", icon: "accessoire" },
+  { id: "Familier",         col: "right", icon: "familier" },
+  { id: "Monture",          col: "right", icon: "monture" },
+  { id: "Embleme",          col: "right", icon: "embleme" },
 ];
 
 const RARITY_CLASS = {
