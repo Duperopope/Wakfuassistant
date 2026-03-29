@@ -606,3 +606,116 @@
 .rc-name { font-weight: 600; color: var(--text); }
 .rc-level { text-align: center; }
 .rc-score, .rc-off { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* === Sortable headers === */
+th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+th[data-sort]:hover {
+  color: var(--accent);
+}
+
+/* === Guild Table === */
+.guild-table { padding: 0 16px; }
+.gt-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 70px 80px 80px 80px 70px 80px 1fr;
+  align-items: center;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.gt-row:hover:not(.gt-header) { background: rgba(255,255,255,0.03); }
+.gt-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+}
+.gt-header [data-sort]:hover { color: var(--accent); }
+.gt-cell { padding: 0 4px; }
+.gt-rank { color: var(--text-muted); font-size: 12px; }
+.gt-left { text-align: left; }
+.gt-center { text-align: center; }
+.gt-right { text-align: right; font-weight: 600; }
+.gt-name { font-weight: 600; }
+.gt-score { color: var(--accent); cursor: help; border-bottom: 1px dotted var(--text-muted); }
+.gt-link { cursor: pointer; color: var(--accent); }
+.gt-link:hover { text-decoration: underline; }
+.gt-large .gt-name { color: var(--green); }
+.gt-medium .gt-name { color: var(--accent); }
+.gt-small .gt-name { color: var(--text-muted); }
+
+/* === Classes Dashboard === */
+.classes-dashboard { padding: 16px; }
+.classes-charts {
+  display: grid;
+  grid-template-columns: 320px 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+@media (max-width: 1200px) {
+  .classes-charts { grid-template-columns: 1fr; }
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.chart-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.donut-container { display: flex; justify-content: center; margin-bottom: 12px; }
+
+/* Legend */
+.legend-container { max-height: 300px; overflow-y: auto; }
+.legend-row {
+  display: grid;
+  grid-template-columns: 12px 90px 1fr 35px 40px;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 12px;
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.legend-breed { font-weight: 600; color: var(--text); }
+.legend-bar-bg { background: rgba(255,255,255,0.08); border-radius: 3px; height: 10px; overflow: hidden; display: block; }
+.legend-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; opacity: 1; filter: brightness(1.3); display: block; }
+.legend-count { text-align: right; font-weight: 600; color: var(--text); }
+.legend-pct { text-align: right; color: var(--text-muted); font-size: 11px; }
+
+/* Level / Off charts */
+.bar-chart { }
+.level-chart-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.lc-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 50px;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12px;
+}
+.lc-breed { font-weight: 600; color: var(--text); font-size: 11px; }
+.lc-bar-bg { background: rgba(255,255,255,0.08); border-radius: 4px; height: 16px; overflow: hidden; display: block; }
+.lc-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; opacity: 1; filter: brightness(1.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); display: block; }
+.lc-value { text-align: right; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }

@@ -22,6 +22,7 @@ function statBox(label, val, detail) {
 }
 
 export async function loadEquipment(container) {
+  if (!container) return;
   container.innerHTML = '<p style="text-align:center;color:var(--text-muted)">Chargement du build...</p>';
 
   try {

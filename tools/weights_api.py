@@ -293,6 +293,7 @@ def recharger_joueurs():
             "top_player": max(joueurs, key=lambda j: j["poids_offensif"])["name"],
             "max_poids_offensif": round(max(j["poids_offensif"] for j in joueurs), 1),
         })
+    guild_list = [g for g in guild_list if not g["guild_name"].startswith("Guilde#")]
     guild_list.sort(key=lambda x: x["avg_poids_offensif"], reverse=True)
     _guilds = guild_list
 
@@ -487,6 +488,8 @@ def charger_donnees():
             "top_player": max(joueurs, key=lambda j: j["poids_offensif"])["name"],
             "max_poids_offensif": round(max(j["poids_offensif"] for j in joueurs), 1),
         })
+    guild_list = [g for g in guild_list if not g["guild_name"].startswith("Guilde#")]
+    guild_list = [g for g in guild_list if not g["guild_name"].startswith("Guilde#")]
     guild_list.sort(key=lambda x: x["avg_poids_offensif"], reverse=True)
     _guilds = guild_list
 
