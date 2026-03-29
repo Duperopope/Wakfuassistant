@@ -92,8 +92,8 @@ function renderGuilds() {
 
   const rows = sorted.map((g, i) => {
     const sizeClass = g.nb_members >= 10 ? "gt-large" : g.nb_members >= 5 ? "gt-medium" : "gt-small";
-    const topClick = g.top_player ? `onclick="window.__showPlayer('${esc(g.top_player).replace(/'/g, "\\'")}')"` : "";
-    const topStyle = g.top_player ? ' class="gt-link"' : "";
+    // topClick supprime -> delegue via .clickable-player
+    // topStyle supprime -> classe unifiee
     const scoreTip = scoreTooltip(g, _globalAvg).replace(/"/g, "&quot;");
 
     return `<div class="gt-row ${sizeClass}">` +
@@ -105,7 +105,7 @@ function renderGuilds() {
       `<span class="gt-cell gt-right">${g.avg_poids_defensif}</span>` +
       `<span class="gt-cell gt-right">${g.avg_level}</span>` +
       `<span class="gt-cell gt-right">${g.max_poids_offensif}</span>` +
-      `<span class="gt-cell gt-left"${topStyle} ${topClick}>${esc(g.top_player || "-")}</span>` +
+      `<span class="gt-cell gt-left${g.top_player ? ' clickable-player' : ''}" ${g.top_player ? 'data-player="' + esc(g.top_player) + '"' : ''}>${esc(g.top_player || "-")}</span>` +
       `</div>`;
   }).join("");
 
@@ -116,6 +116,7 @@ function renderGuilds() {
     el.style.cursor = "pointer";
     el.onclick = () => sortGuilds(el.dataset.sort);
   });
+
 }
 
 export async function loadGuilds() {

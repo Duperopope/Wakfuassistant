@@ -35,11 +35,12 @@ export function renderPlayerRows(players, startOffset) {
   const tbody = document.getElementById("playersTbody");
   if (!tbody) return;
   tbody.innerHTML = players.map((p, i) => {
+
     const rank = p.rank || startOffset + i + 1;
     const iconUrl = p.gfx_id ? `/icons/items/${p.gfx_id}.png` : "";
     return `<tr>
       <td class="rank">${rank}</td>
-      <td class="name-cell" onclick="window.__showPlayer('${esc(p.name)}')">${esc(p.name)}</td>
+      <td class="clickable-player" data-player="${esc(p.name)}">${esc(p.name)}</td>
       <td>${p.level}</td>
       <td><span class="breed-badge">${esc(p.breedName)}</span></td>
       <td class="guild-cell">${esc(p.guild_name)}</td>

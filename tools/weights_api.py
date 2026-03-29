@@ -984,51 +984,151 @@ def main():
 
 # ============================================================
 # Routes Build Optimizer (donnees Sram)
-# ============================================================
-import json as _json
+# ---- INVENTORY ENDPOINT v2 ----
+@app.get("/api/inventory")
+async def api_inventory(breed: str = "", top: int = 0, min_level: int = 0, max_level: int = 999):
+    """Meta items: croise equipements joueurs avec CDN et scores."""
+    import re as _re
+    
+    cdn_path = os.path.join(os.path.dirname(__file__), "..", "rnd", "data", "cdn_items.json")
+    cdn_map = {}
+    try:
+        with open(cdn_path, "r", encoding="utf-8") as f:
+            cdn_raw = json.load(f)
+        for entry in cdn_raw:
+            defn = entry.get("definition", {})
+            item_def = defn.get("item", {})
+            iid = item_def.get("id")
+            if not iid: continue
+            bp = item_def.get("baseParameters", {})
+            title = entry.get("title", {})
+            cdn_map[iid] = {
+                "id": iid,
+                "name_fr": title.get("fr", title.get("en", "Item #" + str(iid))),
+                "level": item_def.get("level", 0),
+                "typeId": bp.get("itemTypeId", 0),
+                "rarity": bp.get("rarity", 0),
+                "setId": bp.get("itemSetId", 0),
+            }
+    except Exception as e:
+        return {"error": "CDN: " + str(e)}
 
-_BUILD_DATA_DIR = Path(__file__).resolve().parent.parent / "build-generator" / "data"
+    RARITY_NAMES = {0:"Commun",1:"Inhabituel",2:"Rare",3:"Mythique",4:"Legendaire",5:"Relique",6:"Souvenir",7:"Epique"}
+    SLOT_NAMES = {0:"Casque",3:"Epaulettes",4:"Amulette",5:"Plastron",7:"Anneau 1",8:"Anneau 2",10:"Bottes",12:"Ceinture",13:"Cape",15:"Arme principale",16:"Seconde main",17:"Accessoire",22:"Familier",24:"Embleme"}
 
-@app.get("/api/build/spells")
-async def api_build_spells():
-    p = _BUILD_DATA_DIR / "sram-spells.json"
-    if not p.exists():
-        return []
-    with open(p, "r", encoding="utf-8") as f:
-        return _json.load(f)
+    # Utiliser _players_by_name pour les scores
+    players_data = []
+    for name, pdata in _players_by_name.items():
+        if not isinstance(pdata, dict): continue
+        score = pdata.get("score_global", 0) or pdata.get("poids_offensif", 0)
+        p_breed = pdata.get("breedName", "")
+        p_level = pdata.get("level", 0)
+        if breed and p_breed != breed: continue
+        if p_level < min_level or p_level > max_level: continue
+        players_data.append({"name": name, "breed": p_breed, "level": p_level, "score": score})
+    
+    # Trier par score et prendre le top si demande
+    players_data.sort(key=lambda x: x["score"], reverse=True)
+    if top > 0:
+        players_data = players_data[:top]
+    
+    player_names = {p["name"] for p in players_data}
+    player_scores = {p["name"]: p["score"] for p in players_data}
+    player_breeds = {p["name"]: p["breed"] for p in players_data}
 
-@app.get("/api/build/passives")
-async def api_build_passives():
-    p = _BUILD_DATA_DIR / "sram-passives.json"
-    if not p.exists():
-        return []
-    with open(p, "r", encoding="utf-8") as f:
-        return _json.load(f)
+    # Scanner les fichiers pour les equipements
+    item_data = {}  # item_id -> {carriers, total_score, breeds, slots}
+    players_dir_str = str(PLAYERS_DIR)
+    files = [f for f in os.listdir(players_dir_str) if f.endswith('.json') and '_t' not in f]
+    scanned = 0
+    # Index: nom avec underscores -> nom avec espaces
+    name_lookup = {}
+    for n in player_names:
+        name_lookup[n] = n
+        name_lookup[n.lower()] = n
+        name_lookup[n.replace(' ', '_')] = n
+        name_lookup[n.replace(' ', '_').lower()] = n
 
-@app.get("/api/build/sublimations")
-async def api_build_sublimations():
-    p = _BUILD_DATA_DIR / "sram-sublimations.json"
-    if not p.exists():
-        return []
-    with open(p, "r", encoding="utf-8") as f:
-        return _json.load(f)
+    for fname in files:
+        pname = fname.replace('.json', '')
+        matched_name = name_lookup.get(pname) or name_lookup.get(pname.lower())
+        if not matched_name: continue
+        fpath = os.path.join(players_dir_str, fname)
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                p = json.load(f)
+        except: continue
+        eq = p.get("equipment", "")
+        if not isinstance(eq, str) or "=" not in eq: continue
+        scanned += 1
+        score = player_scores.get(matched_name, 0)
+        p_breed = player_breeds.get(matched_name, "")
+        pairs = _re.findall(r"(\d+)=(\d+)", eq)
+        for slot_str, item_str in pairs:
+            item_id = int(item_str)
+            slot = int(slot_str)
+            if item_id not in item_data:
+                item_data[item_id] = {"carriers": 0, "total_score": 0, "breeds": {}, "slot": slot, "carrier_names": []}
+            d = item_data[item_id]
+            d["carriers"] += 1
+            d["total_score"] += score
+            d["breeds"][p_breed] = d["breeds"].get(p_breed, 0) + 1
+            if len(d["carrier_names"]) < 5:
+                d["carrier_names"].append({"name": matched_name, "score": round(score, 1)})
 
-@app.get("/api/build/base-stats")
-async def api_build_base_stats():
-    p = _BUILD_DATA_DIR / "sram-base-stats.json"
-    if not p.exists():
-        return {}
-    with open(p, "r", encoding="utf-8") as f:
-        return _json.load(f)
+    # Construire les resultats
+    results = []
+    for item_id, d in item_data.items():
+        cdn = cdn_map.get(item_id, {})
+        rarity = cdn.get("rarity", 0)
+        avg_score = round(d["total_score"] / max(d["carriers"], 1), 1)
+        top_breed = max(d["breeds"].items(), key=lambda x: x[1])[0] if d["breeds"] else ""
+        results.append({
+            "item_id": item_id,
+            "name": cdn.get("name_fr", "Item #" + str(item_id)),
+            "level": cdn.get("level", 0),
+            "rarity": rarity,
+            "rarity_name": RARITY_NAMES.get(rarity, "?"),
+            "slot": SLOT_NAMES.get(d["slot"], "Slot " + str(d["slot"])),
+            "slot_id": d["slot"],
+            "carriers": d["carriers"],
+            "avg_score": avg_score,
+            "popularity_pct": round(d["carriers"] / max(scanned, 1) * 100, 1),
+            "top_breed": top_breed,
+            "carrier_names": sorted(d["carrier_names"], key=lambda x: x["score"], reverse=True),
+        })
 
-@app.get("/api/build/formulas")
-async def api_build_formulas():
-    p = _BUILD_DATA_DIR / "formulas.json"
-    if not p.exists():
-        return {}
-    with open(p, "r", encoding="utf-8") as f:
-        return _json.load(f)
+    # Best in slot (trie par avg_score des porteurs)
+    bis = {}
+    for r in results:
+        s = r["slot"]
+        if s not in bis:
+            bis[s] = []
+        bis[s].append(r)
+    for s in bis:
+        bis[s].sort(key=lambda x: x["avg_score"], reverse=True)
+        bis[s] = bis[s][:10]
 
+    # Stats par rarete
+    rarity_stats = {}
+    for r in results:
+        rn = r["rarity_name"]
+        rarity_stats[rn] = rarity_stats.get(rn, 0) + r["carriers"]
+
+    # Breeds disponibles
+    all_breeds = sorted(set(p["breed"] for p in players_data if p["breed"]))
+
+    results.sort(key=lambda x: x["avg_score"], reverse=True)
+
+    return {
+        "total_items": len(results),
+        "players_scanned": scanned,
+        "players_pool": len(players_data),
+        "items": results[:300],
+        "best_in_slot": bis,
+        "rarity_stats": rarity_stats,
+        "breeds": all_breeds,
+    }
 
 if __name__ == "__main__":
     main()

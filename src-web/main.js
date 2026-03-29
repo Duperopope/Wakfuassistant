@@ -6,6 +6,7 @@ import { debounce } from "./js/utils.js";
 import { loadPlayers } from "./js/tabs/players.js";
 import { loadGuilds } from "./js/tabs/guilds.js";
 import { loadClasses } from "./js/tabs/classes.js";
+import { loadInventory } from "./js/tabs/inventory.js";
 import { loadRecent } from "./js/tabs/recent.js";
 import { loadCdn, populateCdnFilters } from "./js/tabs/cdn.js";
 import { showPlayer, closeModal } from "./js/modal.js";
@@ -42,6 +43,7 @@ function switchSubtab(sub) {
   if (sub === "players") loadPlayers();
   if (sub === "guilds") loadGuilds();
   if (sub === "recent") loadRecent();
+  if (sub === "inventory") loadInventory();
 }
 
 // ─── Stats bar ───
@@ -199,7 +201,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.__showPlayer = showPlayer;
+
+
   init();
+});
+
+
+// === LISTENER DELEGUE GLOBAL: tous les .clickable-player du site ===
+// Place au top level, hors de tout callback, pour garantir l execution
+document.addEventListener("click", function(e) {
+  var el = e.target.closest(".clickable-player");
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  var name = el.dataset.player || el.textContent.trim();
+  if (name && name !== "-" && window.__showPlayer) {
+    window.__showPlayer(name);
+  }
 });
 
 // Vite HMR
