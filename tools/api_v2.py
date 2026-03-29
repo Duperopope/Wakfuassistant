@@ -534,15 +534,19 @@ async def api_guilds_legacy(min_members: int = 0, limit: int = 500):
 @app.get("/api/recent")
 async def api_recent_legacy(limit: int = 200):
     players = db.get_recent(limit=limit)
+    new_players = []
+    updated_players = []
     for p in players:
         p["breedName"] = p.get("breed_name", "")
         p["detected_at"] = p.get("last_seen", "")
-        p["first_seen"] = p.get("last_seen", "")  # approximation
         p["poids_offensif"] = p.get("poids_offensif", 0) or 0
-    # recent.js attend new_players et updated_players
-    # Pour l instant on met tout dans new_players
-    # TODO: differencier nouveaux vs mis a jour via first_seen != last_seen
-    return {"new_players": players, "updated_players": []}
+        fs = p.get("first_seen", "")
+        ls = p.get("last_seen", "")
+        if fs and ls and fs[:16] != ls[:16]:
+            updated_players.append(p)
+        else:
+            new_players.append(p)
+    return {"new_players": new_players, "updated_players": updated_players}
 
 
 @app.get("/api/stats")

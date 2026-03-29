@@ -61,8 +61,8 @@ class WakfuDB:
                     order: str = "DESC", limit: int = 500,
                     offset: int = 0) -> list[dict]:
         """Liste des joueurs avec filtres, tri et pagination."""
-        where = ["1=1"]
-        params = []
+        where = ["breed_name NOT LIKE ?"]
+        params = ["BreedId_%"]
 
         if breed:
             where.append("breed_name = ?")
@@ -110,8 +110,8 @@ class WakfuDB:
                       min_level: int = 0, max_level: int = 999,
                       search: str = "") -> int:
         """Compte total pour pagination."""
-        where = ["1=1"]
-        params = []
+        where = ["breed_name NOT LIKE ?"]
+        params = ["BreedId_%"]
         if breed:
             where.append("breed_name = ?")
             params.append(breed)
@@ -128,7 +128,7 @@ class WakfuDB:
             where.append("name LIKE ?")
             params.append("%%%s%%" % search)
 
-        sql = "SELECT COUNT(*) FROM players WHERE %s" % " AND ".join(where)
+        sql = "SELECT COUNT(*) FROM players WHERE breed_name NOT LIKE 'BreedId_%%' WHERE %s" % " AND ".join(where)
         return self._conn().execute(sql, params).fetchone()[0]
 
     def get_player(self, name: str) -> dict | None:
@@ -285,7 +285,7 @@ class WakfuDB:
                    ROUND(AVG(level), 1) as avg_level,
                    MAX(score_global) as max_score
             FROM players
-            WHERE breed_name != ''
+            WHERE breed_name NOT LIKE 'BreedId_%%'
             GROUP BY breed_name
             ORDER BY count DESC
         """)
@@ -309,8 +309,9 @@ class WakfuDB:
         cur = self._conn().execute("""
             SELECT name, level, breed_name, guild_name, score_global,
                    poids_offensif, poids_defensif, poids_resistance,
-                   pa, pm, last_seen
+                   pa, pm, first_seen, last_seen
             FROM players
+            WHERE breed_name NOT LIKE 'BreedId_%%'
             ORDER BY last_seen DESC
             LIMIT ?
         """, (limit,))
@@ -323,18 +324,18 @@ class WakfuDB:
     def get_stats(self) -> dict:
         """Statistiques globales du serveur."""
         conn = self._conn()
-        total = conn.execute("SELECT COUNT(*) FROM players").fetchone()[0]
+        total = conn.execute("SELECT COUNT(*) FROM players WHERE breed_name NOT LIKE 'BreedId_%%'").fetchone()[0]
         guilds = conn.execute(
-            "SELECT COUNT(DISTINCT guild_name) FROM players WHERE guild_name IS NOT NULL AND guild_name != ''"
+            "SELECT COUNT(DISTINCT guild_name) FROM players WHERE breed_name NOT LIKE 'BreedId_%%' AND guild_name IS NOT NULL AND guild_name != ''"
         ).fetchone()[0]
         top = conn.execute(
             "SELECT name, score_global FROM players ORDER BY score_global DESC LIMIT 1"
         ).fetchone()
         avg_off = conn.execute(
-            "SELECT ROUND(AVG(poids_offensif), 1) FROM players"
+            "SELECT ROUND(AVG(poids_offensif), 1) FROM players WHERE breed_name NOT LIKE 'BreedId_%%'"
         ).fetchone()[0]
         avg_level = conn.execute(
-            "SELECT ROUND(AVG(level), 1) FROM players"
+            "SELECT ROUND(AVG(level), 1) FROM players WHERE breed_name NOT LIKE 'BreedId_%%'"
         ).fetchone()[0]
         latest = conn.execute(
             "SELECT last_seen FROM players ORDER BY last_seen DESC LIMIT 1"
@@ -533,7 +534,7 @@ class WakfuDB:
                    offset: int = 0) -> list[dict]:
         """Recherche dans le CDN."""
         where = ["1=1"]
-        params = []
+        params = ["BreedId_%"]
         if query:
             where.append("name_fr LIKE ?")
             params.append("%%%s%%" % query)
