@@ -1,3 +1,5 @@
+import { initTooltipDelegation } from "../tooltip.js";
+
 // ============================================================
 // armory.js - Onglet Armurerie
 // Vue visuelle des items les plus portes par slot et classe
@@ -93,6 +95,7 @@ function renderArmory(data) {
 
   html += '</div>';
   el.innerHTML = html;
+  initTooltipDelegation();
 }
 
 function renderSlotCard(slot, items) {
@@ -111,7 +114,7 @@ function renderSlotCard(slot, items) {
   items.slice(0, 3).forEach(function(it, i) {
     var rarCls = rc(it.rarity_name);
     var isFirst = i === 0;
-    html += '<div class="arm-item' + (isFirst ? ' arm-item-first' : '') + '">';
+    html += '<div class="arm-item' + (isFirst ? ' arm-item-first' : '') + '" data-item-id="' + it.item_id + '" style="cursor:pointer">';
     html += '<div class="arm-item-icon">' + itemIcon(it.gfx_id, isFirst ? 48 : 32) + '</div>';
     html += '<div class="arm-item-info">';
     html += '<div class="arm-item-name ' + rarCls + '">' + esc(it.name) + '</div>';

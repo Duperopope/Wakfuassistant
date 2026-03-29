@@ -439,6 +439,39 @@ async def api_v1_docs():
     }
 
 
+
+
+# =====================================================
+# CDN ITEM DETAIL (pour tooltips)
+# =====================================================
+
+@app.get("/api/cdn/{item_id}")
+async def api_cdn_item(item_id: int):
+    """Retourne les details complets d'un item CDN pour le tooltip."""
+    result = {}
+
+    # 1) DB SQLite (nom, level, rarity, gfx_id, type_id)
+    cdn_item = db.get_cdn_item(item_id)
+    if cdn_item:
+        result = dict(cdn_item)
+
+    # 2) items_db en memoire (effects complets + description)
+    item = _items_db.get(item_id)
+    if item:
+        result["item_id"] = item_id
+        result["name_fr"] = item.get("name_fr", result.get("name_fr", ""))
+        result["level"] = item.get("level", result.get("level", 0))
+        result["rarity"] = item.get("rarity", result.get("rarity", 0))
+        result["type_id"] = item.get("itemTypeId", result.get("type_id", 0))
+        result["gfx_id"] = item.get("gfxId", result.get("gfx_id", 0))
+        result["effects"] = item.get("effects", [])
+        result["desc_fr"] = item.get("desc_fr", "")
+
+    if not result:
+        return JSONResponse({"error": "Item introuvable"}, status_code=404)
+
+    return result
+
 # =====================================================
 # ENDPOINTS LEGACY (compatibilite avec le frontend actuel)
 # =====================================================

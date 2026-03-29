@@ -176,8 +176,10 @@ def charger_items(path: Path) -> dict:
         bp = item_info.get("baseParameters", {})
 
         gp = item_info.get("graphicParameters", {})
+        desc = entry.get("description", {})
         items[item_id] = {
             "name_fr": titre.get("fr", titre.get("en", f"Item#{item_id}")),
+            "desc_fr": desc.get("fr", "") if isinstance(desc, dict) else "",
             "level": item_info.get("level", 0),
             "rarity": bp.get("rarity", 0),
             "itemTypeId": bp.get("itemTypeId", 0),

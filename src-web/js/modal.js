@@ -9,6 +9,7 @@ function rnd(v, wrap) {
 // Modal - detail joueur
 import { fetchJson } from "./api.js";
 import { esc } from "./utils.js";
+import { initTooltipDelegation } from "./tooltip.js";
 import { getState, setState } from "./state.js";
 
 const RARITY_CLASSES = {0:"rarity-0",1:"rarity-1",2:"rarity-2",3:"rarity-3",4:"rarity-4",5:"rarity-5",6:"rarity-6",7:"rarity-7"};
@@ -83,7 +84,7 @@ export async function showPlayer(name, tranche, keepTab) {
     const rarCls = RARITY_CLASSES[e.rarity] || "";
     const iconUrl = e.gfx_id ? `/icons/items/${e.gfx_id}.png` : "";
     const iconImg = iconUrl ? `<img src="${iconUrl}" class="item-icon" onerror="this.style.display='none'" alt="">` : "";
-    return `<tr>
+    return `<tr data-item-id="${e.item_id}" style="cursor:pointer">
       <td style="white-space:nowrap"><img src="/icons/slots/${SLOT_ICON_MAP[e.slot] || 'accessoire'}.png?v=1774811227" style="width:20px;height:20px;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'" alt="">${esc(e.slot_name || String(e.slot))}</td>
       <td>${iconImg}<span class="${rarCls}">${esc(e.name)}</span></td>
       <td class="num">${(e.slot === 22 || e.slot === 24) ? "" : (e.level || "")}</td>
@@ -168,6 +169,7 @@ export async function showPlayer(name, tranche, keepTab) {
     </div>`;
 
   overlay.classList.add("active");
+  initTooltipDelegation();
 }
 
 export function switchModalTab(tab) {
