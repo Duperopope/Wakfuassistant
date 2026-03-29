@@ -579,3 +579,30 @@
 }
 .placeholder-box h3 { font-size: 18px; color: var(--accent); margin-bottom: 8px; }
 .placeholder-box p { color: var(--text2); font-size: 14px; }
+
+/* === Recents === */
+.recent-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 50px 100px 1fr 80px 80px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.recent-row:hover:not(.recent-header) {
+  background: rgba(255,255,255,0.03);
+}
+.recent-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.rc-time { color: var(--text-muted); font-size: 12px; }
+.rc-name { font-weight: 600; color: var(--text); }
+.rc-level { text-align: center; }
+.rc-score, .rc-off { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }

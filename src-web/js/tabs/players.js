@@ -1,3 +1,11 @@
+function rnd(v, wrap) {
+  if (typeof v !== "number") return v;
+  const display = Math.round(v);
+  const precise = v.toFixed(2);
+  if (wrap === false) return display;
+  return '<span title="' + precise + '" style="cursor:help">' + display + '</span>';
+}
+
 // Players tab - classement des joueurs
 import { fetchJson } from "../api.js";
 import { getState, updateFilters, setState } from "../state.js";
@@ -35,9 +43,9 @@ export function renderPlayerRows(players, startOffset) {
       <td>${p.level}</td>
       <td><span class="breed-badge">${esc(p.breedName)}</span></td>
       <td class="guild-cell">${esc(p.guild_name)}</td>
-      <td class="num high">${p.score_global}</td>
-      <td class="num">${p.poids_offensif}</td>
-      <td class="num">${p.poids_defensif}</td>
+      <td class="num high">${rnd(p.score_global)}</td>
+      <td class="num">${rnd(p.poids_offensif)}</td>
+      <td class="num">${rnd(p.poids_defensif)}</td>
       <td class="num">${p.total_pv}</td>
       <td class="num">${p.total_res}</td>
       <td class="num">${p.pa}</td>

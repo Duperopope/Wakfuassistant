@@ -6,6 +6,7 @@ import { debounce } from "./js/utils.js";
 import { loadPlayers } from "./js/tabs/players.js";
 import { loadGuilds } from "./js/tabs/guilds.js";
 import { loadClasses } from "./js/tabs/classes.js";
+import { loadRecent } from "./js/tabs/recent.js";
 import { loadCdn, populateCdnFilters } from "./js/tabs/cdn.js";
 import { showPlayer, closeModal } from "./js/modal.js";
 // import "./css/builds.css"; // desactive temporairement
@@ -40,6 +41,7 @@ function switchSubtab(sub) {
   );
   if (sub === "players") loadPlayers();
   if (sub === "guilds") loadGuilds();
+  if (sub === "recent") loadRecent();
 }
 
 // ─── Stats bar ───
@@ -53,6 +55,20 @@ function renderStats(s) {
     <div class="stat-card"><div class="label">TOP JOUEUR</div><div class="value">${s.top_player || "-"}</div></div>
     <div class="stat-card"><div class="label">MOY. OFFENSIF</div><div class="value">${s.avg_poids_offensif || 0}</div></div>
     <div class="stat-card"><div class="label">MOY. NIVEAU</div><div class="value">${s.avg_level || 0}</div></div>
+    <div class="stat-card"><div class="label">DERNIER RELEVE</div><div class="value" style="font-size:13px;color:var(--text-muted)">${(() => {
+      if (!s.last_update) return "inconnu";
+      try {
+        const d = new Date(s.last_update.replace(" ", "T"));
+        if (isNaN(d.getTime())) return s.last_update;
+        const now = new Date();
+        const diff = Math.floor((now - d) / 60000);
+        let ago = "";
+        if (diff < 60) ago = "il y a " + diff + " min";
+        else if (diff < 1440) ago = "il y a " + Math.floor(diff / 60) + "h";
+        else ago = "il y a " + Math.floor(diff / 1440) + "j";
+        return d.toLocaleDateString("fr-FR", {day:"2-digit",month:"short"}) + " " + d.toLocaleTimeString("fr-FR", {hour:"2-digit",minute:"2-digit"}) + " (" + ago + ")";
+      } catch(e) { return s.last_update; }
+    })()}</div></div>
   `;
 }
 
@@ -93,6 +109,7 @@ async function init() {
     if (state.currentTab === "classement") {
       if (state.currentSubtab === "players") loadPlayers();
       if (state.currentSubtab === "guilds") loadGuilds();
+      if (state.currentSubtab === "recent") loadRecent(true);
     }
   });
 }

@@ -28,6 +28,16 @@ import threading
 from pathlib import Path
 from collections import defaultdict
 
+def _fix_mojibake(s):
+    """Corrige les doubles encodages UTF-8 (mojibake)."""
+    if not isinstance(s, str):
+        return s
+    try:
+        return s.encode("latin-1").decode("utf-8")
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return s
+
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, StreamingResponse
@@ -134,24 +144,34 @@ def _start_file_watcher():
         watch_paths.append(str(COMBAT_SPELLS_FILE.parent))
 
     def _run():
-        log.info("Watcher démarré sur %s", watch_paths)
-        for changes in watch(*watch_paths, debounce=300, yield_on_timeout=False):
+        import time as _wt
+        _last_reload = 0
+        COOLDOWN = 10  # secondes minimum entre deux reloads
+        log.info("Watcher demarre sur %s (cooldown %ds)", watch_paths, COOLDOWN)
+        for changes in watch(*watch_paths, debounce=2000, yield_on_timeout=False):
             try:
                 # Vérifier si combat_spells.jsonl a changé
                 combat_changed = any(
-                    str(COMBAT_SPELLS_FILE) in str(path)
-                    for _, path in changes
+                    str(COMBAT_SPELLS_FILE) in str(p)
+                    for _, p in changes
                 )
                 if combat_changed:
                     new_spells = _load_combat_spells_incremental()
                     if new_spells:
-                        log.info("Watcher: nouveaux sorts combat détectés")
+                        log.info("Watcher: nouveaux sorts combat detectes")
                         _notify_clients("reload", '{"source":"combat"}')
                     continue
 
-                # Fichier joueur modifié
-                charger_donnees()
-                log.info("Watcher: données rechargées (fichier modifié)")
+                # Cooldown : ignorer si reload trop recent
+                now = _wt.time()
+                if now - _last_reload < COOLDOWN:
+                    log.debug("Watcher: %d changes ignores (cooldown)", len(changes))
+                    continue
+
+                nb = len(changes)
+                recharger_joueurs()
+                _last_reload = _wt.time()
+                log.info("Watcher: %d fichiers -> joueurs recharges en fond", nb)
                 _notify_clients("reload", '{"source":"file"}')
             except Exception as e:
                 log.warning("Watcher reload error: %s", e)
@@ -165,6 +185,152 @@ TRANCHES = [0, 20, 35, 50, 65, 80, 95, 110, 125, 140, 155, 170, 185, 200, 215, 2
 
 RE_TRANCHE_FILE = re.compile(r"^(.+)_t(\d+)\.json$")
 
+
+
+def recharger_joueurs():
+    """Recharge UNIQUEMENT les joueurs (pas le CDN ni les sorts)."""
+    global _players, _players_by_name, _player_tranches, _guilds, _stats
+    import time as _time
+    t0 = _time.time()
+
+    joueurs_raw = []
+    tranche_files = defaultdict(list)
+    for fichier in sorted(PLAYERS_DIR.glob("*.json")):
+        m = RE_TRANCHE_FILE.match(fichier.name)
+        if m:
+            safe_name = m.group(1)
+            tranche = int(m.group(2))
+            tranche_files[safe_name].append((tranche, fichier))
+        else:
+            try:
+                with open(fichier, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                joueurs_raw.append((fichier.stem, data, fichier))
+            except Exception as e:
+                log.warning("Reload: erreur lecture %s : %s", fichier.name, e)
+
+    resultats = []
+    for safe_name, j, src_file in joueurs_raw:
+        r = calculer_joueur(j, _items_db)
+        if r is not None:
+            r["_safe_name"] = safe_name
+            ts = j.get("timestamp", "")
+            if not ts:
+                try:
+                    import os as _os
+                    from datetime import datetime as _dt
+                    mtime = _os.path.getmtime(str(src_file))
+                    ts = _dt.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+                except Exception:
+                    pass
+            r["snapshot_timestamp"] = ts
+            r["score_global"] = round(r["poids_offensif"] + r["poids_defensif"], 1)
+            resultats.append(r)
+
+    _player_tranches = {}
+    for safe_name, fichiers_tranche in tranche_files.items():
+        tranches_dict = {}
+        for tranche, fpath in fichiers_tranche:
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                niveau_max_tranche = tranche + 15
+                r2 = calculer_joueur(data, _items_db, niveau_max=niveau_max_tranche)
+                if r2 is not None:
+                    r2["score_global"] = round(r2["poids_offensif"] + r2["poids_defensif"], 1)
+                    ds = data.get("downscaleLevel", 0)
+                    r2["effective_level"] = ds if ds and ds > 0 else data.get("level", 0)
+                    r2["tranche"] = tranche
+                    r2["snapshot_timestamp"] = data.get("timestamp", "")
+                    if not r2["snapshot_timestamp"]:
+                        try:
+                            import os as _os
+                            from datetime import datetime as _dt
+                            mtime = _os.path.getmtime(str(fpath))
+                            r2["snapshot_timestamp"] = _dt.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+                        except Exception:
+                            pass
+                    tranches_dict[tranche] = r2
+            except Exception:
+                pass
+        if tranches_dict:
+            _player_tranches[safe_name.lower()] = tranches_dict
+
+    resultats.sort(key=lambda x: x.get("poids_offensif", 0), reverse=True)
+    for i, r in enumerate(resultats, 1):
+        r["rank"] = i
+
+    _players = resultats
+    _players_by_name = {r["name"].lower(): r for r in resultats}
+
+    # Tri par score et attribution des rangs
+    resultats.sort(key=lambda x: x.get("score_global", 0), reverse=True)
+    for i, r in enumerate(resultats, 1):
+        r["rank"] = i
+
+    # Construire les guildes avec stats agregees (meme format que charger_donnees)
+    guildes_map = defaultdict(lambda: {"joueurs": [], "guild_name": "", "guild_id": 0})
+    for r in resultats:
+        gid = r.get("guild_id", 0)
+        if gid == 0:
+            continue
+        guildes_map[gid]["joueurs"].append(r)
+        if len(r.get("guild_name", "")) > len(guildes_map[gid]["guild_name"]):
+            guildes_map[gid]["guild_name"] = r["guild_name"]
+            guildes_map[gid]["guild_id"] = gid
+
+    guild_list = []
+    for gid, g in guildes_map.items():
+        joueurs = g["joueurs"]
+        n = len(joueurs)
+        guild_list.append({
+            "guild_name": g["guild_name"] or "Guilde#" + str(gid),
+            "guild_id": gid,
+            "nb_members": n,
+            "avg_poids_offensif": round(sum(j["poids_offensif"] for j in joueurs) / n, 1),
+            "avg_level": round(sum(j["level"] for j in joueurs) / n, 1),
+            "avg_poids_defensif": round(sum(j["poids_defensif"] for j in joueurs) / n, 1),
+            "top_player": max(joueurs, key=lambda j: j["poids_offensif"])["name"],
+            "max_poids_offensif": round(max(j["poids_offensif"] for j in joueurs), 1),
+        })
+    guild_list.sort(key=lambda x: x["avg_poids_offensif"], reverse=True)
+    _guilds = guild_list
+
+    nb_joueurs = len(resultats)
+    off_values = [r["poids_offensif"] for r in resultats if r.get("poids_offensif")]
+    lvl_values = [r["level"] for r in resultats if r.get("level")]
+
+    # Calcul des classes
+    classes_map = defaultdict(list)
+    for r in resultats:
+        classes_map[r['breedName']].append(r)
+    classes_stats = []
+    for breed, members in sorted(classes_map.items(), key=lambda x: -len(x[1])):
+        n = len(members)
+        classes_stats.append({
+            "breedName": breed,
+            "count": n,
+            "avg_poids_offensif": round(sum(m["poids_offensif"] for m in members) / n, 1),
+            "avg_level": round(sum(m["level"] for m in members) / n, 1),
+            "max_poids_offensif": round(max(m["poids_offensif"] for m in members), 1),
+            "top_player": max(members, key=lambda m: m["poids_offensif"])["name"],
+        })
+
+    _stats = {
+        "total_players": nb_joueurs,
+        "total_raw": len(joueurs_raw),
+        "players_sans_stuff": len(joueurs_raw) - nb_joueurs,
+        "total_guilds": len(guild_list),
+        "last_update": max((r.get("snapshot_timestamp", "") for r in resultats), default="inconnu"),
+        "classes": classes_stats,
+        "max_poids_offensif": round(max(off_values, default=0), 1),
+        "top_player": resultats[0]["name"] if resultats else "-",
+        "avg_poids_offensif": round(sum(off_values) / len(off_values), 1) if off_values else 0,
+        "avg_level": round(sum(lvl_values) / len(lvl_values), 1) if lvl_values else 0,
+    }
+
+    elapsed = round((_time.time() - t0) * 1000)
+    log.info("  -> %d joueurs recharges en %d ms (CDN skip)", nb_joueurs, elapsed)
 
 def charger_donnees():
     """Charge et calcule toutes les données au démarrage."""
@@ -203,7 +369,7 @@ def charger_donnees():
             try:
                 with open(fichier, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                joueurs_raw.append((fichier.stem, data))
+                joueurs_raw.append((fichier.stem, data, fichier))
             except Exception as e:
                 log.warning("Erreur lecture %s : %s", fichier.name, e)
 
@@ -212,10 +378,17 @@ def charger_donnees():
 
     # Calculer les joueurs principaux
     resultats = []
-    for safe_name, j in joueurs_raw:
+    for safe_name, j, _src_file in joueurs_raw:
+
         r = calculer_joueur(j, _items_db)
         if r is not None:
             r["_safe_name"] = safe_name
+            try:
+                _mtime = os.path.getmtime(_src_file)
+                from datetime import datetime as _dt
+                r["snapshot_timestamp"] = _dt.fromtimestamp(_mtime).strftime("%Y-%m-%d %H:%M")
+            except Exception:
+                r["snapshot_timestamp"] = ""
             resultats.append(r)
 
     # Charger et calculer les tranches pour chaque joueur
@@ -236,6 +409,14 @@ def charger_donnees():
                     r["effective_level"] = ds if ds and ds > 0 else data.get("level", 0)
                     r["tranche"] = tranche
                     r["snapshot_timestamp"] = data.get("timestamp", "")
+                    if not r["snapshot_timestamp"]:
+                        import os as _os
+                        from datetime import datetime as _dt
+                        try:
+                            mtime = _os.path.getmtime(path)
+                            r["snapshot_timestamp"] = _dt.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+                        except Exception:
+                            pass
                     tranches_dict[tranche] = r
             except Exception:
                 pass
@@ -336,6 +517,7 @@ def charger_donnees():
         "avg_poids_offensif": round(sum(r["poids_offensif"] for r in resultats) / len(resultats), 1) if resultats else 0,
         "avg_level": round(sum(r["level"] for r in resultats) / len(resultats), 1) if resultats else 0,
         "classes": classes_stats,
+        "last_update": max((r.get("snapshot_timestamp", "") for r in resultats), default="inconnu"),
         "weight_system": POIDS_MAITRISE,
     }
 
@@ -368,8 +550,8 @@ def serialiser_joueur(r: dict, detail: bool = False) -> dict:
         "guild_name": r["guild_name"],
         "guild_id": r["guild_id"],
         "score_global": r.get("score_global", 0),
-        "poids_offensif": round(r["poids_offensif"], 1),
-        "poids_defensif": round(r["poids_defensif"], 1),
+        "poids_offensif": round(r["poids_offensif"], 2),
+        "poids_defensif": round(r["poids_defensif"], 2),
         "total_pv": r["total_pv"],
         "total_res": r["total_res"],
         "pa": r["pa"],
@@ -385,7 +567,10 @@ def serialiser_joueur(r: dict, detail: bool = False) -> dict:
         "snapshot_timestamp": r.get("snapshot_timestamp", ""),
     }
     if detail:
-        out["equipment"] = sorted(r.get("items_detail", []), key=lambda x: x["slot"])
+        equip_raw = sorted(r.get("items_detail", []), key=lambda x: x["slot"])
+        for eq in equip_raw:
+            eq["poids_off"] = round(eq.get("poids_off", 0), 2)
+        out["equipment"] = equip_raw
         spells_raw = r.get("spells_data", {"decks": [], "active_deck": 0, "builds": []})
         # Enrichir les IDs de sorts avec nom + gfxId si disponibles
         if _spell_names and spells_raw.get("decks"):
@@ -527,6 +712,85 @@ def api_guilds(
     return {
         "total": len(data),
         "guilds": data[:min(limit, 500)],
+    }
+
+
+
+@app.get("/api/recent")
+def api_recent(limit: int = Query(50, description="Nombre max de resultats")):
+    """Derniers joueurs detectes: nouveaux et mis a jour."""
+    import os as _ros
+    from datetime import datetime as _rdt
+
+    new_players = []
+    updated_players = []
+
+    for fichier in sorted(PLAYERS_DIR.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
+        if RE_TRANCHE_FILE.match(fichier.name):
+            continue
+        try:
+            st = fichier.stat()
+            ctime = st.st_ctime
+            mtime = st.st_mtime
+            # Lire le JSON pour avoir nom, classe, niveau
+            with open(fichier, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            name = data.get("name", fichier.stem)
+
+            # Parser la guilde depuis le champ brut ou depuis _players_by_name
+            guild_name = ""
+            guild_raw = data.get("guild", "")
+            if isinstance(guild_raw, str) and "m_name=" in guild_raw:
+                import re as _re
+                m_name = _re.search(r"m_name='([^']*)'", guild_raw)
+                if m_name:
+                    guild_name = m_name.group(1)
+            # Fallback: prendre depuis le classement si disponible
+            key = name.lower()
+            if not guild_name and key in _players_by_name:
+                guild_name = _players_by_name[key].get("guild_name", "")
+
+            entry = {
+                "name": name,
+                "level": data.get("level", 0),
+                "breedName": data.get("breedName", data.get("breed", "?")),
+                "guild_name": guild_name,
+                "detected_at": _rdt.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S"),
+                "first_seen": _rdt.fromtimestamp(ctime).strftime("%Y-%m-%d %H:%M:%S"),
+            }
+
+            # Joueur dans le classement? Ajouter poids si dispo
+            key = name.lower()
+            if key in _players_by_name:
+                p = _players_by_name[key]
+                entry["poids_offensif"] = round(p.get("poids_offensif", 0), 1)
+                entry["poids_defensif"] = round(p.get("poids_defensif", 0), 1)
+                entry["score_global"] = round(p.get("score_global", 0), 1)
+                entry["rank"] = p.get("rank", 0)
+            else:
+                entry["poids_offensif"] = 0
+                entry["poids_defensif"] = 0
+                entry["score_global"] = 0
+                entry["rank"] = 0
+
+            # Nouveau = cree et modifie dans la meme seconde (tolerance 2s)
+            is_new = abs(mtime - ctime) < 2.0
+            if is_new:
+                new_players.append(entry)
+            else:
+                updated_players.append(entry)
+
+            if len(new_players) >= limit and len(updated_players) >= limit:
+                break
+        except Exception:
+            continue
+
+    return {
+        "new_players": new_players[:limit],
+        "updated_players": updated_players[:limit],
+        "total_new": len(new_players),
+        "total_updated": len(updated_players),
     }
 
 

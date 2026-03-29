@@ -1,3 +1,11 @@
+function rnd(v, wrap) {
+  if (typeof v !== "number") return v;
+  const display = Math.round(v);
+  const precise = v.toFixed(2);
+  if (wrap === false) return display;
+  return '<span title="' + precise + '" style="cursor:help">' + display + '</span>';
+}
+
 // Modal - detail joueur
 import { fetchJson } from "./api.js";
 import { esc } from "./utils.js";
@@ -21,6 +29,25 @@ export async function showPlayer(name, tranche, keepTab) {
   if (!overlay || !body) return;
 
   header.textContent = `${p.name} — Niv.${p.level} ${p.breedName}`;
+  const tsHtml = (() => {
+    if (!p.snapshot_timestamp) return "";
+    let ts = p.snapshot_timestamp;
+    try {
+      const d = new Date(ts);
+      if (!isNaN(d.getTime())) {
+        const now = new Date();
+        const diff = Math.floor((now - d) / 60000);
+        let ago = "";
+        if (diff < 60) ago = "il y a " + diff + " min";
+        else if (diff < 1440) ago = "il y a " + Math.floor(diff / 60) + "h";
+        else ago = "il y a " + Math.floor(diff / 1440) + "j";
+        ts = d.toLocaleDateString("fr-FR", {day:"2-digit",month:"short",year:"numeric"}) + " a " + d.toLocaleTimeString("fr-FR", {hour:"2-digit",minute:"2-digit"});
+        ago = " (" + ago + ")";
+        return '<div style="text-align:right;font-size:11px;color:var(--text-muted);margin-bottom:8px;opacity:.7"><span style="margin-right:4px">\u{1F4C5}</span>' + ts + ago + '</div>';
+      }
+    } catch(e) {}
+    return '<div style="text-align:right;font-size:11px;color:var(--text-muted);margin-bottom:8px;opacity:.7">' + ts + '</div>';
+  })();
 
   // Tranches buttons
   const tranchesHtml = p.available_tranches?.length ? `
@@ -35,9 +62,9 @@ export async function showPlayer(name, tranche, keepTab) {
 
   // Stats cards
   const statsHtml = `<div class="player-stats">
-    <div class="player-stat"><div class="ps-label">SCORE GLOBAL</div><div class="ps-value" style="color:var(--green)">${p.score_global}</div></div>
-    <div class="player-stat"><div class="ps-label">POIDS OFFENSIF</div><div class="ps-value" style="color:var(--accent)">${p.poids_offensif}</div></div>
-    <div class="player-stat"><div class="ps-label">POIDS DEFENSIF</div><div class="ps-value" style="color:var(--purple)">${p.poids_defensif}</div></div>
+    <div class="player-stat"><div class="ps-label">SCORE GLOBAL</div><div class="ps-value" style="color:var(--green)">${rnd(p.score_global)}</div></div>
+    <div class="player-stat"><div class="ps-label">POIDS OFFENSIF</div><div class="ps-value" style="color:var(--accent)">${rnd(p.poids_offensif)}</div></div>
+    <div class="player-stat"><div class="ps-label">POIDS DEFENSIF</div><div class="ps-value" style="color:var(--purple)">${rnd(p.poids_defensif)}</div></div>
     <div class="player-stat"><div class="ps-label">PV</div><div class="ps-value">${p.total_pv}</div></div>
     <div class="player-stat"><div class="ps-label">RESISTANCE</div><div class="ps-value">${p.total_res}</div></div>
     <div class="player-stat"><div class="ps-label">PA / PM / PO</div><div class="ps-value">${p.pa} / ${p.pm} / ${p.po}</div></div>
@@ -58,9 +85,9 @@ export async function showPlayer(name, tranche, keepTab) {
       <td>${iconImg}<span class="${rarCls}">${esc(e.name)}</span></td>
       <td class="num">${e.level}</td>
       <td class="${rarCls}">${esc(e.rarityName)}</td>
-      <td class="num high">${e.poids_off}</td>
-      <td class="num">${e.pv}</td>
-      <td class="num">${e.res}</td>
+      <td class="num high">${rnd(e.poids_off)}</td>
+      <td class="num">${rnd(e.pv)}</td>
+      <td class="num">${rnd(e.res)}</td>
       <td class="num">${e.pa}</td>
       <td class="num">${e.pm}</td>
     </tr>`;
@@ -125,7 +152,7 @@ export async function showPlayer(name, tranche, keepTab) {
     <div class="modal-tab ${activeTab === "spells" ? "active" : ""}" onclick="window.__switchModalTab('spells')">Sorts</div>
   </div>`;
 
-  body.innerHTML = tranchesHtml + statsHtml + guildHtml + tabsHtml + `
+  body.innerHTML = tsHtml + tranchesHtml + statsHtml + guildHtml + tabsHtml + `
     <div id="modalEquip" style="${activeTab !== "equip" ? "display:none" : ""}">
       <h3 style="font-size:14px;margin:16px 0 8px">EQUIPEMENT (${(p.equipment||[]).length} pieces) — ${p.viewing_tranche !== null ? "Tranche " + p.viewing_tranche : "Niveau actuel"}</h3>
       <table class="equip-table">
