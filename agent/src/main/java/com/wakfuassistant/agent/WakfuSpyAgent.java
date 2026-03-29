@@ -35,7 +35,7 @@ public class WakfuSpyAgent {
     // Fichiers de log (chemins absolus pour acces depuis l'advice inline)
     public static final String LOG_DIR = "H:\\Code\\Wakfuassistant\\agent\\logs";
     public static final String SPY_LOG = LOG_DIR + "\\wakfu_agent_spy.log";
-    public static final String MSG_LOG = LOG_DIR + "\\wakfu_messages.log";
+// DISABLED v3 - async only:     public static final String MSG_LOG = LOG_DIR + "\\wakfu_messages.log";
     public static final String HDV_LOG = LOG_DIR + "\\wakfu_hdv.log";
 
     // Stats globales
@@ -73,6 +73,19 @@ public class WakfuSpyAgent {
             installByteBuddy(inst);
             log("Byte Buddy V3.1 installe");
 
+            // --- Phase 2b: Netty ByteBuf Release (corrige fuite DirectByteBuffer) ---
+            new AgentBuilder.Default()
+                .disableClassFormatChanges()
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .type(ElementMatchers.named("aDj"))
+                .transform((builder, type, classLoader, module, protectionDomain) ->
+                    builder.visit(Advice.to(NettyReleaseAdvice.class)
+                        .on(ElementMatchers.named("channelRead0")))
+                )
+                .installOn(inst);
+            log("Phase 2b: NettyReleaseAdvice installe sur aDj.channelRead0");
+
+
             // --- Phase 3: Runtime scanner en background ---
             Thread scanner = new Thread(() -> runtimeScan(inst), "WakfuSpy-Scanner");
             scanner.setDaemon(true);
@@ -86,6 +99,10 @@ public class WakfuSpyAgent {
             // --- Phase 5: Heap Profiler ---
             HeapProfilerAdvice.start();
             log("Phase 5: Heap Profiler OK");
+
+            // --- Phase 6: Cache Booster ---
+            CacheBoosterAdvice.install(inst);
+            log("Phase 6: Cache Booster OK - anti micro-freeze");
         } catch (Throwable t) {
             log("ERREUR INIT: " + t.getMessage());
             t.printStackTrace();
@@ -576,14 +593,9 @@ log("[DESER] Hook as(byte[]) enregistre avec succes");
         }
     }
 
+    // v3: desactive - tout passe par ChannelReadAdvice async writer
     public static void logMessage(String line) {
-        synchronized (LOCK) {
-            try (FileWriter fw = new FileWriter(MSG_LOG, true)) {
-                fw.write(line + "\n");
-            } catch (IOException e) {
-                // fallback
-            }
-        }
+        // no-op
     }
 
     public static void logHdv(String line) {
