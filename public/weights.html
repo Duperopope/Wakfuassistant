@@ -1,0 +1,1442 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wakfu Weights</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface2: #242836;
+        --border: #2e3348;
+        --text: #e0e0e8;
+        --text2: #8890a8;
+        --accent: #5b8af5;
+        --accent2: #3d6ce0;
+        --green: #4ade80;
+        --red: #f87171;
+        --orange: #fbbf24;
+        --purple: #a78bfa;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1a1d27 0%, #242846 100%);
+        border-bottom: 1px solid var(--border);
+        padding: 20px 24px;
+      }
+      .header h1 {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .header h1 span {
+        color: var(--accent);
+      }
+      .header .subtitle {
+        color: var(--text2);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+
+      .stats-bar {
+        display: flex;
+        gap: 16px;
+        padding: 16px 24px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .stat-card {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 18px;
+        min-width: 140px;
+      }
+      .stat-card .label {
+        font-size: 11px;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .stat-card .value {
+        font-size: 22px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .stat-card .value.accent {
+        color: var(--accent);
+      }
+      .stat-card .value.green {
+        color: var(--green);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        padding: 0 24px;
+      }
+      .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text2);
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      .controls {
+        display: flex;
+        gap: 12px;
+        padding: 16px 24px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: var(--bg);
+      }
+      .controls input,
+      .controls select {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+      }
+      .controls input:focus,
+      .controls select:focus {
+        border-color: var(--accent);
+      }
+      .controls input {
+        width: 240px;
+      }
+      .controls select {
+        min-width: 110px;
+      }
+      .controls label {
+        font-size: 12px;
+        color: var(--text2);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .filter-label {
+        min-width: 24px;
+      }
+      .reset-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text2);
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .reset-btn:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
+      .reload-btn {
+        background: var(--accent2);
+        border: 1px solid var(--accent);
+        color: #fff;
+        padding: 8px 18px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .reload-btn:hover {
+        background: var(--accent);
+      }
+      .reload-btn:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+      .active-filters {
+        display: flex;
+        gap: 8px;
+        padding: 0 24px 8px;
+        flex-wrap: wrap;
+        min-height: 4px;
+      }
+      .filter-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--accent2);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .filter-tag .remove {
+        cursor: pointer;
+        opacity: 0.7;
+        margin-left: 2px;
+      }
+      .filter-tag .remove:hover {
+        opacity: 1;
+      }
+
+      .content {
+        padding: 0 24px 24px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      thead th {
+        text-align: left;
+        padding: 10px 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text2);
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+      }
+      thead th:hover {
+        color: var(--accent);
+      }
+      thead th.sorted {
+        color: var(--accent);
+      }
+      thead th.sorted::after {
+        content: " ▼";
+        font-size: 9px;
+      }
+      thead th.sorted.asc::after {
+        content: " ▲";
+      }
+      tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.1s;
+      }
+      tbody tr:hover {
+        background: var(--surface2);
+      }
+      tbody td {
+        padding: 10px 12px;
+        white-space: nowrap;
+      }
+      .rank {
+        color: var(--text2);
+        font-size: 12px;
+      }
+      .name-cell {
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .name-cell:hover {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+      .breed-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+      }
+      .guild-cell {
+        color: var(--text2);
+        font-size: 12px;
+      }
+      .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .num.high {
+        color: var(--green);
+        font-weight: 600;
+      }
+      .num.neg {
+        color: var(--red);
+      }
+
+      /* Modal détail joueur */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+      .modal-overlay.active {
+        display: flex;
+      }
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        max-width: 800px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-header h2 {
+        font-size: 18px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        color: var(--text2);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+      .modal-close:hover {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .modal-body {
+        padding: 20px 24px;
+      }
+
+      .player-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .player-stat {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 14px;
+      }
+      .player-stat .ps-label {
+        font-size: 11px;
+        color: var(--text2);
+        text-transform: uppercase;
+      }
+      .player-stat .ps-value {
+        font-size: 20px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      .tranche-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .tranche-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text2);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.15s;
+      }
+      .tranche-btn:hover {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+      .tranche-btn.active {
+        background: var(--accent2);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      .equip-table {
+        margin-top: 16px;
+      }
+      .equip-table th {
+        font-size: 11px;
+      }
+
+      .pagination {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        color: var(--text2);
+        font-size: 13px;
+      }
+      .pagination button {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .pagination button:hover {
+        border-color: var(--accent);
+      }
+      .pagination button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .rarity-0 {
+        color: #808080;
+      } /* Commun */
+      .rarity-1 {
+        color: #b0b0b0;
+      } /* Inhabituel */
+      .rarity-2 {
+        color: #4ade80;
+      } /* Rare */
+      .rarity-3 {
+        color: #f97316;
+      } /* Mythique */
+      .rarity-4 {
+        color: #fbbf24;
+      } /* Legendaire */
+      .rarity-5 {
+        color: #a855f7;
+      } /* Relique */
+      .rarity-6 {
+        color: #38bdf8;
+      } /* Souvenir */
+      .rarity-7 {
+        color: #e656ac;
+      } /* Epique */
+
+      /* Modal tabs */
+      .modal-tabs {
+        display: flex;
+        gap: 0;
+        margin: 16px 0 0;
+        border-bottom: 2px solid var(--border);
+      }
+      .modal-tab {
+        padding: 8px 20px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text2);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .modal-tab:hover {
+        color: var(--text);
+      }
+      .modal-tab.active {
+        color: var(--orange);
+        border-bottom-color: var(--orange);
+      }
+
+      /* Spell decks */
+      .spell-deck {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 12px 0;
+      }
+      .spell-deck-active {
+        border-color: var(--green);
+        box-shadow: 0 0 0 1px var(--green);
+      }
+      .spell-deck-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .spell-deck-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .spell-deck-level {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .spell-deck-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--green);
+        background: rgba(74, 222, 128, 0.12);
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .spell-section {
+        margin-top: 8px;
+      }
+      .spell-section-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+      }
+      .spell-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .spell-id {
+        display: inline-block;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 12px;
+        font-family: monospace;
+        color: var(--text);
+      }
+      .spell-id.passive {
+        border-color: var(--orange);
+        color: var(--orange);
+      }
+
+      /* Item & spell icons */
+      .item-icon {
+        width: 48px;
+        height: 48px;
+        vertical-align: middle;
+        margin-right: 8px;
+        border-radius: 6px;
+        image-rendering: pixelated;
+        object-fit: contain;
+      }
+      .item-id {
+        font-size: 10px;
+        color: var(--text2);
+        font-family: monospace;
+        margin-left: 4px;
+      }
+      .spell-icon {
+        width: 36px;
+        height: 36px;
+        vertical-align: middle;
+        margin-right: 6px;
+        border-radius: 4px;
+        image-rendering: pixelated;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <div>
+          <h1><span>Wakfu</span> Assistant</h1>
+          <div class="subtitle">
+            Classement des joueurs par poids d'equipement normalise &mdash; API:
+            <a href="/api/docs">/api/docs</a>
+          </div>
+        </div>
+        <button
+          class="reload-btn"
+          onclick="reloadData()"
+          title="Recharger les donnees depuis les fichiers"
+        >
+          Recharger les donnees
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="players" onclick="switchTab('players')">
+        Joueurs
+      </div>
+      <div class="tab" data-tab="guilds" onclick="switchTab('guilds')">
+        Guildes
+      </div>
+      <div class="tab" data-tab="classes" onclick="switchTab('classes')">
+        Classes
+      </div>
+    </div>
+
+    <div id="panel-players">
+      <div class="controls">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Rechercher joueur ou guilde..."
+          oninput="debounceSearch()"
+        />
+        <select id="breedFilter" onchange="resetAndLoad()">
+          <option value="">Toutes les classes</option>
+        </select>
+        <select id="levelRange" onchange="applyLevelRange()">
+          <option value="0-245">Tous les niveaux</option>
+          <option value="231-245">Endgame (231-245)</option>
+          <option value="245-245">Max (245)</option>
+          <option value="216-230">216-230</option>
+          <option value="201-215">201-215</option>
+          <option value="186-200">186-200</option>
+          <option value="171-185">171-185</option>
+          <option value="156-170">156-170</option>
+          <option value="141-155">141-155</option>
+          <option value="126-140">126-140</option>
+          <option value="111-125">111-125</option>
+          <option value="96-110">96-110</option>
+          <option value="81-95">81-95</option>
+          <option value="66-80">66-80</option>
+          <option value="51-65">51-65</option>
+          <option value="36-50">36-50</option>
+          <option value="21-35">21-35</option>
+          <option value="0-20">0-20</option>
+          <option value="custom">Personnalise...</option>
+        </select>
+        <label>
+          <span class="filter-label">Min</span>
+          <input
+            type="number"
+            id="minLevel"
+            value="0"
+            min="0"
+            max="245"
+            style="width: 60px"
+            onchange="
+              syncLevelPreset();
+              resetAndLoad();
+            "
+          />
+        </label>
+        <label>
+          <span class="filter-label">Max</span>
+          <input
+            type="number"
+            id="maxLevel"
+            value="245"
+            min="0"
+            max="245"
+            style="width: 60px"
+            onchange="
+              syncLevelPreset();
+              resetAndLoad();
+            "
+          />
+        </label>
+        <select id="guildFilter" onchange="resetAndLoad()">
+          <option value="">Toutes les guildes</option>
+        </select>
+        <select id="sortField" onchange="resetAndLoad()">
+          <option value="score_global">Score Global</option>
+          <option value="poids_offensif">Poids Offensif</option>
+          <option value="poids_defensif">Poids Defensif</option>
+          <option value="level">Niveau</option>
+          <option value="total_pv">PV</option>
+          <option value="total_res">Resistance</option>
+          <option value="coup_crit">Coup Critique</option>
+          <option value="tacle">Tacle</option>
+          <option value="esquive">Esquive</option>
+          <option value="pa">PA</option>
+          <option value="pm">PM</option>
+          <option value="nb_items">Nb items</option>
+        </select>
+        <select id="sortOrder" onchange="resetAndLoad()">
+          <option value="desc">Desc</option>
+          <option value="asc">Asc</option>
+        </select>
+        <button class="reset-btn" onclick="resetFilters()">Reset</button>
+      </div>
+      <div class="active-filters" id="activeFilters"></div>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Joueur</th>
+              <th>Niv</th>
+              <th>Classe</th>
+              <th>Guilde</th>
+              <th class="num">Score Global</th>
+              <th class="num">Poids Off</th>
+              <th class="num">Poids Def</th>
+              <th class="num">PV</th>
+              <th class="num">Res</th>
+              <th class="num">PA</th>
+              <th class="num">PM</th>
+              <th class="num">CC%</th>
+            </tr>
+          </thead>
+          <tbody id="playersBody"></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+    <div id="panel-guilds" style="display: none">
+      <div class="controls">
+        <label>
+          Membres min
+          <input
+            type="number"
+            id="guildMinMembers"
+            value="2"
+            min="1"
+            style="width: 70px"
+            onchange="loadGuilds()"
+          />
+        </label>
+      </div>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Guilde</th>
+              <th class="num">Membres</th>
+              <th class="num">Moy. Poids Off</th>
+              <th class="num">Max Poids Off</th>
+              <th class="num">Moy. Niveau</th>
+              <th class="num">Moy. Poids Def</th>
+              <th>Top Joueur</th>
+            </tr>
+          </thead>
+          <tbody id="guildsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panel-classes" style="display: none">
+      <div class="content" style="padding-top: 16px">
+        <table>
+          <thead>
+            <tr>
+              <th>Classe</th>
+              <th class="num">Joueurs</th>
+              <th class="num">Moy. Poids Off</th>
+              <th class="num">Max Poids Off</th>
+              <th class="num">Moy. Niveau</th>
+              <th>Top Joueur</th>
+            </tr>
+          </thead>
+          <tbody id="classesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div
+      class="modal-overlay"
+      id="playerModal"
+      onclick="if (event.target === this) closeModal();"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modalTitle"></h2>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <script>
+      const API = "";
+      let currentOffset = 0;
+      const PAGE_SIZE = 50;
+      let searchTimeout = null;
+
+      // Chargement initial
+      async function reloadData() {
+        const btn = document.querySelector(".reload-btn");
+        btn.disabled = true;
+        btn.textContent = "Chargement...";
+        try {
+          const res = await fetch("/api/reload", { method: "POST" });
+          const data = await res.json();
+          btn.textContent = `${data.total_players} joueurs charges`;
+
+          // Rafraichir les stats globales
+          const stats = await fetchJson("/api/stats");
+          window._stats = stats;
+          renderStats(stats);
+
+          // Rafraichir la liste courante sans reset les filtres
+          loadPlayers();
+          loadGuilds();
+
+          // Si un modal est ouvert, le re-fetch avec le meme joueur/tranche
+          if (
+            document
+              .getElementById("playerModal")
+              .classList.contains("active") &&
+            _currentModalPlayer
+          ) {
+            showPlayer(_currentModalPlayer, _currentViewingTranche);
+          }
+
+          setTimeout(() => {
+            btn.textContent = "Recharger les donnees";
+            btn.disabled = false;
+          }, 2000);
+        } catch (e) {
+          btn.textContent = "Erreur!";
+          btn.disabled = false;
+        }
+      }
+
+      // SSE live-update
+      let _sseReconnectDelay = 1000;
+      function _connectSSE() {
+        const es = new EventSource("/api/events");
+        es.addEventListener("reload", () => {
+          // Recharge silencieuse (pas de spinner)
+          _silentReload();
+        });
+        es.onopen = () => {
+          _sseReconnectDelay = 1000;
+        };
+        es.onerror = () => {
+          es.close();
+          setTimeout(_connectSSE, _sseReconnectDelay);
+          _sseReconnectDelay = Math.min(_sseReconnectDelay * 2, 30000);
+        };
+      }
+
+      let _reloading = false;
+      async function _silentReload() {
+        if (_reloading) return;
+        _reloading = true;
+        try {
+          const savedTab = _currentModalTab;
+          const stats = await fetchJson("/api/stats");
+          window._stats = stats;
+          renderStats(stats);
+          loadPlayers();
+          loadGuilds();
+          if (
+            document
+              .getElementById("playerModal")
+              .classList.contains("active") &&
+            _currentModalPlayer
+          ) {
+            await showPlayer(_currentModalPlayer, _currentViewingTranche, true);
+            switchModalTab(savedTab);
+          }
+        } catch (e) {
+        } finally {
+          _reloading = false;
+        }
+      }
+
+      async function init() {
+        const stats = await fetchJson("/api/stats");
+        window._stats = stats;
+        renderStats(stats);
+        populateBreedFilter(stats.classes);
+        populateGuildFilter();
+        loadPlayers();
+        loadGuilds();
+        loadClasses(stats.classes);
+        _connectSSE();
+      }
+
+      async function fetchJson(url) {
+        const res = await fetch(API + url);
+        return res.json();
+      }
+
+      function renderStats(s) {
+        document.getElementById("statsBar").innerHTML = `
+    <div class="stat-card"><div class="label">Joueurs</div><div class="value accent">${s.total_players}</div></div>
+    <div class="stat-card"><div class="label">Guildes</div><div class="value">${s.total_guilds}</div></div>
+    <div class="stat-card"><div class="label">Niveau moyen</div><div class="value">${s.avg_level}</div></div>
+    <div class="stat-card"><div class="label">Top Poids Off</div><div class="value green">${s.max_poids_offensif}</div></div>
+    <div class="stat-card"><div class="label">N1</div><div class="value accent">${s.top_player}</div></div>
+    <div class="stat-card"><div class="label">Moy. Poids Off</div><div class="value">${s.avg_poids_offensif}</div></div>
+  `;
+      }
+
+      function populateBreedFilter(classes) {
+        const sel = document.getElementById("breedFilter");
+        classes.sort((a, b) => a.breedName.localeCompare(b.breedName));
+        classes.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.breedName;
+          opt.textContent = `${c.breedName} (${c.count})`;
+          sel.appendChild(opt);
+        });
+      }
+
+      async function populateGuildFilter() {
+        const data = await fetchJson("/api/guilds?min_members=2&limit=500");
+        const sel = document.getElementById("guildFilter");
+        data.guilds.forEach((g) => {
+          const opt = document.createElement("option");
+          opt.value = g.guild_name;
+          opt.textContent = `${g.guild_name} (${g.nb_members})`;
+          sel.appendChild(opt);
+        });
+      }
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
+        ["players", "guilds", "classes"].forEach((p) => {
+          document.getElementById("panel-" + p).style.display =
+            p === tab ? "" : "none";
+        });
+      }
+
+      function applyLevelRange() {
+        const val = document.getElementById("levelRange").value;
+        if (val === "custom") return;
+        const [min, max] = val.split("-").map(Number);
+        document.getElementById("minLevel").value = min;
+        document.getElementById("maxLevel").value = max;
+        resetAndLoad();
+      }
+
+      function syncLevelPreset() {
+        const min = parseInt(document.getElementById("minLevel").value) || 0;
+        const max = parseInt(document.getElementById("maxLevel").value) || 245;
+        const sel = document.getElementById("levelRange");
+        const key = `${min}-${max}`;
+        // Chercher si un preset correspond
+        let found = false;
+        for (const opt of sel.options) {
+          if (opt.value === key) {
+            sel.value = key;
+            found = true;
+            break;
+          }
+        }
+        if (!found) sel.value = "custom";
+      }
+
+      function resetAndLoad() {
+        currentOffset = 0;
+        loadPlayers();
+        updateActiveFilters();
+      }
+
+      function resetFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("breedFilter").value = "";
+        document.getElementById("levelRange").value = "0-245";
+        document.getElementById("minLevel").value = "0";
+        document.getElementById("maxLevel").value = "245";
+        document.getElementById("guildFilter").value = "";
+        document.getElementById("sortField").value = "score_global";
+        document.getElementById("sortOrder").value = "desc";
+        resetAndLoad();
+      }
+
+      function updateActiveFilters() {
+        const tags = [];
+        const breed = document.getElementById("breedFilter").value;
+        const guild = document.getElementById("guildFilter").value;
+        const minLvl = parseInt(document.getElementById("minLevel").value) || 0;
+        const maxLvl =
+          parseInt(document.getElementById("maxLevel").value) || 245;
+        const sort =
+          document.getElementById("sortField").selectedOptions[0].textContent;
+        const order =
+          document.getElementById("sortOrder").value === "asc" ? "Asc" : "Desc";
+
+        if (breed)
+          tags.push({
+            label: `Classe: ${breed}`,
+            clear: () => {
+              document.getElementById("breedFilter").value = "";
+              resetAndLoad();
+            },
+          });
+        if (guild)
+          tags.push({
+            label: `Guilde: ${guild}`,
+            clear: () => {
+              document.getElementById("guildFilter").value = "";
+              resetAndLoad();
+            },
+          });
+        if (minLvl > 0 || maxLvl < 245)
+          tags.push({
+            label: `Niv. ${minLvl}-${maxLvl}`,
+            clear: () => {
+              document.getElementById("minLevel").value = "0";
+              document.getElementById("maxLevel").value = "245";
+              document.getElementById("levelRange").value = "0-999";
+              resetAndLoad();
+            },
+          });
+
+        const el = document.getElementById("activeFilters");
+        if (tags.length === 0) {
+          el.innerHTML = "";
+          return;
+        }
+        el.innerHTML = tags
+          .map(
+            (t, i) =>
+              `<span class="filter-tag">${t.label} <span class="remove" onclick="window._clearFilter(${i})">x</span></span>`,
+          )
+          .join("");
+        window._filterClears = tags.map((t) => t.clear);
+      }
+      window._clearFilter = (i) => {
+        if (window._filterClears && window._filterClears[i])
+          window._filterClears[i]();
+      };
+
+      // ── Joueurs ─────────────────────────────────────────────────
+
+      async function loadPlayers() {
+        const breed = document.getElementById("breedFilter").value;
+        const sort = document.getElementById("sortField").value;
+        const order = document.getElementById("sortOrder").value;
+        const minLvl = document.getElementById("minLevel").value;
+        const maxLvl = document.getElementById("maxLevel").value;
+        const guild = document.getElementById("guildFilter").value;
+        const search = document.getElementById("searchInput").value;
+
+        updateActiveFilters();
+
+        let url = `/api/players?sort=${sort}&order=${order}&limit=${PAGE_SIZE}&offset=${currentOffset}&min_level=${minLvl}&max_level=${maxLvl}`;
+        if (breed) url += `&breed=${encodeURIComponent(breed)}`;
+        if (guild) url += `&guild=${encodeURIComponent(guild)}`;
+        if (search.length >= 2) {
+          // Recherche combinee via l'API players avec filtre guild en texte
+          let searchUrl = `/api/players?sort=${sort}&order=${order}&limit=${PAGE_SIZE}&offset=0&min_level=${minLvl}&max_level=${maxLvl}`;
+          if (breed) searchUrl += `&breed=${encodeURIComponent(breed)}`;
+          // Tenter comme nom de guilde ET comme nom de joueur
+          const [byGuild, byName] = await Promise.all([
+            fetchJson(searchUrl + `&guild=${encodeURIComponent(search)}`),
+            fetchJson(`/api/search?q=${encodeURIComponent(search)}`),
+          ]);
+          // Fusionner sans doublons
+          const seen = new Set();
+          const merged = [];
+          for (const p of [...byName.players, ...byGuild.players]) {
+            if (!seen.has(p.name)) {
+              seen.add(p.name);
+              merged.push(p);
+            }
+          }
+          renderPlayerRows(merged, 0);
+          document.getElementById("pagination").innerHTML =
+            `<span>${merged.length} resultats</span>`;
+          return;
+        }
+
+        const data = await fetchJson(url);
+        renderPlayerRows(data.players, currentOffset);
+        renderPagination(data.total, data.offset, data.limit);
+      }
+
+      function renderPlayerRows(players, startOffset) {
+        const tbody = document.getElementById("playersBody");
+        tbody.innerHTML = players
+          .map(
+            (p, i) => `
+    <tr>
+      <td class="rank">${startOffset + i + 1}</td>
+      <td class="name-cell" data-player="${esc(p.name)}">${esc(p.name)}</td>
+      <td>${p.level}</td>
+      <td><span class="breed-badge">${p.breedName}</span></td>
+      <td class="guild-cell">${esc(p.guild_name) || "-"}</td>
+      <td class="num" style="color:var(--orange);font-weight:700">${p.score_global.toFixed(1)}</td>
+      <td class="num high">${p.poids_offensif.toFixed(1)}</td>
+      <td class="num">${p.poids_defensif.toFixed(1)}</td>
+      <td class="num">${p.total_pv}</td>
+      <td class="num">${p.total_res}</td>
+      <td class="num">${p.pa}</td>
+      <td class="num">${p.pm}</td>
+      <td class="num ${p.coup_crit < 0 ? "neg" : ""}">${p.coup_crit > 0 ? "+" : ""}${p.coup_crit}%</td>
+    </tr>
+  `,
+          )
+          .join("");
+      }
+
+      function renderPagination(total, offset, limit) {
+        const pages = Math.ceil(total / limit);
+        const current = Math.floor(offset / limit) + 1;
+        document.getElementById("pagination").innerHTML = `
+    <button ${offset === 0 ? "disabled" : ""} onclick="goPage(${offset - limit})">Precedent</button>
+    <span>Page ${current} / ${pages} (${total} joueurs)</span>
+    <button ${offset + limit >= total ? "disabled" : ""} onclick="goPage(${offset + limit})">Suivant</button>
+  `;
+      }
+
+      function goPage(newOffset) {
+        currentOffset = Math.max(0, newOffset);
+        loadPlayers();
+      }
+
+      function debounceSearch() {
+        clearTimeout(searchTimeout);
+        currentOffset = 0;
+        searchTimeout = setTimeout(loadPlayers, 300);
+      }
+
+      // ── Detail joueur ───────────────────────────────────────────
+
+      // Labels des tranches : borne basse → label lisible
+      const TRANCHE_LABELS = {
+        0: "0-20",
+        20: "21-35",
+        35: "36-50",
+        50: "51-65",
+        65: "66-80",
+        80: "81-95",
+        95: "96-110",
+        110: "111-125",
+        125: "126-140",
+        140: "141-155",
+        155: "156-170",
+        170: "171-185",
+        185: "186-200",
+        200: "201-215",
+        215: "216-230",
+        230: "231-245",
+      };
+
+      // État du modal joueur (pour reload sans perdre le contexte)
+      let _currentModalPlayer = "";
+      let _currentViewingTranche = null;
+      let _currentModalTab = "equip";
+
+      async function showPlayer(nameEncoded, tranche, keepTab) {
+        if (!keepTab) _currentModalTab = "equip";
+        _currentModalPlayer = nameEncoded;
+        _currentViewingTranche = tranche !== undefined ? tranche : null;
+        let url = `/api/players/${nameEncoded}`;
+        if (tranche !== undefined && tranche !== null)
+          url += `?tranche=${tranche}`;
+        let data;
+        try {
+          data = await fetchJson(url);
+        } catch (e) {
+          console.error("showPlayer fetch error:", e);
+          return;
+        }
+        if (data.error) {
+          console.error("showPlayer API error:", data.error);
+          return;
+        }
+
+        const viewingLabel =
+          data.viewing_tranche !== null
+            ? `Tranche ${TRANCHE_LABELS[data.viewing_tranche] || data.viewing_tranche}`
+            : "Niveau actuel";
+
+        document.getElementById("modalTitle").textContent =
+          `${data.name} — Niv.${data.level} ${data.breedName}`;
+
+        // Construire les onglets de tranche
+        let trancheTabs = "";
+        if (data.available_tranches && data.available_tranches.length > 0) {
+          const currentBtn = `<button class="tranche-btn ${data.viewing_tranche === null ? "active" : ""}"
+      data-tranche-player="${nameEncoded}" data-tranche-id="">Actuel (Niv.${data.level})</button>`;
+          const trancheBtns = data.available_tranches
+            .map(
+              (t) =>
+                `<button class="tranche-btn ${data.viewing_tranche === t ? "active" : ""}"
+        data-tranche-player="${nameEncoded}" data-tranche-id="${t}">${TRANCHE_LABELS[t] || t}</button>`,
+            )
+            .join("");
+          trancheTabs = `<div class="tranche-tabs">${currentBtn}${trancheBtns}</div>`;
+        }
+
+        const rarityNames = {
+          0: "Commun",
+          1: "Inhabituel",
+          2: "Rare",
+          3: "Mythique",
+          4: "Legendaire",
+          5: "Relique",
+          6: "Souvenir",
+          7: "Epique",
+        };
+
+        let equipRows = "";
+        if (data.equipment) {
+          equipRows = data.equipment
+            .map((e) => {
+              const iconUrl = e.gfx_id ? `/icons/items/${e.gfx_id}.png` : "";
+              const iconImg = iconUrl
+                ? `<img src="${iconUrl}" class="item-icon" onerror="this.style.display='none'" alt="">`
+                : "";
+              return `
+      <tr>
+        <td>${esc(e.slot_name)}</td>
+        <td class="rarity-${e.rarity}">${iconImg}${esc(e.name)}</td>
+        <td class="num">${e.level}</td>
+        <td><span class="rarity-${e.rarity}">${rarityNames[e.rarity] || e.rarity}</span></td>
+        <td class="num ${e.poids_off > 0 ? "high" : e.poids_off < 0 ? "neg" : ""}">${e.poids_off.toFixed(1)}</td>
+        <td class="num">${e.pv}</td>
+        <td class="num">${e.res}</td>
+        <td class="num">${e.pa}</td>
+        <td class="num">${e.pm}</td>
+      </tr>`;
+            })
+            .join("");
+        }
+
+        // Sorts
+        let spellsHtml =
+          '<div style="color:var(--text2);font-style:italic">Aucune donnee de sorts disponible</div>';
+        if (data.spells && data.spells.decks && data.spells.decks.length > 0) {
+          const activeDeckIdx = data.spells.active_deck || 0;
+          const builds = data.spells.builds || [];
+
+          spellsHtml = data.spells.decks
+            .map((deck) => {
+              const buildInfo = builds.find((b) => b.index === deck.index);
+              const buildName = buildInfo
+                ? buildInfo.name
+                : `Deck ${deck.index}`;
+              const isActive = deck.index === activeDeckIdx;
+              const levelLabel =
+                deck.level === -1 ? "Niv. reel" : `Niv. ${deck.level}`;
+
+              const renderSpell = (s, cls) => {
+                const id = typeof s === "object" ? s.id : s;
+                const name = typeof s === "object" && s.name ? s.name : "";
+                const gfxId = typeof s === "object" && s.gfxId ? s.gfxId : id;
+                const label = name || id;
+                const tooltip = name ? `${name} (ID: ${id})` : `Sort #${id}`;
+                return `<span class="spell-id ${cls}" title="${esc(tooltip)}"><img src="/icons/spells/${gfxId}.png" class="spell-icon" onerror="this.style.display='none'" alt="">${esc(String(label))}</span>`;
+              };
+              const activeSpells = deck.active_spells
+                .map((s) => renderSpell(s, ""))
+                .join("");
+              const passiveSpells = deck.passive_spells
+                .map((s) => renderSpell(s, "passive"))
+                .join("");
+
+              return `
+        <div class="spell-deck ${isActive ? "spell-deck-active" : ""}">
+          <div class="spell-deck-header">
+            <span class="spell-deck-name">${esc(buildName)}</span>
+            <span class="spell-deck-level">${levelLabel}</span>
+            ${isActive ? '<span class="spell-deck-badge">Actif</span>' : ""}
+          </div>
+          <div class="spell-section">
+            <div class="spell-section-label">Sorts actifs (${deck.active_spells.length})</div>
+            <div class="spell-list">${activeSpells || '<span style="color:var(--text2)">-</span>'}</div>
+          </div>
+          <div class="spell-section">
+            <div class="spell-section-label">Sorts passifs (${deck.passive_spells.length})</div>
+            <div class="spell-list">${passiveSpells || '<span style="color:var(--text2)">-</span>'}</div>
+          </div>
+        </div>
+      `;
+            })
+            .join("");
+        }
+
+        // Sorts observés en combat (source: crq hook)
+        const combatObs = data.spells && data.spells.combat_observed;
+        if (combatObs && combatObs.length > 0) {
+          const renderSpellCombat = (s) => {
+            const id = s.id,
+              name = s.name || "",
+              gfxId = s.gfxId || id;
+            const label = name || `#${id}`;
+            const tooltip = name ? `${name} (ID: ${id})` : `Sort #${id}`;
+            return `<span class="spell-id" title="${esc(tooltip)}"><img src="/icons/spells/${gfxId}.png" class="spell-icon" onerror="this.style.display='none'" alt="">${esc(label)}</span>`;
+          };
+          const combatSpellsHtml = combatObs.map(renderSpellCombat).join("");
+          spellsHtml =
+            `<div class="spell-deck spell-deck-active">
+      <div class="spell-deck-header">
+        <span class="spell-deck-name">⚔ Sorts observés en combat</span>
+        <span class="spell-deck-level">${combatObs.length} sorts</span>
+      </div>
+      <div class="spell-section">
+        <div class="spell-list">${combatSpellsHtml}</div>
+      </div>
+    </div>` + (spellsHtml.includes("Aucune") ? "" : spellsHtml);
+        }
+
+        document.getElementById("modalBody").innerHTML = `
+    ${trancheTabs}
+    <div class="player-stats">
+      <div class="player-stat"><div class="ps-label">Score Global</div><div class="ps-value" style="color:var(--orange)">${data.score_global.toFixed(1)}</div></div>
+      <div class="player-stat"><div class="ps-label">Poids Offensif</div><div class="ps-value" style="color:var(--green)">${data.poids_offensif.toFixed(1)}</div></div>
+      <div class="player-stat"><div class="ps-label">Poids Defensif</div><div class="ps-value">${data.poids_defensif.toFixed(1)}</div></div>
+      <div class="player-stat"><div class="ps-label">PV</div><div class="ps-value">${data.total_pv}</div></div>
+      <div class="player-stat"><div class="ps-label">Resistance</div><div class="ps-value">${data.total_res}</div></div>
+      <div class="player-stat"><div class="ps-label">PA / PM / PO</div><div class="ps-value">${data.pa} / ${data.pm} / ${data.po}</div></div>
+      <div class="player-stat"><div class="ps-label">Coup Critique</div><div class="ps-value">${data.coup_crit > 0 ? "+" : ""}${data.coup_crit}%</div></div>
+      <div class="player-stat"><div class="ps-label">Tacle / Esquive</div><div class="ps-value">${data.tacle} / ${data.esquive}</div></div>
+      <div class="player-stat"><div class="ps-label">Guilde</div><div class="ps-value" style="font-size:14px">${esc(data.guild_name) || "-"}</div></div>
+    </div>
+
+    <div class="modal-tabs">
+      <div class="modal-tab active" data-mtab="equip" onclick="switchModalTab('equip')">Equipement</div>
+      <div class="modal-tab" data-mtab="spells" onclick="switchModalTab('spells')">Sorts</div>
+    </div>
+
+    <div id="mtab-equip">
+      <h3 style="margin:12px 0;font-size:14px;color:var(--text2)">EQUIPEMENT (${data.nb_items} pieces) — ${viewingLabel}${data.snapshot_timestamp ? `<span style="font-size:11px;color:var(--text2);margin-left:10px;font-weight:normal">snapshot : ${data.snapshot_timestamp.replace("T", " ").substring(0, 16)}</span>` : ""}</h3>
+      <table class="equip-table">
+        <thead><tr>
+          <th>Slot</th><th>Item</th><th class="num">Niv</th><th>Rarete</th>
+          <th class="num">Poids Off</th><th class="num">PV</th><th class="num">Res</th>
+          <th class="num">PA</th><th class="num">PM</th>
+        </tr></thead>
+        <tbody>${equipRows}</tbody>
+      </table>
+    </div>
+
+    <div id="mtab-spells" style="display:none">
+      <h3 style="margin:12px 0;font-size:14px;color:var(--text2)">SORTS & BUILDS</h3>
+      ${spellsHtml}
+    </div>
+  `;
+
+        document.getElementById("playerModal").classList.add("active");
+        switchModalTab(_currentModalTab);
+      }
+
+      function switchModalTab(tab) {
+        _currentModalTab = tab;
+        document
+          .querySelectorAll(".modal-tab")
+          .forEach((t) => t.classList.toggle("active", t.dataset.mtab === tab));
+        document.getElementById("mtab-equip").style.display =
+          tab === "equip" ? "" : "none";
+        document.getElementById("mtab-spells").style.display =
+          tab === "spells" ? "" : "none";
+      }
+
+      function closeModal() {
+        document.getElementById("playerModal").classList.remove("active");
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
+
+      // Event delegation pour les clics sur les noms de joueurs et boutons de tranche
+      document.addEventListener("click", (e) => {
+        const cell = e.target.closest(".name-cell[data-player]");
+        if (cell) {
+          showPlayer(encodeURIComponent(cell.dataset.player));
+          return;
+        }
+        const tbtn = e.target.closest(".tranche-btn[data-tranche-player]");
+        if (tbtn) {
+          const tid = tbtn.dataset.trancheId;
+          showPlayer(
+            tbtn.dataset.tranchePlayer,
+            tid !== "" ? parseInt(tid) : undefined,
+          );
+        }
+      });
+
+      // ── Guildes ─────────────────────────────────────────────────
+
+      async function loadGuilds() {
+        const minM = document.getElementById("guildMinMembers").value;
+        const data = await fetchJson(
+          `/api/guilds?min_members=${minM}&limit=200`,
+        );
+        const tbody = document.getElementById("guildsBody");
+        tbody.innerHTML = data.guilds
+          .map(
+            (g, i) => `
+    <tr>
+      <td class="rank">${i + 1}</td>
+      <td style="font-weight:600">${esc(g.guild_name)}</td>
+      <td class="num">${g.nb_members}</td>
+      <td class="num high">${g.avg_poids_offensif}</td>
+      <td class="num">${g.max_poids_offensif}</td>
+      <td class="num">${g.avg_level}</td>
+      <td class="num">${g.avg_poids_defensif}</td>
+      <td class="name-cell" data-player="${esc(g.top_player)}">${esc(g.top_player)}</td>
+    </tr>
+  `,
+          )
+          .join("");
+      }
+
+      // ── Classes ─────────────────────────────────────────────────
+
+      function loadClasses(classes) {
+        const tbody = document.getElementById("classesBody");
+        const sorted = [...classes].sort(
+          (a, b) => b.avg_poids_offensif - a.avg_poids_offensif,
+        );
+        tbody.innerHTML = sorted
+          .map(
+            (c) => `
+    <tr>
+      <td><span class="breed-badge">${c.breedName}</span></td>
+      <td class="num">${c.count}</td>
+      <td class="num high">${c.avg_poids_offensif}</td>
+      <td class="num">${c.max_poids_offensif}</td>
+      <td class="num">${c.avg_level}</td>
+      <td class="name-cell" data-player="${esc(c.top_player)}">${esc(c.top_player)}</td>
+    </tr>
+  `,
+          )
+          .join("");
+      }
+
+      function esc(s) {
+        if (!s) return "";
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      init();
+    </script>
+  </body>
+</html>

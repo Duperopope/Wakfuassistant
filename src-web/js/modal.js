@@ -1,0 +1,160 @@
+// Modal - detail joueur
+import { fetchJson } from "./api.js";
+import { esc } from "./utils.js";
+import { getState, setState } from "./state.js";
+
+const RARITY_CLASSES = {0:"rarity-0",1:"rarity-1",2:"rarity-2",3:"rarity-3",4:"rarity-4",5:"rarity-5",6:"rarity-6",7:"rarity-7"};
+
+export async function showPlayer(name, tranche, keepTab) {
+  let url = `/api/players/${encodeURIComponent(name)}`;
+  if (tranche !== null && tranche !== undefined) url += `?tranche=${tranche}`;
+  const p = await fetchJson(url);
+  if (p.error) return;
+
+  const modal = getState().modal;
+  const activeTab = keepTab ? modal.activeTab : "equip";
+  setState({ modal: { open: true, playerName: name, tranche: tranche, activeTab } });
+
+  const overlay = document.getElementById("modalOverlay");
+  const header = document.querySelector(".modal-header h2");
+  const body = document.getElementById("modalBody");
+  if (!overlay || !body) return;
+
+  header.textContent = `${p.name} — Niv.${p.level} ${p.breedName}`;
+
+  // Tranches buttons
+  const tranchesHtml = p.available_tranches?.length ? `
+    <div class="tranche-tabs">
+      <div class="tranche-btn ${p.viewing_tranche === null ? "active" : ""}" 
+           onclick="window.__showPlayer('${esc(p.name)}', null)">Actuel (Niv.${p.level})</div>
+      ${p.available_tranches.map(t => `
+        <div class="tranche-btn ${p.viewing_tranche === t ? "active" : ""}"
+             onclick="window.__showPlayer('${esc(p.name)}', ${t}, true)">${t}-${t+15}</div>
+      `).join("")}
+    </div>` : "";
+
+  // Stats cards
+  const statsHtml = `<div class="player-stats">
+    <div class="player-stat"><div class="ps-label">SCORE GLOBAL</div><div class="ps-value" style="color:var(--green)">${p.score_global}</div></div>
+    <div class="player-stat"><div class="ps-label">POIDS OFFENSIF</div><div class="ps-value" style="color:var(--accent)">${p.poids_offensif}</div></div>
+    <div class="player-stat"><div class="ps-label">POIDS DEFENSIF</div><div class="ps-value" style="color:var(--purple)">${p.poids_defensif}</div></div>
+    <div class="player-stat"><div class="ps-label">PV</div><div class="ps-value">${p.total_pv}</div></div>
+    <div class="player-stat"><div class="ps-label">RESISTANCE</div><div class="ps-value">${p.total_res}</div></div>
+    <div class="player-stat"><div class="ps-label">PA / PM / PO</div><div class="ps-value">${p.pa} / ${p.pm} / ${p.po}</div></div>
+    <div class="player-stat"><div class="ps-label">COUP CRITIQUE</div><div class="ps-value">+${p.coup_crit}%</div></div>
+    <div class="player-stat"><div class="ps-label">TACLE / ESQUIVE</div><div class="ps-value">${p.tacle} / ${p.esquive}</div></div>
+  </div>`;
+
+  // Guild
+  const guildHtml = p.guild_name ? `<div style="margin-bottom:12px"><span style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:13px"><b>GUILDE</b> ${esc(p.guild_name)}</span></div>` : "";
+
+  // Equipment table
+  const equipHtml = (p.equipment || []).map(e => {
+    const rarCls = RARITY_CLASSES[e.rarity] || "";
+    const iconUrl = e.gfx_id ? `/icons/items/${e.gfx_id}.png` : "";
+    const iconImg = iconUrl ? `<img src="${iconUrl}" class="item-icon" onerror="this.style.display='none'" alt="">` : "";
+    return `<tr>
+      <td>${esc(e.slot)}</td>
+      <td>${iconImg}<span class="${rarCls}">${esc(e.name)}</span></td>
+      <td class="num">${e.level}</td>
+      <td class="${rarCls}">${esc(e.rarityName)}</td>
+      <td class="num high">${e.poids_off}</td>
+      <td class="num">${e.pv}</td>
+      <td class="num">${e.res}</td>
+      <td class="num">${e.pa}</td>
+      <td class="num">${e.pm}</td>
+    </tr>`;
+  }).join("");
+
+  // Spells
+  const spells = p.spells || {};
+  const decks = spells.decks || [];
+  const builds = spells.builds || [];
+  const activeDeck = spells.active_deck || 0;
+  const combatObserved = spells.combat_observed || [];
+
+  const renderSpell = (s, cls) => {
+    const gfxId = s.gfxId || s.gfx_id || 0;
+    const name = s.name || "";
+    const tooltip = name ? `${name} (ID: ${s.id})` : `Spell ID: ${s.id}`;
+    return `<span class="spell-id ${cls}" title="${esc(tooltip)}"><img src="/icons/spells/${gfxId}.png" class="spell-icon" onerror="this.style.display='none'" alt="">${name || s.id}</span>`;
+  };
+
+  const renderSpellCombat = (s) => {
+    const gfxId = s.gfxId || s.gfx_id || 0;
+    const name = s.name || "";
+    const tooltip = name ? `${name} (ID: ${s.id}) — vu en combat` : `Spell ID: ${s.id} — vu en combat`;
+    return `<span class="spell-id" title="${esc(tooltip)}"><img src="/icons/spells/${gfxId}.png" class="spell-icon" onerror="this.style.display='none'" alt="">${name || s.id}</span>`;
+  };
+
+  let spellsHtml = "";
+  if (decks.length) {
+    spellsHtml = decks.map(deck => {
+      const isActive = deck.index === activeDeck;
+      const buildInfo = builds.find(b => b.index === deck.index);
+      const deckName = buildInfo?.name || `Deck ${deck.index}`;
+      const deckLevel = buildInfo?.level || "";
+      return `<div class="spell-deck ${isActive ? "spell-deck-active" : ""}">
+        <div class="spell-deck-header">
+          <span class="spell-deck-name">${esc(deckName)}</span>
+          ${deckLevel ? `<span class="spell-deck-level">Niv. ${deckLevel}</span>` : ""}
+          ${isActive ? '<span class="spell-deck-badge">ACTIF</span>' : ""}
+        </div>
+        <div class="spell-section">
+          <div class="spell-section-label">Sorts actifs</div>
+          <div class="spell-list">${(deck.active_spells || []).map(s => renderSpell(s, "")).join("")}</div>
+        </div>
+        <div class="spell-section">
+          <div class="spell-section-label">Passifs</div>
+          <div class="spell-list">${(deck.passive_spells || []).map(s => renderSpell(s, "passive")).join("")}</div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  if (combatObserved.length) {
+    spellsHtml += `<div class="spell-deck">
+      <div class="spell-deck-header"><span class="spell-deck-name">Sorts observes en combat</span></div>
+      <div class="spell-list">${combatObserved.map(s => renderSpellCombat(s)).join("")}</div>
+    </div>`;
+  }
+
+  // Modal tabs
+  const tabsHtml = `<div class="modal-tabs">
+    <div class="modal-tab ${activeTab === "equip" ? "active" : ""}" onclick="window.__switchModalTab('equip')">Equipement</div>
+    <div class="modal-tab ${activeTab === "spells" ? "active" : ""}" onclick="window.__switchModalTab('spells')">Sorts</div>
+  </div>`;
+
+  body.innerHTML = tranchesHtml + statsHtml + guildHtml + tabsHtml + `
+    <div id="modalEquip" style="${activeTab !== "equip" ? "display:none" : ""}">
+      <h3 style="font-size:14px;margin:16px 0 8px">EQUIPEMENT (${(p.equipment||[]).length} pieces) — ${p.viewing_tranche !== null ? "Tranche " + p.viewing_tranche : "Niveau actuel"}</h3>
+      <table class="equip-table">
+        <thead><tr><th>SLOT</th><th>ITEM</th><th>NIV</th><th>RARETE</th><th>POIDS OFF</th><th>PV</th><th>RES</th><th>PA</th><th>PM</th></tr></thead>
+        <tbody>${equipHtml}</tbody>
+      </table>
+    </div>
+    <div id="modalSpells" style="${activeTab !== "spells" ? "display:none" : ""}">
+      ${spellsHtml || '<p style="color:var(--text2);padding:20px">Aucune donnee de sorts disponible</p>'}
+    </div>`;
+
+  overlay.classList.add("active");
+}
+
+export function switchModalTab(tab) {
+  setState({ modal: { ...getState().modal, activeTab: tab } });
+  document.querySelectorAll(".modal-tab").forEach(el => el.classList.toggle("active", el.dataset.mtab === tab));
+  const equipDiv = document.getElementById("modalEquip");
+  const spellsDiv = document.getElementById("modalSpells");
+  if (equipDiv) equipDiv.style.display = tab === "equip" ? "" : "none";
+  if (spellsDiv) spellsDiv.style.display = tab === "spells" ? "" : "none";
+}
+
+export function closeModal() {
+  setState({ modal: { open: false, playerName: null, tranche: null, activeTab: "equip" } });
+  document.getElementById("modalOverlay")?.classList.remove("active");
+}
+
+// Expose
+window.__showPlayer = showPlayer;
+window.__switchModalTab = switchModalTab;
+window.__closeModal = closeModal;
