@@ -714,5 +714,54 @@ def main():
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 
+
+# ============================================================
+# Routes Build Optimizer (donnees Sram)
+# ============================================================
+import json as _json
+
+_BUILD_DATA_DIR = Path(__file__).resolve().parent.parent / "build-generator" / "data"
+
+@app.get("/api/build/spells")
+async def api_build_spells():
+    p = _BUILD_DATA_DIR / "sram-spells.json"
+    if not p.exists():
+        return []
+    with open(p, "r", encoding="utf-8") as f:
+        return _json.load(f)
+
+@app.get("/api/build/passives")
+async def api_build_passives():
+    p = _BUILD_DATA_DIR / "sram-passives.json"
+    if not p.exists():
+        return []
+    with open(p, "r", encoding="utf-8") as f:
+        return _json.load(f)
+
+@app.get("/api/build/sublimations")
+async def api_build_sublimations():
+    p = _BUILD_DATA_DIR / "sram-sublimations.json"
+    if not p.exists():
+        return []
+    with open(p, "r", encoding="utf-8") as f:
+        return _json.load(f)
+
+@app.get("/api/build/base-stats")
+async def api_build_base_stats():
+    p = _BUILD_DATA_DIR / "sram-base-stats.json"
+    if not p.exists():
+        return {}
+    with open(p, "r", encoding="utf-8") as f:
+        return _json.load(f)
+
+@app.get("/api/build/formulas")
+async def api_build_formulas():
+    p = _BUILD_DATA_DIR / "formulas.json"
+    if not p.exists():
+        return {}
+    with open(p, "r", encoding="utf-8") as f:
+        return _json.load(f)
+
+
 if __name__ == "__main__":
     main()

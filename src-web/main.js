@@ -8,6 +8,10 @@ import { loadGuilds } from "./js/tabs/guilds.js";
 import { loadClasses } from "./js/tabs/classes.js";
 import { loadCdn, populateCdnFilters } from "./js/tabs/cdn.js";
 import { showPlayer, closeModal } from "./js/modal.js";
+import "./css/builds.css";
+import { loadEquipment } from "./js/tabs/equipment.js";
+import { loadOptimizer } from "./js/tabs/optimizer.js";
+import { loadSpellsEditor } from "./js/tabs/spells.js";
 
 // ─── Onglets principaux ───
 function switchTab(tab) {
@@ -184,4 +188,47 @@ document.addEventListener("DOMContentLoaded", () => {
 // Vite HMR
 if (import.meta.hot) {
   import.meta.hot.accept();
+}
+
+
+// === BUILDS SUB-TABS ===
+let buildsLoaded = { equipment: false, optimizer: false, spells: false };
+
+function initBuildsSubtabs() {
+  document.querySelectorAll("[data-builds-sub]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sub = btn.dataset.buildsSub;
+      // Active tab
+      document.querySelectorAll("[data-builds-sub]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      // Show content
+      document.querySelectorAll("[data-builds-content]").forEach(el => el.style.display = "none");
+      const content = document.querySelector('[data-builds-content="' + sub + '"]');
+      if (content) content.style.display = "block";
+      // Lazy load
+      loadBuildsTab(sub);
+    });
+  });
+}
+
+async function loadBuildsTab(tab) {
+  if (buildsLoaded[tab]) return;
+  buildsLoaded[tab] = true;
+  if (tab === "equipment") {
+    await loadEquipment(document.getElementById("equipment-container"));
+  } else if (tab === "optimizer") {
+    await loadOptimizer(document.getElementById("optimizer-container"));
+  } else if (tab === "spells") {
+    await loadSpellsEditor(document.getElementById("spells-container"));
+  }
+}
+
+// Charger equipment par defaut quand on ouvre Builds
+const origSwitchTab = typeof switchTab === "function" ? switchTab : null;
+
+// Init builds subtabs au chargement
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { initBuildsSubtabs(); loadBuildsTab('equipment'); });
+} else {
+  initBuildsSubtabs(); loadBuildsTab('equipment');
 }
