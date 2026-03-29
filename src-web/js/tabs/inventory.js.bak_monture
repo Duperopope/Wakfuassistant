@@ -6,21 +6,20 @@
 // ============================================================
 
 const SLOT_LAYOUT = [
-  { id: "Casque",           col: "left",  icon: "casque" },
-  { id: "Epaulettes",       col: "left",  icon: "epaulettes" },
-  { id: "Amulette",         col: "left",  icon: "amulette" },
-  { id: "Plastron",         col: "left",  icon: "plastron" },
-  { id: "Anneau 1",         col: "left",  icon: "anneau" },
-  { id: "Ceinture",         col: "left",  icon: "ceinture" },
-  { id: "Cape",             col: "left",  icon: "cape" },
-  { id: "Anneau 2",         col: "right", icon: "anneau" },
-  { id: "Bottes",           col: "right", icon: "bottes" },
-  { id: "Arme principale",  col: "right", icon: "arme" },
-  { id: "Seconde main",     col: "right", icon: "secondemain" },
-  { id: "Accessoire",       col: "right", icon: "accessoire" },
-  { id: "Familier",         col: "right", icon: "familier" },
-  { id: "Monture",          col: "right", icon: "monture" },
-  { id: "Embleme",          col: "right", icon: "embleme" },
+  { id: "Casque",           col: "left",  icon: "\u{1F3A9}" },
+  { id: "Epaulettes",       col: "left",  icon: "\u{1F9BE}" },
+  { id: "Amulette",         col: "left",  icon: "\u{1F4FF}" },
+  { id: "Plastron",         col: "left",  icon: "\u{1F6E1}" },
+  { id: "Anneau 1",         col: "left",  icon: "\u{1F48D}" },
+  { id: "Ceinture",         col: "left",  icon: "\u{1F310}" },
+  { id: "Cape",             col: "left",  icon: "\u{1F9E3}" },
+  { id: "Anneau 2",         col: "right", icon: "\u{1F48D}" },
+  { id: "Bottes",           col: "right", icon: "\u{1F462}" },
+  { id: "Arme principale",  col: "right", icon: "\u{2694}" },
+  { id: "Seconde main",     col: "right", icon: "\u{1F6E1}" },
+  { id: "Accessoire",       col: "right", icon: "\u{2728}" },
+  { id: "Familier",         col: "right", icon: "\u{1F43E}" },
+  { id: "Embleme",          col: "right", icon: "\u{1F3F4}" },
 ];
 
 const RARITY_CLASS = {
@@ -97,16 +96,20 @@ function renderArmory(data) {
 }
 
 function renderSlotCard(slot, items) {
-  if (!items || items.length === 0) return '';
   var html = '<div class="arm-slot-card">';
   html += '<div class="arm-slot-header">';
-  html += '<img src="/icons/slots/' + slot.icon + '.png?v=1774810874" class="arm-slot-icon" style="width:24px;height:24px;vertical-align:middle;margin-right:6px" onerror="this.style.display=\'none\'" alt="">';
+  html += '<span class="arm-slot-emoji">' + slot.icon + '</span>';
   html += '<span class="arm-slot-name">' + esc(slot.id) + '</span>';
   if (items.length > 0) {
     html += '<span class="arm-slot-count">' + items[0].carriers + ' porteurs</span>';
   }
   html += '</div>';
 
+  if (!items.length) {
+    html += '<div class="arm-empty">Aucun item</div>';
+    html += '</div>';
+    return html;
+  }
 
   // Top 3 items pour ce slot
   items.slice(0, 3).forEach(function(it, i) {

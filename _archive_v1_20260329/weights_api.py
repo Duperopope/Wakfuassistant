@@ -1009,6 +1009,7 @@ async def api_inventory(breed: str = "", top: int = 0, min_level: int = 0, max_l
                 "typeId": bp.get("itemTypeId", 0),
                 "rarity": bp.get("rarity", 0),
                 "setId": bp.get("itemSetId", 0),
+                "gfx_id": item_def.get("graphicParameters", {}).get("gfxId", 0),
             }
     except Exception as e:
         return {"error": "CDN: " + str(e)}
@@ -1096,6 +1097,7 @@ async def api_inventory(breed: str = "", top: int = 0, min_level: int = 0, max_l
             "popularity_pct": round(d["carriers"] / max(scanned, 1) * 100, 1),
             "top_breed": top_breed,
             "carrier_names": sorted(d["carrier_names"], key=lambda x: x["score"], reverse=True),
+            "gfx_id": cdn.get("gfx_id", 0),
         })
 
     # Best in slot (trie par avg_score des porteurs)
@@ -1106,7 +1108,7 @@ async def api_inventory(breed: str = "", top: int = 0, min_level: int = 0, max_l
             bis[s] = []
         bis[s].append(r)
     for s in bis:
-        bis[s].sort(key=lambda x: x["avg_score"], reverse=True)
+        bis[s].sort(key=lambda x: (x["carriers"], x["avg_score"]), reverse=True)
         bis[s] = bis[s][:10]
 
     # Stats par rarete
