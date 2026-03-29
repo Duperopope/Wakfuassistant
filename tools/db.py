@@ -128,7 +128,7 @@ class WakfuDB:
             where.append("name LIKE ?")
             params.append("%%%s%%" % search)
 
-        sql = "SELECT COUNT(*) FROM players WHERE breed_name NOT LIKE 'BreedId_%%' WHERE %s" % " AND ".join(where)
+        sql = "SELECT COUNT(*) FROM players WHERE %s" % " AND ".join(where)
         return self._conn().execute(sql, params).fetchone()[0]
 
     def get_player(self, name: str) -> dict | None:
@@ -534,7 +534,7 @@ class WakfuDB:
                    offset: int = 0) -> list[dict]:
         """Recherche dans le CDN."""
         where = ["1=1"]
-        params = ["BreedId_%"]
+        params = []
         if query:
             where.append("name_fr LIKE ?")
             params.append("%%%s%%" % query)
