@@ -346,15 +346,10 @@ def charger_donnees():
 
 
 # --- Wakfu Command Center: routes unifiees ---
-import sys
-sys.path.insert(0, r"H:\Code\Wakfuassistant\tools")
-from patch_unified_api import register_unified_routes, register_ui_route
-
-# --- Auth & Security ---
-import sys
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from auth import verify_api_key, register_auth_routes
 from patch_unified_api import register_unified_routes, register_ui_route
+from auth import verify as verify_api_key, register as register_auth_routes
 
 app = FastAPI(
     title="Wakfu Weights API",
@@ -648,16 +643,25 @@ ICONS_DIR = Path(__file__).resolve().parent.parent / "rnd" / "data" / "icons"
 
 @app.get("/icons/{category}/{icon_id}.png")
 def serve_icon(category: str, icon_id: str):
-    """Sert les icônes d'items et sorts depuis les fichiers PNG extraits."""
+    """Sert les icones d'items et sorts depuis les fichiers PNG extraits."""
     if category not in ("items", "spells"):
-        return JSONResponse({"error": "Catégorie invalide"}, status_code=404)
-    path = ICONS_DIR / category / f"{icon_id}.png"
-    if not path.exists():
-        return JSONResponse({"error": "Icône introuvable"}, status_code=404)
-    return FileResponse(path, media_type="image/png")
+        return JSONResponse({"error": "Categorie invalide"}, status_code=404)
+    icon_path = ICONS_DIR / category / f"{icon_id}.png"
+    if not icon_path.exists():
+        return JSONResponse({"error": "Icone introuvable"}, status_code=404)
+    return FileResponse(icon_path, media_type="image/png")
 
-
-# ─── Interface web ───────────────────────────────────────────────────
+def serve_icon(category: str, icon_id: str):
+    """Redirige vers le CDN Ankama pour les icones."""
+    from starlette.responses import RedirectResponse
+    CDN = {
+        "items": f"https://static.ankama.com/wakfu/portal/game/item/115/{icon_id}.png",
+        "spells": f"https://static.ankama.com/wakfu/portal/game/spell/115/{icon_id}.png",
+    }
+    url = CDN.get(category)
+    if url:
+        return RedirectResponse(url)
+    return JSONResponse({"error": "Categorie invalide"}, status_code=404)
 
 @app.get("/", response_class=HTMLResponse)
 def ui():
@@ -875,9 +879,9 @@ tbody td { padding: 10px 12px; white-space: nowrap; }
 .spell-id.passive { border-color: var(--orange); color: var(--orange); }
 
 /* Item & spell icons */
-.item-icon { width: 32px; height: 32px; vertical-align: middle; margin-right: 6px; border-radius: 4px; image-rendering: pixelated; }
+.item-icon { width: 48px; height: 48px; vertical-align: middle; margin-right: 8px; border-radius: 6px; image-rendering: pixelated; object-fit: contain; }
 .item-id { font-size: 10px; color: var(--text2); font-family: monospace; margin-left: 4px; }
-.spell-icon { width: 24px; height: 24px; vertical-align: middle; margin-right: 4px; border-radius: 3px; image-rendering: pixelated; }
+.spell-icon { width: 36px; height: 36px; vertical-align: middle; margin-right: 6px; border-radius: 4px; image-rendering: pixelated; object-fit: contain; }
 </style>
 </head>
 <body>

@@ -1,7 +1,7 @@
-\"\"\"
+"""
 Wakfu Command Center - Routes unifiees
 Build + CDN + Market endpoints pour weights_api.py
-\"\"\"
+"""
 import json, os, sqlite3, re
 from fastapi import Query
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -90,7 +90,7 @@ def _get_db():
 
 
 def register_unified_routes(app):
-    \"\"\"Enregistre les routes /api/build, /api/cdn, /api/market sur l app FastAPI.\"\"\"
+    """Enregistre les routes /api/build, /api/cdn, /api/market sur l app FastAPI."""
     _load_cdn()
     
     # ==================== BUILD ====================
@@ -215,8 +215,8 @@ def register_unified_routes(app):
         db = _get_db()
         total = db.execute('SELECT COUNT(*) as c FROM market_latest').fetchone()['c']
         obs = db.execute('SELECT COUNT(*) as c FROM market_observations').fetchone()['c']
-        sells = db.execute(\"SELECT COUNT(*) as c FROM market_latest WHERE side='sell'\").fetchone()['c']
-        buys = db.execute(\"SELECT COUNT(*) as c FROM market_latest WHERE side='buy'\").fetchone()['c']
+        sells = db.execute("SELECT COUNT(*) as c FROM market_latest WHERE side='sell'").fetchone()['c']
+        buys = db.execute("SELECT COUNT(*) as c FROM market_latest WHERE side='buy'").fetchone()['c']
         unique = db.execute('SELECT COUNT(DISTINCT item_ref_id) as c FROM market_latest').fetchone()['c']
         latest = db.execute('SELECT MAX(updated_at) as m FROM market_latest').fetchone()['m']
         
@@ -234,7 +234,7 @@ def register_unified_routes(app):
     @app.get('/api/market/history/{item_id}')
     def api_market_history(item_id: int, days: int = 30):
         db = _get_db()
-        rows = db.execute(\"SELECT * FROM market_observations WHERE item_ref_id = ? AND source_ts >= datetime('now', ? || ' days') ORDER BY source_ts DESC LIMIT 500\", [item_id, f'-{days}']).fetchall()
+        rows = db.execute("SELECT * FROM market_observations WHERE item_ref_id = ? AND source_ts >= datetime('now', ? || ' days') ORDER BY source_ts DESC LIMIT 500", [item_id, f'-{days}']).fetchall()
         cdn = _cdn_by_id.get(item_id, {})
         history = [dict(r) for r in rows]
         db.close()
@@ -244,7 +244,7 @@ def register_unified_routes(app):
 
 
 def register_ui_route(app):
-    \"\"\"Route /ui pour le Command Center HTML.\"\"\"
+    """Route /ui pour le Command Center HTML."""
     @app.get('/ui', response_class=HTMLResponse)
     def command_center_ui():
         with open(UI_PATH, 'r', encoding='utf-8-sig') as f:
