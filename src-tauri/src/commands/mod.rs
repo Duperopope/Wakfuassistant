@@ -4,3 +4,4 @@ pub mod pipeline;
 pub mod session;
 pub mod cdn_commands;
 pub mod hdv_commands;
+pub mod patrimoine_commands;

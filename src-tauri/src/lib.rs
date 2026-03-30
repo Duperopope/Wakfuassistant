@@ -103,10 +103,13 @@ pub fn run() {
             // Log (original)
             commands::log_commands::set_verbose_logging,
             commands::log_commands::bridge_log,
-            // HDV — marché
+            // HDV — marché v2
             commands::hdv_commands::get_hdv_stats,
-            commands::hdv_commands::search_hdv_prices,
-            commands::hdv_commands::get_item_offers,
+            commands::hdv_commands::search_hdv_items,
+            commands::hdv_commands::get_item_detail,
+            // Patrimoine
+            commands::patrimoine_commands::get_patrimoine_summary,
+            commands::patrimoine_commands::get_patrimoine_items,
         ])
         .run(tauri::generate_context!())
         .expect("Erreur au lancement de Wakfu Overlay");

@@ -1,56 +1,48 @@
-import type { Component } from "solid-js";
-import { session } from "../../stores/sessionStore";
+/**
+ * EconomyTab.tsx — Hub Économie + Patrimoine + Marché HDV
+ */
+import { Component, createSignal, Switch, Match } from "solid-js";
 
-const fmt = (n: number): string => new Intl.NumberFormat("fr-FR").format(n);
+import SessionView from "../economy/SessionView";
+import PatrimoineView from "../economy/PatrimoineView";
+import MarketView from "../economy/MarketView";
+
+type SubTab = "session" | "patrimoine" | "market";
+
+const SUB_TABS: { id: SubTab; label: string; icon: string }[] = [
+  { id: "session",    label: "Session",    icon: "💰" },
+  { id: "patrimoine", label: "Patrimoine", icon: "📦" },
+  { id: "market",     label: "Marché",     icon: "🏪" },
+];
 
 const EconomyTab: Component = () => {
-  const delta = () =>
-    session.kamasGainedSession - session.kamasSpentSession;
-  const deltaColor = () =>
-    delta() >= 0 ? "text-victory-green" : "text-defeat-red";
+  const [activeSubTab, setActiveSubTab] = createSignal<SubTab>("patrimoine");
 
   return (
-    <div class="flex flex-col h-full p-4 space-y-3">
-      {/* Titre */}
-      <div class="text-sm font-bold text-text-primary">Économie</div>
-
-      {/* Vue globale */}
-      <div class="space-y-2 bg-overlay-surface rounded p-3">
-        <div class="flex justify-between text-xs">
-          <span class="text-text-muted">Gains</span>
-          <span class="font-mono text-victory-green">+{fmt(session.kamasGainedSession)}</span>
-        </div>
-        <div class="flex justify-between text-xs">
-          <span class="text-text-muted">Dépenses</span>
-          <span class="font-mono text-defeat-red">-{fmt(session.kamasSpentSession)}</span>
-        </div>
-        <div class="border-t border-overlay-border pt-2 mt-2 flex justify-between text-xs font-bold">
-          <span class="text-text-primary">Net</span>
-          <span class={`font-mono ${deltaColor()}`}>
-            {delta() >= 0 ? "+" : ""}{fmt(delta())}
-          </span>
-        </div>
+    <div class="flex flex-col h-full">
+      {/* Sub-tab bar */}
+      <div class="flex border-b border-overlay-border px-2 pt-2">
+        {SUB_TABS.map((tab) => (
+          <button
+            onClick={() => setActiveSubTab(tab.id)}
+            class={`flex-1 text-center text-[11px] py-1.5 transition-all border-b-2 ${
+              activeSubTab() === tab.id
+                ? "border-accent text-accent font-semibold"
+                : "border-transparent text-text-muted hover:text-text-primary"
+            }`}
+          >
+            {tab.icon} {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Ratio */}
-      {session.kamasGainedSession > 0 && (
-        <div class="text-xs text-text-muted text-center">
-          Ratio : {((session.kamasSpentSession / session.kamasGainedSession) * 100).toFixed(1)}% dépenses
-        </div>
-      )}
-
-      {/* Balance actuelle */}
-      <div class="bg-overlay-surface rounded p-3">
-        <div class="text-[10px] text-text-muted mb-1">Balance kamas</div>
-        <div class="font-mono text-lg text-kamas">
-          {fmt(session.kamasBalance)}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div class="flex-1" />
-      <div class="text-[10px] text-text-muted italic">
-        Données de la session en cours
+      {/* Content */}
+      <div class="flex-1 overflow-y-auto p-3">
+        <Switch fallback={<PatrimoineView />}>
+          <Match when={activeSubTab() === "session"}><SessionView /></Match>
+          <Match when={activeSubTab() === "patrimoine"}><PatrimoineView /></Match>
+          <Match when={activeSubTab() === "market"}><MarketView /></Match>
+        </Switch>
       </div>
     </div>
   );
