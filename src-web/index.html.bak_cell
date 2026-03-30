@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/builds.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wakfu Command Center</title>
+  <script type="module" src="/main.js"></script>
+
+<style>
+/* ===== WAKFU TOOLTIP - Module:Infobox item dark ===== */
+.wk-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 99999;
+  width: 310px;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: white;
+  background: rgb(84, 84, 84);
+  pointer-events: auto;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+  border: 3px solid var(--wk-rarity-color, #b2b2b2);
+}
+.wk-inner {
+  padding: 4px 0;
+}
+.wk-rarity-tag {
+  line-height: 1.4;
+  font-size: 14px;
+  padding: 0px 6px;
+  border-radius: 3px;
+  width: fit-content;
+  margin: 6px 0 0 10px;
+  border: 2px solid rgba(63, 63, 63, 0.9);
+  font-weight: 500;
+}
+.wk-name {
+  font-size: 20px;
+  margin: 0 10px;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  font-weight: 450;
+}
+.wk-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 0 10px 8px 10px;
+}
+.wk-info-left {
+  display: flex;
+}
+.wk-img-wrap {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  justify-content: start;
+}
+.wk-img-inner {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 7px;
+  border: 2.5px solid rgba(0, 0, 0, 0.2);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wk-img-inner img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+.wk-sub {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+  justify-content: flex-end;
+}
+.wk-type {
+  margin-top: 1em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+.wk-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+}
+.wk-header {
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  font-weight: 300;
+  text-align: center;
+  padding: 4px 0;
+  color: #f0c050;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.wk-section {
+  border-top: 2px rgba(92, 92, 92, 1) solid;
+  border-bottom: 2px rgba(92, 92, 92, 1) solid;
+}
+.wk-section-inner {
+  border-top: 2px solid rgba(63, 63, 63, 0.96);
+  border-bottom: 2px solid rgba(63, 63, 63, 0.96);
+}
+.wk-row {
+  padding: 2px 12px;
+  line-height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.wk-row img {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+.wk-desc {
+  font-style: italic;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ddd;
+}
+.wk-loading {
+  padding: 20px;
+  text-align: center;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* ============================================================
+   PERSONNAGE - Paper Doll Layout
+   Source: Wakfu in-game inventory layout
+   ============================================================ */
+
+/* Recherche */
+.char-search-bar {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.char-search-bar input {
+  flex: 1;
+  background: var(--surface2, #1e1e2e);
+  border: 1px solid var(--border, #333);
+  color: var(--text, #e0e0e0);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+.char-search-bar input:focus {
+  border-color: var(--accent, #4a9eff);
+}
+.char-search-bar button {
+  background: var(--accent, #4a9eff);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity .2s;
+}
+.char-search-bar button:hover { opacity: .85; }
+
+.char-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 80px;
+  background: var(--surface2, #1e1e2e);
+  border: 1px solid var(--border, #444);
+  border-radius: 8px;
+  z-index: 100;
+  max-height: 320px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.char-search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border, #333);
+  transition: background .15s;
+}
+.char-search-item:hover { background: var(--surface, #252535); }
+.char-search-item:last-child { border-bottom: none; }
+.char-search-name { font-weight: 600; }
+.char-search-meta { font-size: 12px; color: var(--text-muted, #888); display: flex; gap: 8px; }
+
+/* Empty state */
+.char-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted, #888);
+}
+.char-empty-icon { font-size: 48px; margin-bottom: 16px; }
+.char-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted, #888);
+  font-size: 14px;
+}
+
+/* Header joueur */
+.char-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--surface2, #1a1a2e);
+  border-radius: 12px;
+  border: 1px solid var(--border, #333);
+}
+.char-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.char-avatar-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.char-breed-icon {
+  font-size: 24px;
+  font-weight: 800;
+  opacity: .7;
+}
+.char-identity { flex: 1; }
+.char-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text, #e0e0e0);
+}
+.char-subtitle {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.char-breed { font-weight: 600; }
+.char-level { color: var(--text-muted, #aaa); }
+.char-guild {
+  background: var(--surface, #252535);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-muted, #aaa);
+}
+.char-score-badge {
+  text-align: center;
+  padding: 8px 16px;
+  background: var(--surface, #252535);
+  border-radius: 10px;
+  border: 1px solid var(--border, #333);
+}
+.char-score-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--green, #4ade80);
+}
+.char-score-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+  letter-spacing: 1px;
+}
+
+/* Stats bar */
+.char-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--surface2, #1a1a2e);
+  border-radius: 10px;
+  border: 1px solid var(--border, #333);
+}
+.char-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--surface, #252535);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.cs-icon {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.cs-val {
+  font-weight: 600;
+  color: var(--text, #e0e0e0);
+}
+
+/* Paper Doll */
+.char-paperdoll {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+  min-height: 400px;
+}
+.pd-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pd-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pd-avatar-frame {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid;
+  overflow: hidden;
+}
+.pd-avatar-bg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pd-avatar-letter {
+  font-size: 32px;
+  font-weight: 900;
+  opacity: .4;
+}
+
+/* Slots */
+.pd-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface2, #1a1a2e);
+  border-radius: 8px;
+  border: 1px solid var(--border, #333);
+  min-height: 48px;
+  transition: border-color .2s, background .2s;
+}
+.pd-slot:hover {
+  border-color: var(--accent, #4a9eff);
+  background: var(--surface, #252535);
+}
+.pd-slot-empty {
+  opacity: .5;
+}
+.pd-slot-filled {
+  opacity: 1;
+}
+.pd-slot-icon-wrap {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--surface, #252535);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pd-has-item {
+  background: rgba(0,0,0,.3);
+}
+.pd-slot-icon, .pd-item-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+.pd-slot-label {
+  font-size: 12px;
+  color: var(--text-muted, #666);
+}
+.pd-slot-info {
+  flex: 1;
+  min-width: 0;
+}
+.pd-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-item-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  margin-top: 2px;
+}
+
+/* Spells */
+.char-spells-section {
+  margin-top: 8px;
+}
+.char-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted, #aaa);
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border, #333);
+}
+.char-spell-deck {
+  background: var(--surface2, #1a1a2e);
+  border: 1px solid var(--border, #333);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.char-spell-deck.active {
+  border-color: var(--accent, #4a9eff);
+}
+.char-deck-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.char-deck-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+.char-deck-badge {
+  background: var(--accent, #4a9eff);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.char-spell-group { margin-bottom: 8px; }
+.char-spell-label {
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+}
+.char-spell-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.char-spell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface, #252535);
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: default;
+}
+.char-spell img {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+}
+.char-spell.passive {
+  border-color: #555;
+  opacity: .8;
+}
+.char-spell-name {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .char-paperdoll {
+    grid-template-columns: 1fr;
+  }
+  .pd-center { display: none; }
+  .char-stats-bar { gap: 4px; }
+  .char-stat { padding: 3px 6px; font-size: 11px; }
+}
+
+</style>
+<style>
+/* === WAKFU TOOLTIP v3 === Source: Module:Infobox item dark (wiki.gg) === */
+.wk-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 99999;
+  width: 310px;
+  border: 3px solid #b2b2b2;
+  border-radius: 0;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.wk-inner {
+  padding: 4px 0;
+}
+.wk-rarity-tag {
+  line-height: 1.4;
+  font-size: 14px;
+  padding: 0px 6px;
+  border-radius: 3px;
+  width: fit-content;
+  margin: 6px 0 0 10px;
+  border: 2px solid rgba(63,63,63,0.9);
+  font-weight: 500;
+}
+.wk-name {
+  font-size: 20px;
+  margin: 0 10px;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  font-weight: 450;
+}
+.wk-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 0 10px 8px 10px;
+}
+.wk-info-left {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+}
+.wk-img-wrap {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 7px;
+  border: 2.5px solid rgba(0,0,0,0.2);
+  display: grid;
+  place-items: center;
+  width: 60px; height: 60px;
+}
+.wk-img-wrap img {
+  width: 56px; height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.wk-type-line {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  color: #ccc;
+  margin-top: 1em;
+}
+.wk-type-icon {
+  width: 20px; height: 20px;
+}
+.wk-level-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.wk-level-label { font-size: 12px; color: #aaa; }
+.wk-level-num   { font-size: 18px; font-weight: bold; }
+.wk-section-title {
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
+  font-weight: 300;
+  text-align: center;
+  margin-top: 4px;
+}
+.wk-section-border {
+  border-top: 2px rgba(92,92,92,1) solid;
+  border-bottom: 2px rgba(92,92,92,1) solid;
+}
+.wk-section-inner {
+  border-top: 2px solid rgba(63,63,63,0.96);
+  border-bottom: 2px solid rgba(63,63,63,0.96);
+}
+.wk-row {
+  padding: 2px 12px;
+  line-height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+.wk-stat-icon {
+  width: 18px; height: 18px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.wk-desc {
+  font-style: italic;
+  padding: 2px 10px;
+  color: #ccc;
+  font-size: 12px;
+  margin-top: 4px;
+}
+/* === FIN WAKFU TOOLTIP v3 === */
+
+/* ── GRIDS CSS v3 ────────────────────────────────────────── */
+
+/* Global states */
+.gc-loading, .gc-error { text-align:center; padding:40px 20px; color:#aaa; font-size:16px; }
+.gc-error { color:#ff6666; }
+
+/* Player header */
+.inv-player-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 20px; margin-bottom:16px;
+    background:linear-gradient(135deg,rgba(30,30,40,.9),rgba(50,50,65,.9));
+    border:1px solid rgba(255,255,255,.1); border-radius:12px;
+    flex-wrap:wrap; gap:12px;
+}
+.inv-player-name { margin:0; font-size:22px; color:#fff; }
+.inv-player-detail { color:#aaa; font-size:14px; margin-left:10px; }
+.inv-player-stats { display:flex; gap:12px; flex-wrap:wrap; }
+.inv-stat {
+    background:rgba(255,255,255,.06); padding:4px 12px;
+    border-radius:8px; font-size:13px; color:#ddd;
+}
+
+/* ── Grid section ── */
+.gg { margin-bottom:22px; }
+.gg__head {
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:6px 10px; margin-bottom:6px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
+.gg__title { margin:0; font-size:15px; color:#eee; font-weight:600; }
+.gg__badge {
+    font-size:12px; color:#888; font-weight:400;
+    background:rgba(255,255,255,.06); padding:2px 8px; border-radius:6px; margin-left:8px;
+}
+.gg__sub { font-size:11px; color:#777; }
+.gg__cells {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap:5px; padding:2px;
+}
+.gg__empty {
+    grid-column:1/-1; text-align:center; padding:28px;
+    color:#555; font-style:italic; font-size:13px;
+}
+
+/* ── Cell ── */
+.gc {
+    position:relative; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    aspect-ratio:1; background:rgba(18,18,26,.9);
+    border:2px solid rgba(100,100,100,.3); border-radius:7px;
+    cursor:pointer; transition:transform .12s, box-shadow .12s;
+    overflow:hidden;
+}
+.gc:hover { transform:scale(1.1); box-shadow:0 0 16px rgba(255,255,255,.12); z-index:2; }
+.gc--empty {
+    border-style:dashed; border-color:rgba(60,60,60,.4); cursor:default;
+}
+.gc--empty:hover { transform:none; box-shadow:none; }
+.gc__ph { color:#333; font-size:20px; }
+
+/* Rarity */
+.gc--common    { border-color:#c0c0c0; }
+.gc--unusual   { border-color:#ffffff; }
+.gc--rare      { border-color:#22b069; }
+.gc--mythic    { border-color:#ff8c19; }
+.gc--legendary { border-color:#ffee00; }
+.gc--relic     { border-color:#ff55ff; }
+.gc--souvenir  { border-color:#66ccff; }
+.gc--epic      { border-color:#ff6600; }
+
+/* Icon area */
+.gc__icon-area {
+    display:flex; align-items:center; justify-content:center;
+    width:68%; height:68%;
+}
+.gc__img {
+    max-width:100%; max-height:100%; object-fit:contain;
+    image-rendering:pixelated; filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));
+}
+.gc__fb {
+    display:flex; align-items:center; justify-content:center;
+    width:100%; height:100%; font-size:10px; color:#666;
+    text-transform:uppercase; letter-spacing:.5px;
+}
+
+/* Badges */
+.gc__lvl {
+    position:absolute; top:2px; left:2px;
+    background:rgba(0,0,0,.75); color:#fff;
+    font-size:9px; padding:1px 4px; border-radius:3px; font-weight:700;
+}
+.gc__qty {
+    position:absolute; top:2px; right:2px;
+    background:rgba(0,0,0,.75); color:#ffcc00;
+    font-size:9px; padding:1px 4px; border-radius:3px; font-weight:700;
+}
+.gc__name {
+    position:absolute; bottom:0; left:0; right:0;
+    text-align:center; font-size:7px; color:#bbb;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    padding:1px 2px; background:rgba(0,0,0,.65);
+    line-height:1.2;
+}
+
+/* Gems */
+.gc__gems {
+    position:absolute; bottom:12px; left:2px;
+    display:flex; gap:2px;
+}
+.gc__gem-dot {
+    width:6px; height:6px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.2);
+}
+.gc__ench {
+    position:absolute; bottom:12px; right:2px;
+    font-size:10px; color:#ffdd44;
+}
+
+/* ── Patrimoine ── */
+.pat {
+    padding:14px 18px; margin-top:12px;
+    background:linear-gradient(135deg,rgba(22,22,32,.9),rgba(38,38,52,.9));
+    border:1px solid rgba(255,255,255,.06); border-radius:12px;
+}
+.pat__title { margin:0 0 8px; font-size:14px; color:#ddd; }
+.pat__row { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:#aaa; }
+.pat__tag { background:rgba(255,255,255,.05); padding:4px 10px; border-radius:6px; }
+.pat__tag strong { color:#fff; }
+.pat__total { color:#ffcc00; }
+.pat__total strong { color:#ffcc00; }
+.pat__ts { margin-top:6px; font-size:10px; color:#555; display:flex; gap:16px; }
+
+/* Responsive */
+@media(max-width:600px) {
+    .gg__cells { grid-template-columns:repeat(auto-fill,minmax(60px,1fr)); }
+    .inv-player-header { flex-direction:column; }
+}
+
+/* ── FIN GRIDS CSS v3 ────────────────────────────────────── */
+
+
+/* ── Build extras ── */
+.gc__slot {
+    position:absolute; top:2px; right:2px;
+    font-size:7px; color:#999; background:rgba(0,0,0,.6);
+    padding:1px 3px; border-radius:2px; max-width:50%;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.gc__owned {
+    position:absolute; top:2px; left:2px;
+    font-size:10px; color:#2ecc71;
+    text-shadow:0 0 3px #2ecc71;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h1><span>Wakfu</span> Command Center</h1>
+      <div class="subtitle">Classement &bull; Builds &bull; HDV Market &bull; CDN</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="reload-btn" id="reloadBtn">Recharger</button>
+      <a href="/api/docs" style="font-size:12px;color:var(--text2)">/api/docs</a>
+    </div>
+  </div>
+</div>
+
+<!-- Onglets principaux -->
+<div class="tabs">
+  <div class="tab active" data-tab="classement">Classement</div>
+  <div class="tab" data-tab="hdv">HDV Market</div>
+  <div class="tab" data-tab="cdn">Personnage</div>
+</div>
+
+<!-- ═══════ CLASSEMENT ═══════ -->
+<div class="tab-content" data-content="classement">
+  <div class="stats-bar" id="statsBar"></div>
+  <!-- Sous-onglets -->
+  <div class="subtabs">
+    <div class="subtab active" data-subtab="players">Joueurs</div>
+    <div class="subtab" data-subtab="guilds">Guildes</div>
+    <div class="subtab" data-subtab="classes">Classes</div>
+      <div class="subtab" data-subtab="recent">Recents</div>
+        <div class="subtab" data-subtab="inventory">Armurerie</div>
+  </div>
+
+  <!-- Joueurs -->
+  <div class="subtab-content" data-subcontent="players">
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Rechercher un joueur...">
+      <select id="breedFilter"><option value="">Toutes les classes</option></select>
+      <select id="guildFilter"><option value="">Toutes les guildes</option></select>
+      <label><span class="filter-label">Niv.</span>
+        <input type="number" id="minLevel" value="0" min="0" max="245" style="width:60px">
+        <span>-</span>
+        <input type="number" id="maxLevel" value="245" min="0" max="245" style="width:60px">
+      </label>
+    </div>
+    <div class="content">
+      <table>
+        <thead><tr>
+          <th>#</th>
+          <th data-sort="name">NOM</th>
+          <th data-sort="level">NIV</th>
+          <th>CLASSE</th>
+          <th>GUILDE</th>
+          <th data-sort="score_global">SCORE</th>
+          <th data-sort="poids_offensif">OFF</th>
+          <th data-sort="poids_defensif">DEF</th>
+          <th data-sort="total_pv">PV</th>
+          <th data-sort="total_res">RES</th>
+          <th data-sort="pa">PA</th>
+          <th data-sort="pm">PM</th>
+        </tr></thead>
+        <tbody id="playersTbody"></tbody>
+      </table>
+      <div class="pagination" id="playersPagination"></div>
+    </div>
+  </div>
+
+  <!-- Guildes -->
+  <div class="subtab-content" data-subcontent="guilds" style="display:none">
+    <div id="guildsTableContainer" class="guild-table"></div>
+  </div>
+
+  <!-- Classes -->
+  <div class="subtab-content" data-subcontent="recent" style="display:none">
+    <div class="recent-toolbar">
+      <div class="recent-filters">
+        <input type="text" id="recentSearchName" placeholder="Nom du joueur..." class="recent-input" style="width:180px">
+        <input type="text" id="recentSearchGuild" placeholder="Guilde..." class="recent-input" style="width:150px">
+        <select id="recentSearchClass" class="recent-input" style="width:140px">
+          <option value="">Toutes classes</option>
+        </select>
+        <div class="recent-range">
+          <span style="font-size:11px;color:var(--text-muted)">Niv.</span>
+          <input type="number" id="recentMinLevel" placeholder="0" value="0" class="recent-input" style="width:55px;text-align:center" min="0" max="245">
+          <span style="font-size:11px;color:var(--text-muted)">-</span>
+          <input type="number" id="recentMaxLevel" placeholder="245" value="245" class="recent-input" style="width:55px;text-align:center" min="0" max="245">
+        </div>
+        <div class="recent-range">
+          <span style="font-size:11px;color:var(--text-muted)">Score min</span>
+          <input type="number" id="recentMinScore" placeholder="0" class="recent-input" style="width:70px;text-align:center" min="0">
+        </div>
+      </div>
+      <div class="recent-tabs" style="display:flex;gap:8px">
+      <div class="recent-btn active" data-recent="new" style="padding:6px 16px;border-radius:6px;cursor:pointer;background:var(--accent);color:#fff;font-size:13px;font-weight:600">Nouveaux joueurs</div>
+      <div class="recent-btn" data-recent="updated" style="padding:6px 16px;border-radius:6px;cursor:pointer;background:var(--card);color:var(--text-muted);font-size:13px;font-weight:600;border:1px solid var(--border)">Mis a jour</div>
+    </div>
+    </div>
+    <div id="recentNewList" class="recent-list"></div>
+    <div id="recentUpdatedList" class="recent-list" style="display:none"></div>
+  </div>
+
+  <div class="subtab-content" data-subcontent="classes" style="display:none">
+    <div class="classes-dashboard">
+      <div class="classes-layout">
+        <div class="classes-left">
+          <div class="chart-card">
+            <div class="chart-title" id="classesDonutTitle">Repartition des classes</div>
+            <div id="classesDonut" class="donut-container"></div>
+          </div>
+        </div>
+        <div class="classes-right">
+          <div class="chart-card">
+            <div id="classesChartSwitcher" class="chart-switcher">
+              <button class="chart-switch-btn" data-mode="level">Niveau moyen</button>
+              <button class="chart-switch-btn" data-mode="offense">Puissance offensive</button>
+              <button class="chart-switch-btn active" data-mode="count">Nombre de joueurs</button>
+            </div>
+            <div id="classesUnifiedChart" class="unified-chart"></div>
+          </div>
+        </div>
+      </div>
+      <table id="classesTable" class="data-table">
+          <thead><tr>
+            <th>#</th>
+            <th data-sort="breedName">CLASSE</th>
+            <th data-sort="count">JOUEURS</th>
+            <th data-sort="avg_poids_offensif">MOY. OFF</th>
+            <th data-sort="avg_level">MOY. NIV</th>
+            <th data-sort="max_poids_offensif">MAX OFF</th>
+            <th>TOP JOUEUR</th>
+          </tr></thead>
+          <tbody id="classesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+      <div class="subtab-content" data-subcontent="inventory" style="display:none">
+      <div class="arm-topbar">
+        <select id="invBreedFilter" class="arm-select">
+          <option value="">Toutes les classes</option>
+        </select>
+        <select id="invTopFilter" class="arm-select">
+          <option value="0">Tous les joueurs</option>
+          <option value="50">Top 50</option>
+          <option value="100">Top 100</option>
+          <option value="200">Top 200</option>
+        </select>
+        <div class="arm-level-filter">
+          <label>Niveau</label>
+          <select id="invLevelMin" class="arm-select arm-select-sm">
+            <option value="0">Min</option>
+            <option value="21">21</option>
+            <option value="36">36</option>
+            <option value="51">51</option>
+            <option value="66">66</option>
+            <option value="81">81</option>
+            <option value="96">96</option>
+            <option value="111">111</option>
+            <option value="126">126</option>
+            <option value="141">141</option>
+            <option value="156">156</option>
+            <option value="171">171</option>
+            <option value="186">186</option>
+            <option value="201">201</option>
+            <option value="216">216</option>
+            <option value="230">230</option>
+            <option value="245">245</option></select>
+          <span class="arm-level-sep">-</span>
+          <select id="invLevelMax" class="arm-select arm-select-sm">
+            <option value="999">Max</option>
+            <option value="21">21</option>
+            <option value="36">36</option>
+            <option value="51">51</option>
+            <option value="66">66</option>
+            <option value="81">81</option>
+            <option value="96">96</option>
+            <option value="111">111</option>
+            <option value="126">126</option>
+            <option value="141">141</option>
+            <option value="156">156</option>
+            <option value="171">171</option>
+            <option value="186">186</option>
+            <option value="201">201</option>
+            <option value="216">216</option>
+            <option value="230">230</option>
+            <option value="245">245</option></select>
+        </div>
+      </div>
+      <div id="invContent"></div>
+    </div>
+          
+  </div>
+</div>
+
+<!-- ═══════ BUILDS ═══════ -->
+<div class="tab-content" data-content="builds" style="display:none">
+  <div class="content" style="padding:24px">
+    <div class="placeholder-box">
+      <h3>Build Generator</h3>
+      <p>Optimiseur de builds SRAM DPS Melee — bientot integre</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ HDV MARKET ═══════ -->
+<div class="tab-content" data-content="hdv" style="display:none">
+  <div class="content" style="padding:24px">
+    <div class="placeholder-box">
+      <h3>HDV Market</h3>
+      <p>82 918 offres capturees — en attente de decodage protobuf</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CDN ITEMS ═══════ -->
+<!-- ======= PERSONNAGE ======= -->
+<div class="tab-content" data-content="cdn" style="display:none">
+            <div id="ficheContent" style="width:100%;min-height:200px;"></div>
+
+
+  <!-- Sous-onglets Personnage -->
+  <div class="subtabs perso-subtabs">
+    <div class="subtab active" data-perso-sub="fiche">Fiche</div>
+    <div class="subtab" data-perso-sub="builder">Builder</div>
+    <div class="subtab" data-perso-sub="optimizer">Optimiseur</div>
+    <div class="subtab" data-perso-sub="spells">Sorts</div>
+  </div>
+
+  <!-- Fiche Personnage (paper doll) -->
+  <div class="perso-panel" data-perso-content="fiche" id="persoFichePanel">
+    <div id="charContainer">
+      <!-- Rempli dynamiquement par character.js -->
+    </div>
+  </div>
+
+  <!-- Builder (ancien equipment.js) -->
+  <div class="perso-panel" data-perso-content="builder" style="display:none">
+    <div id="equipment-container" style="padding:16px">
+      <div class="placeholder-box">
+        <h3>Build Generator</h3>
+        <p>Chargement...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optimiseur -->
+  <div class="perso-panel" data-perso-content="optimizer" style="display:none">
+    <div id="optimizer-container" style="padding:16px">
+      <div class="placeholder-box">
+        <h3>Optimiseur</h3>
+        <p>Chargement...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sorts Editor -->
+  <div class="perso-panel" data-perso-content="spells" style="display:none">
+    <div id="spells-container" style="padding:16px">
+      <div class="placeholder-box">
+        <h3>Editeur de Sorts</h3>
+        <p>Chargement...</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Player detail modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2></h2>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+</body>
+</html>

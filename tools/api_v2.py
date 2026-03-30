@@ -53,7 +53,7 @@ from db import WakfuDB
 BASE_DIR = Path(__file__).resolve().parent.parent
 PLAYERS_DIR = BASE_DIR / "logs" / "players"
 DB_PATH = BASE_DIR / "logs" / "wakfu.db"
-ICONS_DIR = BASE_DIR / "rnd" / "data" / "icons"
+ICONS_DIR = BASE_DIR / "src-web" / "icons"
 WEB_DIR = BASE_DIR / "src-web"
 ITEMS_JSON = BASE_DIR / "rnd" / "data" / "cdn_items.json"
 COOLDOWN = 5  # secondes entre reloads
@@ -699,6 +699,7 @@ async def serve_spa():
 
 # Static files (CSS, JS)
 from starlette.staticfiles import StaticFiles
+app.mount("/icons", StaticFiles(directory=str(WEB_DIR / "icons")), name="icons")
 app.mount("/css", StaticFiles(directory=str(WEB_DIR / "css")), name="css")
 app.mount("/js", StaticFiles(directory=str(WEB_DIR / "js")), name="js")
 
@@ -733,6 +734,229 @@ def main():
     # Lancer le serveur
     log.info("Demarrage du serveur sur %s:%d", args.host, args.port)
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+
+
+# ─── Endpoints Personnage : Build, Inventaire, Coffre ────────────
+import logging as _inv_logging
+_inv_logger = _inv_logging.getLogger("personnage")
+
+# ── Cache CDN en mémoire ──
+_cdn_cache = None
+
+def _ensure_cdn_cache():
+    global _cdn_cache, _i18n_cache
+    if _cdn_cache is not None:
+        return
+    import json as _json
+    _cdn_cache = {}
+    _i18n_cache = {}
+    # CDN items (equipment avec gfxId)
+    for cp in [
+        os.path.join(BASE_DIR, "rnd", "data", "cdn_items.json"),
+        os.path.join(BASE_DIR, "docs", "RND", "data", "cdn_items_full.json"),
+    ]:
+        if not os.path.isfile(cp):
+            continue
+        try:
+            with open(cp, "r", encoding="utf-8") as f:
+                raw = _json.load(f)
+            if isinstance(raw, list):
+                for it in raw:
+                    defn = it.get("definition", {})
+                    itm = defn.get("item", {}) if isinstance(defn, dict) else {}
+                    iid = str(itm.get("id", it.get("id", 0)))
+                    if iid == "0":
+                        continue
+                    title = it.get("title", {})
+                    nm = title.get("fr", "") if isinstance(title, dict) else str(title)
+                    gp = itm.get("graphicParameters", {})
+                    gfx = gp.get("gfxId", 0) if isinstance(gp, dict) else 0
+                    bp = itm.get("baseParameters", {})
+                    _cdn_cache[iid] = {
+                        "name": nm,
+                        "level": itm.get("level", 0),
+                        "rarity": bp.get("rarity", 0) if isinstance(bp, dict) else 0,
+                        "gfxId": gfx,
+                        "typeId": bp.get("itemTypeId", 0) if isinstance(bp, dict) else 0,
+                    }
+            _inv_logger.info(f"CDN: {len(_cdn_cache)} items depuis {os.path.basename(cp)}")
+            break
+        except Exception as e:
+            _inv_logger.warning(f"CDN err {cp}: {e}")
+    # i18n local (20k+ noms + descriptions)
+    i18n_p = os.path.join(BASE_DIR, "rnd", "data", "i18n_items_local.json")
+    if os.path.isfile(i18n_p):
+        try:
+            with open(i18n_p, "r", encoding="utf-8") as f:
+                _i18n_cache = _json.load(f)
+            _inv_logger.info(f"i18n: {len(_i18n_cache)} items")
+        except Exception as e:
+            _inv_logger.warning(f"i18n err: {e}")
+    _inv_logger.info(f"Cache: CDN={len(_cdn_cache)} i18n={len(_i18n_cache)}")
+
+def _cdn_lookup(ref_id):
+    """Cherche un item dans CDN + i18n."""
+    _ensure_cdn_cache()
+    sid = str(ref_id)
+    cdn = _cdn_cache.get(sid, {})
+    i18n = _i18n_cache.get(sid, {})
+    if not cdn and not i18n:
+        return {}
+    result = {}
+    if cdn:
+        result.update(cdn)
+    if isinstance(i18n, dict):
+        if i18n.get("name"):
+            result["name"] = i18n["name"]
+        if i18n.get("description"):
+            result["description"] = i18n["description"]
+        for k in ["gfxId", "level", "rarity", "typeId"]:
+            if not result.get(k) and i18n.get(k):
+                result[k] = i18n[k]
+    elif isinstance(i18n, str) and i18n:
+        result["name"] = i18n
+    if "title" in result and "name" not in result:
+        result["name"] = result["title"]
+    return result
+
+# ── /api/build-data ──
+@app.get("/api/build-data")
+async def get_build_data():
+    """Retourne le build-result.json parsé (avec fix BOM)."""
+    br_path = os.path.join(BASE_DIR, "build-generator", "data", "build-result.json")
+    if not os.path.exists(br_path):
+        return {"error": "build-result.json not found", "items": []}
+    try:
+        with open(br_path, "rb") as f:
+            raw = f.read()
+        if raw[:3] == b"\xef\xbb\xbf":
+            raw = raw[3:]
+        data = json.loads(raw.decode("utf-8"))
+        # Enrichir les items avec gfxId depuis le CDN
+        items = data.get("items", [])
+        for item in items:
+            name = item.get("name", "")
+            # Chercher dans le CDN par nom si pas de refId
+            ref_id = item.get("refId") or item.get("itemId") or item.get("id")
+            if ref_id:
+                cdn_info = _cdn_lookup(ref_id)
+                if cdn_info:
+                    item["gfxId"] = cdn_info.get("gfxId", 0)
+                    item["rarity"] = cdn_info.get("rarity", item.get("rarity", 0))
+                    item["typeId"] = cdn_info.get("typeId", 0)
+        return data
+    except Exception as e:
+        _inv_logger.error(f"[BUILD] Parse error: {e}")
+        return {"error": str(e), "items": []}
+
+# ── /api/inventory/local ──
+@app.get("/api/inventory/local")
+async def get_local_inventory():
+    """Retourne l inventaire local enrichi avec le CDN."""
+    paths = [
+        os.path.join(BASE_DIR, "logs", "inventory_bags.json"),
+        os.path.join(BASE_DIR, "logs", "players", "inventory_bags.json"),
+    ]
+    best_path, best_ts = None, ""
+    for p in paths:
+        if os.path.exists(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    d = json.load(f)
+                ts = d.get("timestamp", "")
+                if ts > best_ts:
+                    best_ts, best_path = ts, p
+            except Exception:
+                continue
+    if not best_path:
+        return {"error": "No inventory file found", "bags": [], "player": "Unknown"}
+    with open(best_path, "r", encoding="utf-8") as f:
+        inv = json.load(f)
+    enriched_bags = []
+    for bag in inv.get("bags", []):
+        enriched_items = []
+        for item in bag.get("items", []):
+            ref_id = item.get("refId", 0)
+            cdn = _cdn_lookup(ref_id)
+            name = item.get("name", "")
+            if name.startswith("item_") or not name:
+                name = cdn.get("name", cdn.get("title", f"#{ref_id}"))
+            enriched_items.append({
+                "refId": ref_id,
+                "name": name,
+                "quantity": item.get("quantity", 1),
+                "level": cdn.get("level", 0),
+                "rarity": cdn.get("rarity", 0),
+                "gfxId": cdn.get("gfxId", 0),
+                "typeId": cdn.get("typeId", 0),
+            })
+        bag_name = bag.get("bagName", "Sac")
+        if bag_name.startswith("item_"):
+            bag_cdn = _cdn_lookup(bag.get("bagRefId", 0))
+            bag_name = bag_cdn.get("name", bag_cdn.get("title", bag_name))
+        enriched_bags.append({
+            "bagId": bag.get("bagId", ""),
+            "bagName": bag_name,
+            "capacity": bag.get("capacity", 0),
+            "itemCount": bag.get("itemCount", 0),
+            "items": enriched_items,
+        })
+    return {
+        "player": inv.get("player", "Unknown"),
+        "level": inv.get("level", 0),
+        "kamas": inv.get("kamas", -1),
+        "timestamp": inv.get("timestamp", ""),
+        "totalBags": len(enriched_bags),
+        "totalItems": sum(b["itemCount"] for b in enriched_bags),
+        "bags": enriched_bags,
+    }
+
+# ── /api/chest ──
+@app.get("/api/chest")
+async def get_chest():
+    """Retourne le coffre de compte enrichi."""
+    chest_path = os.path.join(BASE_DIR, "logs", "account_chest_full.json")
+    if not os.path.exists(chest_path):
+        return {"error": "No chest file", "compartments": []}
+    with open(chest_path, "r", encoding="utf-8") as f:
+        chest = json.load(f)
+    enriched_comps = []
+    for comp in chest.get("compartments", []):
+        enriched_items = []
+        for item in comp.get("items", []):
+            item_id = item.get("itemId", 0)
+            cdn = _cdn_lookup(item_id)
+            name = item.get("name", "")
+            if name.startswith("item_") or not name:
+                name = cdn.get("name", cdn.get("title", f"#{item_id}"))
+            enriched_items.append({
+                "itemId": item_id,
+                "name": name,
+                "quantity": item.get("quantity", 1),
+                "level": cdn.get("level", item.get("level", 0)),
+                "rarity": cdn.get("rarity", 0),
+                "gfxId": cdn.get("gfxId", 0),
+                "typeId": cdn.get("typeId", 0),
+                "enchant": item.get("enchant"),
+                "maxStack": item.get("maxStack", 1),
+            })
+        enriched_comps.append({
+            "id": comp.get("id", ""),
+            "name": comp.get("name", "Compartiment"),
+            "capacity": comp.get("capacity", 0),
+            "itemCount": comp.get("itemCount", 0),
+            "enchantedCount": comp.get("enchantedCount", 0),
+            "emptySlots": comp.get("emptySlots", 0),
+            "items": enriched_items,
+        })
+    return {
+        "lastUpdate": chest.get("lastUpdate", ""),
+        "totalCompartments": chest.get("totalCompartments", 0),
+        "totalItems": chest.get("totalItems", 0),
+        "totalCapacity": chest.get("totalCapacity", 0),
+        "totalEnchanted": chest.get("totalEnchanted", 0),
+        "compartments": enriched_comps,
+    }
 
 
 if __name__ == "__main__":

@@ -58,6 +58,8 @@ WEB_DIR = BASE_DIR / "src-web"
 ITEMS_JSON = BASE_DIR / "rnd" / "data" / "cdn_items.json"
 COOLDOWN = 5  # secondes entre reloads
 
+VALID_BREEDS = {"Feca","Osamodas","Enutrof","Sram","Xelor","Ecaflip","Eniripsa","Iop","Cra","Sadida","Sacrieur","Pandawa","Roublard","Zobal","Steamer","Eliotrope","Huppermage","Ouginak"}
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
@@ -134,6 +136,9 @@ def reload_players():
                 raw = json.load(f)
 
             name = raw.get("name", fname.replace(".json", ""))
+            breed_name_raw = raw.get("breedName", "")
+            if breed_name_raw not in VALID_BREEDS:
+                continue
             guild_raw = raw.get("guild", "")
             guild_id, guild_name = parser_guild(guild_raw) if callable(parser_guild) else (0, "")
 
@@ -434,6 +439,39 @@ async def api_v1_docs():
     }
 
 
+
+
+# =====================================================
+# CDN ITEM DETAIL (pour tooltips)
+# =====================================================
+
+@app.get("/api/cdn/{item_id}")
+async def api_cdn_item(item_id: int):
+    """Retourne les details complets d'un item CDN pour le tooltip."""
+    result = {}
+
+    # 1) DB SQLite (nom, level, rarity, gfx_id, type_id)
+    cdn_item = db.get_cdn_item(item_id)
+    if cdn_item:
+        result = dict(cdn_item)
+
+    # 2) items_db en memoire (effects complets + description)
+    item = _items_db.get(item_id)
+    if item:
+        result["item_id"] = item_id
+        result["name_fr"] = item.get("name_fr", result.get("name_fr", ""))
+        result["level"] = item.get("level", result.get("level", 0))
+        result["rarity"] = item.get("rarity", result.get("rarity", 0))
+        result["type_id"] = item.get("itemTypeId", result.get("type_id", 0))
+        result["gfx_id"] = item.get("gfxId", result.get("gfx_id", 0))
+        result["effects"] = item.get("effects", [])
+        result["desc_fr"] = item.get("desc_fr", "")
+
+    if not result:
+        return JSONResponse({"error": "Item introuvable"}, status_code=404)
+
+    return result
+
 # =====================================================
 # ENDPOINTS LEGACY (compatibilite avec le frontend actuel)
 # =====================================================
@@ -529,15 +567,19 @@ async def api_guilds_legacy(min_members: int = 0, limit: int = 500):
 @app.get("/api/recent")
 async def api_recent_legacy(limit: int = 200):
     players = db.get_recent(limit=limit)
+    new_players = []
+    updated_players = []
     for p in players:
         p["breedName"] = p.get("breed_name", "")
         p["detected_at"] = p.get("last_seen", "")
-        p["first_seen"] = p.get("last_seen", "")  # approximation
         p["poids_offensif"] = p.get("poids_offensif", 0) or 0
-    # recent.js attend new_players et updated_players
-    # Pour l instant on met tout dans new_players
-    # TODO: differencier nouveaux vs mis a jour via first_seen != last_seen
-    return {"new_players": players, "updated_players": []}
+        fs = p.get("first_seen", "")
+        ls = p.get("last_seen", "")
+        if fs and ls and fs[:16] != ls[:16]:
+            updated_players.append(p)
+        else:
+            new_players.append(p)
+    return {"new_players": new_players, "updated_players": updated_players}
 
 
 @app.get("/api/stats")

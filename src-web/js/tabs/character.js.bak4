@@ -1,0 +1,418 @@
+// ============================================================
+// character.js - Onglet Personnage > Fiche
+// 3 grilles inventaire procedurales: Equipe / Inventaire / Coffre
+// Grilles qui grandissent selon le nombre d objets
+// Source: /api/players/{name} + futur /api/players/{name}/inventory
+// ============================================================
+
+import { fetchJson } from "../api.js";
+import { esc } from "../utils.js";
+import { initTooltipDelegation } from "../tooltip.js";
+
+// --- Rarity ---
+const RARITY_CLS = {0:"rarity-0",1:"rarity-1",2:"rarity-2",3:"rarity-3",4:"rarity-4",5:"rarity-5",6:"rarity-6",7:"rarity-7"};
+const RARITY_NAMES = {0:"Commun",1:"Inhabituel",2:"Rare",3:"Mythique",4:"L\u00e9gendaire",5:"Relique",6:"Souvenir",7:"\u00c9pique"};
+const RARITY_HEX = {0:"#b2b2b2",1:"#ffffff",2:"#22b069",3:"#a06016",4:"#bbc70c",5:"#794faf",6:"#257db0",7:"#b04f8a"};
+
+// --- Slot labels pour Equipe ---
+const SLOT_META = {
+  0:{label:"Casque",icon:"casque"}, 3:{label:"\u00c9paulettes",icon:"epaulettes"},
+  4:{label:"Amulette",icon:"amulette"}, 5:{label:"Plastron",icon:"plastron"},
+  7:{label:"Anneau G",icon:"anneau"}, 8:{label:"Anneau D",icon:"anneau"},
+  10:{label:"Ceinture",icon:"ceinture"}, 12:{label:"Bottes",icon:"bottes"},
+  13:{label:"Cape",icon:"cape"}, 15:{label:"Arme",icon:"arme"},
+  16:{label:"Seconde main",icon:"secondemain"}, 17:{label:"Outil",icon:"accessoire"},
+  18:{label:"Seconde main",icon:"secondemain"},
+  22:{label:"Familier",icon:"familier"}, 24:{label:"Monture",icon:"monture"},
+};
+
+// Ordre d affichage des slots equipes
+const SLOT_ORDER = [0, 3, 4, 5, 13, 10, 12, 7, 8, 15, 16, 18, 17, 22, 24];
+
+function rnd(v) { return typeof v === "number" ? Math.round(v) : v; }
+
+function getBreedColor(bid) {
+  var c = {1:"#e8d44d",2:"#3dc44f",3:"#d4a853",4:"#555577",5:"#44aadd",6:"#88bb44",
+    7:"#ff88aa",8:"#dd4444",9:"#77cc55",10:"#77aa44",11:"#cc3333",12:"#ddaa55",
+    13:"#cc7744",14:"#bb66bb",15:"#6688bb",16:"#5599dd",17:"#8877cc",18:"#aa6644"};
+  return c[bid] || "#888";
+}
+
+let _searchBound = false;
+
+// ============================================================
+// Point d entree
+// ============================================================
+export async function loadCharacter() {
+  var container = document.getElementById("charContainer");
+  if (!container) return;
+
+  container.innerHTML =
+    '<div class="char-search-bar">' +
+      '<input type="text" id="charSearchInput" placeholder="Rechercher un joueur..." autocomplete="off">' +
+      '<button id="charSearchBtn">Rechercher</button>' +
+      '<div id="charSearchResults" class="char-search-results"></div>' +
+    '</div>' +
+    '<div id="charContent">' +
+      '<div class="char-empty"><div class="char-empty-icon">\u{1F9D9}</div>' +
+      '<p>Recherchez un joueur pour afficher son patrimoine</p>' +
+      '<p style="font-size:12px;color:var(--text-muted)">Ou cliquez sur un joueur dans le classement</p></div>' +
+    '</div>';
+
+  if (!_searchBound) {
+    _searchBound = true;
+
+    document.addEventListener("input", async function(e) {
+      if (e.target.id !== "charSearchInput") return;
+      var q = e.target.value.trim();
+      if (q.length < 2) { hideResults(); return; }
+      try {
+        var data = await fetchJson("/api/search?q=" + encodeURIComponent(q));
+        showResults(data.players || []);
+      } catch(err) { hideResults(); }
+    });
+
+    document.addEventListener("click", function(e) {
+      var item = e.target.closest(".char-search-item");
+      if (item) {
+        var name = item.dataset.name;
+        var inp = document.getElementById("charSearchInput");
+        if (inp) inp.value = name;
+        hideResults();
+        loadPlayerSheet(name);
+        return;
+      }
+      if (!e.target.closest(".char-search-bar")) hideResults();
+    });
+
+    document.addEventListener("keydown", function(e) {
+      if (e.target.id === "charSearchInput" && e.key === "Enter") {
+        var q = e.target.value.trim();
+        if (q.length >= 2) { hideResults(); loadPlayerSheet(q); }
+      }
+    });
+  }
+}
+
+function hideResults() {
+  var d = document.getElementById("charSearchResults");
+  if (d) { d.innerHTML = ""; d.style.display = "none"; }
+}
+
+function showResults(players) {
+  var d = document.getElementById("charSearchResults");
+  if (!d || !players.length) { hideResults(); return; }
+  d.style.display = "block";
+  d.innerHTML = players.slice(0, 8).map(function(p) {
+    var bc = getBreedColor(p.breed_id);
+    return '<div class="char-search-item" data-name="' + esc(p.name) + '">' +
+      '<span class="char-search-name">' + esc(p.name) + '</span>' +
+      '<span class="char-search-meta"><span style="color:' + bc + '">' +
+      esc(p.breed_name || p.breedName || "") + '</span> Niv.' + p.level + '</span></div>';
+  }).join("");
+}
+
+// ============================================================
+// Chargement joueur
+// ============================================================
+async function loadPlayerSheet(name) {
+  var el = document.getElementById("charContent");
+  if (!el) return;
+  el.innerHTML = '<div class="char-loading">Chargement de ' + esc(name) + '...</div>';
+
+  try {
+    var p = await fetchJson("/api/players/" + encodeURIComponent(name));
+    if (p.error) {
+      el.innerHTML = '<div class="char-empty"><p style="color:#f66">Joueur introuvable</p></div>';
+      return;
+    }
+
+    // Tenter de charger inventaire et coffre (endpoints futurs)
+    var inventory = [];
+    var chest = [];
+    try {
+      var invData = await fetchJson("/api/players/" + encodeURIComponent(name) + "/inventory");
+      inventory = invData.items || [];
+    } catch(e) { /* endpoint pas encore dispo */ }
+    try {
+      var chestData = await fetchJson("/api/players/" + encodeURIComponent(name) + "/chest");
+      chest = chestData.items || [];
+    } catch(e) { /* endpoint pas encore dispo */ }
+
+    renderSheet(el, p, inventory, chest);
+    initTooltipDelegation();
+  } catch(e) {
+    el.innerHTML = '<div class="char-empty"><p style="color:#f66">Erreur: ' + esc(e.message) + '</p></div>';
+  }
+}
+
+// ============================================================
+// Rendu complet
+// ============================================================
+function renderSheet(el, p, inventory, chest) {
+  var bc = getBreedColor(p.breed_id);
+  var bn = p.breedName || p.breed_name || "?";
+  var equip = p.equipment || [];
+
+  var h = "";
+
+  // ---- HEADER ----
+  h += '<div class="char-header">';
+  h += '<div class="char-avatar" style="border-color:' + bc + '">';
+  h += '<div class="char-avatar-inner" style="background:' + bc + '20">';
+  h += '<span class="char-breed-icon">' + bn.charAt(0) + '</span>';
+  h += '</div></div>';
+  h += '<div class="char-identity">';
+  h += '<h2 class="char-name">' + esc(p.name) + '</h2>';
+  h += '<div class="char-subtitle">';
+  h += '<span class="char-breed" style="color:' + bc + '">' + esc(bn) + '</span>';
+  h += '<span class="char-level">Niveau ' + p.level + '</span>';
+  if (p.guild_name) h += '<span class="char-guild">' + esc(p.guild_name) + '</span>';
+  h += '</div></div>';
+  h += '<div class="char-score-badge">';
+  h += '<div class="char-score-value">' + rnd(p.score_global || 0) + '</div>';
+  h += '<div class="char-score-label">Score</div></div>';
+  h += '</div>';
+
+  // ---- STATS BAR ----
+  h += '<div class="char-stats-bar">';
+  var stats = [
+    ["PA","#4a9eff",p.pa||0],["PM","#4ade80",p.pm||0],["PW","#22d3ee",p.pw||0],
+    ["PV","#ef4444",p.total_pv||0],["R\u00e9s","#a78bfa",p.total_res||0],
+    ["CC","#fbbf24","+"+(p.coup_crit||0)+"%"],
+    ["Off","#f97316",rnd(p.poids_offensif||0)],["D\u00e9f","#8b5cf6",rnd(p.poids_defensif||0)],
+    ["Tacle","#64748b",p.tacle||0],["Esq","#64748b",p.esquive||0]
+  ];
+  for (var si = 0; si < stats.length; si++) {
+    h += '<div class="char-stat"><span class="cs-icon" style="color:' + stats[si][1] + '">' + stats[si][0] + '</span><span class="cs-val">' + stats[si][2] + '</span></div>';
+  }
+  h += '</div>';
+
+  // ---- VALEUR TOTALE ----
+  var totalItems = equip.length + inventory.length + chest.length;
+  h += '<div class="patrimoine-summary">';
+  h += '<div class="patrimoine-count"><span class="patrimoine-num">' + totalItems + '</span><span class="patrimoine-label">objets</span></div>';
+  h += '<div class="patrimoine-count"><span class="patrimoine-num">' + equip.length + '</span><span class="patrimoine-label">\u00e9quip\u00e9s</span></div>';
+  h += '<div class="patrimoine-count"><span class="patrimoine-num">' + inventory.length + '</span><span class="patrimoine-label">inventaire</span></div>';
+  h += '<div class="patrimoine-count"><span class="patrimoine-num">' + chest.length + '</span><span class="patrimoine-label">coffre</span></div>';
+  h += '</div>';
+
+  // ---- GRILLES ----
+
+  // 1) EQUIPE - toujours present
+  h += renderGrid("\u2694\ufe0f \u00c9quip\u00e9", "equipe", buildEquipItems(equip), true);
+
+  // 2) INVENTAIRE - si dispo
+  if (inventory.length > 0) {
+    h += renderGrid("\ud83c\udf92 Inventaire", "inventaire", buildGenericItems(inventory), false);
+  } else {
+    h += renderGrid("\ud83c\udf92 Inventaire", "inventaire", [], false);
+  }
+
+  // 3) COFFRE - si dispo
+  if (chest.length > 0) {
+    h += renderGrid("\ud83d\udce6 Coffre", "coffre", buildGenericItems(chest), false);
+  } else {
+    h += renderGrid("\ud83d\udce6 Coffre", "coffre", [], false);
+  }
+
+  // ---- SORTS ----
+  var spells = p.spells || {};
+  var decks = spells.decks || [];
+  var builds = spells.builds || [];
+  var activeDeck = spells.active_deck || 0;
+  var combatObs = spells.combat_observed || [];
+
+  if (decks.length || combatObs.length) {
+    h += '<div class="char-spells-section"><h3 class="grid-title">\ud83d\udcdc Sorts</h3>';
+    for (var di = 0; di < decks.length; di++) {
+      var deck = decks[di];
+      var isAct = deck.index === activeDeck;
+      var bi = null;
+      for (var b = 0; b < builds.length; b++) { if (builds[b].index === deck.index) { bi = builds[b]; break; } }
+      var dn = bi ? bi.name : "Deck " + deck.index;
+      h += '<div class="char-spell-deck' + (isAct ? ' active' : '') + '">';
+      h += '<div class="char-deck-header"><span class="char-deck-name">' + esc(dn) + '</span>';
+      if (isAct) h += '<span class="char-deck-badge">ACTIF</span>';
+      h += '</div>';
+      h += renderSpellGroup("Actifs", deck.active_spells || [], false);
+      h += renderSpellGroup("Passifs", deck.passive_spells || [], true);
+      h += '</div>';
+    }
+    if (combatObs.length) {
+      h += '<div class="char-spell-deck"><div class="char-deck-header"><span class="char-deck-name">Sorts observ\u00e9s en combat</span></div>';
+      h += '<div class="char-spell-list">';
+      for (var co = 0; co < combatObs.length; co++) h += renderOneSpell(combatObs[co], false);
+      h += '</div></div>';
+    }
+    h += '</div>';
+  }
+
+  el.innerHTML = h;
+}
+
+// ============================================================
+// Construction des items pour les grilles
+// ============================================================
+
+function buildEquipItems(equipment) {
+  // Trier par SLOT_ORDER
+  var sorted = [];
+  for (var oi = 0; oi < SLOT_ORDER.length; oi++) {
+    var sid = SLOT_ORDER[oi];
+    for (var ei = 0; ei < equipment.length; ei++) {
+      if (equipment[ei].slot === sid) {
+        sorted.push(equipment[ei]);
+        break;
+      }
+    }
+  }
+  // Ajouter ceux pas dans SLOT_ORDER
+  for (var ai = 0; ai < equipment.length; ai++) {
+    if (SLOT_ORDER.indexOf(equipment[ai].slot) === -1) sorted.push(equipment[ai]);
+  }
+  return sorted.map(function(item) {
+    var sm = SLOT_META[item.slot] || {label:"Slot "+item.slot, icon:"accessoire"};
+    return {
+      item_id: item.item_id,
+      name: item.name || "???",
+      level: item.level || 0,
+      rarity: item.rarity != null ? item.rarity : 0,
+      gfx_id: item.gfx_id || 0,
+      slot_label: sm.label,
+      slot_icon: sm.icon,
+      is_pet: (item.slot === 22 || item.slot === 24),
+    };
+  });
+}
+
+function buildGenericItems(items) {
+  return items.map(function(item) {
+    return {
+      item_id: item.item_id || item.id || 0,
+      name: item.name || item.name_fr || "???",
+      level: item.level || 0,
+      rarity: item.rarity != null ? item.rarity : 0,
+      gfx_id: item.gfx_id || item.gfxId || 0,
+      slot_label: "",
+      slot_icon: "",
+      is_pet: false,
+      quantity: item.quantity || 1,
+    };
+  });
+}
+
+// ============================================================
+// Rendu de grille procedurale
+// ============================================================
+
+function renderGrid(title, id, items, isEquipped) {
+  var h = '';
+  h += '<div class="inv-grid-section" id="grid-' + id + '">';
+  h += '<div class="grid-header">';
+  h += '<h3 class="grid-title">' + title + '</h3>';
+  h += '<span class="grid-count">' + items.length + ' objet' + (items.length !== 1 ? 's' : '') + '</span>';
+  h += '</div>';
+
+  if (items.length === 0) {
+    h += '<div class="grid-empty">';
+    if (id === "inventaire" || id === "coffre") {
+      h += '<div class="grid-empty-slots">';
+      // Afficher 8 slots vides comme placeholder
+      for (var ev = 0; ev < 8; ev++) {
+        h += '<div class="inv-cell inv-cell-empty"><div class="inv-cell-inner"></div></div>';
+      }
+      h += '</div>';
+      h += '<p class="grid-empty-text">Donn\u00e9es non encore disponibles</p>';
+    }
+    h += '</div>';
+  } else {
+    h += '<div class="grid-cells">';
+    for (var i = 0; i < items.length; i++) {
+      h += renderCell(items[i], isEquipped);
+    }
+    h += '</div>';
+  }
+
+  h += '</div>';
+  return h;
+}
+
+function renderCell(item, isEquipped) {
+  var rc = RARITY_CLS[item.rarity] || "rarity-0";
+  var rh = RARITY_HEX[item.rarity] || "#b2b2b2";
+  var rn = RARITY_NAMES[item.rarity] || "Commun";
+  var gfx = item.gfx_id;
+
+  var h = '<div class="inv-cell ' + rc + '" data-item-id="' + item.item_id + '" style="--cell-rarity:' + rh + '">';
+  h += '<div class="inv-cell-inner">';
+
+  // Image
+  if (gfx) {
+    h += '<img src="/icons/items/' + gfx + '.png" class="inv-cell-img" onerror="this.style.display=\'none\'" alt="">';
+  } else if (item.slot_icon) {
+    h += '<img src="/icons/slots/' + item.slot_icon + '.png?v=1" class="inv-cell-img inv-cell-placeholder" alt="">';
+  }
+
+  // Badge level (pas pour pets/montures)
+  if (!item.is_pet && item.level > 0) {
+    h += '<span class="inv-cell-level">' + item.level + '</span>';
+  }
+
+  // Badge quantite (si > 1)
+  if (item.quantity && item.quantity > 1) {
+    h += '<span class="inv-cell-qty">x' + item.quantity + '</span>';
+  }
+
+  // Slot label pour equipe
+  if (isEquipped && item.slot_label) {
+    h += '<span class="inv-cell-slot">' + esc(item.slot_label) + '</span>';
+  }
+
+  h += '</div>'; // inner
+
+  // Nom sous la cellule
+  h += '<div class="inv-cell-name ' + rc + '">' + esc(item.name) + '</div>';
+
+  h += '</div>'; // cell
+  return h;
+}
+
+// ============================================================
+// Sorts (inchange)
+// ============================================================
+function renderSpellGroup(label, spells, passive) {
+  if (!spells || !spells.length) return "";
+  var h = '<div class="char-spell-group"><div class="char-spell-label">' + label + '</div><div class="char-spell-list">';
+  for (var i = 0; i < spells.length; i++) h += renderOneSpell(spells[i], passive);
+  h += '</div></div>';
+  return h;
+}
+
+function renderOneSpell(s, passive) {
+  var sp = typeof s === "object" ? s : { id: s };
+  var gfx = sp.gfxId || sp.gfx_id || sp.id;
+  var nm = sp.name || "";
+  return '<span class="char-spell' + (passive ? ' passive' : '') + '" title="' + esc(nm || "Spell " + sp.id) + '">' +
+    '<img src="/icons/spells/' + gfx + '.png" onerror="this.style.display=\'none\'" alt="">' +
+    (nm ? '<span class="char-spell-name">' + esc(nm) + '</span>' : '') + '</span>';
+}
+
+// ============================================================
+// Expose pour classement -> personnage
+// ============================================================
+window.__loadCharacterTab = function(name) {
+  document.querySelectorAll("[data-tab]").forEach(function(el) { el.classList.remove("active"); });
+  document.querySelectorAll("[data-content]").forEach(function(el) { el.style.display = "none"; });
+  var tab = document.querySelector('[data-tab="cdn"]');
+  var content = document.querySelector('[data-content="cdn"]');
+  if (tab) tab.classList.add("active");
+  if (content) content.style.display = "";
+  document.querySelectorAll("[data-perso-sub]").forEach(function(el) { el.classList.toggle("active", el.dataset.persoSub === "fiche"); });
+  document.querySelectorAll("[data-perso-content]").forEach(function(el) { el.style.display = el.dataset.persoContent === "fiche" ? "" : "none"; });
+  var container = document.getElementById("charContainer");
+  if (container && !document.getElementById("charSearchInput")) loadCharacter();
+  var inp = document.getElementById("charSearchInput");
+  if (inp) inp.value = name;
+  loadPlayerSheet(name);
+};
