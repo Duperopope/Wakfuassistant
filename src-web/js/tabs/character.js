@@ -1,3 +1,21 @@
+/* Icons Atlas - preloaded base64 icons */
+var _iconsAtlas = null;
+function loadIconsAtlas(cb) {
+    if (_iconsAtlas) { if (cb) cb(); return; }
+    fetch("/api/icons-atlas")
+        .then(function(r) { return r.json(); })
+        .then(function(data) { _iconsAtlas = data; console.log("Atlas loaded:", Object.keys(data).length, "icons"); if (cb) cb(); })
+        .catch(function(e) { console.error("Atlas error:", e); _iconsAtlas = {}; if (cb) cb(); });
+}
+function getIconSrc(gfxId) {
+    if (!gfxId || gfxId === 0) return null;
+    var key = String(gfxId);
+    if (_iconsAtlas && _iconsAtlas[key]) {
+        return "data:image/webp;base64," + _iconsAtlas[key];
+    }
+    return "/icons/items/" + key + ".png";
+}
+
 // character.js - Onglet Personnage : 3 grilles (Build, Inventaire, Coffre)
 // Données locales uniquement : build-result.json, inventory_bags.json, account_chest_full.json
 // Enrichissement via CDN local (cdn_items.json décompilé) + noms du coffre
@@ -61,7 +79,7 @@ function cellHTML(item) {
     /* Icon area */
     h += "<div class=\"gc__icon-area\">";
     if (gfx) {
-        var cdnUrl = "/icons/items/" + gfx + ".png";
+        var cdnUrl = getIconSrc(gfx);
         h += "<img class=\"gc__img\" src=\"" + cdnUrl + "\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">";
         h += "<span class=\"gc__fb\" style=\"display:none\">" + esc(nm.substring(0, 3)).toUpperCase() + "</span>";
     } else {
@@ -265,3 +283,6 @@ export async function loadCharacter() {
 window.__loadCharacterTab = function() {
     loadCharacter();
 };
+
+// Pre-charger l'atlas
+loadIconsAtlas();

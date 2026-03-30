@@ -697,6 +697,23 @@ async def serve_spa():
     return HTMLResponse("<h1>Wakfu Assistant API v2</h1><p><a href='/api/v1/docs'>Documentation</a></p>")
 
 
+
+# Icons atlas (single JSON with all base64 icons)
+_icons_atlas = None
+
+@app.get("/api/icons-atlas")
+async def get_icons_atlas():
+    global _icons_atlas
+    if _icons_atlas is None:
+        import json as _json
+        atlas_path = BASE_DIR / "rnd" / "data" / "icons_atlas.json"
+        if atlas_path.exists():
+            with open(atlas_path, "r", encoding="utf-8") as f:
+                _icons_atlas = _json.load(f)
+        else:
+            _icons_atlas = {}
+    return _icons_atlas
+
 # Static files (CSS, JS)
 from starlette.staticfiles import StaticFiles
 app.mount("/icons", StaticFiles(directory=str(WEB_DIR / "icons")), name="icons")
