@@ -96,9 +96,10 @@ def _save_active_player(name: str):
     ACTIVE_CHAR_FILE.write_text(name, encoding="utf-8")
 
 def _get_player_file(name: str = "") -> dict | None:
-    """Charge players/{name}.json ou le fichier le plus récent avec équipement."""
+    """Charge players/{name}.json avec fuzzy matching, ou le fichier le plus récent avec équipement."""
     player_dir = BASE_DIR / "logs" / "players"
     if name:
+        # 1. Essayer correspondance exacte
         p = player_dir / f"{name}.json"
         if p.exists():
             try:
@@ -106,7 +107,42 @@ def _get_player_file(name: str = "") -> dict | None:
                     return json.load(f)
             except Exception:
                 pass
-    # Fallback: fichier le plus récent avec équipement non vide (hors snapshots _tN)
+
+        # 2. Essayer correspondance case-insensitive (gère Tiramisun vs Tiramisune)
+        name_lower = name.lower()
+        candidates = []
+        for p in player_dir.glob("*.json"):
+            if "_t" in p.stem:  # Ignorer snapshots _tN
+                continue
+            # Calcul de similitude simple (nombre de caractères communs au début)
+            stem_lower = p.stem.lower()
+            if stem_lower == name_lower:  # Match exact (case-insensitive)
+                try:
+                    with open(p, encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
+            # Enregistrer comme candidat si très similaire
+            common_len = 0
+            for i, (c1, c2) in enumerate(zip(name_lower, stem_lower)):
+                if c1 == c2:
+                    common_len = i + 1
+                else:
+                    break
+            if common_len >= len(name_lower) - 1:  # Au moins 90% de similitude au début
+                candidates.append((p, common_len))
+
+        # Retourner le meilleur candidat
+        if candidates:
+            candidates.sort(key=lambda x: x[1], reverse=True)
+            p = candidates[0][0]
+            try:
+                with open(p, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+
+    # 3. Fallback: fichier le plus récent avec équipement non vide (hors snapshots _tN)
     best_t, best_data = 0, None
     for p in player_dir.glob("*.json"):
         if "_t" in p.stem:
