@@ -1,19 +1,10 @@
 import { fetchJson } from "../api.js";
+import { RARITY, getRarity, fmtPrice, getIconSrc, getCdnIconSrc, escHtml } from "../shared/item.js";
 
-const RARITY_NAMES = ["Commun","Commun","Rare","Mythique","Legendaire","Epique","Relique","Souvenir"];
-const RARITY_COLORS = ["#c0c0c0","#ffffff","#00cc44","#ff8c19","#ffee00","#ff55ff","#66ccff","#ff6600"];
 
-function fmtK(n) {
-  if (!n && n !== 0) return "0";
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
-  if (n >= 1000) return (n / 1000).toFixed(1) + "K";
-  return n.toLocaleString("fr-FR");
-}
+// fmtK -> fmtPrice (shared/item.js)
 
-function icoUrl(gfx) {
-  if (!gfx) return "";
-  return "https://static.ankama.com/wakfu/portal/game/item/115/" + gfx + ".png";
-}
+// icoUrl -> getCdnIconSrc (shared/item.js)
 
 let ms = { query: "", side: "", offset: 0, limit: 30, sort: "unit_price", order: "asc" };
 let currentSub = "patrimoine";
@@ -32,17 +23,17 @@ async function loadPatrimoine() {
     let html = "<div style='display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px'>";
     html += "<div style='background:#1a1a2e;padding:16px 24px;border-radius:8px;min-width:180px'>";
     html += "<div style='color:#aaa;font-size:12px'>VALEUR TOTALE</div>";
-    html += "<div style='color:#ffee00;font-size:28px;font-weight:bold'>" + fmtK(data.totalValue) + " K</div></div>";
+    html += "<div style='color:#ffee00;font-size:28px;font-weight:bold'>" + fmtPrice(data.totalValue) + " K</div></div>";
     html += "<div style='background:#1a1a2e;padding:16px 24px;border-radius:8px;min-width:140px'>";
     html += "<div style='color:#aaa;font-size:12px'>KAMAS LIQUIDES</div>";
-    html += "<div style='color:#00cc44;font-size:22px;font-weight:bold'>" + fmtK(data.kamas) + "</div></div>";
+    html += "<div style='color:#00cc44;font-size:22px;font-weight:bold'>" + fmtPrice(data.kamas) + "</div></div>";
     html += "<div style='background:#1a1a2e;padding:16px 24px;border-radius:8px;min-width:140px'>";
     html += "<div style='color:#aaa;font-size:12px'>COFFRE</div>";
-    html += "<div style='color:#66ccff;font-size:22px'>" + fmtK(data.chestValue) + " K</div>";
+    html += "<div style='color:#66ccff;font-size:22px'>" + fmtPrice(data.chestValue) + " K</div>";
     html += "<div style='color:#888;font-size:11px'>" + (data.chestPriced || 0) + " items evalues</div></div>";
     html += "<div style='background:#1a1a2e;padding:16px 24px;border-radius:8px;min-width:140px'>";
     html += "<div style='color:#aaa;font-size:12px'>INVENTAIRE</div>";
-    html += "<div style='color:#ff8c19;font-size:22px'>" + fmtK(data.inventoryValue) + " K</div>";
+    html += "<div style='color:#ff8c19;font-size:22px'>" + fmtPrice(data.inventoryValue) + " K</div>";
     html += "<div style='color:#888;font-size:11px'>" + (data.inventoryPriced || 0) + " items evalues</div></div>";
     html += "</div>";
     if (data.lastUpdate) { html += "<div style='color:#888;font-size:12px;margin-bottom:16px'>Derniere mise a jour des prix : " + data.lastUpdate + "</div>"; }
@@ -54,14 +45,14 @@ async function loadPatrimoine() {
       html += "<th style='padding:6px'>Item</th><th>Qte</th><th>Prix unit.</th><th>Valeur</th><th>Source</th></tr></thead><tbody>";
       for (var i = 0; i < data.topItems.length; i++) {
         var it = data.topItems[i];
-        var rc = RARITY_COLORS[it.rarity || 0] || "#ccc";
+        var rc = getRarity(it.rarity).hex;
         html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
-        if (it.gfxId) html += "<img src='" + icoUrl(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
+        if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
         html += "<td>" + (it.quantity || 1) + "</td>";
-        html += "<td>" + fmtK(it.unitPrice) + "</td>";
-        html += "<td style='color:#ffee00;font-weight:bold'>" + fmtK(it.totalValue) + "</td>";
+        html += "<td>" + fmtPrice(it.unitPrice) + "</td>";
+        html += "<td style='color:#ffee00;font-weight:bold'>" + fmtPrice(it.totalValue) + "</td>";
         html += "<td style='color:#888;font-size:12px'>" + (it.source || "") + "</td>";
         html += "</tr>";
       }
@@ -110,15 +101,15 @@ async function loadMarket() {
       html += "<th style='padding:6px'>Item</th><th>Qte</th><th>Prix unit.</th><th>Prix total</th><th>Type</th><th>Date</th></tr></thead><tbody>";
       for (var i = 0; i < data.items.length; i++) {
         var it = data.items[i];
-        var rc = RARITY_COLORS[it.rarity || 0] || "#ccc";
+        var rc = getRarity(it.rarity).hex;
         var sideLabel = it.side === "buy" ? "<span style='color:#66ccff'>Achat</span>" : "<span style='color:#00cc44'>Vente</span>";
         html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
-        if (it.gfxId) html += "<img src='" + icoUrl(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
+        if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
         html += "<td>" + (it.qty || 1) + "</td>";
-        html += "<td style='color:#ffee00'>" + fmtK(it.unitPrice) + "</td>";
-        html += "<td>" + fmtK(it.totalPrice) + "</td>";
+        html += "<td style='color:#ffee00'>" + fmtPrice(it.unitPrice) + "</td>";
+        html += "<td>" + fmtPrice(it.totalPrice) + "</td>";
         html += "<td>" + sideLabel + "</td>";
         html += "<td style='color:#888;font-size:12px'>" + (it.capturedAt || "") + "</td>";
         html += "</tr>";
@@ -304,9 +295,9 @@ function drawPriceChart(data) {
     ctx.fillStyle = "#888";
     ctx.font = "9px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(fmtK(minP), pad.left, H - 4);
+    ctx.fillText(fmtPrice(minP), pad.left, H - 4);
     ctx.textAlign = "right";
-    ctx.fillText(fmtK(maxP), W - pad.right, pad.top + 10);
+    ctx.fillText(fmtPrice(maxP), W - pad.right, pad.top + 10);
 
     // Last point dot
     const lastX = pad.left + chartW;
@@ -340,9 +331,9 @@ export async function showPriceTooltip(itemRefId, itemName, event) {
 
         tooltipTitle.textContent = data.name || itemName || `Item #${itemRefId}`;
         tooltipStats.innerHTML = `
-            <span style="color:#00ff88">Min: ${fmtK(data.min_price)}</span>
-            <span style="color:#ff6b6b">Max: ${fmtK(data.max_price)}</span>
-            <span style="color:#ffd93d">Moy: ${fmtK(data.avg_price)}</span>
+            <span style="color:#00ff88">Min: ${fmtPrice(data.min_price)}</span>
+            <span style="color:#ff6b6b">Max: ${fmtPrice(data.max_price)}</span>
+            <span style="color:#ffd93d">Moy: ${fmtPrice(data.avg_price)}</span>
             <span style="color:#aaa">${data.count} offres</span>
         `;
         drawPriceChart(data);
