@@ -33,6 +33,7 @@ import logging
 import threading
 import time
 import json
+from tools.hdv_sync import run_sync as hdv_run_sync
 import re
 from pathlib import Path
 
@@ -242,11 +243,10 @@ def reload_single_player(fpath):
 
 
 def _start_watcher():
-    """Thread de surveillance incrementale des fichiers joueurs."""
+    """Thread de surveillance unifie: joueurs + HDV + coffre + inventaire."""
     def _run():
-        log.info("Watcher incremental sur %s (cooldown %ds)", PLAYERS_DIR, COOLDOWN)
+        log.info("Watcher unifie sur %s (cooldown %ds)", PLAYERS_DIR, COOLDOWN)
         last_mtimes = {}
-        # Indexer les mtimes au demarrage pour ne pas tout recharger au 1er cycle
         for fpath in PLAYERS_DIR.glob("*.json"):
             if "_t" in fpath.name:
                 continue
@@ -254,7 +254,28 @@ def _start_watcher():
                 last_mtimes[fpath.name] = fpath.stat().st_mtime
             except:
                 pass
-        log.info("Watcher: %d fichiers indexes", len(last_mtimes))
+        log.info("Watcher: %d fichiers joueurs indexes", len(last_mtimes))
+
+        hdv_proto = BASE_DIR / "logs" / "market_v3_proto.log"
+        chest_file = BASE_DIR / "logs" / "account_chest_full.json"
+        inv_file = BASE_DIR / "logs" / "inventory_bags.json"
+        hdv_db = BASE_DIR / "logs" / "hdv_market.db"
+
+        extra_mtimes = {}
+        hdv_offset = 0
+        for fp in [hdv_proto, chest_file, inv_file]:
+            try:
+                extra_mtimes[str(fp)] = fp.stat().st_mtime
+            except:
+                extra_mtimes[str(fp)] = 0
+
+        if hdv_proto.exists():
+            try:
+                count, hdv_offset = hdv_run_sync(str(hdv_proto), str(hdv_db))
+                log.info("Watcher: HDV sync initiale, %d entries, offset=%d", count, hdv_offset)
+            except Exception as e:
+                log.warning("Watcher: HDV sync initiale error: %s", e)
+
         while True:
             time.sleep(COOLDOWN)
             try:
@@ -283,10 +304,44 @@ def _start_watcher():
                     if names:
                         db.log_scan("incremental", len(names), ms, ", ".join(names[:20]))
                         broadcast_sse("update", {"players": names[:20], "count": len(names), "duration_ms": ms})
+
+                if hdv_proto.exists():
+                    try:
+                        mt = hdv_proto.stat().st_mtime
+                        if mt != extra_mtimes.get(str(hdv_proto), 0):
+                            extra_mtimes[str(hdv_proto)] = mt
+                            count, hdv_offset = hdv_run_sync(str(hdv_proto), str(hdv_db), hdv_offset)
+                            if count > 0:
+                                log.info("Watcher: HDV +%d entries (offset=%d)", count, hdv_offset)
+                                broadcast_sse("hdv", {"new_entries": count, "offset": hdv_offset})
+                    except Exception as e:
+                        log.warning("Watcher HDV error: %s", e)
+
+                if chest_file.exists():
+                    try:
+                        mt = chest_file.stat().st_mtime
+                        if mt != extra_mtimes.get(str(chest_file), 0):
+                            extra_mtimes[str(chest_file)] = mt
+                            log.info("Watcher: coffre mis a jour")
+                            broadcast_sse("chest", {"file": "account_chest_full.json", "updated": True})
+                    except Exception as e:
+                        log.warning("Watcher chest error: %s", e)
+
+                if inv_file.exists():
+                    try:
+                        mt = inv_file.stat().st_mtime
+                        if mt != extra_mtimes.get(str(inv_file), 0):
+                            extra_mtimes[str(inv_file)] = mt
+                            log.info("Watcher: inventaire mis a jour")
+                            broadcast_sse("inventory", {"file": "inventory_bags.json", "updated": True})
+                    except Exception as e:
+                        log.warning("Watcher inventory error: %s", e)
+
             except Exception as e:
                 log.warning("Watcher error: %s", e)
-    t = threading.Thread(target=_run, name="PlayerWatcher", daemon=True)
+    t = threading.Thread(target=_run, name="UnifiedWatcher", daemon=True)
     t.start()
+
 
 
 # =====================================================

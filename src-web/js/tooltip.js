@@ -12,9 +12,16 @@ const _cache = {};
 
 // --- Fonctions publiques ---
 
+var _currentItemId = null;
+
 function showTooltip(evt, itemId, slotColors) {
   if (!itemId) return;
   let tip = document.getElementById("wk-tooltip");
+  if (_currentItemId === itemId && tip && tip.style.display === "block") {
+    positionTooltip(tip, evt);
+    return;
+  }
+  _currentItemId = itemId;
   if (!tip) {
     tip = document.createElement("div");
     tip.id = "wk-tooltip";
@@ -45,6 +52,7 @@ function showTooltip(evt, itemId, slotColors) {
 }
 
 function hideTooltip() {
+  _currentItemId = null;
   const tip = document.getElementById("wk-tooltip");
   if (tip) tip.style.display = "none";
 }

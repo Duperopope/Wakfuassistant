@@ -1,7 +1,8 @@
 // Main entry - Wakfu Command Center
 // Tabs: Classement / Personnage / HDV Market
 import "./css/app.css";
-import { fetchJson, reloadData, connectSSE } from "./js/api.js";
+import { fetchJson, reloadData } from "./js/api.js";
+import { connectSSE, on as onSSE } from "./js/shared/events.js";
 import { getState, setState, updateFilters, subscribe } from "./js/state.js";
 import { debounce } from "./js/utils.js";
 import { loadPlayers } from "./js/tabs/players.js";
@@ -135,8 +136,11 @@ async function init() {
   await populateGuildFilter();
   await loadPlayers();
 
-  // SSE live updates
-  connectSSE(async () => {
+  // SSE live updates (unifie)
+  connectSSE();
+
+  // Classement: joueurs mis a jour
+  onSSE("update", async () => {
     const s = await fetchJson("/api/stats");
     setState({ stats: s, classes: s.classes || [] });
     renderStats(s);
@@ -147,13 +151,33 @@ async function init() {
       if (state.currentSubtab === "guilds") loadGuilds();
       if (state.currentSubtab === "recent") loadRecent(true);
     }
-    if (state.currentTab === "hdv") {
-      loadHdv();
-    }
-    if (state.currentTab === "cdn") {
-      persoLoaded.fiche = false;
-      loadCharacter();
-    }
+  });
+
+  // HDV: nouvelles offres detectees
+  onSSE("hdv", async () => {
+    const state = getState();
+    if (state.currentTab === "hdv") loadHdv();
+  });
+
+  // Coffre ou inventaire mis a jour -> rafraichir patrimoine + personnage
+  onSSE("chest", async () => {
+    const state = getState();
+    if (state.currentTab === "hdv") loadHdv();
+    if (state.currentTab === "cdn") { persoLoaded.fiche = false; loadCharacter(); }
+  });
+
+  onSSE("inventory", async () => {
+    const state = getState();
+    if (state.currentTab === "hdv") loadHdv();
+    if (state.currentTab === "cdn") { persoLoaded.fiche = false; loadCharacter(); }
+  });
+
+  // Reload manuel
+  onSSE("reload", async () => {
+    const s = await fetchJson("/api/stats");
+    setState({ stats: s, classes: s.classes || [] });
+    renderStats(s);
+    loadClasses(s.classes);
   });
 }
 
