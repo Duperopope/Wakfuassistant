@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class ItemEnchantExtractor {
 
-    private static final String[] COLOR_NAMES = {"None", "Red", "Blue", "Green", "White"};
+    private static final String[] COLOR_NAMES = {"None", "Red", "Green", "Blue", "White"};
 
     /**
      * Echappe une string pour JSON.

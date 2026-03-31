@@ -150,14 +150,14 @@ function renderTooltip(tip, item) {
   // --- GEMMES (si slot_colors fourni) ---
   const slotColors = item._slot_colors || "";
   if (slotColors) {
-    const gemColorMap = {"Rouge":"#e74c3c","Bleu":"#3498db","Vert":"#2ecc71","Blanc":"#ecf0f1"};
+    const gemIconMap = {"Rouge":"shardRedFull","Bleu":"shardBlueFull","Vert":"shardGreenFull","Blanc":"shardWhiteFull"};
     const gems = slotColors.split(",").map(function(g){ return g.trim(); }).filter(Boolean);
     if (gems.length > 0) {
-      html += '<div style="margin:6px 0;display:flex;align-items:center;gap:6px">';
-      html += '<span style="color:#888;font-size:10px;letter-spacing:1px">GEMMES</span> ';
+      html += '<div style="margin:6px 0;display:flex;align-items:center;justify-content:center;gap:6px">';
+      
       for (var gi = 0; gi < gems.length; gi++) {
-        var gc = gemColorMap[gems[gi]] || "#888";
-        html += '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:' + gc + ';border:1px solid rgba(255,255,255,0.3)" title="' + escHtml(gems[gi]) + '"></span>';
+        var icon = gemIconMap[gems[gi]] || "shardWhiteFull";
+        html += '<img src="/icons/items/' + icon + '.png" width="18" height="18" style="vertical-align:middle" title="' + escHtml(gems[gi]) + '">';
       }
       html += '</div>';
     }

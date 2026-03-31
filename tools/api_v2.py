@@ -1147,7 +1147,12 @@ async def api_patrimoine():
                 chest = json.load(f)
             for comp in chest.get("compartments", []):
                 for it in comp.get("items", []):
-                    chest_items.append({"itemId": it.get("itemId", 0), "quantity": it.get("quantity", 1), "source": "coffre"})
+                    _enc = it.get("enchant", {})
+                    _slots = _enc.get("slots", [])
+                    _color_map = {1:"Rouge",2:"Vert",3:"Bleu",4:"Blanc"}
+                    _sc = ",".join([_color_map.get(s.get("colorId",0),"") for s in _slots]) if _slots else ""
+                    _sub = _enc.get("sublimationId", 0)
+                    chest_items.append({"itemId": it.get("itemId", 0), "quantity": it.get("quantity", 1), "source": "coffre", "slotColors": _sc, "sublimationId": _sub})
         except Exception:
             pass
     # 3) Inventaire
@@ -1190,7 +1195,7 @@ async def api_patrimoine():
             chest_value += val
             chest_priced += 1
             cdn_info = _cdn_lookup(it["itemId"])
-            all_valued.append({"itemId": it["itemId"], "name": cdn_info.get("name", str(it["itemId"])), "quantity": it["quantity"], "unitPrice": p, "totalValue": val, "rarity": cdn_info.get("rarity", 0), "gfxId": cdn_info.get("gfxId", 0), "source": "coffre"})
+            all_valued.append({"itemId": it["itemId"], "name": cdn_info.get("name", str(it["itemId"])), "quantity": it["quantity"], "unitPrice": p, "totalValue": val, "rarity": cdn_info.get("rarity", 0), "gfxId": cdn_info.get("gfxId", 0), "source": "coffre", "slotColors": it.get("slotColors", ""), "sublimationId": it.get("sublimationId", 0)})
     for it in inv_items:
         p = prices.get(it["itemId"], 0)
         if p > 0:

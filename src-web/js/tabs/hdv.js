@@ -46,7 +46,7 @@ async function loadPatrimoine() {
       for (var i = 0; i < data.topItems.length; i++) {
         var it = data.topItems[i];
         var rc = getRarity(it.rarity).hex;
-        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' style='border-bottom:1px solid #222'>";
+        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' data-slot-colors='" + (it.slotColors || "") + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
         if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
@@ -102,7 +102,7 @@ async function loadMarket() {
         var it = data.items[i];
         var rc = getRarity(it.rarity).hex;
         var sideLabel = it.side === "buy" ? "<span style='color:#66ccff'>Achat</span>" : "<span style='color:#00cc44'>Vente</span>";
-        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' style='border-bottom:1px solid #222'>";
+        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' data-slot-colors='" + (it.slotColors || "") + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
         if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
