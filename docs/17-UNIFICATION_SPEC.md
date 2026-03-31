@@ -115,3 +115,31 @@ Render.com Web Service
 Build: npm install && npm run build:web && pip install -r requirements.txt
 Start: uvicorn tools.api_v2:app --host 0.0.0.0 --port 
 DB: Turso (SQLite distribue, 5GB gratuit, bases separees public/prive)
+
+---
+
+## Journal de tests
+
+### Test 1 — 2026-03-31 — Post-migration shared (commits 49c5084..c67ee00)
+
+**Environnement** : 
+pm run dev:web + python tools/api_v2.py (localhost:3000 / 8042)
+
+**Resultats** :
+- Classement : OK — joueurs affiches, icones chargees, tooltip wiki fonctionne (couleurs partagees)
+- Tooltip CDN : OK — badge rarete, effets avec icones wiki, description, positionnement correct
+- HDV : OK — patrimoine et marche chargent, prix formates via fmtPrice shared
+- Personnage : OK — grilles build/inventaire/coffre, icones atlas (23ms)
+- SSE : OK — connexion EventSource active
+
+**Erreurs connues (pre-existantes, non liees a la migration)** :
+- 24 erreurs 404 : icones de slots manquantes (casque.png, cape.png, etc.) — proviennent de modal.js SLOT_ICON_MAP
+- favicon.ico 404
+
+**Performance** :
+- icons-atlas : 1,846 KB en 23ms
+- players API : 23.9 KB en 5ms
+- DOMContentLoaded : 150ms
+- Load : 313ms
+
+**Verdict** : PASS — migration shared validee, zero regression fonctionnelle.
