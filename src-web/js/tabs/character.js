@@ -1,20 +1,4 @@
-/* Icons Atlas - preloaded base64 icons */
-var _iconsAtlas = null;
-function loadIconsAtlas(cb) {
-    if (_iconsAtlas) { if (cb) cb(); return; }
-    fetch("/api/icons-atlas")
-        .then(function(r) { return r.json(); })
-        .then(function(data) { _iconsAtlas = data; console.log("Atlas loaded:", Object.keys(data).length, "icons"); if (cb) cb(); })
-        .catch(function(e) { console.error("Atlas error:", e); _iconsAtlas = {}; if (cb) cb(); });
-}
-function getIconSrc(gfxId) {
-    if (!gfxId || gfxId === 0) return null;
-    var key = String(gfxId);
-    if (_iconsAtlas && _iconsAtlas[key]) {
-        return "data:image/webp;base64," + _iconsAtlas[key];
-    }
-    return "/icons/items/" + key + ".png";
-}
+// Icons: utilise shared/item.js (sharedLoadAtlas, sharedGetIcon)
 
 // character.js - Onglet Personnage : 3 grilles (Build, Inventaire, Coffre)
 // Données locales uniquement : build-result.json, inventory_bags.json, account_chest_full.json
@@ -24,38 +8,26 @@ function getIconSrc(gfxId) {
 
 
 import { fetchJson } from "../api.js";
+import { getRarity, GEM_COLORS, escHtml, loadIconsAtlas as sharedLoadAtlas, getIconSrc as sharedGetIcon } from "../shared/item.js";
+import { showPriceTooltip, positionTooltip, hidePriceTooltip } from "./hdv.js";
 import { initTooltipDelegation } from "../tooltip.js";
 
-/* Constantes rareté */
-var RARITY = [
-    { name: "Commun",     hex: "#c0c0c0", cls: "common"    },
-    { name: "Inhabituel", hex: "#ffffff", cls: "unusual"   },
-    { name: "Rare",       hex: "#22b069", cls: "rare"      },
-    { name: "Mythique",   hex: "#ff8c19", cls: "mythic"    },
-    { name: "Legendaire", hex: "#ffee00", cls: "legendary" },
-    { name: "Relique",    hex: "#ff55ff", cls: "relic"     },
-    { name: "Souvenir",   hex: "#66ccff", cls: "souvenir"  },
-    { name: "Epique",     hex: "#ff6600", cls: "epic"      }
-];
+// Rarete: utilise shared/item.js (getRarity)
 
-var GEM_COLORS = { Red: "#e74c3c", Blue: "#3498db", Green: "#2ecc71", White: "#ecf0f1" };
+// GEM_COLORS: utilise shared/item.js
 
-function esc(s) {
-    var d = document.createElement("div");
-    d.textContent = s || "";
-    return d.innerHTML;
-}
+// esc -> escHtml (shared/item.js)
 
 function ri(idx) {
-    return RARITY[Math.min(Math.max(idx || 0, 0), 7)];
+    return getRarity(idx);
 }
 
 /* Cellule */
 function cellHTML(item) {
-    var rMap = {1:{cls:"common",hex:"#aaa"},2:{cls:"uncommon",hex:"#fff"},3:{cls:"rare",hex:"#4fc"},4:{cls:"mythic",hex:"#fa0"},5:{cls:"legend",hex:"#f80"},6:{cls:"relic",hex:"#e44"},7:{cls:"epic",hex:"#e4e"}};
+    // rMap supprime - utilise getRarity
     var id = item.id || item.refId || item.itemId || 0;
     var nm = item.name || item.title || ("#" + id);
-    var r = rMap[item.rarity] || {cls:"common",hex:"#555"};
+    var r = getRarity(item.rarity);
     var gfx = item.gfxId || item.gfx || 0;
     var qty = item.quantity || 1;
     var lvl = item.level || "";
@@ -73,17 +45,17 @@ function cellHTML(item) {
 
     var h = "";
     h += "<div class=\"gc\" style=\"border-color:" + r.hex + "\"";
-    h += " data-tooltip=\"" + esc(tipText).replace(/\n/g, "&#10;") + "\"";
+    h += " data-tooltip=\"" + escHtml(tipText).replace(/\n/g, "&#10;") + "\"";
     h += " data-id=\"" + id + "\">";
 
     /* Icon area */
     h += "<div class=\"gc__icon-area\">";
     if (gfx) {
-        var cdnUrl = getIconSrc(gfx);
+        var cdnUrl = sharedGetIcon(gfx);
         h += "<img class=\"gc__img\" src=\"" + cdnUrl + "\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">";
-        h += "<span class=\"gc__fb\" style=\"display:none\">" + esc(nm.substring(0, 3)).toUpperCase() + "</span>";
+        h += "<span class=\"gc__fb\" style=\"display:none\">" + escHtml(nm.substring(0, 3)).toUpperCase() + "</span>";
     } else {
-        h += "<span class=\"gc__fb\">" + esc(nm.substring(0, 3)).toUpperCase() + "</span>";
+        h += "<span class=\"gc__fb\">" + escHtml(nm.substring(0, 3)).toUpperCase() + "</span>";
     }
     h += "</div>";
 
@@ -104,9 +76,9 @@ function cellHTML(item) {
     if (hasGems) h += "<span class=\"gc__ench\">&#10024;</span>";
 
     /* Nom complet sur 2 lignes */
-    h += "<div class=\"gc__name\">" + esc(nm) + "</div>";
+    h += "<div class=\"gc__name\">" + escHtml(nm) + "</div>";
 
-    if (item.slot) h += "<span class=\"gc__slot\">" + esc(item.slot) + "</span>";
+    if (item.slot) h += "<span class=\"gc__slot\">" + escHtml(item.slot) + "</span>";
     if (item.owned) h += "<span class=\"gc__owned\">&#10003;</span>";
     h += "</div>";
     return h;
@@ -119,13 +91,13 @@ function gridHTML(title, badge, subtitle, items) {
     if (count > 0) {
         items.forEach(function(it) { cells += cellHTML(it); });
     } else {
-        cells = "<div class=\"gg__empty\">" + esc(subtitle || "Aucun objet") + "</div>";
+        cells = "<div class=\"gg__empty\">" + escHtml(subtitle || "Aucun objet") + "</div>";
     }
     var h = "";
     h += "<section class=\"gg\">";
     h += "<header class=\"gg__head\">";
-    h += "<h3 class=\"gg__title\">" + esc(title) + " <span class=\"gg__badge\">" + esc(badge) + "</span></h3>";
-    if (subtitle && count > 0) h += "<span class=\"gg__sub\">" + esc(subtitle) + "</span>";
+    h += "<h3 class=\"gg__title\">" + escHtml(title) + " <span class=\"gg__badge\">" + escHtml(badge) + "</span></h3>";
+    if (subtitle && count > 0) h += "<span class=\"gg__sub\">" + escHtml(subtitle) + "</span>";
     h += "</header>";
     h += "<div class=\"gg__cells\">" + cells + "</div>";
     h += "</section>";
@@ -145,7 +117,7 @@ function patrimoineHTML(bc, ic, cc, timestamps) {
     h += "<span class=\"pat__tag pat__total\">Total <strong>" + total + "</strong></span>";
     h += "</div>";
     h += "<div class=\"pat__ts\">";
-    timestamps.forEach(function(t) { h += "<span>" + esc(t) + "</span>"; });
+    timestamps.forEach(function(t) { h += "<span>" + escHtml(t) + "</span>"; });
     h += "</div></div>";
     return h;
 }
@@ -167,7 +139,7 @@ async function loadSheet(container) {
         if (results[2].status === "fulfilled" && !results[2].value.error) chestData = results[2].value;
     } catch (err) {
         console.error("[character] Fetch error:", err);
-        container.innerHTML = "<div class=\"gc-error\">Erreur : " + esc(err.message) + "</div>";
+        container.innerHTML = "<div class=\"gc-error\">Erreur : " + escHtml(err.message) + "</div>";
         return;
     }
 
@@ -176,7 +148,7 @@ async function loadSheet(container) {
     // Header joueur
     if (invData && invData.player) {
         html += "<div class=\"inv-player-header\">";
-        html += "<div><h2 class=\"inv-player-name\">" + esc(invData.player) + "</h2>";
+        html += "<div><h2 class=\"inv-player-name\">" + escHtml(invData.player) + "</h2>";
         html += "<span class=\"inv-player-detail\">Niv. " + (invData.level || "?") + "</span></div>";
         html += "<div class=\"inv-player-stats\">";
         if (invData.kamas > 0) html += "<span class=\"inv-stat\">" + invData.kamas.toLocaleString("fr-FR") + " Kamas</span>";
@@ -286,7 +258,7 @@ window.__loadCharacterTab = function() {
 };
 
 // Pre-charger l'atlas
-loadIconsAtlas();
+sharedLoadAtlas();
 
 
 // === GRAPHE PRIX MOUSEOVER (personnage) ===
@@ -300,23 +272,17 @@ function attachCharacterPriceHover() {
         var itemId = parseInt(card.dataset.id);
         if (!itemId || itemId <= 0) return;
         var itemName = card.querySelector(".gc__name") ? card.querySelector(".gc__name").textContent.trim() : "";
-        if (typeof showPriceTooltip === "function") {
-            showPriceTooltip(itemId, itemName, e);
-        } else if (window.__showPriceTooltip) {
-            window.__showPriceTooltip(itemId, itemName, e);
-        }
+        showPriceTooltip(itemId, itemName, e);
     });
 
     container.addEventListener("mousemove", function(e) {
-        if (typeof positionTooltip === "function") positionTooltip(e);
-        else if (window.__positionTooltip) window.__positionTooltip(e);
+        positionTooltip(e);
     });
 
     container.addEventListener("mouseout", function(e) {
         var card = e.target.closest(".gc[data-id]");
         if (card) {
-            if (typeof hidePriceTooltip === "function") hidePriceTooltip();
-            else if (window.__hidePriceTooltip) window.__hidePriceTooltip();
+            hidePriceTooltip();
         }
     });
 }
