@@ -33,7 +33,7 @@ import logging
 import threading
 import time
 import json
-from tools.hdv_sync import run_sync as hdv_run_sync
+from hdv_sync import run_sync as hdv_run_sync
 import re
 from pathlib import Path
 
