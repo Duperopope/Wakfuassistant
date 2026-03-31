@@ -139,9 +139,16 @@ async function init() {
   connectSSE();
 
   // ── Helpers SSE ──────────────────────────────────────────────────
+  let _builderRefreshTimer = null;
+
   function _refreshBuilderIfVisible() {
     if (getState().currentTab === "cdn" && currentPersoSub === "builder") {
-      loadEquipment(document.getElementById("equipment-container"));
+      // Debounce: ne rafraîchir le builder que max 1 fois par 15 secondes
+      if (_builderRefreshTimer) clearTimeout(_builderRefreshTimer);
+      _builderRefreshTimer = setTimeout(() => {
+        loadEquipment(document.getElementById("equipment-container"));
+        _builderRefreshTimer = null;
+      }, 15000);
     }
   }
 
@@ -165,11 +172,11 @@ async function init() {
   onSSE("hdv", () => {
     const state = getState();
     if (state.currentTab === "hdv") refreshHdv();
-    // Le builder affiche les prix HDV → rafraîchir si visible
+    // Le builder affiche les prix HDV → rafraîchir si visible (debounced)
     _refreshBuilderIfVisible();
   });
 
-  // Coffre ou inventaire mis a jour
+  // Coffre ou inventaire mis a jour (events frequents → utiliser debounce pour eviter reload constant)
   onSSE("chest", () => {
     const state = getState();
     if (state.currentTab === "hdv") refreshHdv();
