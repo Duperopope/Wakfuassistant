@@ -69,9 +69,10 @@ function switchPersoSub(sub) {
     el.style.display = el.dataset.persoContent === sub ? "" : "none"
   );
   // Lazy load
-  if (!persoLoaded[sub]) {
+  if (sub === "fiche") {
+    loadCharacter();
+  } else if (!persoLoaded[sub]) {
     persoLoaded[sub] = true;
-    if (sub === "fiche") loadCharacter();
     if (sub === "builder") loadEquipment(document.getElementById("equipment-container"));
     if (sub === "optimizer") loadOptimizer(document.getElementById("optimizer-container"));
     if (sub === "spells") loadSpellsEditor(document.getElementById("spells-container"));
@@ -143,6 +144,13 @@ async function init() {
       if (state.currentSubtab === "players") loadPlayers();
       if (state.currentSubtab === "guilds") loadGuilds();
       if (state.currentSubtab === "recent") loadRecent(true);
+    }
+    if (state.currentTab === "hdv") {
+      loadHdv();
+    }
+    if (state.currentTab === "cdn") {
+      persoLoaded.fiche = false;
+      loadCharacter();
     }
   });
 }

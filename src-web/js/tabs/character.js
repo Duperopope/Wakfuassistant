@@ -291,7 +291,7 @@ loadIconsAtlas();
 
 // === GRAPHE PRIX MOUSEOVER (personnage) ===
 function attachCharacterPriceHover() {
-    var container = document.getElementById("charContainer") || document.getElementById("persoFichePanel");
+    var container = document.getElementById("ficheContent") || document.getElementById("charContainer") || document.getElementById("persoFichePanel");
     if (!container) return;
 
     container.addEventListener("mouseover", function(e) {
