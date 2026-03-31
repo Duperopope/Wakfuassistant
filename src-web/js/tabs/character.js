@@ -1,261 +1,228 @@
-// Icons: utilise shared/item.js (sharedLoadAtlas, sharedGetIcon)
-
-// character.js - Onglet Personnage : 3 grilles (Build, Inventaire, Coffre)
-// Données locales uniquement : build-result.json, inventory_bags.json, account_chest_full.json
-// Enrichissement via CDN local (cdn_items.json décompilé) + noms du coffre
-
-
-
+// character.js — Page Personnage : Build / Inventaire / Coffre
 
 import { fetchJson } from "../api.js";
-import { getRarity, GEM_COLORS, escHtml, loadIconsAtlas as sharedLoadAtlas, getIconSrc as sharedGetIcon } from "../shared/item.js";
+import { getRarity, escHtml, loadIconsAtlas as sharedLoadAtlas, getIconSrc as sharedGetIcon } from "../shared/item.js";
 import { initTooltipDelegation } from "../tooltip.js";
 
-// Rarete: utilise shared/item.js (getRarity)
+const GEM_COLOR = { 1: "#e04040", 2: "#38c454", 3: "#4466ee", 4: "#cccccc" };
 
-// GEM_COLORS: utilise shared/item.js
+// ── Carte d'un item ──────────────────────────────────────────────
+function itemCard(it) {
+    const id      = it.id || it.refId || it.itemId || 0;
+    const nm      = it.name || ("#" + id);
+    const r       = getRarity(it.rarity || 0);
+    const gfx     = it.gfxId || it.gfx || 0;
+    const qty     = it.quantity || 1;
+    const lvl     = it.level || "";
+    const gems    = it.gemSlots || it.gems || [];
+    const iconUrl = gfx ? sharedGetIcon(gfx) : "";
 
-// esc -> escHtml (shared/item.js)
-
-function ri(idx) {
-    return getRarity(idx);
-}
-
-/* Cellule */
-function cellHTML(item) {
-    // rMap supprime - utilise getRarity
-    var id = item.id || item.refId || item.itemId || 0;
-    var nm = item.name || item.title || ("#" + id);
-    var r = getRarity(item.rarity);
-    var gfx = item.gfxId || item.gfx || 0;
-    var qty = item.quantity || 1;
-    var lvl = item.level || "";
-    var desc = item.description || "";
-    var gems = item.gemSlots || item.gems || [];
-    var hasGems = gems.length > 0 || item.enchantCount > 0;
-
-    /* Tooltip complet */
-    var tipParts = [nm];
-    if (lvl) tipParts.push("Niveau " + lvl);
-    var rName = {1:"Commun",2:"Inhabituel",3:"Rare",4:"Mythique",5:"Legendaire",6:"Relique",7:"Epique"}[item.rarity];
-    if (rName) tipParts.push(rName);
-    if (desc) tipParts.push(desc.length > 200 ? desc.substring(0, 200) + "..." : desc);
-    var tipText = tipParts.join("\n");
-
-    var h = "";
-    h += "<div class=\"gc\" style=\"border-color:" + r.hex + "\"";
-    h += " data-tooltip=\"" + escHtml(tipText).replace(/\n/g, "&#10;") + "\"";
-    h += " data-id=\"" + id + "\" data-item-id=\"" + id + "\">";
-
-    /* Icon area */
-    h += "<div class=\"gc__icon-area\">";
-    if (gfx) {
-        var cdnUrl = sharedGetIcon(gfx);
-        h += "<img class=\"gc__img\" src=\"" + cdnUrl + "\" alt=\"\" loading=\"lazy\" onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\">";
-        h += "<span class=\"gc__fb\" style=\"display:none\">" + escHtml(nm.substring(0, 3)).toUpperCase() + "</span>";
+    let h = `<div class="ch-card" style="--rc:${r.hex}" data-item-id="${id}">`;
+    h += `<div class="ch-card__ico">`;
+    if (iconUrl) {
+        h += `<img src="${escHtml(iconUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`;
+        h += `<span class="ch-card__ico-fb" style="display:none">${escHtml(nm.slice(0, 3).toUpperCase())}</span>`;
     } else {
-        h += "<span class=\"gc__fb\">" + escHtml(nm.substring(0, 3)).toUpperCase() + "</span>";
+        h += `<span class="ch-card__ico-fb">${escHtml(nm.slice(0, 3).toUpperCase())}</span>`;
     }
-    h += "</div>";
-
-    /* Badges */
-    if (qty > 1) h += "<span class=\"gc__qty\">x" + qty + "</span>";
-    if (lvl) h += "<span class=\"gc__lvl\">" + lvl + "</span>";
-
-    /* Gem dots */
+    h += `</div>`;
+    if (qty > 1) h += `<span class="ch-card__qty">x${qty}</span>`;
+    if (lvl)     h += `<span class="ch-card__lvl">${lvl}</span>`;
     if (gems.length > 0) {
-        var gemH = "";
-        var gColors = {1:"#e33",2:"#3b3",3:"#33e",4:"#fff"};
-        for (var gi = 0; gi < gems.length; gi++) {
-            var gc = gColors[gems[gi]] || gColors[gems[gi].color] || "#888";
-            gemH += "<span class=\"gc__gem-dot\" style=\"background:" + gc + "\"></span>";
+        h += `<div class="ch-card__gems">`;
+        gems.forEach(g => {
+            const c = GEM_COLOR[g] || GEM_COLOR[g && g.color] || "#555";
+            h += `<span class="ch-card__gem" style="background:${c}"></span>`;
+        });
+        h += `</div>`;
+    }
+    h += `<div class="ch-card__name">${escHtml(nm)}</div>`;
+    h += `</div>`;
+    return h;
+}
+
+// ── Section repliable (Build / Sac / Compartiment) ──────────────
+function renderSection(icon, title, badge, meta, items) {
+    const cells = items.length
+        ? items.map(itemCard).join("")
+        : `<span class="ch-empty">${escHtml(meta || "Aucun objet")}</span>`;
+
+    // Stats inline dans le header
+    let statsHtml = "";
+    if (items.length > 0) {
+        const leveled = items.filter(it => it.level > 0);
+        if (leveled.length > 0) {
+            const avg = Math.round(leveled.reduce((s, it) => s + it.level, 0) / leveled.length);
+            statsHtml += `<span class="ch-section__stat">Moy.\u00a0niv.\u00a0${avg}</span>`;
         }
-        h += "<div class=\"gc__gems\">" + gemH + "</div>";
+        const top = items.slice().sort((a, b) => (b.level || 0) - (a.level || 0))[0];
+        if (top && top.name && !top.name.startsWith("#")) {
+            const nm = top.name.length > 22 ? top.name.slice(0, 22) + "\u2026" : top.name;
+            const topId = top.id || top.refId || top.itemId || 0;
+            statsHtml += `<span class="ch-section__stat ch-section__stat--top" data-item-id="${topId}">${escHtml(nm)}\u00a0niv.\u00a0${top.level || "?"}</span>`;
+        }
     }
-    if (hasGems) h += "<span class=\"gc__ench\">&#10024;</span>";
 
-    /* Nom complet sur 2 lignes */
-    h += "<div class=\"gc__name\">" + escHtml(nm) + "</div>";
-
-    if (item.slot) h += "<span class=\"gc__slot\">" + escHtml(item.slot) + "</span>";
-    if (item.owned) h += "<span class=\"gc__owned\">&#10003;</span>";
-    h += "</div>";
-    return h;
+    return `
+<section class="ch-section ch-section--collapsed">
+  <div class="ch-section__head" role="button" tabindex="0" onclick="this.closest('.ch-section').classList.toggle('ch-section--collapsed')" onkeydown="if(event.key==='Enter'||event.key===' ')this.click()">
+    <span class="ch-section__chevron">&#9660;</span>
+    <span class="ch-section__icon">${icon}</span>
+    <h3 class="ch-section__title">${escHtml(title)}</h3>
+    <span class="ch-section__badge">${escHtml(String(badge))}</span>
+    ${statsHtml}
+    ${meta && items.length ? `<span class="ch-section__meta">${escHtml(meta)}</span>` : ""}
+  </div>
+  <div class="ch-grid">${cells}</div>
+</section>`;
 }
 
-/* Section grille */
-function gridHTML(title, badge, subtitle, items) {
-    var count = items.length;
-    var cells = "";
-    if (count > 0) {
-        items.forEach(function(it) { cells += cellHTML(it); });
-    } else {
-        cells = "<div class=\"gg__empty\">" + escHtml(subtitle || "Aucun objet") + "</div>";
-    }
-    var h = "";
-    h += "<section class=\"gg\">";
-    h += "<header class=\"gg__head\">";
-    h += "<h3 class=\"gg__title\">" + escHtml(title) + " <span class=\"gg__badge\">" + escHtml(badge) + "</span></h3>";
-    if (subtitle && count > 0) h += "<span class=\"gg__sub\">" + escHtml(subtitle) + "</span>";
-    h += "</header>";
-    h += "<div class=\"gg__cells\">" + cells + "</div>";
-    h += "</section>";
-    return h;
+// ── Header joueur ────────────────────────────────────────────────
+function playerHeader(invData) {
+    const name  = invData.player && invData.player !== "<undefined>" ? invData.player : null;
+    const level = invData.level || "";
+    const kamas = invData.kamas > 0 ? invData.kamas.toLocaleString("fr-FR") + " K" : null;
+    if (!name && !level && !kamas) return "";
+    return `
+<div class="ch-header">
+  <div class="ch-header__left">
+    ${name  ? `<span class="ch-header__name">${escHtml(name)}</span>` : ""}
+    ${level ? `<span class="ch-header__level">Niv.\u00a0${level}</span>` : ""}
+  </div>
+  ${kamas ? `<span class="ch-header__kamas">${kamas}</span>` : ""}
+</div>`;
 }
 
-/* Patrimoine */
-function patrimoineHTML(bc, ic, cc, timestamps) {
-    var total = bc + ic + cc;
-    var h = "";
-    h += "<div class=\"pat\">";
-    h += "<h3 class=\"pat__title\">Patrimoine</h3>";
-    h += "<div class=\"pat__row\">";
-    h += "<span class=\"pat__tag\">Build <strong>" + bc + "</strong></span>";
-    h += "<span class=\"pat__tag\">Inventaire <strong>" + ic + "</strong></span>";
-    h += "<span class=\"pat__tag\">Coffre <strong>" + cc + "</strong></span>";
-    h += "<span class=\"pat__tag pat__total\">Total <strong>" + total + "</strong></span>";
-    h += "</div>";
-    h += "<div class=\"pat__ts\">";
-    timestamps.forEach(function(t) { h += "<span>" + escHtml(t) + "</span>"; });
-    h += "</div></div>";
-    return h;
+// ── Catégorisation des sacs ──────────────────────────────────────
+function bagCategory(bag) {
+    const nm = (bag.bagName || "").toLowerCase();
+    if (nm.includes("qu\u00eate") || nm.includes("quete") || nm.includes("quest") || nm.includes("objet de qu")) return "quest";
+    if (nm.includes("caissette") || nm.includes("aventuri")) return "crate";
+    return "normal";
 }
 
-/* Chargement principal */
+// ── Barre de résumé ──────────────────────────────────────────────
+function summaryBar(invCount, chestCount, invTs, chestTs) {
+    return `
+<div class="ch-summary">
+  <div class="ch-summary__stat">
+    <span class="ch-summary__label">Inventaire</span>
+    <span class="ch-summary__val">${invCount} items</span>
+  </div>
+  <div class="ch-summary__sep"></div>
+  <div class="ch-summary__stat">
+    <span class="ch-summary__label">Coffre</span>
+    <span class="ch-summary__val">${chestCount} items</span>
+  </div>
+  <div class="ch-summary__ts">
+    ${invTs   ? `<span>Inv.\u00a0: ${escHtml(invTs)}</span>`    : ""}
+    ${chestTs ? `<span>Coffre\u00a0: ${escHtml(chestTs)}</span>` : ""}
+  </div>
+</div>`;
+}
+
+// ── Chargement principal ─────────────────────────────────────────
 async function loadSheet(container) {
-    container.innerHTML = "<div class=\"gc-loading\">Chargement des donnees...</div>";
-
-    var buildData = null, invData = null, chestData = null;
-
+    container.innerHTML = `<div class="ch-loading">Chargement...</div>`;
+    let invData = null, chestData = null;
     try {
-        var results = await Promise.allSettled([
-            fetchJson("/api/build-data"),
+        const results = await Promise.allSettled([
             fetchJson("/api/inventory/local"),
             fetchJson("/api/chest")
         ]);
-        if (results[0].status === "fulfilled" && !results[0].value.error) buildData = results[0].value;
-        if (results[1].status === "fulfilled" && !results[1].value.error) invData = results[1].value;
-        if (results[2].status === "fulfilled" && !results[2].value.error) chestData = results[2].value;
+        if (results[0].status === "fulfilled" && !results[0].value.error) invData   = results[0].value;
+        if (results[1].status === "fulfilled" && !results[1].value.error) chestData = results[1].value;
     } catch (err) {
-        console.error("[character] Fetch error:", err);
-        container.innerHTML = "<div class=\"gc-error\">Erreur : " + escHtml(err.message) + "</div>";
+        container.innerHTML = `<div class="ch-error">Erreur : ${escHtml(err.message)}</div>`;
         return;
     }
 
-    var html = "";
+    let html = "";
 
     // Header joueur
-    if (invData && invData.player) {
-        html += "<div class=\"inv-player-header\">";
-        html += "<div><h2 class=\"inv-player-name\">" + escHtml(invData.player) + "</h2>";
-        html += "<span class=\"inv-player-detail\">Niv. " + (invData.level || "?") + "</span></div>";
-        html += "<div class=\"inv-player-stats\">";
-        if (invData.kamas > 0) html += "<span class=\"inv-stat\">" + invData.kamas.toLocaleString("fr-FR") + " Kamas</span>";
-        html += "</div></div>";
+    if (invData && (invData.player || invData.level)) {
+        html += playerHeader(invData);
     }
 
-    // Grille 1 : Build
-    var buildItems = [];
-    if (buildData && buildData.items) {
-        buildData.items.forEach(function(it) {
-            buildItems.push({
-                refId: it.id || it.refId || 0,
-                name: it.name || "?",
+    // Trier les sacs par catégorie
+    const bags = invData && invData.bags ? invData.bags : [];
+    const normalBags = bags.filter(b => bagCategory(b) === "normal");
+    const crateBags  = bags.filter(b => bagCategory(b) === "crate");
+    const questBags  = bags.filter(b => bagCategory(b) === "quest");
+
+    // Coffres triés alphabétiquement
+    const compartments = chestData && chestData.compartments
+        ? chestData.compartments.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr"))
+        : [];
+
+    function renderBag(bag) {
+        const items = (bag.items || []).map(it => ({
+            id: it.refId || 0,
+            name: it.name || ("#" + it.refId),
+            level: it.level || 0,
+            rarity: it.rarity || 0,
+            gfxId: it.gfxId || 0,
+            quantity: it.quantity || 1,
+        }));
+        const meta = (bag.capacity - (bag.itemCount || 0)) + " slots libres";
+        html += renderSection("&#127526;", bag.bagName || "Sac",
+            (bag.itemCount || 0) + " / " + bag.capacity, meta, items);
+    }
+
+    // 1. Sacs normaux
+    if (normalBags.length > 0) {
+        normalBags.forEach(renderBag);
+    } else if (bags.length === 0) {
+        html += renderSection("&#127526;", "Inventaire", "0 items",
+            "Lance le jeu avec l'agent pour capturer l'inventaire.", []);
+    }
+
+    // 2. Caissettes de l'aventurier
+    crateBags.forEach(renderBag);
+
+    // 3. Coffre (compartiments triés alphabétiquement)
+    if (compartments.length > 0) {
+        compartments.forEach(comp => {
+            const items = (comp.items || []).map(it => ({
+                id: it.itemId || 0,
+                name: it.name || ("#" + it.itemId),
                 level: it.level || 0,
                 rarity: it.rarity || 0,
                 gfxId: it.gfxId || 0,
-                quantity: 1,
-                slot: it.slot || "",
-                owned: it.owned || false
-            });
-        });
-    }
-    var buildSub = "";
-    if (buildData) {
-        var subs = (buildData.sublimations || []).length;
-        var burst = buildData.burst || {};
-        var parts = [];
-        if (burst.masteryPool) parts.push("Mastery Pool: " + burst.masteryPool);
-        if (subs > 0) parts.push(subs + " sublimations");
-        buildSub = parts.join(" — ");
-    }
-    html += gridHTML("Build", buildItems.length + " pieces", buildSub || "Aucun build (build-result.json)", buildItems);
-
-    // Grille 2 : Inventaire
-    if (invData && invData.bags && invData.bags.length > 0) {
-        invData.bags.forEach(function(bag) {
-            var bagItems = [];
-            (bag.items || []).forEach(function(it) {
-                bagItems.push({
-                    refId: it.refId || 0,
-                    name: it.name || ("#" + it.refId),
-                    level: it.level || 0,
-                    rarity: it.rarity || 0,
-                    gfxId: it.gfxId || 0,
-                    quantity: it.quantity || 1
-                });
-            });
-            html += gridHTML(bag.bagName || "Sac", bag.itemCount + "/" + bag.capacity, "Sac vide", bagItems);
+                quantity: it.quantity || 1,
+                gems: it.enchant ? Object.values(it.enchant) : [],
+            }));
+            const enchStr = comp.enchantedCount > 0 ? comp.enchantedCount + " enchantes" : "";
+            const meta = [comp.emptySlots + " slots libres", enchStr].filter(Boolean).join(" · ");
+            html += renderSection("&#128230;", comp.name || "Compartiment",
+                (comp.itemCount || 0) + " / " + comp.capacity, meta, items);
         });
     } else {
-        html += gridHTML("Inventaire", "0", "Lance le jeu avec l agent pour capturer l inventaire.", []);
+        html += renderSection("&#128230;", "Coffre", "0 items",
+            "Ouvre ton coffre en jeu avec l'agent actif.", []);
     }
 
-    // Grille 3 : Coffre
-    if (chestData && chestData.compartments && chestData.compartments.length > 0) {
-        chestData.compartments.forEach(function(comp) {
-            var compItems = [];
-            (comp.items || []).forEach(function(it) {
-                compItems.push({
-                    refId: it.itemId || 0,
-                    name: it.name || ("#" + it.itemId),
-                    level: it.level || 0,
-                    rarity: it.rarity || 0,
-                    gfxId: it.gfxId || 0,
-                    quantity: it.quantity || 1,
-                    enchant: it.enchant || null
-                });
-            });
-            var enchTag = comp.enchantedCount > 0 ? " — " + comp.enchantedCount + " enchantes" : "";
-            html += gridHTML("Coffre : " + comp.name, comp.itemCount + "/" + comp.capacity, comp.emptySlots + " slots vides" + enchTag, compItems);
-        });
-    } else {
-        html += gridHTML("Coffre", "0", "Ouvre ton coffre en jeu avec l agent actif.", []);
-    }
+    // 4. Sacs de quêtes (en dernier)
+    questBags.forEach(renderBag);
 
-    // Patrimoine
-    var bc = buildItems.length;
-    var ic = invData ? (invData.totalItems || 0) : 0;
-    var cc = chestData ? (chestData.totalItems || 0) : 0;
-    var ts = [];
-    if (invData && invData.timestamp) ts.push("Inventaire : " + invData.timestamp);
-    if (chestData && chestData.lastUpdate) ts.push("Coffre : " + chestData.lastUpdate);
-    html += patrimoineHTML(bc, ic, cc, ts);
+    // Résumé bas de page
+    html += summaryBar(
+        invData   ? (invData.totalItems   || 0) : 0,
+        chestData ? (chestData.totalItems || 0) : 0,
+        invData   && invData.timestamp    ? invData.timestamp    : "",
+        chestData && chestData.lastUpdate ? chestData.lastUpdate : ""
+    );
 
     container.innerHTML = html;
     initTooltipDelegation(container);
-    console.log("[character] Rendu : build=" + bc + ", inv=" + ic + ", coffre=" + cc);
 }
 
-/* Point d entree */
+// ── Export ───────────────────────────────────────────────────────
 export async function loadCharacter() {
-    console.log("[character] init");
-    var container = document.getElementById("ficheContent");
-    if (!container) {
-        container = document.querySelector("[data-subcontent=\"fiche\"]");
-    }
-    if (!container) {
-        console.error("[character] Container introuvable !");
-        return;
-    }
+    const container = document.getElementById("ficheContent");
+    if (!container) return;
     await loadSheet(container);
 }
 
-window.__loadCharacterTab = function() {
-    loadCharacter();
-};
-
-// Pre-charger l'atlas
+window.__loadCharacterTab = () => loadCharacter();
 sharedLoadAtlas();
-
-

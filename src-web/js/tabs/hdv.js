@@ -166,7 +166,15 @@ function switchHdvSub(sub) {
 // ===================== INIT =====================
 export function loadHdv() {
   document.querySelectorAll("[data-hdv-sub]").forEach(function(el) {
-    el.addEventListener("click", function() { switchHdvSub(el.dataset.hdvSub); });
+    el.removeEventListener("click", el._hdvClickHandler);
+    el._hdvClickHandler = function() { switchHdvSub(el.dataset.hdvSub); };
+    el.addEventListener("click", el._hdvClickHandler);
   });
   switchHdvSub("patrimoine");
+}
+
+// Rafraichit uniquement le sous-onglet actif (pour SSE)
+export function refreshHdv() {
+  if (currentSub === "patrimoine") loadPatrimoine();
+  else if (currentSub === "market") loadMarket();
 }

@@ -33,6 +33,8 @@ import logging
 import threading
 import time
 import json
+import sqlite3
+from collections import defaultdict
 from hdv_sync import run_sync as hdv_run_sync
 import re
 from pathlib import Path
@@ -57,9 +59,71 @@ DB_PATH = BASE_DIR / "logs" / "wakfu.db"
 ICONS_DIR = BASE_DIR / "src-web" / "icons"
 WEB_DIR = BASE_DIR / "src-web"
 ITEMS_JSON = BASE_DIR / "rnd" / "data" / "cdn_items.json"
-COOLDOWN = 5  # secondes entre reloads
+COOLDOWN = 5          # secondes entre reloads
+HDV_FORCE_INTERVAL = 30  # secondes entre force-sync HDV indépendamment du mtime
 
 VALID_BREEDS = {"Feca","Osamodas","Enutrof","Sram","Xelor","Ecaflip","Eniripsa","Iop","Cra","Sadida","Sacrieur","Pandawa","Roublard","Zobal","Steamer","Eliotrope","Huppermage","Ouginak"}
+
+MANUAL_EQUIP_FILE = BASE_DIR / "logs" / "manual_equip.json"
+_manual_equip: dict = {}  # slot_name → {item_id, type_id}
+
+def _load_manual_equip():
+    global _manual_equip
+    if MANUAL_EQUIP_FILE.exists():
+        try:
+            with open(MANUAL_EQUIP_FILE, encoding="utf-8") as f:
+                _manual_equip = json.load(f)
+        except Exception:
+            _manual_equip = {}
+
+def _save_manual_equip():
+    MANUAL_EQUIP_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(MANUAL_EQUIP_FILE, "w", encoding="utf-8") as f:
+        json.dump(_manual_equip, f, ensure_ascii=False, indent=2)
+
+_load_manual_equip()
+
+ACTIVE_CHAR_FILE = BASE_DIR / "logs" / "active_character.txt"
+_active_player: str = ""
+
+def _load_active_player():
+    global _active_player
+    if ACTIVE_CHAR_FILE.exists():
+        _active_player = ACTIVE_CHAR_FILE.read_text(encoding="utf-8").strip()
+
+def _save_active_player(name: str):
+    ACTIVE_CHAR_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ACTIVE_CHAR_FILE.write_text(name, encoding="utf-8")
+
+def _get_player_file(name: str = "") -> dict | None:
+    """Charge players/{name}.json ou le fichier le plus récent avec équipement."""
+    player_dir = BASE_DIR / "logs" / "players"
+    if name:
+        p = player_dir / f"{name}.json"
+        if p.exists():
+            try:
+                with open(p, encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+    # Fallback: fichier le plus récent avec équipement non vide (hors snapshots _tN)
+    best_t, best_data = 0, None
+    for p in player_dir.glob("*.json"):
+        if "_t" in p.stem:
+            continue
+        mtime = p.stat().st_mtime
+        if mtime <= best_t:
+            continue
+        try:
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+            if d.get("equipment"):
+                best_t, best_data = mtime, d
+        except Exception:
+            pass
+    return best_data
+
+_load_active_player()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -80,13 +144,19 @@ log.info("DB: %s (%d joueurs)", DB_PATH, db.get_stats()["total_players"])
 try:
     from calculate_weights import (
         charger_items, calculer_joueur, parser_equipment,
-        parser_guild, parser_spells
+        parser_guild, parser_spells, SLOT_NAMES
     )
     _items_db = charger_items(ITEMS_JSON)
     log.info("Items DB: %d items charges", len(_items_db))
 except ImportError:
     log.warning("calculate_weights non trouve, scores indisponibles")
     _items_db = {}
+    SLOT_NAMES = {
+        0: "Casque", 3: "Épaulettes", 4: "Amulette", 5: "Plastron",
+        7: "Bague G", 8: "Bague D", 10: "Ceinture", 12: "Bottes",
+        13: "Cape", 15: "Arme", 16: "Seconde main", 17: "Outil",
+        22: "Familier", 24: "Monture",
+    }
     def calculer_joueur(*a, **kw): return None
     def parser_equipment(s): return {}
     def parser_guild(s): return (0, "")
@@ -97,16 +167,23 @@ except ImportError:
 # =====================================================
 _sse_clients: list[asyncio.Queue] = []
 _sse_lock = threading.Lock()
+_event_loop: asyncio.AbstractEventLoop | None = None
 
 def broadcast_sse(event: str, data: dict):
-    """Envoyer un evenement a tous les clients SSE."""
+    """Envoyer un evenement a tous les clients SSE (thread-safe)."""
     msg = json.dumps(data, ensure_ascii=False)
+    payload = {"event": event, "data": msg}
+    loop = _event_loop
+    if loop is None or not loop.is_running():
+        return
     with _sse_lock:
-        for q in _sse_clients:
-            try:
-                q.put_nowait({"event": event, "data": msg})
-            except asyncio.QueueFull:
-                pass
+        for q in list(_sse_clients):
+            def _put(q=q, p=payload):
+                try:
+                    q.put_nowait(p)
+                except asyncio.QueueFull:
+                    pass
+            loop.call_soon_threadsafe(_put)
 
 # =====================================================
 # WATCHER: surveille les fichiers joueurs
@@ -263,6 +340,7 @@ def _start_watcher():
 
         extra_mtimes = {}
         hdv_offset = 0
+        last_hdv_force = 0.0  # timestamp du dernier force-sync HDV
         for fp in [hdv_proto, chest_file, inv_file]:
             try:
                 extra_mtimes[str(fp)] = fp.stat().st_mtime
@@ -272,6 +350,7 @@ def _start_watcher():
         if hdv_proto.exists():
             try:
                 count, hdv_offset = hdv_run_sync(str(hdv_proto), str(hdv_db))
+                last_hdv_force = time.time()
                 log.info("Watcher: HDV sync initiale, %d entries, offset=%d", count, hdv_offset)
             except Exception as e:
                 log.warning("Watcher: HDV sync initiale error: %s", e)
@@ -308,12 +387,20 @@ def _start_watcher():
                 if hdv_proto.exists():
                     try:
                         mt = hdv_proto.stat().st_mtime
-                        if mt != extra_mtimes.get(str(hdv_proto), 0):
+                        now_t = time.time()
+                        mtime_changed = mt != extra_mtimes.get(str(hdv_proto), 0)
+                        force_due = (now_t - last_hdv_force) >= HDV_FORCE_INTERVAL
+                        if mtime_changed or force_due:
                             extra_mtimes[str(hdv_proto)] = mt
                             count, hdv_offset = hdv_run_sync(str(hdv_proto), str(hdv_db), hdv_offset)
+                            last_hdv_force = now_t
                             if count > 0:
                                 log.info("Watcher: HDV +%d entries (offset=%d)", count, hdv_offset)
                                 broadcast_sse("hdv", {"new_entries": count, "offset": hdv_offset})
+                            elif force_due:
+                                # Force-sync sans nouveaux entries : signaler quand même pour
+                                # que le frontend rafraîchisse les dates
+                                broadcast_sse("hdv", {"new_entries": 0, "offset": hdv_offset, "heartbeat": True})
                     except Exception as e:
                         log.warning("Watcher HDV error: %s", e)
 
@@ -352,6 +439,12 @@ app = FastAPI(
     version="2.0.0",
     description="API pour l'analyse des joueurs Wakfu"
 )
+
+@app.on_event("startup")
+async def _capture_event_loop():
+    global _event_loop
+    _event_loop = asyncio.get_running_loop()
+    log.info("Event loop SSE capture (thread-safe broadcasts actifs)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -698,8 +791,424 @@ async def api_reload_legacy():
 
 
 # =====================================================
+# BUILDER SRAM
+# =====================================================
+
+def _sram_score(item_data: dict) -> dict:
+    """
+    Score spécifique Sram burst-mêlée.
+    Priorités (doc référence Sram) :
+      +PA  > Mêlée > Élém-4 > %CC > Mêlée critique > Maît.dos > Maît.critique > PM > PW
+    Terre et Distance sont quasi-inutiles pour le Sram.
+    """
+    effets = item_data.get("effects", [])
+    action_ids = {e["actionId"] for e in effets}
+    cumul = (1052 in action_ids) and (1053 in action_ids)  # mêlée ET distance sur le même item
+
+    score = 0.0
+    bd = {}  # breakdown lisible
+
+    def add(key, val):
+        nonlocal score
+        score += val
+        bd[key] = round(bd.get(key, 0) + val)
+
+    for eff in effets:
+        aid = eff["actionId"]
+        p = eff.get("params", [])
+        v = float(p[0]) if p else 0.0
+
+        # ── Maîtrises offensives ─────────────────────────────────
+        if aid == 1052:   # Mêlée (tous les sorts Sram = mêlée)
+            add("mêlée",    v * (125 if cumul else 200))
+        elif aid == 1053: # Distance — presque inutile
+            add("distance", v * (50 if cumul else 20))
+        elif aid == 120:  # Élémentaire 4 élém
+            add("élém",     v * 167)
+        elif aid == 1068: # Élémentaire variable (N élems)
+            nb = int(p[2]) if len(p) > 2 else 1
+            add("élém",     v * {1: 100, 2: 130, 3: 155, 4: 167}.get(nb, 167))
+        elif aid in (122, 124, 125):  # Feu / Eau / Air mono
+            add("élém_mono", v * 100)
+        elif aid == 123:  # Terre — Sram n'a aucun sort Terre
+            add("terre",    v * 15)
+        elif aid == 149:  # Maîtrise critique
+            add("critique", v * 135)
+        elif aid == 180:  # Maîtrise dos (×1.25 multiplicateur séparé)
+            add("dos",      v * 115)
+        elif aid == 1055: # Maîtrise berserk (niche)
+            add("berserk",  v * 70)
+        elif aid == 26:   # Maîtrise soin — inutile DPS
+            add("soin",     v * 5)
+        # ── % CC — très précieux (target 100 %) ─────────────────
+        elif aid == 150:  # +% CC
+            add("cc%",      v * 550)
+        elif aid == 168:  # -% CC
+            add("cc%",     -v * 550)
+        # ── Stats majeures ───────────────────────────────────────
+        elif aid == 31:   # +PA
+            add("PA",       v * 3000)
+        elif aid == 56:   # -PA
+            add("PA",      -v * 3000)
+        elif aid == 41:   # +PM
+            add("PM",       v * 700)
+        elif aid == 57:   # -PM
+            add("PM",      -v * 700)
+        elif aid == 191:  # +PW
+            add("PW",       v * 400)
+        elif aid == 160:  # +Portée
+            add("portée",   v * 200)
+        # ── Pertes offensives explicites ────────────────────────
+        elif aid == 130:  # -Maît.Élém
+            add("élém",    -v * 167)
+        elif aid == 1059: # -Maît.Mêlée
+            add("mêlée",   -v * (125 if cumul else 200))
+        elif aid == 1056: # -Maît.Critique
+            add("critique",-v * 135)
+        elif aid == 181:  # -Maît.Dos
+            add("dos",     -v * 115)
+        elif aid == 1061: # -Maît.Berserk
+            add("berserk", -v * 70)
+        # ── Défensif — faible valeur en config DPS ───────────────
+        elif aid == 20:   # PV
+            add("pv",       v * 0.3)
+        elif aid == 80:   # Rés.Élém toutes
+            add("rés",      v * 0.5)
+
+    return {"score": round(score), "breakdown": {k: v for k, v in bd.items() if v != 0}}
+
+
+@app.get("/api/builder/sram")
+async def api_builder_sram(level: int = 0, budget: int = 0):
+    """Optimiseur Sram : compare build actuel / items possédés / HDV par slot.
+    level=0 → pas de filtre ; level>0 → ne propose que des items de niveau ≤ level.
+    budget=0 → pas de filtre ; budget>0 → ne propose que des offres HDV ≤ budget kamas."""
+    # ── 1. Build courant (source : players/{name}.json en priorité) ───
+    current_slots = {}  # slot_name → item enrichi
+    type_to_slot  = {}  # typeId → slot_name
+    player_name   = ""
+    player_level  = 0
+
+    player_data = _get_player_file(_active_player)
+    if player_data and player_data.get("equipment"):
+        equip = parser_equipment(player_data["equipment"])
+        player_name  = player_data.get("name", "")
+        player_level = player_data.get("level", 0)
+        for slot_id, iid in equip.items():
+            slot_name = SLOT_NAMES.get(slot_id, f"Slot{slot_id}")
+            cdn = _items_db.get(iid, {})
+            if not cdn:
+                continue
+            sc  = _sram_score(cdn)
+            tid = cdn.get("itemTypeId", 0)
+            if tid:
+                type_to_slot[tid] = slot_name
+            current_slots[slot_name] = {
+                "id": iid, "typeId": tid,
+                "name": cdn.get("name_fr", f"Item#{iid}"),
+                "level": cdn.get("level", 0),
+                "rarity": cdn.get("rarity", 0),
+                "gfxId": cdn.get("gfxId", 0),
+                "score": sc["score"],
+                "breakdown": sc["breakdown"],
+                "source": "build",
+            }
+
+    # Fallback : build-result.json (build optimizer)
+    if not current_slots:
+        br_path = Path(BASE_DIR) / "build-generator" / "data" / "build-result.json"
+        if br_path.exists():
+            try:
+                with open(br_path, "rb") as f:
+                    raw = f.read()
+                if raw[:3] == b"\xef\xbb\xbf":
+                    raw = raw[3:]
+                br = json.loads(raw)
+                for it in br.get("items", []):
+                    slot = it.get("slot")
+                    tid  = it.get("typeId")
+                    iid  = it.get("id")
+                    if not (slot and tid and iid):
+                        continue
+                    type_to_slot[tid] = slot
+                    cdn = _items_db.get(iid, {})
+                    sc  = _sram_score(cdn)
+                    current_slots[slot] = {
+                        "id": iid, "typeId": tid,
+                        "name": cdn.get("name_fr", f"Item#{iid}"),
+                        "level": cdn.get("level", it.get("level", 0)),
+                        "rarity": cdn.get("rarity", it.get("rarity", 0)),
+                        "gfxId": cdn.get("gfxId", 0),
+                        "score": sc["score"],
+                        "breakdown": sc["breakdown"],
+                        "source": "build",
+                    }
+            except Exception as e:
+                log.warning("Builder: build-result fallback error: %s", e)
+
+    # ── Override manuel (slots configurés manuellement) ──────────────
+    for slot_name, manual in _manual_equip.items():
+        iid = manual.get("item_id")
+        tid = manual.get("type_id")
+        if not iid:
+            continue
+        cdn = _items_db.get(iid, {})
+        sc  = _sram_score(cdn)
+        if tid is None and slot_name in current_slots:
+            tid = current_slots[slot_name].get("typeId")
+        if tid:
+            type_to_slot[tid] = slot_name
+        current_slots[slot_name] = {
+            "id": iid, "typeId": tid,
+            "name": cdn.get("name_fr", f"Item#{iid}"),
+            "level": cdn.get("level", 0),
+            "rarity": cdn.get("rarity", 0),
+            "gfxId": cdn.get("gfxId", 0),
+            "score": sc["score"],
+            "breakdown": sc["breakdown"],
+            "source": "build",
+        }
+
+    if not current_slots:
+        return {"error": "Aucun équipement trouvé. Configure ton personnage actif ou lance l'optimiseur.", "slots": []}
+
+    # ── Contrainte épique (rarity=6) / relique (rarity=5) ────────────
+    # Un build ne peut avoir qu'1 épique et 1 relique max.
+    equipped_rarities = {v["rarity"] for v in current_slots.values()}
+    has_epique  = 6 in equipped_rarities
+    has_relique = 5 in equipped_rarities
+
+    # ── 2. Items possédés (inventaire + coffre) ───────────────────────
+    owned_by_type = defaultdict(list)  # typeId → [candidate]
+
+    def _add_owned(iid, source):
+        cdn = _items_db.get(iid)
+        if not cdn:
+            return
+        if level > 0 and cdn.get("level", 0) > level:
+            return
+        sc = _sram_score(cdn)
+        owned_by_type[cdn["itemTypeId"]].append({
+            "id": iid, "name": cdn["name_fr"],
+            "level": cdn["level"], "rarity": cdn["rarity"],
+            "gfxId": cdn["gfxId"], "score": sc["score"],
+            "breakdown": sc["breakdown"], "source": source,
+        })
+
+    inv_file = BASE_DIR / "logs" / "inventory_bags.json"
+    if inv_file.exists():
+        try:
+            with open(inv_file, encoding="utf-8") as f:
+                inv = json.load(f)
+            for bag in inv.get("bags", []):
+                for it in bag.get("items", []):
+                    iid = it.get("refId") or it.get("itemId")
+                    if iid:
+                        _add_owned(int(iid), "inventaire")
+        except Exception as e:
+            log.warning("Builder: inv error: %s", e)
+
+    chest_file = BASE_DIR / "logs" / "account_chest_full.json"
+    if chest_file.exists():
+        try:
+            with open(chest_file, encoding="utf-8") as f:
+                chest = json.load(f)
+            for comp in chest.get("compartments", []):
+                for it in comp.get("items", []):
+                    iid = it.get("itemId")
+                    if iid:
+                        _add_owned(int(iid), "coffre")
+        except Exception as e:
+            log.warning("Builder: chest error: %s", e)
+
+    # ── 3. Items HDV ──────────────────────────────────────────────────
+    hdv_by_type = defaultdict(list)
+    hdv_db_path = BASE_DIR / "logs" / "hdv_market.db"
+    if hdv_db_path.exists():
+        try:
+            conn = sqlite3.connect(str(hdv_db_path))
+            rows = conn.execute(
+                "SELECT item_ref_id, MIN(unit_price) as best_price "
+                "FROM market_latest WHERE side='sell' AND qty_remaining > 0 "
+                "GROUP BY item_ref_id"
+            ).fetchall()
+            conn.close()
+            for iid, price in rows:
+                cdn = _items_db.get(iid)
+                if not cdn:
+                    continue
+                if level > 0 and cdn.get("level", 0) > level:
+                    continue
+                if budget > 0 and price > budget:
+                    continue
+                sc = _sram_score(cdn)
+                hdv_by_type[cdn["itemTypeId"]].append({
+                    "id": iid, "name": cdn["name_fr"],
+                    "level": cdn["level"], "rarity": cdn["rarity"],
+                    "gfxId": cdn["gfxId"], "score": sc["score"],
+                    "breakdown": sc["breakdown"],
+                    "source": "hdv", "unit_price": price,
+                })
+        except Exception as e:
+            log.warning("Builder: hdv error: %s", e)
+
+    # ── 4. Assemblage par slot ────────────────────────────────────────
+    def _rarity_allowed(cand_rarity: int, curr_rarity: int) -> bool:
+        """Vérifie que le candidat ne viole pas la contrainte épique/relique."""
+        if cand_rarity == 6:  # Épique
+            # Autorisé si le slot courant est déjà épique (on le remplace)
+            # ou si aucun épique n'est encore équipé
+            return curr_rarity == 6 or not has_epique
+        if cand_rarity == 5:  # Relique
+            return curr_rarity == 5 or not has_relique
+        return True  # Autres raretés toujours ok
+
+    slots = []
+    for slot_name, curr in current_slots.items():
+        tid       = curr["typeId"]
+        curr_id   = curr["id"]
+        curr_rar  = curr["rarity"]
+
+        seen = {curr_id}
+        candidates_owned = []
+        for c in owned_by_type.get(tid, []):
+            if c["id"] in seen:
+                continue
+            if not _rarity_allowed(c["rarity"], curr_rar):
+                continue
+            seen.add(c["id"])
+            candidates_owned.append(c)
+        candidates_owned.sort(key=lambda x: -x["score"])
+
+        candidates_hdv = []
+        for c in hdv_by_type.get(tid, []):
+            if c["id"] in seen:
+                continue
+            if not _rarity_allowed(c["rarity"], curr_rar):
+                continue
+            seen.add(c["id"])
+            candidates_hdv.append(c)
+        candidates_hdv.sort(key=lambda x: -x["score"])
+
+        best_owned = candidates_owned[0] if candidates_owned else None
+        best_hdv   = candidates_hdv[0]   if candidates_hdv   else None
+
+        slots.append({
+            "slot": slot_name,
+            "typeId": tid,
+            "current": curr,
+            "best_owned": best_owned,
+            "best_hdv":   best_hdv,
+            "gain_owned": (best_owned["score"] - curr["score"]) if best_owned else None,
+            "gain_hdv":   (best_hdv["score"]   - curr["score"]) if best_hdv   else None,
+        })
+
+    # Trier par gain potentiel (upgrades les plus impactants d'abord)
+    slots.sort(key=lambda s: -(max(s.get("gain_hdv") or 0, s.get("gain_owned") or 0)))
+
+    total = sum(s["current"]["score"] for s in slots)
+    potential = total + sum(
+        max(s.get("gain_owned") or 0, s.get("gain_hdv") or 0, 0) for s in slots
+    )
+
+    return {
+        "total_score": total,
+        "potential_score": potential,
+        "player_name": player_name,
+        "player_level": player_level,
+        "slots": slots,
+        "manual_equip": list(_manual_equip.keys()),
+    }
+
+
+@app.post("/api/builder/equip")
+async def api_builder_equip_set(request: Request):
+    """Définit manuellement l'item équipé dans un slot."""
+    body = await request.json()
+    slot    = body.get("slot")
+    item_id = body.get("item_id")
+    type_id = body.get("type_id")
+    if not slot or not item_id:
+        return JSONResponse({"error": "slot and item_id required"}, status_code=400)
+    _manual_equip[slot] = {"item_id": int(item_id), "type_id": type_id}
+    _save_manual_equip()
+    return {"ok": True, "slot": slot, "item_id": item_id}
+
+
+@app.delete("/api/builder/equip/{slot}")
+async def api_builder_equip_delete(slot: str):
+    """Réinitialise un slot (retour à build-result.json)."""
+    removed = _manual_equip.pop(slot, None)
+    if removed is not None:
+        _save_manual_equip()
+    return {"ok": True, "removed": removed is not None}
+
+
+@app.delete("/api/builder/equip")
+async def api_builder_equip_reset():
+    """Réinitialise tous les slots manuels."""
+    _manual_equip.clear()
+    _save_manual_equip()
+    return {"ok": True}
+
+
+# ── Joueur actif ──────────────────────────────────────────────────────
+
+@app.get("/api/me")
+async def api_me_get():
+    """Retourne le joueur actif et ses données (niveau, équipement…)."""
+    data = _get_player_file(_active_player)
+    players_dir = BASE_DIR / "logs" / "players"
+    known = sorted(
+        [p.stem for p in players_dir.glob("*.json") if "_t" not in p.stem],
+        key=str.lower
+    )
+    if data:
+        return {
+            "name": data.get("name", _active_player),
+            "level": data.get("level", 0),
+            "breed": data.get("breedName", ""),
+            "equipment_slots": len(parser_equipment(data.get("equipment", ""))),
+            "known_players": known,
+        }
+    return {"name": "", "level": 0, "breed": "", "equipment_slots": 0, "known_players": known}
+
+
+@app.post("/api/me")
+async def api_me_set(request: Request):
+    """Définit le personnage actif."""
+    global _active_player
+    body = await request.json()
+    name = body.get("name", "").strip()
+    _active_player = name
+    _save_active_player(name)
+    data = _get_player_file(name)
+    return {
+        "ok": True,
+        "name": name,
+        "level": data.get("level", 0) if data else 0,
+        "equipment_slots": len(parser_equipment(data.get("equipment", ""))) if data else 0,
+    }
+
+
+# =====================================================
 # SSE
 # =====================================================
+
+@app.post("/api/hdv/sync")
+async def api_hdv_force_sync():
+    """Force un re-sync complet du fichier protobuf HDV → SQLite."""
+    hdv_proto = BASE_DIR / "logs" / "market_v3_proto.log"
+    hdv_db    = BASE_DIR / "logs" / "hdv_market.db"
+    if not hdv_proto.exists():
+        return JSONResponse({"error": "market_v3_proto.log introuvable"}, status_code=404)
+    try:
+        count, offset = hdv_run_sync(str(hdv_proto), str(hdv_db))
+        broadcast_sse("hdv", {"new_entries": count, "offset": offset, "forced": True})
+        return {"ok": True, "synced": count, "offset": offset}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.get("/api/events")
 async def api_events(request: Request):
@@ -1097,7 +1606,7 @@ async def api_market(q: str = "", side: str = "", sort: str = "unit_price",
                 "qty": r.get("qty_remaining", 1),
                 "totalPrice": r.get("total_price", 0),
                 "sellerId": r.get("seller_id", 0),
-                "capturedAt": r.get("captured_at", ""),
+                "capturedAt": r.get("updated_at", ""),
                 "slotColors": r.get("slot_colors", ""),
                 "sublimationId": r.get("sublimation_id", 0),
             })
@@ -1114,9 +1623,9 @@ async def api_market_stats():
         return {"total_latest": 0, "total_history": 0, "unique_items": 0, "error": "hdv_market.db introuvable"}
     try:
         tl = conn.execute("SELECT COUNT(*) as c FROM market_latest").fetchone()["c"]
-        th = conn.execute("SELECT COUNT(*) as c FROM market_history").fetchone()["c"]
+        th = conn.execute("SELECT COUNT(*) as c FROM market_observations").fetchone()["c"]
         ui = conn.execute("SELECT COUNT(DISTINCT item_ref_id) as c FROM market_latest").fetchone()["c"]
-        lu = conn.execute("SELECT MAX(captured_at) as m FROM market_latest").fetchone()["m"]
+        lu = conn.execute("SELECT MAX(updated_at) as m FROM market_latest").fetchone()["m"]
         conn.close()
         return {"total_latest": tl, "total_history": th, "unique_items": ui, "latest_update": lu}
     except Exception as e:
@@ -1277,140 +1786,5 @@ async def api_patrimoine():
 if __name__ == "__main__":
     main()
 
-# =====================================================
-# HDV MARKET + PATRIMOINE
-# =====================================================
-import sqlite3 as _market_sqlite3
-
-HDV_DB_PATH = os.path.join(BASE_DIR, "logs", "hdv_market.db")
-
-def _hdv_db():
-    if not os.path.isfile(HDV_DB_PATH):
-        return None
-    conn = _market_sqlite3.connect(HDV_DB_PATH)
-    conn.row_factory = _market_sqlite3.Row
-    return conn
-
-@app.get("/api/market")
-async def api_market(q: str = "", side: str = "", sort: str = "unit_price", order: str = "asc", limit: int = 50, offset: int = 0, min_price: int = None, max_price: int = None):
-    conn = _hdv_db()
-    if not conn:
-        return {"total": 0, "items": [], "error": "hdv_market.db introuvable"}
-    try:
-        _ensure_cdn_cache()
-        conds, params = [], []
-        if q:
-            matching_ids = []
-            for sid, info in _cdn_cache.items():
-                if q.lower() in info.get("name", "").lower():
-                    matching_ids.append(int(sid))
-            for sid, info in _i18n_cache.items():
-                nm = info.get("name", "") if isinstance(info, dict) else (info if isinstance(info, str) else "")
-                if q.lower() in nm.lower():
-                    try: matching_ids.append(int(sid))
-                    except: pass
-            matching_ids = list(set(matching_ids))
-            if not matching_ids:
-                conn.close()
-                return {"total": 0, "items": []}
-            conds.append("item_id IN (%s)" % ",".join("?" * len(matching_ids)))
-            params.extend(matching_ids)
-        if side:
-            conds.append("side = ?"); params.append(side)
-        if min_price is not None:
-            conds.append("unit_price >= ?"); params.append(min_price)
-        if max_price is not None:
-            conds.append("unit_price <= ?"); params.append(max_price)
-        where = (" WHERE " + " AND ".join(conds)) if conds else ""
-        ok_sorts = {"unit_price", "qty", "captured_at", "item_id", "total_price"}
-        sc = sort if sort in ok_sorts else "unit_price"
-        so = "DESC" if order.lower() == "desc" else "ASC"
-        total = conn.execute("SELECT COUNT(*) as c FROM market_latest" + where, params).fetchone()["c"]
-        rows = conn.execute("SELECT * FROM market_latest" + where + " ORDER BY %s %s LIMIT ? OFFSET ?" % (sc, so), params + [limit, offset]).fetchall()
-        items = []
-        for row in rows:
-            r = dict(row)
-            ci = _cdn_lookup(r.get("item_ref_id", 0))
-            items.append({"itemId": r.get("item_id"), "name": ci.get("name", r.get("item_name", "Item#%s" % r.get("item_id"))), "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "side": r.get("side", "sell"), "unitPrice": r.get("unit_price", 0), "qty": r.get("qty_remaining", 1), "totalPrice": r.get("total_price", 0), "capturedAt": r.get("captured_at", ""), "slotColors": r.get("slot_colors", ""), "sublimationId": r.get("sublimation_id", 0)})
-        conn.close()
-        return {"total": total, "limit": limit, "offset": offset, "items": items}
-    except Exception as e:
-        conn.close()
-        return {"total": 0, "items": [], "error": str(e)}
-
-@app.get("/api/market/stats")
-async def api_market_stats():
-    conn = _hdv_db()
-    if not conn:
-        return {"total_offers": 0, "unique_items": 0, "latest_update": None, "error": "hdv_market.db introuvable"}
-    try:
-        total = conn.execute("SELECT COUNT(*) as c FROM market_latest").fetchone()["c"]
-        hist = conn.execute("SELECT COUNT(*) as c FROM market_history").fetchone()["c"]
-        unique = conn.execute("SELECT COUNT(DISTINCT item_ref_id) as c FROM market_latest").fetchone()["c"]
-        latest = conn.execute("SELECT MAX(captured_at) as m FROM market_latest").fetchone()["m"]
-        conn.close()
-        return {"total_offers": total, "total_history": hist, "unique_items": unique, "latest_update": latest}
-    except Exception as e:
-        conn.close()
-        return {"total_offers": 0, "unique_items": 0, "latest_update": None, "error": str(e)}
-
-@app.get("/api/patrimoine")
-async def api_patrimoine():
-    _ensure_cdn_cache()
-    hdv_prices = {}
-    conn = _hdv_db()
-    if conn:
-        try:
-            for r in conn.execute("SELECT item_ref_id, MIN(unit_price) as min_price, COUNT(*) as offers FROM market_latest WHERE side='sell' AND unit_price > 0 GROUP BY item_ref_id").fetchall():
-                hdv_prices[r["item_ref_id"]] = {"min_price": r["min_price"], "offers": r["offers"]}
-            conn.close()
-        except:
-            conn.close()
-    chest_items = []
-    chest_path = os.path.join(BASE_DIR, "logs", "account_chest_full.json")
-    if os.path.isfile(chest_path):
-        try:
-            with open(chest_path, "r", encoding="utf-8") as f:
-                chest = json.load(f)
-            for comp in chest.get("compartments", []):
-                for item in comp.get("items", []):
-                    iid = item.get("itemId", 0)
-                    qty = item.get("quantity", 1)
-                    ci = _cdn_lookup(iid)
-                    pi = hdv_prices.get(iid, {})
-                    mp = pi.get("min_price", 0)
-                    chest_items.append({"itemId": iid, "name": ci.get("name", item.get("name", "#%s" % iid)), "quantity": qty, "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "unitPrice": mp, "totalValue": mp * qty, "hdvOffers": pi.get("offers", 0), "source": "chest"})
-        except Exception as e:
-            log.warning("Patrimoine chest: %s", e)
-    inv_items = []
-    for inv_path in [os.path.join(BASE_DIR, "logs", "inventory_bags.json"), os.path.join(BASE_DIR, "logs", "players", "inventory_bags.json")]:
-        if not os.path.isfile(inv_path):
-            continue
-        try:
-            with open(inv_path, "r", encoding="utf-8") as f:
-                inv = json.load(f)
-            for bag in inv.get("bags", []):
-                for item in bag.get("items", []):
-                    iid = item.get("refId", 0)
-                    qty = item.get("quantity", 1)
-                    ci = _cdn_lookup(iid)
-                    pi = hdv_prices.get(iid, {})
-                    mp = pi.get("min_price", 0)
-                    inv_items.append({"itemId": iid, "name": ci.get("name", item.get("name", "#%s" % iid)), "quantity": qty, "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "unitPrice": mp, "totalValue": mp * qty, "hdvOffers": pi.get("offers", 0), "source": "inventory"})
-            break
-        except Exception as e:
-            log.warning("Patrimoine inv: %s", e)
-    all_items = sorted(chest_items + inv_items, key=lambda x: x["totalValue"], reverse=True)
-    cv = sum(i["totalValue"] for i in chest_items)
-    iv = sum(i["totalValue"] for i in inv_items)
-    kamas = 0
-    for ip in [os.path.join(BASE_DIR, "logs", "inventory_bags.json")]:
-        if os.path.isfile(ip):
-            try:
-                with open(ip, "r", encoding="utf-8") as f:
-                    kamas = json.load(f).get("kamas", 0)
-            except:
-                pass
-    return {"kamas": kamas, "chestValue": cv, "inventoryValue": iv, "totalValue": cv + iv, "totalWithKamas": cv + iv + kamas, "chestItems": len(chest_items), "inventoryItems": len(inv_items), "pricedItems": len([i for i in all_items if i["unitPrice"] > 0]), "unpricedItems": len([i for i in all_items if i["unitPrice"] == 0]), "hdvItemsAvailable": len(hdv_prices), "topItems": all_items[:50], "allItems": all_items}
 
 

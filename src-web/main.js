@@ -15,7 +15,7 @@ import { showPlayer, closeModal } from "./js/modal.js";
 import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
-import { loadHdv } from "./js/tabs/hdv.js";
+import { loadHdv, refreshHdv } from "./js/tabs/hdv.js";
 import { initTooltipDelegation } from "./js/tooltip.js";
 
 // ─── State pour sous-onglets Personnage ───
@@ -138,6 +138,13 @@ async function init() {
   // SSE live updates (unifie)
   connectSSE();
 
+  // ── Helpers SSE ──────────────────────────────────────────────────
+  function _refreshBuilderIfVisible() {
+    if (getState().currentTab === "cdn" && currentPersoSub === "builder") {
+      loadEquipment(document.getElementById("equipment-container"));
+    }
+  }
+
   // Classement: joueurs mis a jour
   onSSE("update", async () => {
     const s = await fetchJson("/api/stats");
@@ -150,25 +157,37 @@ async function init() {
       if (state.currentSubtab === "guilds") loadGuilds();
       if (state.currentSubtab === "recent") loadRecent(true);
     }
+    // Un nouveau joueur vu = possible mise à jour de l'équipement actif
+    _refreshBuilderIfVisible();
   });
 
   // HDV: nouvelles offres detectees
-  onSSE("hdv", async () => {
+  onSSE("hdv", () => {
     const state = getState();
-    if (state.currentTab === "hdv") loadHdv();
+    if (state.currentTab === "hdv") refreshHdv();
+    // Le builder affiche les prix HDV → rafraîchir si visible
+    _refreshBuilderIfVisible();
   });
 
-  // Coffre ou inventaire mis a jour -> rafraichir patrimoine + personnage
-  onSSE("chest", async () => {
+  // Coffre ou inventaire mis a jour
+  onSSE("chest", () => {
     const state = getState();
-    if (state.currentTab === "hdv") loadHdv();
-    if (state.currentTab === "cdn") { persoLoaded.fiche = false; loadCharacter(); }
+    if (state.currentTab === "hdv") refreshHdv();
+    if (state.currentTab === "cdn") {
+      persoLoaded.fiche = false;
+      if (currentPersoSub === "fiche") loadCharacter();
+      _refreshBuilderIfVisible();
+    }
   });
 
-  onSSE("inventory", async () => {
+  onSSE("inventory", () => {
     const state = getState();
-    if (state.currentTab === "hdv") loadHdv();
-    if (state.currentTab === "cdn") { persoLoaded.fiche = false; loadCharacter(); }
+    if (state.currentTab === "hdv") refreshHdv();
+    if (state.currentTab === "cdn") {
+      persoLoaded.fiche = false;
+      if (currentPersoSub === "fiche") loadCharacter();
+      _refreshBuilderIfVisible();
+    }
   });
 
   // Reload manuel

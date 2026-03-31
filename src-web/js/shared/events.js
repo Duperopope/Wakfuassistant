@@ -30,6 +30,9 @@ export function connectSSE(url) {
   evtSource.addEventListener("inventory", (e) => {
     try { emit("inventory", JSON.parse(e.data)); } catch(_) { emit("inventory", {}); }
   });
+  evtSource.addEventListener("chest", (e) => {
+    try { emit("chest", JSON.parse(e.data)); } catch(_) { emit("chest", {}); }
+  });
 
   evtSource.onerror = () => {
     evtSource.close();
