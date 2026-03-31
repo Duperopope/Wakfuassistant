@@ -12,7 +12,7 @@ const _cache = {};
 
 // --- Fonctions publiques ---
 
-function showTooltip(evt, itemId) {
+function showTooltip(evt, itemId, slotColors) {
   if (!itemId) return;
   let tip = document.getElementById("wk-tooltip");
   if (!tip) {
@@ -25,6 +25,7 @@ function showTooltip(evt, itemId) {
   positionTooltip(tip, evt);
 
   if (_cache[itemId]) {
+    if (slotColors) _cache[itemId]._slot_colors = slotColors;
     renderTooltip(tip, _cache[itemId]);
     return;
   }
@@ -34,6 +35,7 @@ function showTooltip(evt, itemId) {
   fetch("/api/cdn/" + itemId)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => {
+      data._slot_colors = slotColors || null;
       _cache[itemId] = data;
       renderTooltip(tip, data);
     })
@@ -160,17 +162,19 @@ function renderTooltip(tip, item) {
   tip.style.borderColor = r.hex;
 
   // Charger le graphe prix
-  _loadPriceChart(item.id || item.item_id || 0);
+  _loadPriceChart(item.id || item.item_id || 0, item._slot_colors || null);
 }
 
 // escHtml -> shared/item.js
 
 
-function _loadPriceChart(itemId) {
+function _loadPriceChart(itemId, slotColors) {
   var zone = document.getElementById("wk-price-zone");
   if (!zone || !itemId) return;
   zone.innerHTML = '<div style="color:#666;font-size:11px;text-align:center">Chargement prix...</div>';
-  fetch("/api/market/history/" + itemId)
+  var url = "/api/market/history/" + itemId;
+  if (slotColors) url += "?slot_colors=" + encodeURIComponent(slotColors);
+  fetch(url)
     .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(data) {
       zone = document.getElementById("wk-price-zone");
@@ -233,7 +237,7 @@ function _loadPriceChart(itemId) {
 export function initTooltipDelegation() {
   document.addEventListener("mouseover", function(e) {
     const el = e.target.closest("[data-item-id]");
-    if (el) showTooltip(e, el.dataset.itemId);
+    if (el) showTooltip(e, el.dataset.itemId, el.dataset.slotColors || null);
   });
   document.addEventListener("mouseout", function(e) {
     const el = e.target.closest("[data-item-id]");

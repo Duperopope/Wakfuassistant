@@ -1043,6 +1043,8 @@ async def api_market(q: str = "", side: str = "", sort: str = "unit_price",
                 "totalPrice": r.get("total_price", 0),
                 "sellerId": r.get("seller_id", 0),
                 "capturedAt": r.get("captured_at", ""),
+                "slotColors": r.get("slot_colors", ""),
+                "sublimationId": r.get("sublimation_id", 0),
             })
         conn.close()
         return {"total": total, "limit": limit, "offset": offset, "items": items}
@@ -1068,8 +1070,9 @@ async def api_market_stats():
 
 
 @app.get("/api/market/history/{item_ref_id}")
-def api_market_history(item_ref_id: int, days: int = 30):
-    """Historique de prix pour un objet - utilise pour graphe mouseover"""
+def api_market_history(item_ref_id: int, days: int = 30, slot_colors: str = None):
+    """Historique de prix pour un objet - utilise pour graphe mouseover
+    Si slot_colors est fourni (ex: 'Bleu,Rouge,Rouge,Vert'), filtre les offres identiques."""
     import datetime, sqlite3, os
     db_path = os.path.join(str(BASE_DIR), "logs", "hdv_market.db")
     if not os.path.isfile(db_path):
@@ -1088,10 +1091,16 @@ def api_market_history(item_ref_id: int, days: int = 30):
             history = [dict(r) for r in rows]
         else:
             # Fallback: utiliser market_latest comme seul point
-            rows = conn.execute(
-                "SELECT * FROM market_latest WHERE item_ref_id = ? ORDER BY unit_price ASC",
-                (item_ref_id,)
-            ).fetchall()
+            if slot_colors:
+                rows = conn.execute(
+                    "SELECT * FROM market_latest WHERE item_ref_id = ? AND slot_colors = ? ORDER BY unit_price ASC",
+                    (item_ref_id, slot_colors)
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM market_latest WHERE item_ref_id = ? ORDER BY unit_price ASC",
+                    (item_ref_id,)
+                ).fetchall()
             history = [dict(r) for r in rows]
         # Nom depuis CDN
         name = ""
@@ -1262,7 +1271,7 @@ async def api_market(q: str = "", side: str = "", sort: str = "unit_price", orde
         for row in rows:
             r = dict(row)
             ci = _cdn_lookup(r.get("item_ref_id", 0))
-            items.append({"itemId": r.get("item_id"), "name": ci.get("name", r.get("item_name", "Item#%s" % r.get("item_id"))), "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "side": r.get("side", "sell"), "unitPrice": r.get("unit_price", 0), "qty": r.get("qty_remaining", 1), "totalPrice": r.get("total_price", 0), "capturedAt": r.get("captured_at", "")})
+            items.append({"itemId": r.get("item_id"), "name": ci.get("name", r.get("item_name", "Item#%s" % r.get("item_id"))), "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "side": r.get("side", "sell"), "unitPrice": r.get("unit_price", 0), "qty": r.get("qty_remaining", 1), "totalPrice": r.get("total_price", 0), "capturedAt": r.get("captured_at", ""), "slotColors": r.get("slot_colors", ""), "sublimationId": r.get("sublimation_id", 0)})
         conn.close()
         return {"total": total, "limit": limit, "offset": offset, "items": items}
     except Exception as e:
