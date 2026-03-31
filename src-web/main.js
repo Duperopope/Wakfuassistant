@@ -14,6 +14,7 @@ import { showPlayer, closeModal } from "./js/modal.js";
 import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
+import { loadHdv } from "./js/tabs/hdv.js";
 
 // ─── State pour sous-onglets Personnage ───
 let persoLoaded = { fiche: false, builder: false, optimizer: false, spells: false };
@@ -31,6 +32,9 @@ function switchTab(tab) {
   if (tab === "classement") {
     const sub = getState().currentSubtab || "players";
     switchSubtab(sub);
+  }
+  if (tab === "hdv") {
+    loadHdv();
   }
   if (tab === "cdn") {
     switchPersoSub(currentPersoSub);
@@ -243,3 +247,4 @@ document.addEventListener("click", function(e) {
 if (import.meta.hot) {
   import.meta.hot.accept();
 }
+

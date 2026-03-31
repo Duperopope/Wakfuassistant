@@ -458,7 +458,7 @@ async def api_cdn_item(item_id: int):
     # 2) items_db en memoire (effects complets + description)
     item = _items_db.get(item_id)
     if item:
-        result["item_id"] = item_id
+        result["item_ref_id"] = item_id
         result["name_fr"] = item.get("name_fr", result.get("name_fr", ""))
         result["level"] = item.get("level", result.get("level", 0))
         result["rarity"] = item.get("rarity", result.get("rarity", 0))
@@ -976,5 +976,373 @@ async def get_chest():
     }
 
 
+
+# =====================================================
+# HDV MARKET + PATRIMOINE (ajout automatique)
+# =====================================================
+import sqlite3 as _hdv_sqlite3
+
+HDV_DB = os.path.join(str(BASE_DIR), "logs", "hdv_market.db")
+
+def _hdv_conn():
+    if not os.path.isfile(HDV_DB):
+        return None
+    c = _hdv_sqlite3.connect(HDV_DB)
+    c.row_factory = _hdv_sqlite3.Row
+    return c
+
+@app.get("/api/market")
+async def api_market(q: str = "", side: str = "", sort: str = "unit_price",
+                     order: str = "asc", limit: int = 50, offset: int = 0,
+                     min_price: int = None, max_price: int = None):
+    conn = _hdv_conn()
+    if not conn:
+        return {"total": 0, "items": [], "error": "hdv_market.db introuvable"}
+    try:
+        conds, params = [], []
+        if q:
+            _ensure_cdn_cache()
+            ids = [k for k, v in _cdn_cache.items() if q.lower() in v.get("name", "").lower()]
+            i18n_ids = [k for k, v in _i18n_cache.items() if isinstance(v, dict) and q.lower() in v.get("name", "").lower()]
+            all_ids = list(set(ids + i18n_ids))
+            if not all_ids:
+                conn.close()
+                return {"total": 0, "items": []}
+            placeholders = ",".join(["?"] * len(all_ids))
+            conds.append("item_ref_id IN (" + placeholders + ")")
+            params.extend([int(x) for x in all_ids])
+        if side:
+            conds.append("side = ?")
+            params.append(side)
+        if min_price is not None:
+            conds.append("unit_price >= ?")
+            params.append(min_price)
+        if max_price is not None:
+            conds.append("unit_price <= ?")
+            params.append(max_price)
+        where = (" WHERE " + " AND ".join(conds)) if conds else ""
+        ok_sorts = {"unit_price", "qty_remaining", "updated_at", "item_ref_id"}
+        sc = sort if sort in ok_sorts else "unit_price"
+        so = "DESC" if order.lower() == "desc" else "ASC"
+        total = conn.execute("SELECT COUNT(*) as c FROM market_latest" + where, params).fetchone()["c"]
+        rows = conn.execute("SELECT * FROM market_latest" + where + " ORDER BY " + sc + " " + so + " LIMIT ? OFFSET ?", params + [limit, offset]).fetchall()
+        items = []
+        for row in rows:
+            r = dict(row)
+            cdn_info = _cdn_lookup(r.get("item_ref_id", 0))
+            items.append({
+                "itemId": r.get("item_ref_id", 0),
+                "name": cdn_info.get("name", r.get("item_name", "")),
+                "level": cdn_info.get("level", 0),
+                "rarity": cdn_info.get("rarity", 0),
+                "gfxId": cdn_info.get("gfxId", 0),
+                "typeId": cdn_info.get("typeId", 0),
+                "side": r.get("side", "sell"),
+                "unitPrice": r.get("unit_price", 0),
+                "qty": r.get("qty_remaining", 1),
+                "totalPrice": r.get("total_price", 0),
+                "sellerId": r.get("seller_id", 0),
+                "capturedAt": r.get("captured_at", ""),
+            })
+        conn.close()
+        return {"total": total, "limit": limit, "offset": offset, "items": items}
+    except Exception as e:
+        conn.close()
+        return {"total": 0, "items": [], "error": str(e)}
+
+@app.get("/api/market/stats")
+async def api_market_stats():
+    conn = _hdv_conn()
+    if not conn:
+        return {"total_latest": 0, "total_history": 0, "unique_items": 0, "error": "hdv_market.db introuvable"}
+    try:
+        tl = conn.execute("SELECT COUNT(*) as c FROM market_latest").fetchone()["c"]
+        th = conn.execute("SELECT COUNT(*) as c FROM market_history").fetchone()["c"]
+        ui = conn.execute("SELECT COUNT(DISTINCT item_ref_id) as c FROM market_latest").fetchone()["c"]
+        lu = conn.execute("SELECT MAX(captured_at) as m FROM market_latest").fetchone()["m"]
+        conn.close()
+        return {"total_latest": tl, "total_history": th, "unique_items": ui, "latest_update": lu}
+    except Exception as e:
+        conn.close()
+        return {"total_latest": 0, "total_history": 0, "error": str(e)}
+
+
+    @app.get("/api/market/history/{item_ref_id}")
+    async def api_market_history(item_ref_id: int, days: int = 30):
+        """Historique de prix pour un objet - utilise pour graphe mouseover"""
+        import datetime
+        db_path = os.path.join(str(BASE_DIR), "logs", "hdv_market.db")
+        if not os.path.isfile(db_path):
+            return {"item_ref_id": item_ref_id, "name": "", "history": [], "count": 0}
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        try:
+            # Essayer market_observations d abord
+            tables = [t[0] for t in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+            history = []
+            if "market_observations" in tables:
+                rows = conn.execute(
+                    "SELECT * FROM market_observations WHERE item_ref_id = ? ORDER BY source_ts DESC LIMIT 500",
+                    (item_ref_id,)
+                ).fetchall()
+                history = [dict(r) for r in rows]
+            else:
+                # Fallback: utiliser market_latest comme seul point
+                rows = conn.execute(
+                    "SELECT * FROM market_latest WHERE item_ref_id = ? ORDER BY unit_price ASC",
+                    (item_ref_id,)
+                ).fetchall()
+                history = [dict(r) for r in rows]
+            # Nom depuis CDN
+            name = ""
+            if CDN_CACHE and item_ref_id in CDN_CACHE:
+                name = CDN_CACHE[item_ref_id].get("name_fr", CDN_CACHE[item_ref_id].get("name", ""))
+            elif CDN_ITEMS and str(item_ref_id) in CDN_ITEMS:
+                name = CDN_ITEMS[str(item_ref_id)].get("title", {}).get("fr", "")
+            # Stats
+            prices = [h.get("unit_price", 0) for h in history if h.get("unit_price", 0) > 0]
+            return {
+                "item_ref_id": item_ref_id,
+                "name": name,
+                "count": len(history),
+                "min_price": min(prices) if prices else 0,
+                "max_price": max(prices) if prices else 0,
+                "avg_price": int(sum(prices)/len(prices)) if prices else 0,
+                "history": history[:200]
+            }
+        finally:
+            conn.close()
+
+@app.get("/api/patrimoine")
+async def api_patrimoine():
+    _ensure_cdn_cache()
+    # 1) Prix min HDV par item
+    prices = {}
+    last_update = None
+    conn = _hdv_conn()
+    if conn:
+        try:
+            rows = conn.execute("SELECT item_ref_id, MIN(unit_price) as min_price FROM market_latest WHERE side='sell' AND unit_price > 0 GROUP BY item_ref_id").fetchall()
+            for r in rows:
+                prices[int(r["item_ref_id"])] = int(r["min_price"])
+            last_update = conn.execute("SELECT MAX(updated_at) FROM market_latest").fetchone()[0]
+            conn.close()
+        except Exception:
+            try: conn.close()
+            except: pass
+    # 2) Coffre
+    chest_items = []
+    chest_path = os.path.join(str(BASE_DIR), "logs", "account_chest_full.json")
+    if os.path.isfile(chest_path):
+        try:
+            with open(chest_path, "r", encoding="utf-8") as f:
+                chest = json.load(f)
+            for comp in chest.get("compartments", []):
+                for it in comp.get("items", []):
+                    chest_items.append({"itemId": it.get("itemId", 0), "quantity": it.get("quantity", 1), "source": "coffre"})
+        except Exception:
+            pass
+    # 3) Inventaire
+    inv_items = []
+    kamas = 0
+    for ip in [os.path.join(str(BASE_DIR), "logs", "inventory_bags.json"), os.path.join(str(BASE_DIR), "logs", "players", "inventory_bags.json")]:
+        if os.path.isfile(ip):
+            try:
+                with open(ip, "r", encoding="utf-8") as f:
+                    inv = json.load(f)
+                kamas = inv.get("kamas", 0)
+                for bag in inv.get("bags", []):
+                    for it in bag.get("items", []):
+                        inv_items.append({"itemId": it.get("refId", 0), "quantity": it.get("quantity", 1), "source": "inventaire"})
+                break
+            except Exception:
+                pass
+    # 3b) Kamas depuis proto log (plus fiable)
+    proto_log = os.path.join(str(BASE_DIR), "logs", "market_v3_proto.log")
+    if os.path.isfile(proto_log):
+        try:
+            import re as _re
+            with open(proto_log, "r", encoding="utf-8") as f:
+                for line in f:
+                    m = _re.search(r"kamas=(\d+)", line)
+                    if m:
+                        kamas = int(m.group(1))
+        except Exception:
+            pass
+    # 4) Calculer valeurs
+    chest_value = 0
+    inv_value = 0
+    chest_priced = 0
+    inv_priced = 0
+    all_valued = []
+    for it in chest_items:
+        p = prices.get(it["itemId"], 0)
+        if p > 0:
+            val = p * it["quantity"]
+            chest_value += val
+            chest_priced += 1
+            cdn_info = _cdn_lookup(it["itemId"])
+            all_valued.append({"itemId": it["itemId"], "name": cdn_info.get("name", str(it["itemId"])), "quantity": it["quantity"], "unitPrice": p, "totalValue": val, "rarity": cdn_info.get("rarity", 0), "gfxId": cdn_info.get("gfxId", 0), "source": "coffre"})
+    for it in inv_items:
+        p = prices.get(it["itemId"], 0)
+        if p > 0:
+            val = p * it["quantity"]
+            inv_value += val
+            inv_priced += 1
+            cdn_info = _cdn_lookup(it["itemId"])
+            all_valued.append({"itemId": it["itemId"], "name": cdn_info.get("name", str(it["itemId"])), "quantity": it["quantity"], "unitPrice": p, "totalValue": val, "rarity": cdn_info.get("rarity", 0), "gfxId": cdn_info.get("gfxId", 0), "source": "inventaire"})
+    all_valued.sort(key=lambda x: x["totalValue"], reverse=True)
+    return {
+        "kamas": kamas,
+        "chestValue": chest_value,
+        "inventoryValue": inv_value,
+        "totalValue": kamas + chest_value + inv_value,
+        "chestPriced": chest_priced,
+        "inventoryPriced": inv_priced,
+        "chestTotal": len(chest_items),
+        "inventoryTotal": len(inv_items),
+        "hdvPrices": len(prices),
+        "lastUpdate": last_update,
+        "topItems": all_valued[:50],
+    }
+
 if __name__ == "__main__":
     main()
+
+# =====================================================
+# HDV MARKET + PATRIMOINE
+# =====================================================
+import sqlite3 as _market_sqlite3
+
+HDV_DB_PATH = os.path.join(BASE_DIR, "logs", "hdv_market.db")
+
+def _hdv_db():
+    if not os.path.isfile(HDV_DB_PATH):
+        return None
+    conn = _market_sqlite3.connect(HDV_DB_PATH)
+    conn.row_factory = _market_sqlite3.Row
+    return conn
+
+@app.get("/api/market")
+async def api_market(q: str = "", side: str = "", sort: str = "unit_price", order: str = "asc", limit: int = 50, offset: int = 0, min_price: int = None, max_price: int = None):
+    conn = _hdv_db()
+    if not conn:
+        return {"total": 0, "items": [], "error": "hdv_market.db introuvable"}
+    try:
+        _ensure_cdn_cache()
+        conds, params = [], []
+        if q:
+            matching_ids = []
+            for sid, info in _cdn_cache.items():
+                if q.lower() in info.get("name", "").lower():
+                    matching_ids.append(int(sid))
+            for sid, info in _i18n_cache.items():
+                nm = info.get("name", "") if isinstance(info, dict) else (info if isinstance(info, str) else "")
+                if q.lower() in nm.lower():
+                    try: matching_ids.append(int(sid))
+                    except: pass
+            matching_ids = list(set(matching_ids))
+            if not matching_ids:
+                conn.close()
+                return {"total": 0, "items": []}
+            conds.append("item_id IN (%s)" % ",".join("?" * len(matching_ids)))
+            params.extend(matching_ids)
+        if side:
+            conds.append("side = ?"); params.append(side)
+        if min_price is not None:
+            conds.append("unit_price >= ?"); params.append(min_price)
+        if max_price is not None:
+            conds.append("unit_price <= ?"); params.append(max_price)
+        where = (" WHERE " + " AND ".join(conds)) if conds else ""
+        ok_sorts = {"unit_price", "qty", "captured_at", "item_id", "total_price"}
+        sc = sort if sort in ok_sorts else "unit_price"
+        so = "DESC" if order.lower() == "desc" else "ASC"
+        total = conn.execute("SELECT COUNT(*) as c FROM market_latest" + where, params).fetchone()["c"]
+        rows = conn.execute("SELECT * FROM market_latest" + where + " ORDER BY %s %s LIMIT ? OFFSET ?" % (sc, so), params + [limit, offset]).fetchall()
+        items = []
+        for row in rows:
+            r = dict(row)
+            ci = _cdn_lookup(r.get("item_ref_id", 0))
+            items.append({"itemId": r.get("item_id"), "name": ci.get("name", r.get("item_name", "Item#%s" % r.get("item_id"))), "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "side": r.get("side", "sell"), "unitPrice": r.get("unit_price", 0), "qty": r.get("qty_remaining", 1), "totalPrice": r.get("total_price", 0), "capturedAt": r.get("captured_at", "")})
+        conn.close()
+        return {"total": total, "limit": limit, "offset": offset, "items": items}
+    except Exception as e:
+        conn.close()
+        return {"total": 0, "items": [], "error": str(e)}
+
+@app.get("/api/market/stats")
+async def api_market_stats():
+    conn = _hdv_db()
+    if not conn:
+        return {"total_offers": 0, "unique_items": 0, "latest_update": None, "error": "hdv_market.db introuvable"}
+    try:
+        total = conn.execute("SELECT COUNT(*) as c FROM market_latest").fetchone()["c"]
+        hist = conn.execute("SELECT COUNT(*) as c FROM market_history").fetchone()["c"]
+        unique = conn.execute("SELECT COUNT(DISTINCT item_ref_id) as c FROM market_latest").fetchone()["c"]
+        latest = conn.execute("SELECT MAX(captured_at) as m FROM market_latest").fetchone()["m"]
+        conn.close()
+        return {"total_offers": total, "total_history": hist, "unique_items": unique, "latest_update": latest}
+    except Exception as e:
+        conn.close()
+        return {"total_offers": 0, "unique_items": 0, "latest_update": None, "error": str(e)}
+
+@app.get("/api/patrimoine")
+async def api_patrimoine():
+    _ensure_cdn_cache()
+    hdv_prices = {}
+    conn = _hdv_db()
+    if conn:
+        try:
+            for r in conn.execute("SELECT item_ref_id, MIN(unit_price) as min_price, COUNT(*) as offers FROM market_latest WHERE side='sell' AND unit_price > 0 GROUP BY item_ref_id").fetchall():
+                hdv_prices[r["item_ref_id"]] = {"min_price": r["min_price"], "offers": r["offers"]}
+            conn.close()
+        except:
+            conn.close()
+    chest_items = []
+    chest_path = os.path.join(BASE_DIR, "logs", "account_chest_full.json")
+    if os.path.isfile(chest_path):
+        try:
+            with open(chest_path, "r", encoding="utf-8") as f:
+                chest = json.load(f)
+            for comp in chest.get("compartments", []):
+                for item in comp.get("items", []):
+                    iid = item.get("itemId", 0)
+                    qty = item.get("quantity", 1)
+                    ci = _cdn_lookup(iid)
+                    pi = hdv_prices.get(iid, {})
+                    mp = pi.get("min_price", 0)
+                    chest_items.append({"itemId": iid, "name": ci.get("name", item.get("name", "#%s" % iid)), "quantity": qty, "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "unitPrice": mp, "totalValue": mp * qty, "hdvOffers": pi.get("offers", 0), "source": "chest"})
+        except Exception as e:
+            log.warning("Patrimoine chest: %s", e)
+    inv_items = []
+    for inv_path in [os.path.join(BASE_DIR, "logs", "inventory_bags.json"), os.path.join(BASE_DIR, "logs", "players", "inventory_bags.json")]:
+        if not os.path.isfile(inv_path):
+            continue
+        try:
+            with open(inv_path, "r", encoding="utf-8") as f:
+                inv = json.load(f)
+            for bag in inv.get("bags", []):
+                for item in bag.get("items", []):
+                    iid = item.get("refId", 0)
+                    qty = item.get("quantity", 1)
+                    ci = _cdn_lookup(iid)
+                    pi = hdv_prices.get(iid, {})
+                    mp = pi.get("min_price", 0)
+                    inv_items.append({"itemId": iid, "name": ci.get("name", item.get("name", "#%s" % iid)), "quantity": qty, "level": ci.get("level", 0), "rarity": ci.get("rarity", 0), "gfxId": ci.get("gfxId", 0), "unitPrice": mp, "totalValue": mp * qty, "hdvOffers": pi.get("offers", 0), "source": "inventory"})
+            break
+        except Exception as e:
+            log.warning("Patrimoine inv: %s", e)
+    all_items = sorted(chest_items + inv_items, key=lambda x: x["totalValue"], reverse=True)
+    cv = sum(i["totalValue"] for i in chest_items)
+    iv = sum(i["totalValue"] for i in inv_items)
+    kamas = 0
+    for ip in [os.path.join(BASE_DIR, "logs", "inventory_bags.json")]:
+        if os.path.isfile(ip):
+            try:
+                with open(ip, "r", encoding="utf-8") as f:
+                    kamas = json.load(f).get("kamas", 0)
+            except:
+                pass
+    return {"kamas": kamas, "chestValue": cv, "inventoryValue": iv, "totalValue": cv + iv, "totalWithKamas": cv + iv + kamas, "chestItems": len(chest_items), "inventoryItems": len(inv_items), "pricedItems": len([i for i in all_items if i["unitPrice"] > 0]), "unpricedItems": len([i for i in all_items if i["unitPrice"] == 0]), "hdvItemsAvailable": len(hdv_prices), "topItems": all_items[:50], "allItems": all_items}
+
+
