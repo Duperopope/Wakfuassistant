@@ -4,7 +4,7 @@
    Source: https://wakfu.wiki.gg/wiki/Module:Infobox_item_dark
    ============================================================ */
 
-import { RARITY, TYPE_INFO, ACTIONS, ELEMENT_ICONS, WIKI, getRarity, escHtml, getIconSrc } from "./shared/item.js";
+import { RARITY, TYPE_INFO, ACTIONS, ELEMENT_ICONS, WIKI, getRarity, escHtml, getIconSrc, fmtPrice } from "./shared/item.js";
 
 
 // --- Cache tooltip ---
@@ -151,14 +151,83 @@ function renderTooltip(tip, item) {
     html += '<div class="wk-desc">"' + escHtml(desc) + '"</div>';
   }
 
+  // --- GRAPHE PRIX HDV ---
+  html += '<div id="wk-price-zone" style="margin-top:8px;border-top:1px solid #555;padding-top:8px"></div>';
+
   html += '</div>'; // wk-inner
 
   tip.innerHTML = html;
-  // Appliquer la bordure rareté
   tip.style.borderColor = r.hex;
+
+  // Charger le graphe prix
+  _loadPriceChart(item.id || item.item_id || 0);
 }
 
 // escHtml -> shared/item.js
+
+
+function _loadPriceChart(itemId) {
+  var zone = document.getElementById("wk-price-zone");
+  if (!zone || !itemId) return;
+  zone.innerHTML = '<div style="color:#666;font-size:11px;text-align:center">Chargement prix...</div>';
+  fetch("/api/market/history/" + itemId)
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(data) {
+      zone = document.getElementById("wk-price-zone");
+      if (!zone) return;
+      var lastDate = "";
+      if (data.history && data.history.length > 0) {
+        lastDate = data.history[0].observed_at || "";
+      }
+      var h = '<div style="text-align:center;margin-bottom:6px">';
+      h += '<div style="display:inline-flex;gap:10px;font-size:11px">';
+      h += '<span style="color:#00ff88">Min: ' + fmtPrice(data.min_price) + '</span>';
+      h += '<span style="color:#ff6b6b">Max: ' + fmtPrice(data.max_price) + '</span>';
+      h += '<span style="color:#ffd93d">Moy: ' + fmtPrice(data.avg_price) + '</span>';
+      h += '<span style="color:#aaa">' + (data.count || 0) + ' offres</span></div>';
+      if (lastDate) {
+        var ago = "";
+        try {
+          var then = new Date(lastDate.replace(" ", "T"));
+          var now = new Date();
+          var diff = Math.floor((now - then) / 1000);
+          if (diff < 60) ago = "il y a " + diff + "s";
+          else if (diff < 3600) ago = "il y a " + Math.floor(diff/60) + " min";
+          else if (diff < 86400) ago = "il y a " + Math.floor(diff/3600) + "h" + String(Math.floor((diff%3600)/60)).padStart(2,"0");
+          else ago = "il y a " + Math.floor(diff/86400) + "j";
+        } catch(e) {}
+        h += '<div style="color:#aaa;font-size:10px;margin-top:3px">' + lastDate + (ago ? ' <em style="color:#ffd93d">(' + ago + ')</em>' : '') + '</div>';
+      }
+      h += '</div>';
+      h += '<canvas id="wk-price-canvas" width="260" height="80" style="border-radius:4px;background:#0f0f23;display:block;margin:0 auto"></canvas>';
+      zone.innerHTML = h;
+      var canvas = document.getElementById("wk-price-canvas");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var W = canvas.width, H = canvas.height;
+      var prices = (data.history || []).map(function(x){return x.unit_price||0}).filter(function(p){return p>0}).reverse();
+      if (prices.length === 0) { ctx.fillStyle="#666";ctx.font="11px sans-serif";ctx.textAlign="center";ctx.fillText("Pas de donnees prix",W/2,H/2);return; }
+      if (prices.length === 1) { ctx.strokeStyle="#00d2ff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(10,H/2);ctx.lineTo(W-10,H/2);ctx.stroke();return; }
+      var p={top:6,bottom:16,left:8,right:8},cW=W-p.left-p.right,cH=H-p.top-p.bottom;
+      var minP=Math.min.apply(null,prices),maxP=Math.max.apply(null,prices),rng=maxP-minP||1;
+      ctx.strokeStyle="#1a1a3e";ctx.lineWidth=0.5;
+      for(var g=0;g<=3;g++){var gy=p.top+(cH*g)/3;ctx.beginPath();ctx.moveTo(p.left,gy);ctx.lineTo(W-p.right,gy);ctx.stroke();}
+      var gd=ctx.createLinearGradient(0,p.top,0,H-p.bottom);gd.addColorStop(0,"#00d2ff");gd.addColorStop(1,"#0051ff");
+      ctx.strokeStyle=gd;ctx.lineWidth=2;ctx.lineJoin="round";ctx.beginPath();
+      for(var i=0;i<prices.length;i++){var x=p.left+(cW*i)/(prices.length-1);var y=p.top+cH-((prices[i]-minP)/rng)*cH;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      ctx.stroke();
+      var fg=ctx.createLinearGradient(0,p.top,0,H-p.bottom);fg.addColorStop(0,"rgba(0,210,255,0.15)");fg.addColorStop(1,"rgba(0,81,255,0.02)");
+      ctx.fillStyle=fg;ctx.lineTo(p.left+cW,p.top+cH);ctx.lineTo(p.left,p.top+cH);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#888";ctx.font="9px sans-serif";ctx.textAlign="left";ctx.fillText(fmtPrice(minP),p.left,H-2);
+      ctx.textAlign="right";ctx.fillText(fmtPrice(maxP),W-p.right,p.top+8);
+      var lx=p.left+cW,ly=p.top+cH-((prices[prices.length-1]-minP)/rng)*cH;
+      ctx.fillStyle="#00ff88";ctx.beginPath();ctx.arc(lx,ly,3,0,Math.PI*2);ctx.fill();
+    })
+    .catch(function(){
+      var z=document.getElementById("wk-price-zone");
+      if(z) z.innerHTML='<div style="color:#555;font-size:11px;text-align:center">Prix indisponible</div>';
+    });
+}
 
 // --- Délégation d'événements ---
 export function initTooltipDelegation() {

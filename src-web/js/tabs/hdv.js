@@ -46,7 +46,7 @@ async function loadPatrimoine() {
       for (var i = 0; i < data.topItems.length; i++) {
         var it = data.topItems[i];
         var rc = getRarity(it.rarity).hex;
-        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' style='border-bottom:1px solid #222'>";
+        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
         if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
@@ -103,7 +103,7 @@ async function loadMarket() {
         var it = data.items[i];
         var rc = getRarity(it.rarity).hex;
         var sideLabel = it.side === "buy" ? "<span style='color:#66ccff'>Achat</span>" : "<span style='color:#00cc44'>Vente</span>";
-        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' style='border-bottom:1px solid #222'>";
+        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
         if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
@@ -209,6 +209,7 @@ function ensureTooltip() {
     tooltipCanvas.style.cssText = "border-radius: 4px; background: #0f0f23;";
     tooltipEl.appendChild(tooltipCanvas);
     tooltipCtx = tooltipCanvas.getContext("2d");
+
     document.body.appendChild(tooltipEl);
 }
 
@@ -308,6 +309,66 @@ function drawPriceChart(data) {
     ctx.fill();
 }
 
+
+// === Rendu CDN dans le tooltip prix ===
+function renderCdnInfo(itemId) {
+    if (!tooltipCdn) return;
+    tooltipCdn.innerHTML = '<span style="color:#666">Chargement details...</span>';
+    fetch("/api/cdn/" + itemId)
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(item) {
+            var r = getRarity(item.rarity);
+            var typeInfo = TYPE_INFO[item.type_id] || { fr:"Objet", icon:"One-Handed_Weapon" };
+            var gfxId = item.gfx_id || 0;
+            var h = "";
+            // Header: image + rarete + type + level
+            h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">';
+            if (gfxId) h += '<img src="/icons/items/' + gfxId + '.png" width="32" height="32" style="border-radius:4px" onerror="this.style.display=\'none\'">';
+            h += '<div>';
+            h += '<span style="background:' + r.hex + ';color:' + r.txtColor + ';padding:1px 6px;border-radius:3px;font-size:10px">' + r.name + '</span> ';
+            h += '<span style="color:#888;font-size:11px">[' + typeInfo.fr + '] Niv.' + (item.level || "?") + '</span>';
+            h += '</div></div>';
+            // Effets
+            var effects = item.effects || [];
+            if (effects.length > 0) {
+                h += '<div style="font-size:10px;color:#888;margin-bottom:3px">EFFETS</div>';
+                for (var i = 0; i < effects.length; i++) {
+                    var eff = effects[i];
+                    var actionId = eff.action_id || eff.actionId || 0;
+                    var val = eff.value || (eff.params ? eff.params[0] : 0) || 0;
+                    var params = eff.params || [];
+                    var act = ACTIONS[actionId];
+                    var line = "";
+                    if (act) {
+                        var iconUrl = WIKI + "/" + act.icon + ".png";
+                        line += '<img src="' + iconUrl + '" width="14" height="14" style="vertical-align:middle;margin-right:3px">';
+                        if ([1050, 1052, 1068].indexOf(actionId) >= 0 && params.length >= 3) {
+                            line += val + " Maitrise avec " + (params[2] || 0) + " elem.";
+                        } else if ([1051, 1053, 1069].indexOf(actionId) >= 0 && params.length >= 3) {
+                            line += val + " Resistance a " + (params[2] || 0) + " elem.";
+                        } else if (act.label.charAt(0) === "%") {
+                            line += val + act.label;
+                        } else {
+                            line += val + " " + act.label;
+                        }
+                    } else {
+                        line = val + " (action " + actionId + ")";
+                    }
+                    var bg = (i % 2 === 0) ? "#2a2a3e" : "#333348";
+                    h += '<div style="padding:2px 4px;background:' + bg + ';border-radius:2px;margin-bottom:1px">' + line + '</div>';
+                }
+            }
+            // Description
+            var desc = item.desc_fr || "";
+            if (desc) {
+                h += '<div style="margin-top:6px;color:#aa8;font-style:italic;font-size:11px">"' + escHtml(desc) + '"</div>';
+            }
+            tooltipCdn.innerHTML = h;
+        })
+        .catch(function() {
+            tooltipCdn.innerHTML = '<span style="color:#666">Details indisponibles</span>';
+        });
+}
 
 export async function showPriceTooltip(itemRefId, itemName, event) {
     ensureTooltip();
