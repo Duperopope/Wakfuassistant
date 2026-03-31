@@ -9,7 +9,6 @@
 
 import { fetchJson } from "../api.js";
 import { getRarity, GEM_COLORS, escHtml, loadIconsAtlas as sharedLoadAtlas, getIconSrc as sharedGetIcon } from "../shared/item.js";
-import { showPriceTooltip, positionTooltip, hidePriceTooltip } from "./hdv.js";
 import { initTooltipDelegation } from "../tooltip.js";
 
 // Rarete: utilise shared/item.js (getRarity)
@@ -46,7 +45,7 @@ function cellHTML(item) {
     var h = "";
     h += "<div class=\"gc\" style=\"border-color:" + r.hex + "\"";
     h += " data-tooltip=\"" + escHtml(tipText).replace(/\n/g, "&#10;") + "\"";
-    h += " data-id=\"" + id + "\">";
+    h += " data-id=\"" + id + "\" data-item-id=\"" + id + "\">";
 
     /* Icon area */
     h += "<div class=\"gc__icon-area\">";
@@ -235,7 +234,6 @@ async function loadSheet(container) {
 
     container.innerHTML = html;
     initTooltipDelegation(container);
-    attachCharacterPriceHover();
     console.log("[character] Rendu : build=" + bc + ", inv=" + ic + ", coffre=" + cc);
 }
 
@@ -261,28 +259,3 @@ window.__loadCharacterTab = function() {
 sharedLoadAtlas();
 
 
-// === GRAPHE PRIX MOUSEOVER (personnage) ===
-function attachCharacterPriceHover() {
-    var container = document.getElementById("ficheContent") || document.getElementById("charContainer") || document.getElementById("persoFichePanel");
-    if (!container) return;
-
-    container.addEventListener("mouseover", function(e) {
-        var card = e.target.closest(".gc[data-id]");
-        if (!card) return;
-        var itemId = parseInt(card.dataset.id);
-        if (!itemId || itemId <= 0) return;
-        var itemName = card.querySelector(".gc__name") ? card.querySelector(".gc__name").textContent.trim() : "";
-        showPriceTooltip(itemId, itemName, e);
-    });
-
-    container.addEventListener("mousemove", function(e) {
-        positionTooltip(e);
-    });
-
-    container.addEventListener("mouseout", function(e) {
-        var card = e.target.closest(".gc[data-id]");
-        if (card) {
-            hidePriceTooltip();
-        }
-    });
-}

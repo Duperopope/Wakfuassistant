@@ -16,7 +16,6 @@ import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
 import { loadHdv } from "./js/tabs/hdv.js";
-import { attachPriceHover, showPriceTooltip, hidePriceTooltip } from "./js/tabs/hdv.js";
 import { initTooltipDelegation } from "./js/tooltip.js";
 
 // ─── State pour sous-onglets Personnage ───
@@ -262,8 +261,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.__showPlayer = showPlayer;
-  window.__showPriceTooltip = showPriceTooltip;
-  window.__hidePriceTooltip = hidePriceTooltip;
 
   init();
 });
