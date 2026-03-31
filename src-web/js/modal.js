@@ -1,3 +1,8 @@
+import { fetchJson } from "./api.js";
+import { esc } from "./utils.js";
+import { initTooltipDelegation } from "./tooltip.js";
+import { getState, setState } from "./state.js";
+
 function rnd(v, wrap) {
   if (typeof v !== "number") return v;
   const display = Math.round(v);
@@ -5,12 +10,6 @@ function rnd(v, wrap) {
   if (wrap === false) return display;
   return '<span title="' + precise + '" style="cursor:help">' + display + '</span>';
 }
-
-// Modal - detail joueur
-import { fetchJson } from "./api.js";
-import { esc } from "./utils.js";
-import { initTooltipDelegation } from "./tooltip.js";
-import { getState, setState } from "./state.js";
 
 function escAttr(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;"); }
 

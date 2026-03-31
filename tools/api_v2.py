@@ -325,7 +325,7 @@ def _start_watcher():
         log.info("Watcher unifie sur %s (cooldown %ds)", PLAYERS_DIR, COOLDOWN)
         last_mtimes = {}
         for fpath in PLAYERS_DIR.glob("*.json"):
-            if "_t" in fpath.name:
+            if re.match(r".*_t\d+\.json$", fpath.name):
                 continue
             try:
                 last_mtimes[fpath.name] = fpath.stat().st_mtime
@@ -360,7 +360,7 @@ def _start_watcher():
             try:
                 changed = []
                 for fpath in PLAYERS_DIR.glob("*.json"):
-                    if "_t" in fpath.name:
+                    if re.match(r".*_t\d+\.json$", fpath.name):
                         continue
                     try:
                         mtime = fpath.stat().st_mtime

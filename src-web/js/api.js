@@ -1,5 +1,7 @@
 // API client - toutes les requetes vers le backend
-const API_BASE = "http://127.0.0.1:8042";
+const API_BASE = typeof window !== "undefined" && window.location.hostname === "localhost"
+  ? "http://localhost:8042"
+  : "http://127.0.0.1:8042";
 
 export async function fetchJson(url) {
   const res = await fetch(API_BASE + url);

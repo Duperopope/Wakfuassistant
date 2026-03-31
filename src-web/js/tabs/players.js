@@ -1,3 +1,7 @@
+import { fetchJson } from "../api.js";
+import { getState, updateFilters, setState } from "../state.js";
+import { esc } from "../utils.js";
+
 function rnd(v, wrap) {
   if (typeof v !== "number") return v;
   const display = Math.round(v);
@@ -6,31 +10,13 @@ function rnd(v, wrap) {
   return '<span title="' + precise + '" style="cursor:help">' + display + '</span>';
 }
 
-// Players tab - classement des joueurs
-import { fetchJson } from "../api.js";
-import { getState, updateFilters, setState } from "../state.js";
-import { esc } from "../utils.js";
-
 let _tranchesLoaded = false;
 
 async function loadTranches() {
-  if (_tranchesLoaded) return;
-  try {
-    const data = await fetchJson("/api/tranches");
-    const sel = document.getElementById("trancheFilter");
-    if (!sel) return;
-    for (const t of (data.tranches || [])) {
-      const opt = document.createElement("option");
-      opt.value = t.tranche;
-      opt.textContent = `Niv. ${t.label} (${t.count})`;
-      sel.appendChild(opt);
-    }
-    sel.addEventListener("change", () => {
-      updateFilters({ offset: 0 });
-      loadPlayers();
-    });
-    _tranchesLoaded = true;
-  } catch (_) {}
+  // Le select trancheFilter n'existe pas dans le HTML actuel
+  // Cette fonction est reservee pour un futur support des tranches
+  // Pour l'instant, on marque comme loaded pour ne pas retenter
+  _tranchesLoaded = true;
 }
 
 export async function loadPlayers() {
