@@ -263,6 +263,7 @@ async function loadSheet(container) {
 
     container.innerHTML = html;
     initTooltipDelegation(container);
+    attachCharacterPriceHover();
     console.log("[character] Rendu : build=" + bc + ", inv=" + ic + ", coffre=" + cc);
 }
 
@@ -286,3 +287,36 @@ window.__loadCharacterTab = function() {
 
 // Pre-charger l'atlas
 loadIconsAtlas();
+
+
+// === GRAPHE PRIX MOUSEOVER (personnage) ===
+function attachCharacterPriceHover() {
+    var container = document.getElementById("charContainer") || document.getElementById("persoFichePanel");
+    if (!container) return;
+
+    container.addEventListener("mouseover", function(e) {
+        var card = e.target.closest(".gc[data-id]");
+        if (!card) return;
+        var itemId = parseInt(card.dataset.id);
+        if (!itemId || itemId <= 0) return;
+        var itemName = card.querySelector(".gc__name") ? card.querySelector(".gc__name").textContent.trim() : "";
+        if (typeof showPriceTooltip === "function") {
+            showPriceTooltip(itemId, itemName, e);
+        } else if (window.__showPriceTooltip) {
+            window.__showPriceTooltip(itemId, itemName, e);
+        }
+    });
+
+    container.addEventListener("mousemove", function(e) {
+        if (typeof positionTooltip === "function") positionTooltip(e);
+        else if (window.__positionTooltip) window.__positionTooltip(e);
+    });
+
+    container.addEventListener("mouseout", function(e) {
+        var card = e.target.closest(".gc[data-id]");
+        if (card) {
+            if (typeof hidePriceTooltip === "function") hidePriceTooltip();
+            else if (window.__hidePriceTooltip) window.__hidePriceTooltip();
+        }
+    });
+}

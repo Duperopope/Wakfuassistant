@@ -55,7 +55,7 @@ async function loadPatrimoine() {
       for (var i = 0; i < data.topItems.length; i++) {
         var it = data.topItems[i];
         var rc = RARITY_COLORS[it.rarity || 0] || "#ccc";
-        html += "<tr style='border-bottom:1px solid #222'>";
+        html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
         if (it.gfxId) html += "<img src='" + icoUrl(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
@@ -72,6 +72,7 @@ async function loadPatrimoine() {
       html += "<p style='color:#888;margin-top:20px'>Aucun item evaluable. La base HDV (hdv_market.db) est probablement vide. Lance l agent Java pour capturer des offres.</p>";
     }
     el.innerHTML = html;
+    attachPriceHover();
   } catch (e) {
     el.innerHTML = "<p style='color:#f44'>Erreur: " + e.message + "</p>";
   }
@@ -317,7 +318,7 @@ function drawPriceChart(data) {
 }
 
 
-async function showPriceTooltip(itemRefId, itemName, event) {
+export async function showPriceTooltip(itemRefId, itemName, event) {
     ensureTooltip();
     if (currentHoverItem === itemRefId && tooltipEl.style.display !== "none") {
         positionTooltip(event);
@@ -331,7 +332,7 @@ async function showPriceTooltip(itemRefId, itemName, event) {
     positionTooltip(event);
 
     try {
-        const resp = await fetch(`http://127.0.0.1:8042/api/market/history/${itemRefId}`);
+        const resp = await fetch(`/api/market/history/${itemRefId}`);
         if (!resp.ok) throw new Error(resp.statusText);
         const data = await resp.json();
 
@@ -350,7 +351,7 @@ async function showPriceTooltip(itemRefId, itemName, event) {
     }
 }
 
-function positionTooltip(event) {
+export function positionTooltip(event) {
     if (!tooltipEl) return;
     const margin = 15;
     let x = event.clientX + margin;
@@ -362,15 +363,26 @@ function positionTooltip(event) {
     tooltipEl.style.top = y + "px";
 }
 
-function hidePriceTooltip() {
+export function hidePriceTooltip() {
     currentHoverItem = null;
     if (tooltipEl) tooltipEl.style.display = "none";
 }
 
+// Exposer sur window pour les autres onglets
+window.__showPriceTooltip = showPriceTooltip;
+window.__positionTooltip = positionTooltip;
+window.__hidePriceTooltip = hidePriceTooltip;
+
+
 // === Attacher les événements au tableau marché ===
 export function attachPriceHover() {
-    const container = document.getElementById("hdv-market") || document.getElementById("market-table-body");
-    if (!container) return;
+    var containers = [
+        document.getElementById("hdv-patrimoine"),
+        document.getElementById("hdv-market"),
+        document.getElementById("market-table-body")
+    ].filter(Boolean);
+    if (containers.length === 0) return;
+    containers.forEach(function(container) {
 
     container.addEventListener("mouseover", (e) => {
         const row = e.target.closest("tr[data-item-ref-id]");
@@ -396,4 +408,5 @@ export function attachPriceHover() {
             hidePriceTooltip();
         }
     });
+    }); // fin forEach containers
 }

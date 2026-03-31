@@ -15,6 +15,7 @@ import { loadEquipment } from "./js/tabs/equipment.js";
 import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
 import { loadHdv } from "./js/tabs/hdv.js";
+import { attachPriceHover, showPriceTooltip, hidePriceTooltip } from "./js/tabs/hdv.js";
 
 // ─── State pour sous-onglets Personnage ───
 let persoLoaded = { fiche: false, builder: false, optimizer: false, spells: false };
@@ -227,6 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.__showPlayer = showPlayer;
+  window.__showPriceTooltip = showPriceTooltip;
+  window.__hidePriceTooltip = hidePriceTooltip;
 
   init();
 });

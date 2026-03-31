@@ -1067,51 +1067,50 @@ async def api_market_stats():
         return {"total_latest": 0, "total_history": 0, "error": str(e)}
 
 
-    @app.get("/api/market/history/{item_ref_id}")
-    async def api_market_history(item_ref_id: int, days: int = 30):
-        """Historique de prix pour un objet - utilise pour graphe mouseover"""
-        import datetime
-        db_path = os.path.join(str(BASE_DIR), "logs", "hdv_market.db")
-        if not os.path.isfile(db_path):
-            return {"item_ref_id": item_ref_id, "name": "", "history": [], "count": 0}
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        try:
-            # Essayer market_observations d abord
-            tables = [t[0] for t in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
-            history = []
-            if "market_observations" in tables:
-                rows = conn.execute(
-                    "SELECT * FROM market_observations WHERE item_ref_id = ? ORDER BY source_ts DESC LIMIT 500",
-                    (item_ref_id,)
-                ).fetchall()
-                history = [dict(r) for r in rows]
-            else:
-                # Fallback: utiliser market_latest comme seul point
-                rows = conn.execute(
-                    "SELECT * FROM market_latest WHERE item_ref_id = ? ORDER BY unit_price ASC",
-                    (item_ref_id,)
-                ).fetchall()
-                history = [dict(r) for r in rows]
-            # Nom depuis CDN
-            name = ""
-            if CDN_CACHE and item_ref_id in CDN_CACHE:
-                name = CDN_CACHE[item_ref_id].get("name_fr", CDN_CACHE[item_ref_id].get("name", ""))
-            elif CDN_ITEMS and str(item_ref_id) in CDN_ITEMS:
-                name = CDN_ITEMS[str(item_ref_id)].get("title", {}).get("fr", "")
-            # Stats
-            prices = [h.get("unit_price", 0) for h in history if h.get("unit_price", 0) > 0]
-            return {
-                "item_ref_id": item_ref_id,
-                "name": name,
-                "count": len(history),
-                "min_price": min(prices) if prices else 0,
-                "max_price": max(prices) if prices else 0,
-                "avg_price": int(sum(prices)/len(prices)) if prices else 0,
-                "history": history[:200]
-            }
-        finally:
-            conn.close()
+@app.get("/api/market/history/{item_ref_id}")
+def api_market_history(item_ref_id: int, days: int = 30):
+    """Historique de prix pour un objet - utilise pour graphe mouseover"""
+    import datetime, sqlite3, os
+    db_path = os.path.join(str(BASE_DIR), "logs", "hdv_market.db")
+    if not os.path.isfile(db_path):
+        return {"item_ref_id": item_ref_id, "name": "", "history": [], "count": 0}
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        # Essayer market_observations d abord
+        tables = [t[0] for t in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+        history = []
+        if "market_observations" in tables:
+            rows = conn.execute(
+                "SELECT * FROM market_observations WHERE item_ref_id = ? ORDER BY source_ts DESC LIMIT 500",
+                (item_ref_id,)
+            ).fetchall()
+            history = [dict(r) for r in rows]
+        else:
+            # Fallback: utiliser market_latest comme seul point
+            rows = conn.execute(
+                "SELECT * FROM market_latest WHERE item_ref_id = ? ORDER BY unit_price ASC",
+                (item_ref_id,)
+            ).fetchall()
+            history = [dict(r) for r in rows]
+        # Nom depuis CDN
+        name = ""
+        info = _cdn_lookup(item_ref_id)
+        if info:
+            name = info.get("name", info.get("name_fr", ""))
+        # Stats
+        prices = [h.get("unit_price", 0) for h in history if h.get("unit_price", 0) > 0]
+        return {
+            "item_ref_id": item_ref_id,
+            "name": name,
+            "count": len(history),
+            "min_price": min(prices) if prices else 0,
+            "max_price": max(prices) if prices else 0,
+            "avg_price": int(sum(prices)/len(prices)) if prices else 0,
+            "history": history[:200]
+        }
+    finally:
+        conn.close()
 
 @app.get("/api/patrimoine")
 async def api_patrimoine():
