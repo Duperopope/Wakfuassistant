@@ -143,3 +143,12 @@ pm run dev:web + python tools/api_v2.py (localhost:3000 / 8042)
 - Load : 313ms
 
 **Verdict** : PASS — migration shared validee, zero regression fonctionnelle.
+
+
+## Backlog features (post-deploy)
+
+| # | Feature | Priorite | Statut |
+|---|---------|----------|--------|
+| F1 | Tooltip unifie HDV : combiner graphe prix + stats CDN + description | HAUTE | TODO |
+| F2 | Corriger icones slots modal.js (24 erreurs 404) | MOYENNE | TODO |
+| F3 | Precharger atlas au demarrage global (pas seulement character.js) | BASSE | TODO |

@@ -63,7 +63,6 @@ async function loadPatrimoine() {
       html += "<p style='color:#888;margin-top:20px'>Aucun item evaluable. La base HDV (hdv_market.db) est probablement vide. Lance l agent Java pour capturer des offres.</p>";
     }
     el.innerHTML = html;
-    attachPriceHover();
   } catch (e) {
     el.innerHTML = "<p style='color:#f44'>Erreur: " + e.message + "</p>";
   }
@@ -130,7 +129,6 @@ async function loadMarket() {
     }
 
     el.innerHTML = html;
-    attachPriceHover();
 
     // Bind events
     var searchInput = document.getElementById("hdv-search");

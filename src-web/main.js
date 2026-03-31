@@ -16,6 +16,7 @@ import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
 import { loadHdv } from "./js/tabs/hdv.js";
 import { attachPriceHover, showPriceTooltip, hidePriceTooltip } from "./js/tabs/hdv.js";
+import { initTooltipDelegation } from "./js/tooltip.js";
 
 // ─── State pour sous-onglets Personnage ───
 let persoLoaded = { fiche: false, builder: false, optimizer: false, spells: false };
@@ -125,6 +126,7 @@ async function populateGuildFilter() {
 
 // ─── Init ───
 async function init() {
+  initTooltipDelegation();
   const stats = await fetchJson("/api/stats");
   setState({ stats, classes: stats.classes || [] });
   renderStats(stats);
