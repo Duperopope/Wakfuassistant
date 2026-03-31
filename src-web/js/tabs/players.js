@@ -11,12 +11,37 @@ import { fetchJson } from "../api.js";
 import { getState, updateFilters, setState } from "../state.js";
 import { esc } from "../utils.js";
 
+let _tranchesLoaded = false;
+
+async function loadTranches() {
+  if (_tranchesLoaded) return;
+  try {
+    const data = await fetchJson("/api/tranches");
+    const sel = document.getElementById("trancheFilter");
+    if (!sel) return;
+    for (const t of (data.tranches || [])) {
+      const opt = document.createElement("option");
+      opt.value = t.tranche;
+      opt.textContent = `Niv. ${t.label} (${t.count})`;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener("change", () => {
+      updateFilters({ offset: 0 });
+      loadPlayers();
+    });
+    _tranchesLoaded = true;
+  } catch (_) {}
+}
+
 export async function loadPlayers() {
+  await loadTranches();
+
   const s = getState();
   const f = s.filters;
-  let url = `/api/players?sort=${f.sort}&order=${f.order}&limit=${f.limit}&offset=${f.offset}&min_level=${f.minLevel}&max_level=${f.maxLevel}`;
-  if (f.breed) url += `&breed=${encodeURIComponent(f.breed)}`;
-  if (f.guild) url += `&guild=${encodeURIComponent(f.guild)}`;
+
+  // Vérifier si une tranche est sélectionnée
+  const trancheSel = document.getElementById("trancheFilter");
+  const trancheVal = trancheSel ? trancheSel.value : "";
 
   if (f.search && f.search.length >= 2) {
     const searchData = await fetchJson(`/api/search?q=${encodeURIComponent(f.search)}`);
@@ -24,6 +49,22 @@ export async function loadPlayers() {
     renderPagination(searchData.players?.length || 0, 0, f.limit);
     return;
   }
+
+  if (trancheVal !== "") {
+    // Mode tranche : utiliser le nouvel endpoint
+    let url = `/api/players/by-tranche?tranche=${trancheVal}&sort=${f.sort}&order=${f.order}&limit=${f.limit}&offset=${f.offset}`;
+    if (f.breed) url += `&breed=${encodeURIComponent(f.breed)}`;
+    const data = await fetchJson(url);
+    setState({ players: data.players || [] });
+    renderPlayerRows(data.players || [], f.offset);
+    renderPagination(data.total || 0, f.offset, f.limit);
+    return;
+  }
+
+  // Mode normal : tous les joueurs
+  let url = `/api/players?sort=${f.sort}&order=${f.order}&limit=${f.limit}&offset=${f.offset}&min_level=${f.minLevel}&max_level=${f.maxLevel}`;
+  if (f.breed) url += `&breed=${encodeURIComponent(f.breed)}`;
+  if (f.guild) url += `&guild=${encodeURIComponent(f.guild)}`;
 
   const data = await fetchJson(url);
   setState({ players: data.players || [] });
@@ -35,9 +76,7 @@ export function renderPlayerRows(players, startOffset) {
   const tbody = document.getElementById("playersTbody");
   if (!tbody) return;
   tbody.innerHTML = players.map((p, i) => {
-
     const rank = p.rank || startOffset + i + 1;
-    const iconUrl = p.gfx_id ? `/icons/items/${p.gfx_id}.png` : "";
     return `<tr>
       <td class="rank">${rank}</td>
       <td class="clickable-player" data-player="${esc(p.name)}">${esc(p.name)}</td>
@@ -67,7 +106,6 @@ function renderPagination(total, offset, limit) {
   `;
 }
 
-// Expose pour onclick inline (sera remplace par events plus tard)
 window.__goPage = (newOffset) => {
   updateFilters({ offset: Math.max(0, newOffset) });
   loadPlayers();

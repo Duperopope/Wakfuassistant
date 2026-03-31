@@ -670,12 +670,29 @@ public class CharacterExtractorAdvice {
             fw.flush();
             fw.close();
 
-            // Écrire le snapshot de cette tranche (écrase le précédent pour cette tranche)
-            java.io.FileWriter fwTranche = new java.io.FileWriter(
-                    playersDir + "\\" + safeName + "_t" + tranche + ".json", false);
-            fwTranche.write(json);
-            fwTranche.flush();
-            fwTranche.close();
+            // Vérifier que l'équipement est cohérent avec la tranche avant d'écrire
+            // Si le joueur est downscalé, equipmentLevel > borne haute de la tranche = snapshot invalide
+            int trancheMax = (tranche == 0) ? 20 : tranche + 14;
+            boolean snapshotValide = true;
+            if (equipmentLevel > 0 && equipmentLevel > trancheMax) {
+                snapshotValide = false;
+                // Log pour debug
+                java.io.FileWriter fwSkip = new java.io.FileWriter(
+                        "H:\\Code\\Wakfuassistant\\agent\\logs\\wakfu_agent_spy.log", true);
+                fwSkip.write("[" + timestamp + "] SNAPSHOT_SKIPPED: " + name
+                        + " level=" + level + " eqLevel=" + equipmentLevel
+                        + " tranche=" + tranche + " (eq depasse trancheMax=" + trancheMax + ")\n");
+                fwSkip.flush();
+                fwSkip.close();
+            }
+            if (snapshotValide) {
+                // Écrire le snapshot de cette tranche (écrase le précédent pour cette tranche)
+                java.io.FileWriter fwTranche = new java.io.FileWriter(
+                        playersDir + "\\" + safeName + "_t" + tranche + ".json", false);
+                fwTranche.write(json);
+                fwTranche.flush();
+                fwTranche.close();
+            }
 
             java.io.FileWriter fw2 = new java.io.FileWriter(logDir + "\\character_data.log", true);
             fw2.write("[" + timestamp + "] " + type + " | " + name + " | " + breedName + " Lv." + level

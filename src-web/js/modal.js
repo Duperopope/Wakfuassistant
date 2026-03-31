@@ -12,6 +12,8 @@ import { esc } from "./utils.js";
 import { initTooltipDelegation } from "./tooltip.js";
 import { getState, setState } from "./state.js";
 
+function escAttr(s) { return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;"); }
+
 const RARITY_CLASSES = {0:"rarity-0",1:"rarity-1",2:"rarity-2",3:"rarity-3",4:"rarity-4",5:"rarity-5",6:"rarity-6",7:"rarity-7"};
 const SLOT_ICON_MAP = {0:"casque",3:"epaulettes",4:"amulette",5:"plastron",7:"anneau",8:"anneau",10:"ceinture",12:"bottes",13:"cape",15:"arme",17:"accessoire",18:"secondemain",22:"familier",23:"monture",24:"monture"};
 const SLOT_ORDER = {0:0,13:1,4:2,3:3,5:4,10:5,12:6,7:7,8:8,15:9,18:10,17:11,22:12,24:13};
@@ -57,10 +59,10 @@ export async function showPlayer(name, tranche, keepTab) {
   const tranchesHtml = p.available_tranches?.length ? `
     <div class="tranche-tabs">
       <div class="tranche-btn ${p.viewing_tranche === null ? "active" : ""}" 
-           onclick="window.__showPlayer('${esc(p.name)}', null)">Actuel (Niv.${p.level})</div>
+           data-tranche-player="${escAttr(p.name)}" data-tranche-val="null">Actuel (Niv.${p.level})</div>
       ${p.available_tranches.map(t => `
         <div class="tranche-btn ${p.viewing_tranche === t ? "active" : ""}"
-             onclick="window.__showPlayer('${esc(p.name)}', ${t}, true)">${t}-${t+15}</div>
+             data-tranche-player="${escAttr(p.name)}" data-tranche-val="${t}">${t}-${t+14}</div>
       `).join("")}
     </div>` : "";
 
@@ -170,6 +172,16 @@ export async function showPlayer(name, tranche, keepTab) {
 
   overlay.classList.add("active");
   initTooltipDelegation();
+
+  // Delegation pour boutons tranche
+  body.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-tranche-player]");
+    if (!btn) return;
+    const playerName = btn.dataset.tranchePlayer;
+    const val = btn.dataset.trancheVal;
+    const trancheArg = val === "null" ? null : parseInt(val);
+    window.__showPlayer(playerName, trancheArg, true);
+  });
 }
 
 export function switchModalTab(tab) {

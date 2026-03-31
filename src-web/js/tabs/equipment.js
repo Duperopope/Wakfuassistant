@@ -126,11 +126,33 @@ function scorePct(current, potential) {
 let _selectedLevel  = 0;  // 0 = pas de filtre
 let _selectedBudget = 0;  // 0 = pas de filtre (en kamas)
 let _clickHandler   = null;  // référence pour retirer l'ancien listener
+let _knownPlayersCache = null;
+let _nameToFileMap = {};
+
+async function _fetchRealPlayerNames() {
+    if (_knownPlayersCache) return _knownPlayersCache;
+    try {
+        const data = await fetchJson("/api/players?limit=5000&sort=name&order=ASC");
+        const meData2 = await fetchJson("/api/me");
+        const fileNames = meData2.known_players || [];
+        const dbNames = (data.players || []).map(p => p.name);
+        _nameToFileMap = {};
+        for (const real of dbNames) {
+            const sanitized = real.replace(/['']/g, "_");
+            const match = fileNames.find(f => f === real || f === sanitized);
+            if (match) _nameToFileMap[real] = match;
+        }
+        _knownPlayersCache = dbNames;
+    } catch (_) {
+        _knownPlayersCache = [];
+    }
+    return _knownPlayersCache;
+}
 
 // ── Sélecteur joueur actif (datalist = filtre natif + accents/apostrophes) ──
-function _renderPlayerSelect(meData) {
+function _renderPlayerSelect(meData, realNames) {
     const current = meData.name || "";
-    const players = meData.known_players || [];
+    const players = realNames || meData.known_players || [];
     const opts = players.map(p => `<option value="${escHtml(p)}">`).join("");
     const lvlInfo = meData.level ? ` niv.${meData.level}` : "";
     return `
@@ -150,13 +172,15 @@ function _bindPlayerSelect(container, meData) {
 
     // Valider et envoyer quand l'utilisateur choisit dans la liste ou appuie Entrée
     const _apply = async () => {
+        _knownPlayersCache = null;
         const name = input.value.trim();
         if (!name || name === (meData.name || "")) return;
+        const fileName = _nameToFileMap[name] || name.replace(/['\u2019]/g, "_");
         try {
             await fetch("/api/me", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name: fileName }),
             });
         } catch (_) {}
         loadEquipment(container);
@@ -182,6 +206,7 @@ export async function loadEquipment(container) {
     // Charger le joueur actif et la liste des joueurs connus
     let meData = { name: "", level: 0, known_players: [] };
     try { meData = await fetchJson("/api/me"); } catch (_) {}
+    const _realNames = await _fetchRealPlayerNames();
 
     let data;
     try {
@@ -203,7 +228,7 @@ export async function loadEquipment(container) {
     <span class="bld-toolbar__title">Builder Sram</span>
   </div>
   <div class="bld-toolbar__right">
-    ${_renderPlayerSelect(meData)}
+    ${_renderPlayerSelect(meData, _realNames)}
   </div>
 </div>
 <div class="bld-empty">${escHtml(data.error)}</div>`;
@@ -235,7 +260,7 @@ export async function loadEquipment(container) {
     <span class="bld-toolbar__sub">Score offensif burst mêlée</span>
   </div>
   <div class="bld-toolbar__right">
-    ${_renderPlayerSelect({ ...meData, name: activePlayerName, level: activePlayerLevel })}
+    ${_renderPlayerSelect({ ...meData, name: activePlayerName, level: activePlayerLevel }, _realNames)}
     <label class="bld-level-label" for="bld-level-input">Niv. max</label>
     <input id="bld-level-input" class="bld-level-input" type="number" min="1" max="230"
            value="${displayLevel}" placeholder="140">

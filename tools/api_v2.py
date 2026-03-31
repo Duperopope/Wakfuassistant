@@ -656,21 +656,63 @@ async def api_players_legacy(
 
 
 @app.get("/api/players/{name:path}")
-async def api_player_legacy(name: str):
+async def api_player_legacy(name: str, tranche: int = None):
     player = db.get_player(name)
     if not player:
         return JSONResponse({"error": "Joueur introuvable"}, status_code=404)
 
+    # Recuperer les tranches disponibles pour ce joueur
+    conn = db._conn()
+    snap_rows = conn.execute(
+        "SELECT DISTINCT level FROM equipment_snapshots WHERE player_name = ? ORDER BY level",
+        (name,)
+    ).fetchall()
+    available = set()
+    for r in snap_rows:
+        lvl = r["level"]
+        t = 0 if lvl <= 20 else ((lvl - 21) // 15) * 15 + 21
+        available.add(t)
+    player["available_tranches"] = sorted(available)
+    player["viewing_tranche"] = tranche
+
+    # Si une tranche est demandee, charger l equipment depuis les snapshots
+    equipment_str = player.get("equipment", "")
+    use_level = player.get("level", 0)
+    if tranche is not None:
+        if tranche == 0:
+            t_min, t_max = 0, 20
+        else:
+            t_min, t_max = tranche, tranche + 14
+        snap = conn.execute(
+            "SELECT equipment, level, equipment_level, captured_at FROM equipment_snapshots "
+            "WHERE player_name = ? AND level >= ? AND level <= ? "
+            "ORDER BY level DESC, captured_at DESC LIMIT 1",
+            (name, t_min, t_max)
+        ).fetchone()
+        if not snap:
+            # Fallback: chercher le snapshot le plus proche en dessous
+            snap = conn.execute(
+                "SELECT equipment, level, equipment_level, captured_at FROM equipment_snapshots "
+                "WHERE player_name = ? AND level <= ? "
+                "ORDER BY level DESC LIMIT 1",
+                (name, t_max)
+            ).fetchone()
+        if snap:
+            equipment_str = snap["equipment"]
+            use_level = snap["level"]
+            player["level"] = use_level
+            player["snapshot_timestamp"] = snap["captured_at"]
+
     # Calculer les details
-    if _items_db and player.get("equipment"):
+    if _items_db and equipment_str and "=" in str(equipment_str):
         raw = {
             "name": player["name"],
-            "level": player["level"],
-            "breedId": player["breed_id"],
-            "breedName": player["breed_name"],
-            "equipment": player["equipment"],
-            "equipmentLevel": player["equipment_level"],
-            "spells": player.get("spells", ""),
+            "level": use_level,
+            "breedId": player.get("breed_id", 0),
+            "breedName": player.get("breed_name", ""),
+            "equipment": equipment_str,
+            "equipmentLevel": player.get("equipment_level", 0),
+            "spells": player.get("spells", "") if tranche is None else "",
             "builds": "",
         }
         result = calculer_joueur(raw, _items_db)
@@ -683,7 +725,7 @@ async def api_player_legacy(name: str):
                 "poids_defensif": round(deff, 1),
                 "poids_resistance": result.get("total_res", 0) or 0,
                 "equipment": result.get("items_detail", []),
-                "spells": result.get("spells_data", []),
+                "spells": result.get("spells_data", []) if tranche is None else [],
                 "pa": result.get("pa", 0),
                 "pm": result.get("pm", 0),
                 "total_pv": result.get("total_pv", 0) or 0,
