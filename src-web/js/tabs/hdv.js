@@ -1,5 +1,6 @@
 import { fetchJson } from "../api.js";
 import { RARITY, getRarity, fmtPrice, getIconSrc, getCdnIconSrc, escHtml } from "../shared/item.js";
+import { prefillCache } from "../tooltip.js";
 
 
 // fmtK -> fmtPrice (shared/item.js)
@@ -8,18 +9,24 @@ import { RARITY, getRarity, fmtPrice, getIconSrc, getCdnIconSrc, escHtml } from 
 
 let ms = { query: "", side: "", offset: 0, limit: 30, sort: "unit_price", order: "asc" };
 let currentSub = "patrimoine";
+let _lastPatrimoineTs = null;
+let _lastMarketTs = null;
 
 // ===================== PATRIMOINE =====================
-async function loadPatrimoine() {
+async function loadPatrimoine(isSSE) {
   const el = document.getElementById("hdv-patrimoine");
   if (!el) return;
-  el.innerHTML = "<p style='color:#aaa'>Chargement du patrimoine...</p>";
+  if (!isSSE) el.innerHTML = "<p style='color:#aaa'>Chargement du patrimoine...</p>";
   try {
     const data = await fetchJson("/api/patrimoine");
     if (data.error) {
       el.innerHTML = "<p style='color:#f44'>" + data.error + "</p>";
       return;
     }
+    // Skip re-render si donnees identiques (SSE refresh)
+    const ts = data.lastUpdate || "";
+    if (isSSE && ts && ts === _lastPatrimoineTs) return;
+    _lastPatrimoineTs = ts;
     let html = "<div style='display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px'>";
     html += "<div style='background:#1a1a2e;padding:16px 24px;border-radius:8px;min-width:180px'>";
     html += "<div style='color:#aaa;font-size:12px'>VALEUR TOTALE</div>";
@@ -48,7 +55,7 @@ async function loadPatrimoine() {
         var rc = getRarity(it.rarity).hex;
         html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || '').replace(/'/g, '')) + "' data-slot-colors='" + (it.slotColors || "") + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
-        if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
+        if (it.gfxId) html += "<img src='" + getIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
         html += "<td>" + (it.quantity || 1) + "</td>";
         html += "<td>" + fmtPrice(it.unitPrice) + "</td>";
@@ -63,16 +70,25 @@ async function loadPatrimoine() {
       html += "<p style='color:#888;margin-top:20px'>Aucun item evaluable. La base HDV (hdv_market.db) est probablement vide. Lance l agent Java pour capturer des offres.</p>";
     }
     el.innerHTML = html;
+
+    // Prefill tooltip cache
+    if (data.topItems) {
+      prefillCache(data.topItems.map(it => ({
+        id: it.itemId || it.item_ref_id, name_fr: it.name,
+        level: 0, rarity: it.rarity, gfxId: it.gfxId,
+        slotColors: it.slotColors || "",
+      })));
+    }
   } catch (e) {
     el.innerHTML = "<p style='color:#f44'>Erreur: " + e.message + "</p>";
   }
 }
 
 // ===================== MARCHE HDV =====================
-async function loadMarket() {
+async function loadMarket(isSSE) {
   var el = document.getElementById("hdv-market");
   if (!el) return;
-  el.innerHTML = "<p style='color:#aaa'>Chargement du marche...</p>";
+  if (!isSSE) el.innerHTML = "<p style='color:#aaa'>Chargement du marche...</p>";
   try {
     var stats = {};
     try { stats = await fetchJson("/api/market/stats"); } catch(e) { stats = {}; }
@@ -81,6 +97,11 @@ async function loadMarket() {
     if (ms.query) qs += "&q=" + encodeURIComponent(ms.query);
     if (ms.side) qs += "&side=" + ms.side;
     var data = await fetchJson(qs);
+
+    // Skip re-render si donnees identiques (SSE refresh)
+    var mktTs = data.lastUpdate || "";
+    if (isSSE && mktTs && mktTs === _lastMarketTs) return;
+    _lastMarketTs = mktTs;
 
     var html = "<div style='margin-bottom:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap'>";
     html += "<input id='hdv-search' type='text' placeholder='Rechercher un item...' value='" + (ms.query || "") + "' style='padding:8px 12px;background:#1a1a2e;border:1px solid #333;color:#fff;border-radius:6px;width:240px'>";
@@ -104,7 +125,7 @@ async function loadMarket() {
         var sideLabel = it.side === "buy" ? "<span style='color:#66ccff'>Achat</span>" : "<span style='color:#00cc44'>Vente</span>";
         html += "<tr data-item-ref-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-id='" + (it.itemId || it.item_ref_id || 0) + "' data-item-name='" + ((it.name || "").replace(/'/g, "\'")) + "' data-slot-colors='" + (it.slotColors || "") + "' style='border-bottom:1px solid #222'>";
         html += "<td style='padding:6px;display:flex;align-items:center;gap:6px'>";
-        if (it.gfxId) html += "<img src='" + getCdnIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
+        if (it.gfxId) html += "<img src='" + getIconSrc(it.gfxId) + "' width='28' height='28' style='border-radius:4px' onerror='this.style.display=\"none\"'>";
         html += "<span style='color:" + rc + "'>" + (it.name || "#" + it.itemId) + "</span></td>";
         html += "<td>" + (it.qty || 1) + "</td>";
         html += "<td style='color:#ffee00'>" + fmtPrice(it.unitPrice) + "</td>";
@@ -129,6 +150,15 @@ async function loadMarket() {
     }
 
     el.innerHTML = html;
+
+    // Prefill tooltip cache
+    if (data.items) {
+      prefillCache(data.items.map(it => ({
+        id: it.itemId || it.item_ref_id, name_fr: it.name,
+        level: 0, rarity: it.rarity, gfxId: it.gfxId,
+        slotColors: it.slotColors || "",
+      })));
+    }
 
     // Bind events
     var searchInput = document.getElementById("hdv-search");
@@ -173,8 +203,8 @@ export function loadHdv() {
   switchHdvSub("patrimoine");
 }
 
-// Rafraichit uniquement le sous-onglet actif (pour SSE)
+// Rafraichit uniquement le sous-onglet actif (pour SSE — skip si donnees inchangees)
 export function refreshHdv() {
-  if (currentSub === "patrimoine") loadPatrimoine();
-  else if (currentSub === "market") loadMarket();
+  if (currentSub === "patrimoine") loadPatrimoine(true);
+  else if (currentSub === "market") loadMarket(true);
 }

@@ -1,6 +1,7 @@
 import { fetchJson } from "./api.js";
 import { esc } from "./utils.js";
 import { initTooltipDelegation } from "./tooltip.js";
+import { getIconSrc } from "./shared/item.js";
 import { getState, setState } from "./state.js";
 
 function rnd(v, wrap) {
@@ -83,7 +84,7 @@ export async function showPlayer(name, tranche, keepTab) {
   // Equipment table
   const equipHtml = (p.equipment || []).slice().sort(function(a,b){return (SLOT_ORDER[a.slot]!==undefined?SLOT_ORDER[a.slot]:99)-(SLOT_ORDER[b.slot]!==undefined?SLOT_ORDER[b.slot]:99);}).map(e => {
     const rarCls = RARITY_CLASSES[e.rarity] || "";
-    const iconUrl = e.gfx_id ? `/icons/items/${e.gfx_id}.png` : "";
+    const iconUrl = e.gfx_id ? getIconSrc(e.gfx_id) : "";
     const iconImg = iconUrl ? `<img src="${iconUrl}" class="item-icon" onerror="this.style.display='none'" alt="">` : "";
     return `<tr data-item-id="${e.item_id}" style="cursor:pointer">
       <td style="white-space:nowrap"><img src="/icons/slots/${SLOT_ICON_MAP[e.slot] || 'accessoire'}.png?v=1774811227" style="width:20px;height:20px;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'" alt="">${esc(e.slot_name || String(e.slot))}</td>

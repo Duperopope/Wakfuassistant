@@ -1,12 +1,18 @@
 // character.js — Page Personnage : Build / Inventaire / Coffre
 
 import { fetchJson } from "../api.js";
-import { getRarity, escHtml, loadIconsAtlas as sharedLoadAtlas, getIconSrc as sharedGetIcon } from "../shared/item.js";
-import { initTooltipDelegation } from "../tooltip.js";
+import { getRarity, escHtml, getIconSrc as sharedGetIcon } from "../shared/item.js";
+import { prefillCache } from "../tooltip.js";
 
 const GEM_COLOR = { 1: "#e04040", 2: "#38c454", 3: "#4466ee", 4: "#cccccc" };
+const GEM_COLOR_NAME = { 1: "Rouge", 2: "Vert", 3: "Bleu", 4: "Blanc" };
 
 // ── Carte d'un item ──────────────────────────────────────────────
+function _gemSlotColors(gems) {
+    if (!gems || !gems.length) return "";
+    return gems.map(g => GEM_COLOR_NAME[g] || GEM_COLOR_NAME[g && g.color] || "").filter(Boolean).join(",");
+}
+
 function itemCard(it) {
     const id      = it.id || it.refId || it.itemId || 0;
     const nm      = it.name || ("#" + id);
@@ -16,11 +22,12 @@ function itemCard(it) {
     const lvl     = it.level || "";
     const gems    = it.gemSlots || it.gems || [];
     const iconUrl = gfx ? sharedGetIcon(gfx) : "";
+    const sc      = _gemSlotColors(gems);
 
-    let h = `<div class="ch-card" style="--rc:${r.hex}" data-item-id="${id}">`;
+    let h = `<div class="ch-card" style="--rc:${r.hex}" data-item-id="${id}" data-item-name="${escHtml(nm)}" data-item-level="${lvl}" data-item-rarity="${it.rarity || 0}"${sc ? ` data-slot-colors="${escHtml(sc)}"` : ""}>`;
     h += `<div class="ch-card__ico">`;
     if (iconUrl) {
-        h += `<img src="${escHtml(iconUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`;
+        h += `<img src="${escHtml(iconUrl)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`;
         h += `<span class="ch-card__ico-fb" style="display:none">${escHtml(nm.slice(0, 3).toUpperCase())}</span>`;
     } else {
         h += `<span class="ch-card__ico-fb">${escHtml(nm.slice(0, 3).toUpperCase())}</span>`;
@@ -121,9 +128,16 @@ function summaryBar(invCount, chestCount, invTs, chestTs) {
 </div>`;
 }
 
+// ── Timestamps pour eviter re-render inutile ────────────────────
+let _lastInvTs = null;
+let _lastChestTs = null;
+
 // ── Chargement principal ─────────────────────────────────────────
 async function loadSheet(container) {
-    container.innerHTML = `<div class="ch-loading">Chargement...</div>`;
+    // Premier chargement : afficher le loading
+    if (!container.querySelector(".ch-section")) {
+        container.innerHTML = `<div class="ch-loading">Chargement...</div>`;
+    }
     let invData = null, chestData = null;
     try {
         const results = await Promise.allSettled([
@@ -136,6 +150,15 @@ async function loadSheet(container) {
         container.innerHTML = `<div class="ch-error">Erreur : ${escHtml(err.message)}</div>`;
         return;
     }
+
+    // Skip re-render si les donnees n'ont pas change
+    const newInvTs = invData && invData.timestamp || null;
+    const newChestTs = chestData && chestData.lastUpdate || null;
+    if (_lastInvTs !== null && newInvTs === _lastInvTs && newChestTs === _lastChestTs) {
+        return; // donnees identiques, pas de re-render
+    }
+    _lastInvTs = newInvTs;
+    _lastChestTs = newChestTs;
 
     let html = "";
 
@@ -155,6 +178,8 @@ async function loadSheet(container) {
         ? chestData.compartments.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr"))
         : [];
 
+    const _allItems = []; // pour prefill tooltip cache
+
     function renderBag(bag) {
         const items = (bag.items || []).map(it => ({
             id: it.refId || 0,
@@ -164,6 +189,7 @@ async function loadSheet(container) {
             gfxId: it.gfxId || 0,
             quantity: it.quantity || 1,
         }));
+        _allItems.push(...items);
         const meta = (bag.capacity - (bag.itemCount || 0)) + " slots libres";
         html += renderSection("&#127526;", bag.bagName || "Sac",
             (bag.itemCount || 0) + " / " + bag.capacity, meta, items);
@@ -183,15 +209,22 @@ async function loadSheet(container) {
     // 3. Coffre (compartiments triés alphabétiquement)
     if (compartments.length > 0) {
         compartments.forEach(comp => {
-            const items = (comp.items || []).map(it => ({
-                id: it.itemId || 0,
-                name: it.name || ("#" + it.itemId),
-                level: it.level || 0,
-                rarity: it.rarity || 0,
-                gfxId: it.gfxId || 0,
-                quantity: it.quantity || 1,
-                gems: it.enchant ? Object.values(it.enchant) : [],
-            }));
+            const items = (comp.items || []).map(it => {
+                // Extraire les couleurs de gemmes depuis enchant.slots
+                const enc = it.enchant || {};
+                const slots = enc.slots || [];
+                const gemIds = slots.map(s => s.colorId || 0).filter(Boolean);
+                return {
+                    id: it.itemId || 0,
+                    name: it.name || ("#" + it.itemId),
+                    level: it.level || 0,
+                    rarity: it.rarity || 0,
+                    gfxId: it.gfxId || 0,
+                    quantity: it.quantity || 1,
+                    gems: gemIds,
+                };
+            });
+            _allItems.push(...items);
             const enchStr = comp.enchantedCount > 0 ? comp.enchantedCount + " enchantes" : "";
             const meta = [comp.emptySlots + " slots libres", enchStr].filter(Boolean).join(" · ");
             html += renderSection("&#128230;", comp.name || "Compartiment",
@@ -214,7 +247,16 @@ async function loadSheet(container) {
     );
 
     container.innerHTML = html;
-    initTooltipDelegation(container);
+
+    // Pre-remplir le cache tooltip avec tous les items (tooltips instantanes)
+    prefillCache(_allItems.map(it => ({
+        id: it.id,
+        name_fr: it.name,
+        level: it.level,
+        rarity: it.rarity,
+        gfxId: it.gfxId,
+        _slot_colors: _gemSlotColors(it.gems),
+    })));
 }
 
 // ── Export ───────────────────────────────────────────────────────
@@ -225,4 +267,3 @@ export async function loadCharacter() {
 }
 
 window.__loadCharacterTab = () => loadCharacter();
-sharedLoadAtlas();

@@ -59,6 +59,7 @@ DB_PATH = BASE_DIR / "logs" / "wakfu.db"
 ICONS_DIR = BASE_DIR / "src-web" / "icons"
 WEB_DIR = BASE_DIR / "src-web"
 ITEMS_JSON = BASE_DIR / "rnd" / "data" / "cdn_items.json"
+JOBS_ITEMS_JSON = BASE_DIR / "rnd" / "data" / "cdn_jobsItems.json"
 COOLDOWN = 5          # secondes entre reloads
 HDV_FORCE_INTERVAL = 30  # secondes entre force-sync HDV indépendamment du mtime
 
@@ -184,6 +185,33 @@ try:
     )
     _items_db = charger_items(ITEMS_JSON)
     log.info("Items DB: %d items charges", len(_items_db))
+    # Charger aussi jobsItems (ressources, consommables, fragments, etc.)
+    if JOBS_ITEMS_JSON.exists():
+        try:
+            _jobs_raw = json.loads(JOBS_ITEMS_JSON.read_text(encoding="utf-8"))
+            _jobs_count = 0
+            for entry in _jobs_raw:
+                defn = entry.get("definition", {})
+                jid = defn.get("id")
+                if jid is None or jid in _items_db:
+                    continue
+                titre = entry.get("title", {})
+                desc = entry.get("description", {})
+                gp = defn.get("graphicParameters", {})
+                _items_db[jid] = {
+                    "name_fr": titre.get("fr", titre.get("en", f"Item#{jid}")),
+                    "desc_fr": desc.get("fr", "") if isinstance(desc, dict) else "",
+                    "level": defn.get("level", 0),
+                    "rarity": defn.get("rarity", 0),
+                    "itemTypeId": defn.get("itemTypeId", 0),
+                    "gfxId": gp.get("gfxId", 0),
+                    "effects": [],
+                }
+                _jobs_count += 1
+            log.info("Jobs items: +%d items (total: %d)", _jobs_count, len(_items_db))
+            del _jobs_raw
+        except Exception as e:
+            log.warning("Erreur chargement jobsItems: %s", e)
 except ImportError:
     log.warning("calculate_weights non trouve, scores indisponibles")
     _items_db = {}
@@ -197,6 +225,25 @@ except ImportError:
     def parser_equipment(s): return {}
     def parser_guild(s): return (0, "")
     def parser_spells(s, b): return {}
+
+# =====================================================
+# SEEN ITEMS CACHE (items vus dans inventaire/coffre mais absents du CDN)
+# =====================================================
+_seen_items: dict[int, dict] = {}
+
+def _learn_item(item_id: int, name: str, level: int = 0, rarity: int = 0, gfx_id: int = 0):
+    """Enregistre un item vu dans l'inventaire/coffre pour le tooltip."""
+    if item_id and item_id not in _items_db and item_id not in _seen_items:
+        _seen_items[item_id] = {
+            "name_fr": name or f"Item#{item_id}",
+            "level": level,
+            "rarity": rarity,
+            "gfxId": gfx_id,
+            "itemTypeId": 0,
+            "effects": [],
+            "desc_fr": "",
+            "_source": "seen",
+        }
 
 # =====================================================
 # SSE (Server-Sent Events)
@@ -651,9 +698,42 @@ async def api_cdn_item(item_id: int):
         result["effects"] = item.get("effects", [])
         result["desc_fr"] = item.get("desc_fr", "")
 
+    # 3) CDN cache enrichi (jobsItems + i18n — 20k+ items)
+    if not result:
+        cdn_enriched = _cdn_lookup(item_id)
+        if cdn_enriched:
+            result = {
+                "item_ref_id": item_id,
+                "name_fr": cdn_enriched.get("name", ""),
+                "level": cdn_enriched.get("level", 0),
+                "rarity": cdn_enriched.get("rarity", 0),
+                "type_id": cdn_enriched.get("typeId", 0),
+                "gfx_id": cdn_enriched.get("gfxId", 0),
+                "effects": [],
+                "desc_fr": cdn_enriched.get("description", ""),
+            }
+
+    # 4) Items vus dans inventaire/coffre (dernier fallback)
+    if not result:
+        seen = _seen_items.get(item_id)
+        if seen:
+            result = {
+                "item_ref_id": item_id,
+                "name_fr": seen.get("name_fr", ""),
+                "level": seen.get("level", 0),
+                "rarity": seen.get("rarity", 0),
+                "type_id": seen.get("itemTypeId", 0),
+                "gfx_id": seen.get("gfxId", 0),
+                "effects": [],
+                "desc_fr": "",
+            }
+
     if not result:
         return JSONResponse({"error": "Item introuvable"}, status_code=404)
 
+    # Toujours inclure id et item_id pour le graphe prix frontend
+    result.setdefault("id", item_id)
+    result.setdefault("item_id", item_id)
     return result
 
 # =====================================================
@@ -1442,6 +1522,33 @@ def _ensure_cdn_cache():
             break
         except Exception as e:
             _inv_logger.warning(f"CDN err {cp}: {e}")
+    # jobsItems (ressources, consommables, fragments, etc.)
+    jobs_path = os.path.join(BASE_DIR, "rnd", "data", "cdn_jobsItems.json")
+    if os.path.isfile(jobs_path):
+        try:
+            with open(jobs_path, "r", encoding="utf-8") as f:
+                raw = _json.load(f)
+            jobs_added = 0
+            for it in raw:
+                defn = it.get("definition", {})
+                iid = str(defn.get("id", 0))
+                if iid == "0" or iid in _cdn_cache:
+                    continue
+                title = it.get("title", {})
+                nm = title.get("fr", "") if isinstance(title, dict) else str(title)
+                gp = defn.get("graphicParameters", {})
+                gfx = gp.get("gfxId", 0) if isinstance(gp, dict) else 0
+                _cdn_cache[iid] = {
+                    "name": nm,
+                    "level": defn.get("level", 0),
+                    "rarity": defn.get("rarity", 0),
+                    "gfxId": gfx,
+                    "typeId": defn.get("itemTypeId", 0),
+                }
+                jobs_added += 1
+            _inv_logger.info(f"CDN+jobs: +{jobs_added} items (total: {len(_cdn_cache)})")
+        except Exception as e:
+            _inv_logger.warning(f"Jobs items err: {e}")
     # i18n local (20k+ noms + descriptions)
     i18n_p = os.path.join(BASE_DIR, "rnd", "data", "i18n_items_local.json")
     if os.path.isfile(i18n_p):
@@ -1540,15 +1647,20 @@ async def get_local_inventory():
             name = item.get("name", "")
             if name.startswith("item_") or not name:
                 name = cdn.get("name", cdn.get("title", f"#{ref_id}"))
+            it_level = cdn.get("level", 0)
+            it_rarity = cdn.get("rarity", 0)
+            it_gfx = cdn.get("gfxId", 0)
             enriched_items.append({
                 "refId": ref_id,
                 "name": name,
                 "quantity": item.get("quantity", 1),
-                "level": cdn.get("level", 0),
-                "rarity": cdn.get("rarity", 0),
-                "gfxId": cdn.get("gfxId", 0),
+                "level": it_level,
+                "rarity": it_rarity,
+                "gfxId": it_gfx,
                 "typeId": cdn.get("typeId", 0),
             })
+            # Apprendre les items inconnus du CDN
+            _learn_item(ref_id, name, it_level, it_rarity, it_gfx)
         bag_name = bag.get("bagName", "Sac")
         if bag_name.startswith("item_"):
             bag_cdn = _cdn_lookup(bag.get("bagRefId", 0))
@@ -1588,17 +1700,22 @@ async def get_chest():
             name = item.get("name", "")
             if name.startswith("item_") or not name:
                 name = cdn.get("name", cdn.get("title", f"#{item_id}"))
+            it_level = cdn.get("level", item.get("level", 0))
+            it_rarity = cdn.get("rarity", 0)
+            it_gfx = cdn.get("gfxId", 0)
             enriched_items.append({
                 "itemId": item_id,
                 "name": name,
                 "quantity": item.get("quantity", 1),
-                "level": cdn.get("level", item.get("level", 0)),
-                "rarity": cdn.get("rarity", 0),
-                "gfxId": cdn.get("gfxId", 0),
+                "level": it_level,
+                "rarity": it_rarity,
+                "gfxId": it_gfx,
                 "typeId": cdn.get("typeId", 0),
                 "enchant": item.get("enchant"),
                 "maxStack": item.get("maxStack", 1),
             })
+            # Apprendre les items inconnus du CDN
+            _learn_item(item_id, name, it_level, it_rarity, it_gfx)
         enriched_comps.append({
             "id": comp.get("id", ""),
             "name": comp.get("name", "Compartiment"),

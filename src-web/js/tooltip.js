@@ -1,5 +1,5 @@
 /* ============================================================
-   Wakfu Assistant — Tooltip système v3
+   Wakfu Assistant — Tooltip système v4
    Basé sur Module:Infobox item dark (wakfu.wiki.gg)
    Source: https://wakfu.wiki.gg/wiki/Module:Infobox_item_dark
    ============================================================ */
@@ -9,6 +9,30 @@ import { RARITY, TYPE_INFO, ACTIONS, ELEMENT_ICONS, WIKI, getRarity, escHtml, ge
 
 // --- Cache tooltip ---
 const _cache = {};
+
+// --- Pre-remplir le cache tooltip en batch (appele par les pages apres chargement) ---
+// Les items prefills sont marques _partial: le tooltip s'affiche instantanement
+// mais un fetch asynchrone enrichit avec les effects/description si disponibles.
+export function prefillCache(items) {
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const id = it.id || it.item_id || it.itemId || it.refId;
+    if (!id || _cache[id]) continue;
+    _cache[id] = {
+      id: id,
+      item_id: id,
+      name_fr: it.name_fr || it.name || "",
+      level: it.level || 0,
+      rarity: it.rarity || 0,
+      type_id: it.type_id || it.typeId || 0,
+      gfx_id: it.gfx_id || it.gfxId || 0,
+      effects: it.effects || [],
+      desc_fr: it.desc_fr || "",
+      _slot_colors: it._slot_colors || it.slotColors || null,
+      _partial: !(it.effects && it.effects.length), // besoin d'enrichissement
+    };
+  }
+}
 
 // --- Fonctions publiques ---
 
@@ -31,23 +55,57 @@ function showTooltip(evt, itemId, slotColors) {
   tip.style.display = "block";
   positionTooltip(tip, evt);
 
+  // Deja en cache -> render instantane
   if (_cache[itemId]) {
     if (slotColors) _cache[itemId]._slot_colors = slotColors;
     renderTooltip(tip, _cache[itemId]);
+
+    // Enrichissement asynchrone si partial (pas d'effects)
+    if (_cache[itemId]._partial) {
+      fetch("/api/cdn/" + itemId)
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(data => {
+          const cached = _cache[itemId];
+          if (data.effects && data.effects.length) cached.effects = data.effects;
+          if (data.desc_fr) cached.desc_fr = data.desc_fr;
+          if (data.type_id) cached.type_id = data.type_id;
+          if (data.gfx_id) cached.gfx_id = data.gfx_id;
+          cached._partial = false;
+          if (_currentItemId == itemId) {
+            const t = document.getElementById("wk-tooltip");
+            if (t) renderTooltip(t, cached);
+          }
+        })
+        .catch(() => { _cache[itemId]._partial = false; });
+    }
     return;
   }
 
-  tip.innerHTML = '<div style="padding:20px;color:#aaa;text-align:center">Chargement...</div>';
+  // Pas en cache -> fetch API (cas rare si prefill a fonctionne)
+  tip.innerHTML = '<div style="padding:12px;color:#aaa;text-align:center">Chargement...</div>';
 
   fetch("/api/cdn/" + itemId)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => {
       data._slot_colors = slotColors || null;
       _cache[itemId] = data;
-      renderTooltip(tip, data);
+      if (_currentItemId == itemId) renderTooltip(tip, data);
     })
     .catch(() => {
-      tip.innerHTML = '<div style="padding:12px;color:#f66">Item introuvable</div>';
+      // Fallback depuis data-attributes du DOM
+      const srcEl = evt.target.closest("[data-item-id]");
+      const name = srcEl && srcEl.dataset.itemName;
+      if (name) {
+        const r = RARITY[parseInt(srcEl.dataset.itemRarity) || 0] || RARITY[0];
+        _cache[itemId] = {
+          id: itemId, name_fr: name, level: parseInt(srcEl.dataset.itemLevel) || 0,
+          rarity: parseInt(srcEl.dataset.itemRarity) || 0, gfx_id: 0, type_id: 0,
+          effects: [], desc_fr: "", _slot_colors: slotColors,
+        };
+        if (_currentItemId == itemId) renderTooltip(tip, _cache[itemId]);
+      } else {
+        tip.innerHTML = '<div style="padding:12px;color:#f66">Item introuvable</div>';
+      }
     });
 }
 
@@ -61,9 +119,7 @@ function positionTooltip(tip, evt) {
   const pad = 15;
   let x = evt.clientX + pad;
   let y = evt.clientY + pad;
-  // Ajuster si déborde à droite
   if (x + 320 > window.innerWidth) x = evt.clientX - 330;
-  // Ajuster si déborde en bas
   if (y + 400 > window.innerHeight) y = Math.max(10, window.innerHeight - 420);
   tip.style.left = x + "px";
   tip.style.top  = y + "px";
@@ -71,17 +127,16 @@ function positionTooltip(tip, evt) {
 
 function renderTooltip(tip, item) {
   const r = RARITY[item.rarity] || RARITY[0];
-  const typeInfo = TYPE_INFO[item.type_id] || { fr:"Objet", icon:"One-Handed_Weapon" };
-  // type deja complet via Ankama officiel
-  const gfxId = item.gfx_id || 0;
+  const typeInfo = TYPE_INFO[item.type_id] || null;
+  const gfxId = item.gfx_id || item.gfxId || 0;
+  const iconSrc = gfxId ? getIconSrc(gfxId) : "";
 
-  // Construire le HTML exactement comme le module wiki
   let html = "";
 
-  // --- Conteneur principal avec gradient rareté ---
+  // --- Conteneur principal avec gradient rarete ---
   html += '<div class="wk-inner" style="background:linear-gradient(152deg, rgb(' + r.rgb + ' / 30%), rgb(84,84,84) 35%, rgb(84,84,84) 100%)">';
 
-  // --- Badge rareté ---
+  // --- Badge rarete ---
   html += '<div class="wk-rarity-tag" style="background:' + r.hex + ';color:' + r.txtColor + '">' + r.name + '</div>';
 
   // --- Nom de l'item ---
@@ -89,31 +144,32 @@ function renderTooltip(tip, item) {
 
   // --- Zone info: image + type/level ---
   html += '<div class="wk-info-row">';
-  // Image item
   html += '<div class="wk-info-left">';
-  html += '<div class="wk-img-wrap"><img src="/icons/items/' + gfxId + '.png" alt="" onerror="this.style.display=\'none\'"></div>';
-  // Type avec icône wiki
-  html += '<div class="wk-type-line">';
-  html += '<img src="' + WIKI + '/ItemType_' + typeInfo.icon + '.png" class="wk-type-icon" alt="">';
-  html += '<span>[' + typeInfo.fr;
-  // deja dans typeInfo.fr
-  html += ']</span>';
-  html += '</div>'; // wk-type-line
+  if (iconSrc) {
+    html += '<div class="wk-img-wrap"><img src="' + iconSrc + '" alt="" onerror="this.style.display=\'none\'"></div>';
+  }
+  if (typeInfo) {
+    html += '<div class="wk-type-line">';
+    html += '<img src="' + WIKI + '/ItemType_' + typeInfo.icon + '.png" class="wk-type-icon" alt="">';
+    html += '<span>[' + typeInfo.fr + ']</span>';
+    html += '</div>';
+  }
   html += '</div>'; // wk-info-left
 
   // Level
-  html += '<div class="wk-level-box">';
-  html += '<div class="wk-level-label">Lvl.</div>';
-  html += '<div class="wk-level-num">' + (item.level || "?") + '</div>';
-  html += '</div>';
+  if (item.level) {
+    html += '<div class="wk-level-box">';
+    html += '<div class="wk-level-label">Lvl.</div>';
+    html += '<div class="wk-level-num">' + item.level + '</div>';
+    html += '</div>';
+  }
   html += '</div>'; // wk-info-row
 
   // --- EFFECTS ---
   const effects = item.effects || [];
   if (effects.length > 0) {
     html += '<div class="wk-section-title">EFFECTS</div>';
-    html += '<div class="wk-section-border">';
-    html += '<div class="wk-section-inner">';
+    html += '<div class="wk-section-border"><div class="wk-section-inner">';
     for (let i = 0; i < effects.length; i++) {
       const eff = effects[i];
       const actionId = eff.action_id || eff.actionId || 0;
@@ -124,47 +180,35 @@ function renderTooltip(tip, item) {
 
       let rowHtml = "";
       if (act) {
-        const iconUrl = WIKI + "/" + act.icon + ".png";
-        rowHtml = '<img src="' + iconUrl + '" class="wk-stat-icon" alt=""> ';
-
-        // Gestion des maîtrises élémentaires multi-éléments (action 1050, 1052, 1068)
+        rowHtml = '<img src="' + WIKI + "/" + act.icon + '.png" class="wk-stat-icon" alt=""> ';
         if ([1050, 1052, 1068].includes(actionId) && params.length >= 3) {
           const nbElem = params[2] || 0;
-          rowHtml += val + " Maîtrise avec " + nbElem + (nbElem > 1 ? " éléments" : " élément");
-        }
-        // Résistances multi-éléments (1051, 1053, 1069)
-        else if ([1051, 1053, 1069].includes(actionId) && params.length >= 3) {
+          rowHtml += val + " Maitrise avec " + nbElem + (nbElem > 1 ? " elements" : " element");
+        } else if ([1051, 1053, 1069].includes(actionId) && params.length >= 3) {
           const nbElem = params[2] || 0;
-          rowHtml += val + " Résistance à " + nbElem + (nbElem > 1 ? " éléments" : " élément");
-        }
-        // % stats
-        else if (act.label.startsWith("%")) {
+          rowHtml += val + " Resistance a " + nbElem + (nbElem > 1 ? " elements" : " element");
+        } else if (act.label.startsWith("%")) {
           rowHtml += val + act.label;
-        }
-        // Normal
-        else {
+        } else {
           rowHtml += val + " " + act.label;
         }
       } else {
-        // Action inconnue : afficher brut
         rowHtml = val + " (action " + actionId + ")";
       }
-
       html += '<div class="wk-row" style="background:' + bgColor + '">' + rowHtml + '</div>';
     }
-    html += '</div></div>'; // inner + border
+    html += '</div></div>';
   }
 
-  // --- GEMMES (si slot_colors fourni) ---
+  // --- GEMMES ---
   const slotColors = item._slot_colors || "";
   if (slotColors) {
     const gemIconMap = {"Rouge":"shardRedFull","Bleu":"shardBlueFull","Vert":"shardGreenFull","Blanc":"shardWhiteFull"};
-    const gems = slotColors.split(",").map(function(g){ return g.trim(); }).filter(Boolean);
+    const gems = slotColors.split(",").map(g => g.trim()).filter(Boolean);
     if (gems.length > 0) {
       html += '<div style="margin:6px 0;display:flex;align-items:center;justify-content:center;gap:6px">';
-      
-      for (var gi = 0; gi < gems.length; gi++) {
-        var icon = gemIconMap[gems[gi]] || "shardWhiteFull";
+      for (let gi = 0; gi < gems.length; gi++) {
+        const icon = gemIconMap[gems[gi]] || "shardWhiteFull";
         html += '<img src="/icons/items/' + icon + '.png" width="18" height="18" style="vertical-align:middle" title="' + escHtml(gems[gi]) + '">';
       }
       html += '</div>';
@@ -185,11 +229,9 @@ function renderTooltip(tip, item) {
   tip.innerHTML = html;
   tip.style.borderColor = r.hex;
 
-  // Charger le graphe prix
-  _loadPriceChart(item.id || item.item_id || 0, item._slot_colors || null);
+  // Charger le graphe prix (async, ne bloque pas le tooltip)
+  _loadPriceChart(item.id || item.item_id || item.item_ref_id || item.itemId || 0, item._slot_colors || null);
 }
-
-// escHtml -> shared/item.js
 
 
 function _loadPriceChart(itemId, slotColors) {
@@ -257,7 +299,7 @@ function _loadPriceChart(itemId, slotColors) {
     });
 }
 
-// --- Délégation d'événements ---
+// --- Delegation d'evenements ---
 export function initTooltipDelegation() {
   document.addEventListener("mouseover", function(e) {
     const el = e.target.closest("[data-item-id]");

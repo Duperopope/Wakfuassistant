@@ -17,6 +17,7 @@ import { loadOptimizer } from "./js/tabs/optimizer.js";
 import { loadSpellsEditor } from "./js/tabs/spells.js";
 import { loadHdv, refreshHdv } from "./js/tabs/hdv.js";
 import { initTooltipDelegation } from "./js/tooltip.js";
+import { loadIconsAtlas } from "./js/shared/item.js";
 
 // ─── State pour sous-onglets Personnage ───
 let persoLoaded = { fiche: false, builder: false, optimizer: false, spells: false };
@@ -127,6 +128,7 @@ async function populateGuildFilter() {
 // ─── Init ───
 async function init() {
   initTooltipDelegation();
+  loadIconsAtlas(); // preload atlas en background (non-bloquant)
   const stats = await fetchJson("/api/stats");
   setState({ stats, classes: stats.classes || [] });
   renderStats(stats);
@@ -152,32 +154,40 @@ async function init() {
     }
   }
 
-  // Classement: joueurs mis a jour
-  onSSE("update", async () => {
-    const s = await fetchJson("/api/stats");
-    setState({ stats: s, classes: s.classes || [] });
-    renderStats(s);
-    loadClasses(s.classes);
-    const state = getState();
-    if (state.currentTab === "classement") {
-      if (state.currentSubtab === "players") loadPlayers();
-      if (state.currentSubtab === "guilds") loadGuilds();
-      if (state.currentSubtab === "recent") loadRecent(true);
+  // Classement: joueurs mis a jour (debounced pour eviter refresh constant)
+  let _updatePending = false;
+  const _debouncedUpdate = debounce(async () => {
+    if (_updatePending) return;
+    _updatePending = true;
+    try {
+      const s = await fetchJson("/api/stats");
+      setState({ stats: s, classes: s.classes || [] });
+      renderStats(s);
+      loadClasses(s.classes);
+      const state = getState();
+      if (state.currentTab === "classement") {
+        if (state.currentSubtab === "players") loadPlayers();
+        if (state.currentSubtab === "guilds") loadGuilds();
+        if (state.currentSubtab === "recent") loadRecent(true);
+      }
+      _refreshBuilderIfVisible();
+    } finally {
+      _updatePending = false;
     }
-    // Un nouveau joueur vu = possible mise à jour de l'équipement actif
-    _refreshBuilderIfVisible();
-  });
+  }, 10000);
+  onSSE("update", _debouncedUpdate);
 
-  // HDV: nouvelles offres detectees
-  onSSE("hdv", () => {
+  // HDV: nouvelles offres detectees (ignorer heartbeats sans nouvelles donnees)
+  onSSE("hdv", (data) => {
+    if (data && data.heartbeat && !data.new_entries) return;
     const state = getState();
     if (state.currentTab === "hdv") refreshHdv();
     // Le builder affiche les prix HDV → rafraîchir si visible (debounced)
     _refreshBuilderIfVisible();
   });
 
-  // Coffre ou inventaire mis a jour (events frequents → utiliser debounce pour eviter reload constant)
-  onSSE("chest", () => {
+  // Coffre ou inventaire mis a jour (debounced pour eviter reload constant)
+  const _debouncedChestInv = debounce(() => {
     const state = getState();
     if (state.currentTab === "hdv") refreshHdv();
     if (state.currentTab === "cdn") {
@@ -185,17 +195,10 @@ async function init() {
       if (currentPersoSub === "fiche") loadCharacter();
       _refreshBuilderIfVisible();
     }
-  });
+  }, 5000);
 
-  onSSE("inventory", () => {
-    const state = getState();
-    if (state.currentTab === "hdv") refreshHdv();
-    if (state.currentTab === "cdn") {
-      persoLoaded.fiche = false;
-      if (currentPersoSub === "fiche") loadCharacter();
-      _refreshBuilderIfVisible();
-    }
-  });
+  onSSE("chest", _debouncedChestInv);
+  onSSE("inventory", _debouncedChestInv);
 
   // Reload manuel
   onSSE("reload", async () => {

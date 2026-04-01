@@ -1,8 +1,16 @@
-import { Component, createSignal, createResource, For, Show } from "solid-js";
+import type { Component } from "solid-js";
+import { createSignal, createResource, For, Show } from "solid-js";
 import {
-  searchHdvItems, getHdvStats, getItemDetail,
-  fmtKamas, fmtNumber, rarityColor, rarityName,
-  type MarketSearchResult, type HdvStats, type ItemDetail,
+  searchHdvItems,
+  getHdvStats,
+  getItemDetail,
+  fmtKamas,
+  fmtNumber,
+  rarityColor,
+  rarityName,
+  type MarketSearchResult,
+  type HdvStats,
+  type ItemDetail,
 } from "../../lib/hdvApi";
 
 const MarketView: Component = () => {
@@ -15,7 +23,10 @@ const MarketView: Component = () => {
   const [stats] = createResource(getHdvStats);
 
   const searchParams = () => ({
-    q: query(), side: side(), sort: sort(), page: page(),
+    q: query(),
+    side: side(),
+    sort: sort(),
+    page: page(),
   });
 
   const [results] = createResource(searchParams, async (p) => {
@@ -68,12 +79,19 @@ const MarketView: Component = () => {
         />
       </div>
       <div class="flex gap-1 text-[10px]">
-        <For each={[
-          { v: "sell", l: "Ventes" }, { v: "buy", l: "Achats" }, { v: "both", l: "Tout" },
-        ]}>
+        <For
+          each={[
+            { v: "sell", l: "Ventes" },
+            { v: "buy", l: "Achats" },
+            { v: "both", l: "Tout" },
+          ]}
+        >
           {(opt) => (
             <button
-              onClick={() => { setSide(opt.v); setPage(0); }}
+              onClick={() => {
+                setSide(opt.v);
+                setPage(0);
+              }}
               class={`px-2 py-0.5 rounded transition ${
                 side() === opt.v
                   ? "bg-accent text-overlay-bg"
@@ -87,7 +105,10 @@ const MarketView: Component = () => {
         <div class="flex-1" />
         <select
           value={sort()}
-          onChange={(e) => { setSort(e.currentTarget.value); setPage(0); }}
+          onChange={(e) => {
+            setSort(e.currentTarget.value);
+            setPage(0);
+          }}
           class="bg-overlay-surface text-text-muted text-[10px] rounded px-1 border border-overlay-border outline-none"
         >
           <option value="price_asc">Prix ↑</option>
@@ -101,7 +122,11 @@ const MarketView: Component = () => {
       {/* Results */}
       <Show
         when={!results.loading}
-        fallback={<div class="text-xs text-text-muted text-center py-4">Recherche...</div>}
+        fallback={
+          <div class="text-xs text-text-muted text-center py-4">
+            Recherche...
+          </div>
+        }
       >
         <Show when={results()}>
           {(r) => (
@@ -115,7 +140,9 @@ const MarketView: Component = () => {
                     <button
                       onClick={() => setSelectedId(item.itemRefId)}
                       class={`w-full flex justify-between items-center text-[11px] py-1 px-1.5 rounded transition hover:bg-overlay-surface ${
-                        selectedId() === item.itemRefId ? "bg-overlay-surface" : ""
+                        selectedId() === item.itemRefId
+                          ? "bg-overlay-surface"
+                          : ""
                       }`}
                     >
                       <div class="flex items-center gap-1 truncate flex-1 min-w-0">
@@ -123,12 +150,20 @@ const MarketView: Component = () => {
                           class="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
                           style={{ background: rarityColor(item.rarity) }}
                         />
-                        <span class="text-text-primary truncate">{item.nameFr}</span>
-                        <span class="text-text-muted flex-shrink-0 text-[9px]">Niv.{item.level}</span>
+                        <span class="text-text-primary truncate">
+                          {item.nameFr}
+                        </span>
+                        <span class="text-text-muted flex-shrink-0 text-[9px]">
+                          Niv.{item.level}
+                        </span>
                       </div>
                       <div class="flex items-center gap-2 flex-shrink-0 ml-1">
-                        <span class="font-mono text-kamas">{fmtKamas(item.minPrice)}</span>
-                        <span class="text-text-muted text-[9px]">×{item.offerCount}</span>
+                        <span class="font-mono text-kamas">
+                          {fmtKamas(item.minPrice)}
+                        </span>
+                        <span class="text-text-muted text-[9px]">
+                          ×{item.offerCount}
+                        </span>
                       </div>
                     </button>
                   )}
@@ -149,7 +184,9 @@ const MarketView: Component = () => {
                     {page() + 1} / {totalPages()}
                   </span>
                   <button
-                    onClick={() => setPage(Math.min(totalPages() - 1, page() + 1))}
+                    onClick={() =>
+                      setPage(Math.min(totalPages() - 1, page() + 1))
+                    }
                     disabled={page() >= totalPages() - 1}
                     class="text-[10px] px-2 py-0.5 rounded bg-overlay-surface text-text-muted disabled:opacity-30"
                   >
@@ -176,7 +213,9 @@ const MarketView: Component = () => {
                       class="inline-block w-2 h-2 rounded-full"
                       style={{ background: rarityColor(data.rarity) }}
                     />
-                    <span class="text-xs font-bold text-text-primary">{data.nameFr}</span>
+                    <span class="text-xs font-bold text-text-primary">
+                      {data.nameFr}
+                    </span>
                   </div>
                   <div class="text-[9px] text-text-muted">
                     Niv.{data.level} • {rarityName(data.rarity)}
@@ -221,12 +260,18 @@ const MarketView: Component = () => {
                   <For each={data.sellOffers.slice(0, 15)}>
                     {(o) => (
                       <div class="flex justify-between text-[10px]">
-                        <span class="text-text-primary truncate">{o.actorName}</span>
+                        <span class="text-text-primary truncate">
+                          {o.actorName}
+                        </span>
                         <div class="flex gap-2 flex-shrink-0">
-                          <span class="font-mono text-kamas">{fmtKamas(o.unitPrice)}</span>
+                          <span class="font-mono text-kamas">
+                            {fmtKamas(o.unitPrice)}
+                          </span>
                           <span class="text-text-muted">×{o.qtyRemaining}</span>
                           {o.slotColors && (
-                            <span class="text-text-muted text-[8px]">[{o.slotColors}]</span>
+                            <span class="text-text-muted text-[8px]">
+                              [{o.slotColors}]
+                            </span>
                           )}
                         </div>
                       </div>
@@ -244,8 +289,12 @@ const MarketView: Component = () => {
                   <For each={data.buyOffers.slice(0, 10)}>
                     {(o) => (
                       <div class="flex justify-between text-[10px]">
-                        <span class="text-text-primary truncate">{o.actorName}</span>
-                        <span class="font-mono text-defeat-red">{fmtKamas(o.unitPrice)}</span>
+                        <span class="text-text-primary truncate">
+                          {o.actorName}
+                        </span>
+                        <span class="font-mono text-defeat-red">
+                          {fmtKamas(o.unitPrice)}
+                        </span>
                       </div>
                     )}
                   </For>

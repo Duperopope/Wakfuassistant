@@ -1,7 +1,8 @@
 // equipment.js — Builder Sram : compare build actuel / possédés / HDV par slot
 
 import { fetchJson } from "../api.js";
-import { getRarity, escHtml, getCdnIconSrc } from "../shared/item.js";
+import { getRarity, escHtml, getIconSrc } from "../shared/item.js";
+import { prefillCache } from "../tooltip.js";
 
 const SOURCE_LABEL = { build: "Équipé", inventaire: "🎒 Sac", coffre: "📦 Coffre", hdv: "💰 HDV" };
 const SOURCE_CLASS = { build: "bld-src--equip", inventaire: "bld-src--inv", coffre: "bld-src--chest", hdv: "bld-src--hdv" };
@@ -37,7 +38,7 @@ function itemRow(it, gain, isCurrent, slotInfo) {
     const r = getRarity(it.rarity || 0);
     const borderStyle = `border:2px solid ${escHtml(r.hex)}`;
     const icon = it.gfxId
-        ? `<img src="${getCdnIconSrc(it.gfxId)}" width="40" height="40" style="border-radius:6px;${borderStyle}" onerror="this.style.display='none'">`
+        ? `<img src="${getIconSrc(it.gfxId)}" width="40" height="40" style="border-radius:6px;${borderStyle}" onerror="this.style.display='none'">`
         : `<span class="bld-no-icon" style="${borderStyle};border-radius:6px"></span>`;
 
     const srcLabel = SOURCE_LABEL[it.source] || it.source;
@@ -62,7 +63,7 @@ function itemRow(it, gain, isCurrent, slotInfo) {
             data-slot="${escHtml(slotInfo.slot)}">✕</button>`;
     }
 
-    return `<div class="${rowCls}" data-item-id="${it.id}">
+    return `<div class="${rowCls}" data-item-id="${it.id}" data-item-name="${escHtml(it.name)}" data-item-rarity="${it.rarity || 0}">
   ${icon}
   <div class="bld-row__info">
     <span class="bld-row__name" style="color:${escHtml(r.hex)}" title="${escHtml(it.name)}">${escHtml(it.name.length > 28 ? it.name.slice(0, 28) + "…" : it.name)}</span>
@@ -127,7 +128,8 @@ let _selectedLevel  = 0;  // 0 = pas de filtre
 let _selectedBudget = 0;  // 0 = pas de filtre (en kamas)
 let _clickHandler   = null;  // référence pour retirer l'ancien listener
 let _knownPlayersCache = null;
-let _nameToFileMap = {};
+let _nameToFileMap = {};  // map dbName → fileName
+let _validFileNames = new Set();  // ensemble des noms de fichiers valides (pour valider)
 
 async function _fetchRealPlayerNames() {
     if (_knownPlayersCache) return _knownPlayersCache;
@@ -137,6 +139,7 @@ async function _fetchRealPlayerNames() {
         const fileNames = meData2.known_players || [];
         const dbNames = (data.players || []).map(p => p.name);
         _nameToFileMap = {};
+        _validFileNames = new Set(fileNames);
         for (const real of dbNames) {
             const sanitized = real.replace(/['']/g, "_");
             const match = fileNames.find(f => f === real || f === sanitized);
@@ -145,6 +148,7 @@ async function _fetchRealPlayerNames() {
         _knownPlayersCache = dbNames;
     } catch (_) {
         _knownPlayersCache = [];
+        _validFileNames = new Set();
     }
     return _knownPlayersCache;
 }
@@ -175,7 +179,21 @@ function _bindPlayerSelect(container, meData) {
         _knownPlayersCache = null;
         const name = input.value.trim();
         if (!name || name === (meData.name || "")) return;
-        const fileName = _nameToFileMap[name] || name.replace(/['\u2019]/g, "_");
+
+        // Chercher le fileName correspondant au dbName saisi
+        let fileName = _nameToFileMap[name];
+        if (!fileName) {
+            // Fallback : essayer les transformations de sanitization
+            const sanitized = name.replace(/['\u2019]/g, "_");
+            fileName = _validFileNames.has(sanitized) ? sanitized : null;
+        }
+
+        // Si on ne trouve pas un nom valide, refuser
+        if (!fileName || !_validFileNames.has(fileName)) {
+            alert(`"${name}" n'est pas un personnage valide. Veuillez en sélectionner un dans la liste.`);
+            return;
+        }
+
         try {
             await fetch("/api/me", {
                 method: "POST",
@@ -312,6 +330,15 @@ export async function loadEquipment(container) {
     }
 
     container.innerHTML = html;
+
+    // Prefill tooltip cache avec tous les items du builder
+    const _tooltipItems = [];
+    for (const s of slots) {
+        for (const it of [s.current, s.best_owned, s.best_hdv]) {
+            if (it) _tooltipItems.push({ id: it.id, name_fr: it.name, rarity: it.rarity, gfxId: it.gfxId, level: it.level });
+        }
+    }
+    prefillCache(_tooltipItems);
 
     // ── Sélecteur joueur actif ───────────────────────────────────────
     _bindPlayerSelect(container, meData);
